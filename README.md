@@ -16,7 +16,7 @@
 - **📝 จัดการไฟล์ JSON:** ดูและแก้ไขข้อมูลดิบของไฟล์ `freesr-data.json` และ `persistent` พร้อมระบบจัดรูปแบบและดาวน์โหลดสำรอง
 
 ---
-
+# THERES ONLY DARK MODE IF U ASK FOR LIGHT GO AWAY FROM ME
 ## 💻 การเปิดใช้งานในเครื่อง (Local Usage)
 
 1. **เปิดผ่านเบราว์เซอร์โดยตรง:** ดับเบิลคลิกเปิดไฟล์ `index.html` ได้ทันที
