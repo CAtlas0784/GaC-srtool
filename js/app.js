@@ -487,36 +487,135 @@ function updateFilterDropdownTranslations() {
   }
 }
 
+// Robust Dual Storage (IndexedDB + localStorage fallback)
+const DB_NAME = 'GaCSrtoolDB';
+const DB_STORE = 'cache_store';
+
+function openIDB() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB) {
+      resolve(null);
+      return;
+    }
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(DB_STORE)) {
+        db.createObjectStore(DB_STORE);
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = () => resolve(null);
+  });
+}
+
+async function idbSet(key, value) {
+  try {
+    const db = await openIDB();
+    if (db) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(value, key);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    }
+  } catch (e) {}
+  return false;
+}
+
+async function idbGet(key) {
+  try {
+    const db = await openIDB();
+    if (db) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(DB_STORE, 'readonly');
+        const req = tx.objectStore(DB_STORE).get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      });
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function idbDelete(key) {
+  try {
+    const db = await openIDB();
+    if (db) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).delete(key);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    }
+  } catch (e) {}
+  return false;
+}
+
+async function idbClear() {
+  try {
+    const db = await openIDB();
+    if (db) {
+      return new Promise((resolve) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).clear();
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      });
+    }
+  } catch (e) {}
+  return false;
+}
+
 // Storage Cache Handlers for Offline & Upload Persistence
-function saveFreesrCache(data) {
+async function saveFreesrCache(data) {
   if (!data) return;
+  try {
+    // 1. Primary: IndexedDB (handles large multi-MB FreeSR files easily)
+    await idbSet('gac_srtool_freesr_cache', data);
+  } catch (e) {
+    console.warn('Failed to save freesr cache to IndexedDB:', e);
+  }
+
+  // 2. Secondary: localStorage
   try {
     localStorage.setItem('gac_srtool_freesr_cache', JSON.stringify(data));
-    updateCacheUsageDisplay();
   } catch (e) {
-    console.warn('Failed to save freesr cache to localStorage:', e);
+    console.warn('localStorage quota exceeded for freesr cache, safely persisted in IndexedDB:', e);
   }
+  updateCacheUsageDisplay();
 }
 
-function savePersistentCache(data) {
+async function savePersistentCache(data) {
   if (!data) return;
   try {
-    localStorage.setItem('gac_srtool_persistent_cache', JSON.stringify(data));
-    updateCacheUsageDisplay();
+    await idbSet('gac_srtool_persistent_cache', data);
   } catch (e) {
-    console.warn('Failed to save persistent cache to localStorage:', e);
+    console.warn('Failed to save persistent cache to IndexedDB:', e);
   }
+
+  try {
+    localStorage.setItem('gac_srtool_persistent_cache', JSON.stringify(data));
+  } catch (e) {
+    console.warn('localStorage quota exceeded for persistent cache, safely persisted in IndexedDB:', e);
+  }
+  updateCacheUsageDisplay();
 }
 
-function loadCachedStorageData() {
+async function loadCachedStorageData() {
   try {
-    const cachedFreesr = localStorage.getItem('gac_srtool_freesr_cache');
+    let cachedFreesr = await idbGet('gac_srtool_freesr_cache');
+    if (!cachedFreesr) {
+      const raw = localStorage.getItem('gac_srtool_freesr_cache');
+      if (raw) cachedFreesr = JSON.parse(raw);
+    }
     if (cachedFreesr) {
-      const parsed = JSON.parse(cachedFreesr);
-      state.fullFreesrData = parsed;
-      if (parsed.avatars) {
-        for (const aid in parsed.avatars) {
-          const av = parsed.avatars[aid];
+      state.fullFreesrData = cachedFreesr;
+      if (cachedFreesr.avatars) {
+        for (const aid in cachedFreesr.avatars) {
+          const av = cachedFreesr.avatars[aid];
           const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
           if (found) {
             found.level = av.level || 80;
@@ -525,9 +624,9 @@ function loadCachedStorageData() {
           }
         }
       }
-      if (parsed.lineups && (!state.statusData || !state.statusData.lineups)) {
+      if (cachedFreesr.lineups && (!state.statusData || !state.statusData.lineups)) {
         state.statusData = state.statusData || {};
-        state.statusData.lineups = parsed.lineups;
+        state.statusData.lineups = cachedFreesr.lineups;
       }
     }
   } catch (e) {
@@ -535,13 +634,16 @@ function loadCachedStorageData() {
   }
 
   try {
-    const cachedPersistent = localStorage.getItem('gac_srtool_persistent_cache');
+    let cachedPersistent = await idbGet('gac_srtool_persistent_cache');
+    if (!cachedPersistent) {
+      const raw = localStorage.getItem('gac_srtool_persistent_cache');
+      if (raw) cachedPersistent = JSON.parse(raw);
+    }
     if (cachedPersistent) {
-      const parsed = JSON.parse(cachedPersistent);
-      state.persistentData = parsed;
-      if (parsed.lineups && (!state.statusData || !state.statusData.lineups)) {
+      state.persistentData = cachedPersistent;
+      if (cachedPersistent.lineups && (!state.statusData || !state.statusData.lineups)) {
         state.statusData = state.statusData || {};
-        state.statusData.lineups = parsed.lineups;
+        state.statusData.lineups = cachedPersistent.lineups;
       }
     }
   } catch (e) {
@@ -3704,17 +3806,47 @@ async function maxAllAvatars() {
 // Push local freesr changes to server and save to local browser cache
 async function saveFreesrChangesToServer() {
   if (!state.fullFreesrData) return;
-  saveFreesrCache(state.fullFreesrData);
-  if (!state.isConnected) return;
+  await saveFreesrCache(state.fullFreesrData);
+
+  // Attempt to push to server
+  let lastErr = null;
+  const payloadWrapped = { data: state.fullFreesrData };
+  const payloadDirect = state.fullFreesrData;
+
   if (state.serverMode === 'firefly' || state.serverMode === 'robin') {
     try {
-      await apiCall('/srtools', 'POST', { data: state.fullFreesrData });
-    } catch (e) {
-      await apiCall('/api/freesr', 'POST', state.fullFreesrData);
+      await apiCall('/srtools', 'POST', payloadWrapped);
+      state.isConnected = true;
+      return;
+    } catch (e1) {
+      lastErr = e1;
+      try {
+        await apiCall('/api/freesr', 'POST', payloadDirect);
+        state.isConnected = true;
+        return;
+      } catch (e2) {
+        lastErr = e2;
+      }
     }
   } else {
-    await apiCall('/api/freesr', 'POST', state.fullFreesrData);
+    // gac or default
+    try {
+      await apiCall('/api/freesr', 'POST', payloadDirect);
+      state.isConnected = true;
+      return;
+    } catch (e1) {
+      lastErr = e1;
+      try {
+        await apiCall('/srtools', 'POST', payloadWrapped);
+        state.isConnected = true;
+        return;
+      } catch (e2) {
+        lastErr = e2;
+      }
+    }
   }
+
+  if (lastErr) throw lastErr;
 }
 
 // Equipment Sub-tab & Filter Helpers (Matching srtools neonteam)
@@ -3738,22 +3870,27 @@ async function loadEquipment() {
       lcs = state.fullFreesrData.lightcones || [];
       relics = state.fullFreesrData.relics || [];
     } else if (state.isConnected) {
-      const res = await apiCall('/api/freesr');
+      const res = await apiCall('/api/freesr').catch(async () => {
+        return await apiCall('/srtools');
+      }).catch(() => null);
       if (res && res.data) {
         state.fullFreesrData = res.data;
-        saveFreesrCache(res.data);
+        await saveFreesrCache(res.data);
         lcs = res.data.lightcones || [];
         relics = res.data.relics || [];
       }
     } else {
-      const cached = localStorage.getItem('gac_srtool_freesr_cache');
+      let cached = await idbGet('gac_srtool_freesr_cache');
+      if (!cached) {
+        const raw = localStorage.getItem('gac_srtool_freesr_cache');
+        if (raw) {
+          try { cached = JSON.parse(raw); } catch (e) {}
+        }
+      }
       if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          state.fullFreesrData = parsed;
-          lcs = parsed.lightcones || [];
-          relics = parsed.relics || [];
-        } catch (e) {}
+        state.fullFreesrData = cached;
+        lcs = cached.lightcones || [];
+        relics = cached.relics || [];
       }
     }
 
@@ -4642,11 +4779,18 @@ async function saveJsonData() {
     const parsed = JSON.parse(el.jsonEditor.value);
     if (state.currentJsonMode === 'freesr') {
       state.fullFreesrData = parsed;
-      saveFreesrCache(parsed);
+      await saveFreesrCache(parsed);
       loadEquipment();
-      if (state.isConnected) {
+
+      let serverSaved = false;
+      let serverError = null;
+      try {
         await saveFreesrChangesToServer();
+        serverSaved = true;
+      } catch (err) {
+        serverError = err.message;
       }
+
       // Sync loaded characters to local list
       if (parsed.avatars) {
         for (const aid in parsed.avatars) {
@@ -4660,19 +4804,41 @@ async function saveJsonData() {
         }
         renderAvatarsGrid();
       }
-      showToast('บันทึก freesr-data.json ลงในแคชและเซิร์ฟเวอร์เรียบร้อย', 'success');
+
+      if (serverSaved) {
+        showToast('✅ บันทึก freesr-data.json ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+      } else if (serverError) {
+        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+      } else {
+        showToast('💾 บันทึก freesr-data.json ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+      }
     } else {
       state.persistentData = parsed;
-      savePersistentCache(parsed);
-      if (state.isConnected && state.serverMode === 'gac') {
-        await apiCall('/api/persistent', 'POST', parsed);
+      await savePersistentCache(parsed);
+      let serverSaved = false;
+      let serverError = null;
+      try {
+        if (state.serverMode === 'gac') {
+          await apiCall('/api/persistent', 'POST', parsed);
+        } else {
+          await saveFreesrChangesToServer();
+        }
+        serverSaved = true;
+      } catch (err) {
+        serverError = err.message;
       }
       if (parsed.lineups) {
         state.statusData = state.statusData || {};
         state.statusData.lineups = parsed.lineups;
         renderLineup(parsed.lineups);
       }
-      showToast('บันทึกไฟล์ persistent ลงในแคชและเซิร์ฟเวอร์เรียบร้อย', 'success');
+      if (serverSaved) {
+        showToast('✅ บันทึกไฟล์ persistent ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+      } else if (serverError) {
+        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+      } else {
+        showToast('💾 บันทึกไฟล์ persistent ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+      }
     }
     updateCacheUsageDisplay();
     refreshStatus();
@@ -4691,9 +4857,15 @@ function updateCacheUsageDisplay() {
         totalBytes += (localStorage[key].length + key.length) * 2;
       }
     }
-    const kb = (totalBytes / 1024).toFixed(1);
-    const count = Object.keys(localStorage).length;
-    el.lblCacheUsage.textContent = `${kb} KB (${count} keys)`;
+    let freesrBytes = 0;
+    if (state.fullFreesrData) {
+      try {
+        freesrBytes = JSON.stringify(state.fullFreesrData).length;
+      } catch (e) {}
+    }
+    const displayBytes = Math.max(totalBytes, freesrBytes);
+    const kb = (displayBytes / 1024).toFixed(1);
+    el.lblCacheUsage.textContent = `${kb} KB (IndexedDB + Storage)`;
   } catch (err) {
     el.lblCacheUsage.textContent = 'ไม่สามารถตรวจสอบได้';
   }
@@ -5189,18 +5361,21 @@ function setupEvents() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
         el.jsonEditor.value = JSON.stringify(parsed, null, 2);
 
         let recognized = false;
+        let isFreesr = false;
+        let isPersistent = false;
 
         // If freesr-data.json was uploaded (has avatars, lightcones, or relics)
         if (parsed.avatars || parsed.lightcones || parsed.relics) {
           recognized = true;
+          isFreesr = true;
           state.fullFreesrData = parsed;
-          saveFreesrCache(parsed);
+          await saveFreesrCache(parsed);
 
           if (parsed.avatars) {
             for (const aid in parsed.avatars) {
@@ -5228,8 +5403,9 @@ function setupEvents() {
         // If persistent or has lineups
         if (parsed.main_character || parsed.march_type || (parsed.lineups && !parsed.avatars)) {
           recognized = true;
+          isPersistent = true;
           state.persistentData = parsed;
-          savePersistentCache(parsed);
+          await savePersistentCache(parsed);
 
           if (parsed.lineups) {
             state.statusData = state.statusData || {};
@@ -5255,18 +5431,46 @@ function setupEvents() {
 
         if (!recognized) {
           if (state.currentJsonMode === 'freesr') {
+            isFreesr = true;
             state.fullFreesrData = parsed;
-            saveFreesrCache(parsed);
+            await saveFreesrCache(parsed);
             loadEquipment();
           } else {
+            isPersistent = true;
             state.persistentData = parsed;
-            savePersistentCache(parsed);
+            await savePersistentCache(parsed);
           }
+        }
+
+        // Automatically push to server upon file upload
+        let serverSaved = false;
+        let serverError = null;
+        try {
+          if (isFreesr) {
+            await saveFreesrChangesToServer();
+            serverSaved = true;
+          } else if (isPersistent) {
+            if (state.serverMode === 'gac') {
+              await apiCall('/api/persistent', 'POST', parsed);
+            } else {
+              await saveFreesrChangesToServer();
+            }
+            serverSaved = true;
+          }
+        } catch (sErr) {
+          serverError = sErr.message;
         }
 
         updateCacheUsageDisplay();
         refreshStatus();
-        showToast(`บันทึกไฟล์ ${file.name} ลงในแคชของเบราว์เซอร์และซิงค์ข้อมูลสำเร็จ!`, 'success');
+
+        if (serverSaved) {
+          showToast(`✅ อัปโหลดและบันทึก ${file.name} ลงเซิร์ฟเวอร์ + แคชสำเร็จ!`, 'success');
+        } else if (serverError) {
+          showToast(`💾 บันทึก ${file.name} ลงแคชแล้ว (แต่ส่งเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError})`, 'warning');
+        } else {
+          showToast(`💾 บันทึก ${file.name} ลงแคชสำเร็จ (โหมดออฟไลน์)`, 'info');
+        }
       } catch (err) {
         showToast(t('jsonInvalid') || 'ไฟล์ JSON ไม่ถูกต้อง', 'error');
       }
@@ -5412,11 +5616,12 @@ function setupEvents() {
 
   // Clear Browser Cache Button
   if (el.btnClearBrowserCache) {
-    el.btnClearBrowserCache.addEventListener('click', () => {
+    el.btnClearBrowserCache.addEventListener('click', async () => {
       const keepUrl = localStorage.getItem('gac_srtool_api_url');
       const keepMode = localStorage.getItem('gac_srtool_mode');
       const keepLang = localStorage.getItem('gac_srtool_lang');
       localStorage.clear();
+      await idbClear();
       if (keepUrl) localStorage.setItem('gac_srtool_api_url', keepUrl);
       if (keepMode) localStorage.setItem('gac_srtool_mode', keepMode);
       if (keepLang) localStorage.setItem('gac_srtool_lang', keepLang);
@@ -5432,8 +5637,9 @@ function setupEvents() {
 
   // Factory Reset Button
   if (el.btnResetSettings) {
-    el.btnResetSettings.addEventListener('click', () => {
+    el.btnResetSettings.addEventListener('click', async () => {
       localStorage.clear();
+      await idbClear();
       state.fullFreesrData = null;
       state.persistentData = null;
       state.apiUrl = 'http://localhost:21000';
@@ -5488,9 +5694,9 @@ function startPingLoop() {
 }
 
 // Initialize Application
-function init() {
+async function init() {
   initAvatarsList();
-  loadCachedStorageData();
+  await loadCachedStorageData();
   setupServerModes();
   setupLanguageSelector();
   setupTabs();
