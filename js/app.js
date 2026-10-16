@@ -479,6 +479,68 @@ function updateFilterDropdownTranslations() {
   }
 }
 
+// Storage Cache Handlers for Offline & Upload Persistence
+function saveFreesrCache(data) {
+  if (!data) return;
+  try {
+    localStorage.setItem('gac_srtool_freesr_cache', JSON.stringify(data));
+    updateCacheUsageDisplay();
+  } catch (e) {
+    console.warn('Failed to save freesr cache to localStorage:', e);
+  }
+}
+
+function savePersistentCache(data) {
+  if (!data) return;
+  try {
+    localStorage.setItem('gac_srtool_persistent_cache', JSON.stringify(data));
+    updateCacheUsageDisplay();
+  } catch (e) {
+    console.warn('Failed to save persistent cache to localStorage:', e);
+  }
+}
+
+function loadCachedStorageData() {
+  try {
+    const cachedFreesr = localStorage.getItem('gac_srtool_freesr_cache');
+    if (cachedFreesr) {
+      const parsed = JSON.parse(cachedFreesr);
+      state.fullFreesrData = parsed;
+      if (parsed.avatars) {
+        for (const aid in parsed.avatars) {
+          const av = parsed.avatars[aid];
+          const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
+          if (found) {
+            found.level = av.level || 80;
+            found.promotion = av.promotion || 6;
+            found.rank = av.data?.rank ?? 6;
+          }
+        }
+      }
+      if (parsed.lineups && (!state.statusData || !state.statusData.lineups)) {
+        state.statusData = state.statusData || {};
+        state.statusData.lineups = parsed.lineups;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load cached freesr data:', e);
+  }
+
+  try {
+    const cachedPersistent = localStorage.getItem('gac_srtool_persistent_cache');
+    if (cachedPersistent) {
+      const parsed = JSON.parse(cachedPersistent);
+      state.persistentData = parsed;
+      if (parsed.lineups && (!state.statusData || !state.statusData.lineups)) {
+        state.statusData = state.statusData || {};
+        state.statusData.lineups = parsed.lineups;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load cached persistent data:', e);
+  }
+}
+
 // Apply multi-language translations across UI
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(elem => {
@@ -676,7 +738,17 @@ async function refreshStatus() {
   } catch (err) {
     setConnectionStatus(false, t('offline'));
     el.lblApiUrl.textContent = state.apiUrl;
-    el.statAvatars.textContent = state.avatarsList.length;
+
+    if (state.fullFreesrData) {
+      const avCount = Object.keys(state.fullFreesrData.avatars || {}).length;
+      const lcCount = (state.fullFreesrData.lightcones || []).length;
+      const relicCount = (state.fullFreesrData.relics || []).length;
+      el.statAvatars.textContent = avCount || state.avatarsList.length;
+      el.statLightcones.textContent = lcCount;
+      el.statRelics.textContent = relicCount;
+    } else {
+      el.statAvatars.textContent = state.avatarsList.length;
+    }
 
     if (el.badgePersistenceMode) {
       if (state.serverMode === 'gac') {
@@ -968,6 +1040,20 @@ async function assignAvatarToLineup(slot, avatarId) {
 // Load and Render Avatars
 async function loadAvatars() {
   initAvatarsList();
+
+  // Sync from cached / in-memory freesr data first
+  if (state.fullFreesrData?.avatars) {
+    for (const aid in state.fullFreesrData.avatars) {
+      const serverAv = state.fullFreesrData.avatars[aid];
+      const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
+      if (found) {
+        found.level = serverAv.level || 80;
+        found.promotion = serverAv.promotion || 6;
+        found.rank = serverAv.data?.rank ?? 6;
+      }
+    }
+  }
+
   if (state.isConnected) {
     try {
       const res = await apiCall('/api/freesr/avatars');
@@ -3257,9 +3343,11 @@ async function maxAllAvatars() {
   }
 }
 
-// Push local freesr changes to server
+// Push local freesr changes to server and save to local browser cache
 async function saveFreesrChangesToServer() {
   if (!state.fullFreesrData) return;
+  saveFreesrCache(state.fullFreesrData);
+  if (!state.isConnected) return;
   if (state.serverMode === 'firefly' || state.serverMode === 'robin') {
     try {
       await apiCall('/srtools', 'POST', { data: state.fullFreesrData });
@@ -3295,8 +3383,19 @@ async function loadEquipment() {
       const res = await apiCall('/api/freesr');
       if (res && res.data) {
         state.fullFreesrData = res.data;
+        saveFreesrCache(res.data);
         lcs = res.data.lightcones || [];
         relics = res.data.relics || [];
+      }
+    } else {
+      const cached = localStorage.getItem('gac_srtool_freesr_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          state.fullFreesrData = parsed;
+          lcs = parsed.lightcones || [];
+          relics = parsed.relics || [];
+        } catch (e) {}
       }
     }
 
@@ -3856,20 +3955,35 @@ async function handleAddRelicSubmit(e) {
 async function loadPersistentSettings() {
   if (state.serverMode !== 'gac') return;
   try {
-    const res = await apiCall('/api/persistent');
-    if (!res || !res.data) return;
-    state.persistentData = res.data;
-
-    if (res.data.main_character) {
-      el.persistentMcSelect.value = res.data.main_character;
+    let data = state.persistentData;
+    if (state.isConnected) {
+      const res = await apiCall('/api/persistent');
+      if (res && res.data) {
+        data = res.data;
+        state.persistentData = data;
+        savePersistentCache(data);
+      }
+    } else if (!data) {
+      const cached = localStorage.getItem('gac_srtool_persistent_cache');
+      if (cached) {
+        try {
+          data = JSON.parse(cached);
+          state.persistentData = data;
+        } catch (e) {}
+      }
     }
-    if (res.data.march_type) {
-      el.persistentMarchSelect.value = res.data.march_type;
+    if (!data) return;
+
+    if (data.main_character && el.persistentMcSelect) {
+      el.persistentMcSelect.value = data.main_character;
+    }
+    if (data.march_type && el.persistentMarchSelect) {
+      el.persistentMarchSelect.value = data.march_type;
     }
 
-    el.toggleSwGlobal.checked = res.data.enable_sw_global !== false;
-    el.toggleCastoriceGlobal.checked = res.data.enable_castorice_global !== false;
-    if (el.toggleAhaGlobal) el.toggleAhaGlobal.checked = res.data.enable_aha_global !== false;
+    if (el.toggleSwGlobal) el.toggleSwGlobal.checked = data.enable_sw_global !== false;
+    if (el.toggleCastoriceGlobal) el.toggleCastoriceGlobal.checked = data.enable_castorice_global !== false;
+    if (el.toggleAhaGlobal) el.toggleAhaGlobal.checked = data.enable_aha_global !== false;
   } catch (err) {
     console.warn('Persistent settings loading error:', err);
   }
@@ -3952,17 +4066,41 @@ async function loadJsonData(mode) {
     try {
       if (state.fullFreesrData) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
-        el.jsonStatusInfo.textContent = 'freesr-data.json (Loaded from memory)';
-      } else {
+        el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากหน่วยความจำ/แคช)';
+      } else if (state.isConnected) {
         const res = await apiCall('/api/freesr');
         state.fullFreesrData = res.data;
+        saveFreesrCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
-        el.jsonStatusInfo.textContent = 'freesr-data.json (Loaded from server)';
+        el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากเซิร์ฟเวอร์)';
+      } else {
+        const cached = localStorage.getItem('gac_srtool_freesr_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          state.fullFreesrData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากแคชของเบราว์เซอร์)';
+        } else {
+          el.jsonStatusInfo.textContent = 'Offline: ไม่มีแคช สามารถอัปโหลดหรือพิมพ์ JSON เองได้';
+          if (!el.jsonEditor.value) {
+            el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
+          }
+        }
       }
     } catch (err) {
-      el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
-      if (!el.jsonEditor.value) {
-        el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
+      const cached = localStorage.getItem('gac_srtool_freesr_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          state.fullFreesrData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากแคชของเบราว์เซอร์)';
+        } catch (e) {}
+      } else {
+        el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+        if (!el.jsonEditor.value) {
+          el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
+        }
       }
     }
   } else {
@@ -3972,17 +4110,41 @@ async function loadJsonData(mode) {
     try {
       if (state.persistentData) {
         el.jsonEditor.value = JSON.stringify(state.persistentData, null, 2);
-        el.jsonStatusInfo.textContent = 'persistent (Loaded from memory)';
-      } else {
+        el.jsonStatusInfo.textContent = 'persistent (โหลดจากหน่วยความจำ/แคช)';
+      } else if (state.isConnected) {
         const res = await apiCall('/api/persistent');
         state.persistentData = res.data;
+        savePersistentCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
-        el.jsonStatusInfo.textContent = 'persistent (Loaded from server)';
+        el.jsonStatusInfo.textContent = 'persistent (โหลดจากเซิร์ฟเวอร์)';
+      } else {
+        const cached = localStorage.getItem('gac_srtool_persistent_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          state.persistentData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'persistent (โหลดจากแคชของเบราว์เซอร์)';
+        } else {
+          el.jsonStatusInfo.textContent = 'Offline: ไม่มีแคช สามารถอัปโหลดหรือพิมพ์ JSON เองได้';
+          if (!el.jsonEditor.value) {
+            el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
+          }
+        }
       }
     } catch (err) {
-      el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
-      if (!el.jsonEditor.value) {
-        el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
+      const cached = localStorage.getItem('gac_srtool_persistent_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          state.persistentData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'persistent (โหลดจากแคชของเบราว์เซอร์)';
+        } catch (e) {}
+      } else {
+        el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+        if (!el.jsonEditor.value) {
+          el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
+        }
       }
     }
   }
@@ -3994,6 +4156,8 @@ async function saveJsonData() {
     const parsed = JSON.parse(el.jsonEditor.value);
     if (state.currentJsonMode === 'freesr') {
       state.fullFreesrData = parsed;
+      saveFreesrCache(parsed);
+      loadEquipment();
       if (state.isConnected) {
         await saveFreesrChangesToServer();
       }
@@ -4010,9 +4174,10 @@ async function saveJsonData() {
         }
         renderAvatarsGrid();
       }
-      showToast('บันทึก freesr-data.json เรียบร้อย', 'success');
+      showToast('บันทึก freesr-data.json ลงในแคชและเซิร์ฟเวอร์เรียบร้อย', 'success');
     } else {
       state.persistentData = parsed;
+      savePersistentCache(parsed);
       if (state.isConnected && state.serverMode === 'gac') {
         await apiCall('/api/persistent', 'POST', parsed);
       }
@@ -4021,8 +4186,9 @@ async function saveJsonData() {
         state.statusData.lineups = parsed.lineups;
         renderLineup(parsed.lineups);
       }
-      showToast('บันทึกไฟล์ persistent เรียบร้อย', 'success');
+      showToast('บันทึกไฟล์ persistent ลงในแคชและเซิร์ฟเวอร์เรียบร้อย', 'success');
     }
+    updateCacheUsageDisplay();
     refreshStatus();
   } catch (err) {
     showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
@@ -4510,35 +4676,86 @@ function setupEvents() {
       try {
         const parsed = JSON.parse(event.target.result);
         el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-        
-        // If freesr-data.json was uploaded
-        if (parsed.avatars) {
+
+        let recognized = false;
+
+        // If freesr-data.json was uploaded (has avatars, lightcones, or relics)
+        if (parsed.avatars || parsed.lightcones || parsed.relics) {
+          recognized = true;
           state.fullFreesrData = parsed;
-          for (const aid in parsed.avatars) {
-            const av = parsed.avatars[aid];
-            const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
-            if (found) {
-              found.level = av.level || 80;
-              found.promotion = av.promotion || 6;
-              found.rank = av.data?.rank ?? 6;
+          saveFreesrCache(parsed);
+
+          if (parsed.avatars) {
+            for (const aid in parsed.avatars) {
+              const av = parsed.avatars[aid];
+              const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
+              if (found) {
+                found.level = av.level || 80;
+                found.promotion = av.promotion || 6;
+                found.rank = av.data?.rank ?? 6;
+              }
             }
+            renderAvatarsGrid();
           }
-          renderAvatarsGrid();
+
+          loadEquipment();
+
+          if (parsed.battle_config?.custom_battle_lineup || parsed.lineups) {
+            const lineups = parsed.lineups || parsed.battle_config?.custom_battle_lineup;
+            state.statusData = state.statusData || {};
+            state.statusData.lineups = lineups;
+            renderLineup(lineups);
+          }
         }
-        
+
         // If persistent or has lineups
-        if (parsed.lineups) {
-          state.statusData = state.statusData || {};
-          state.statusData.lineups = parsed.lineups;
-          renderLineup(parsed.lineups);
+        if (parsed.main_character || parsed.march_type || (parsed.lineups && !parsed.avatars)) {
+          recognized = true;
+          state.persistentData = parsed;
+          savePersistentCache(parsed);
+
+          if (parsed.lineups) {
+            state.statusData = state.statusData || {};
+            state.statusData.lineups = parsed.lineups;
+            renderLineup(parsed.lineups);
+          }
+          if (parsed.main_character && el.persistentMcSelect) {
+            el.persistentMcSelect.value = parsed.main_character;
+          }
+          if (parsed.march_type && el.persistentMarchSelect) {
+            el.persistentMarchSelect.value = parsed.march_type;
+          }
+          if (el.toggleSwGlobal && parsed.enable_sw_global !== undefined) {
+            el.toggleSwGlobal.checked = parsed.enable_sw_global !== false;
+          }
+          if (el.toggleCastoriceGlobal && parsed.enable_castorice_global !== undefined) {
+            el.toggleCastoriceGlobal.checked = parsed.enable_castorice_global !== false;
+          }
+          if (el.toggleAhaGlobal && parsed.enable_aha_global !== undefined) {
+            el.toggleAhaGlobal.checked = parsed.enable_aha_global !== false;
+          }
         }
-        
-        showToast(`โหลดไฟล์ ${file.name} สำเร็จและซิงค์ข้อมูลแล้ว`, 'success');
+
+        if (!recognized) {
+          if (state.currentJsonMode === 'freesr') {
+            state.fullFreesrData = parsed;
+            saveFreesrCache(parsed);
+            loadEquipment();
+          } else {
+            state.persistentData = parsed;
+            savePersistentCache(parsed);
+          }
+        }
+
+        updateCacheUsageDisplay();
+        refreshStatus();
+        showToast(`บันทึกไฟล์ ${file.name} ลงในแคชของเบราว์เซอร์และซิงค์ข้อมูลสำเร็จ!`, 'success');
       } catch (err) {
-        showToast(t('jsonInvalid'), 'error');
+        showToast(t('jsonInvalid') || 'ไฟล์ JSON ไม่ถูกต้อง', 'error');
       }
     };
     reader.readAsText(file);
+    e.target.value = '';
   });
 
   // -------------------------------------------------------------
@@ -4686,8 +4903,13 @@ function setupEvents() {
       if (keepUrl) localStorage.setItem('gac_srtool_api_url', keepUrl);
       if (keepMode) localStorage.setItem('gac_srtool_mode', keepMode);
       if (keepLang) localStorage.setItem('gac_srtool_lang', keepLang);
+      state.fullFreesrData = null;
+      state.persistentData = null;
+      loadAvatars();
+      loadEquipment();
       updateCacheUsageDisplay();
-      showToast(t('toastCacheCleared'), 'success');
+      showToast(t('toastCacheCleared') || 'ล้างแคชในเบราว์เซอร์เรียบร้อยแล้ว', 'success');
+      refreshStatus();
     });
   }
 
@@ -4695,6 +4917,8 @@ function setupEvents() {
   if (el.btnResetSettings) {
     el.btnResetSettings.addEventListener('click', () => {
       localStorage.clear();
+      state.fullFreesrData = null;
+      state.persistentData = null;
       state.apiUrl = 'http://localhost:21000';
       state.serverMode = 'gac';
       state.creativeMode = false;
@@ -4710,8 +4934,10 @@ function setupEvents() {
       if (el.settingShowcaseAura) el.settingShowcaseAura.checked = true;
       if (el.toggleCreativeMode) el.toggleCreativeMode.checked = false;
       if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'none';
+      loadAvatars();
+      loadEquipment();
       updateCacheUsageDisplay();
-      showToast(t('settingsReset'), 'info');
+      showToast(t('settingsReset') || 'รีเซ็ตเป็นค่าเริ่มต้นเรียบร้อย', 'info');
       refreshStatus();
     });
   }
@@ -4747,6 +4973,7 @@ function startPingLoop() {
 // Initialize Application
 function init() {
   initAvatarsList();
+  loadCachedStorageData();
   setupServerModes();
   setupLanguageSelector();
   setupTabs();
@@ -4758,6 +4985,7 @@ function init() {
   loadEquipment();
   refreshStatus();
   startPingLoop();
+  updateCacheUsageDisplay();
 }
 
 // Run on DOM load
