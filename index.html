@@ -24,14 +24,14 @@
       <div class="server-mode-badge" title="โหมดการเชื่อมต่อเซิร์ฟเวอร์">
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
-          <option value="gac" selected>⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก / Full Control)</option>
-          <option value="firefly">🔥 FireflyGo (FreeSR Compatible)</option>
-          <option value="robin">🕊️ RobinSR (FreeSR Compatible)</option>
+          <option value="gac" selected>⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)</option>
+          <option value="firefly">🔥 FireflyGo (FreeSR)</option>
+          <option value="robin">🕊️ RobinSR (FreeSR)</option>
         </select>
       </div>
 
       <!-- Language Selector (13 Languages) -->
-      <select id="lang-select" class="form-select btn-sm" style="width: auto; padding: 0.4rem 0.75rem; background: var(--bg-secondary); cursor: pointer;" title="Language / 语言 / 言語 / ภาษา">
+      <select id="lang-select" class="form-select btn-sm" style="width: auto; padding: 0.4rem 0.75rem; background: var(--bg-secondary); cursor: pointer;" title="Language / ภาษา">
       </select>
 
       <!-- Connection Pill -->
@@ -48,11 +48,11 @@
 
   <!-- Navigation Bar -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="tab-dashboard">📊 แดชบอร์ด & ทีม (Lineup)</button>
-    <button class="tab-btn" data-tab="tab-avatars">👥 ตัวละคร (Avatars & Build)</button>
-    <button class="tab-btn" data-tab="tab-equipment">🗡️ กรวยแสง & รีลิกส์ (Equipment)</button>
-    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent">💾 จัดการเซฟ GaC (Persistent)</button>
-    <button class="tab-btn" data-tab="tab-exrank">⚡ Ex-Rank (สกิลพิเศษ)</button>
+    <button class="tab-btn active" data-tab="tab-dashboard">📊 แดชบอร์ด & จัดทีม</button>
+    <button class="tab-btn" data-tab="tab-avatars">👥 ตัวละคร</button>
+    <button class="tab-btn" data-tab="tab-equipment">🗡️ กรวยแสง & รีลิกส์</button>
+    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent">💾 จัดการเซฟ GaC</button>
+    <button class="tab-btn" data-tab="tab-exrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json">📝 จัดการไฟล์ JSON</button>
     <button class="tab-btn" data-tab="tab-settings">⚙️ ตั้งค่า & ข้อมูลโหมด</button>
   </nav>
@@ -65,22 +65,22 @@
       <div class="grid-3" style="margin-bottom: 1.5rem;">
         <div class="card stat-box">
           <div class="stat-number" id="stat-avatars">0</div>
-          <div class="stat-label">ตัวละครที่ครอบครอง (Avatars)</div>
+          <div class="stat-label">ตัวละครที่ครอบครอง</div>
         </div>
         <div class="card stat-box">
           <div class="stat-number" id="stat-lightcones">0</div>
-          <div class="stat-label">กรวยแสง (Lightcones)</div>
+          <div class="stat-label">กรวยแสง</div>
         </div>
         <div class="card stat-box">
           <div class="stat-number" id="stat-relics">0</div>
-          <div class="stat-label">รีลิกส์ (Relics)</div>
+          <div class="stat-label">รีลิกส์</div>
         </div>
       </div>
 
       <!-- Party Lineup Visualizer -->
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span>🎮 สมาชิกในทีมปัจจุบัน (Active Party Lineup)</span>
+          <span>🎮 สมาชิกในทีมปัจจุบัน</span>
           <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: normal;">* คลิกที่ช่องเพื่อเปลี่ยนตัวละครในทีม</span>
         </div>
         <div class="lineup-grid" id="lineup-container">
@@ -123,14 +123,14 @@
 
         <!-- Quick Actions Card -->
         <div class="card">
-          <div class="card-title">⚡ ดำเนินการด่วน (Quick Actions)</div>
+          <div class="card-title">⚡ ดำเนินการด่วน</div>
           <p class="card-subtitle">ส่งคำสั่งไปยังเซิร์ฟเวอร์ทันที</p>
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <button class="btn btn-gold" id="btn-quick-max-all">
-              ⭐ ปรับเลเวล 80 & ปลด E6 ตัวละครทั้งหมด (Max All)
+              ⭐ ปรับเลเวล 80 & ปลด E6 ตัวละครทั้งหมด
             </button>
             <button class="btn btn-secondary" id="btn-quick-sync-persistent">
-              💾 ซิงค์ข้อมูล Persistent / เซฟล่าสุด
+              💾 ซิงค์ข้อมูล Persistent ล่าสุด
             </button>
           </div>
         </div>
@@ -144,18 +144,18 @@
           <input type="text" id="avatar-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร...">
           <select id="avatar-filter-rarity" class="form-select" style="max-width: 140px;">
             <option value="all">ทุกระดับดาว</option>
-            <option value="5">5 ดาว (SSR)</option>
-            <option value="4">4 ดาว (SR)</option>
+            <option value="5">5 ดาว</option>
+            <option value="4">4 ดาว</option>
           </select>
           <select id="avatar-filter-element" class="form-select" style="max-width: 140px;">
             <option value="all">ทุกธาตุ</option>
-            <option value="Fire">ไฟ (Fire)</option>
-            <option value="Ice">น้ำแข็ง (Ice)</option>
-            <option value="Lightning">สายฟ้า (Lightning)</option>
-            <option value="Wind">ลม (Wind)</option>
-            <option value="Physical">กายภาพ (Physical)</option>
-            <option value="Quantum">ควอนตัม (Quantum)</option>
-            <option value="Imaginary">จินตภาพ (Imaginary)</option>
+            <option value="Fire">ไฟ</option>
+            <option value="Ice">น้ำแข็ง</option>
+            <option value="Lightning">สายฟ้า</option>
+            <option value="Wind">ลม</option>
+            <option value="Physical">กายภาพ</option>
+            <option value="Quantum">ควอนตัม</option>
+            <option value="Imaginary">จินตภาพ</option>
           </select>
         </div>
         <div style="display: flex; gap: 0.5rem;">
@@ -177,7 +177,7 @@
         <!-- Lightcones Card -->
         <div class="card">
           <div class="card-title">
-            <span>🗡️ กรวยแสงในคลัง (Lightcones)</span>
+            <span>🗡️ กรวยแสงในคลัง</span>
             <span class="btn-sm btn-secondary" id="badge-total-lc">0 ชิ้น</span>
           </div>
           <p class="card-subtitle">รายการกรวยแสงทั้งหมดจาก freesr-data.json</p>
@@ -189,7 +189,7 @@
         <!-- Relics Card -->
         <div class="card">
           <div class="card-title">
-            <span>🛡️ รีลิกส์ในคลัง (Relics)</span>
+            <span>🛡️ รีลิกส์ในคลัง</span>
             <span class="btn-sm btn-secondary" id="badge-total-relics">0 ชิ้น</span>
           </div>
           <p class="card-subtitle">รายการรีลิกส์ทั้งหมดจาก freesr-data.json</p>
@@ -204,7 +204,7 @@
     <section id="tab-persistent" class="tab-content">
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span>💾 จัดการไฟล์เซฟ Persistent (GaC-hkrpg-go Dedicated)</span>
+          <span>💾 จัดการไฟล์เซฟ GaC</span>
           <span class="btn-sm btn-success">เซิร์ฟเวอร์ของเราเอง</span>
         </div>
         <p class="card-subtitle">
@@ -218,24 +218,24 @@
           <div class="card-title">👤 ผู้บุกเบิก & March 7th</div>
           <form id="form-persistent-chars">
             <div class="form-group">
-              <label class="form-label">เพศ & ธาตุของตัวเอก (Main Character)</label>
+              <label class="form-label">เพศ & ธาตุของตัวเอก</label>
               <select id="persistent-mc-select" class="form-select">
-                <option value="MalePhysical">ผู้บุกเบิกชาย - กายภาพ (Male Physical)</option>
-                <option value="FemalePhysical">ผู้บุกเบิกหญิง - กายภาพ (Female Physical)</option>
-                <option value="MalePreservation">ผู้บุกเบิกชาย - ไฟ (Male Preservation)</option>
-                <option value="FemalePreservation">ผู้บุกเบิกหญิง - ไฟ (Female Preservation)</option>
-                <option value="MaleHarmony">ผู้บุกเบิกชาย - ประสาน (Male Harmony)</option>
-                <option value="FemaleHarmony">ผู้บุกเบิกหญิง - ประสาน (Female Harmony)</option>
-                <option value="MaleRemembrance">ผู้บุกเบิกชาย - ความทรงจำ (Male Remembrance)</option>
-                <option value="FemaleRemembrance">ผู้บุกเบิกหญิง - ความทรงจำ (Female Remembrance)</option>
+                <option value="MalePhysical">ผู้บุกเบิกชาย - กายภาพ</option>
+                <option value="FemalePhysical">ผู้บุกเบิกหญิง - กายภาพ</option>
+                <option value="MalePreservation">ผู้บุกเบิกชาย - ไฟ</option>
+                <option value="FemalePreservation">ผู้บุกเบิกหญิง - ไฟ</option>
+                <option value="MaleHarmony">ผู้บุกเบิกชาย - ประสาน</option>
+                <option value="FemaleHarmony">ผู้บุกเบิกหญิง - ประสาน</option>
+                <option value="MaleRemembrance">ผู้บุกเบิกชาย - ความทรงจำ</option>
+                <option value="FemaleRemembrance">ผู้บุกเบิกหญิง - ความทรงจำ</option>
               </select>
             </div>
 
             <div class="form-group">
               <label class="form-label">สายของ March 7th</label>
               <select id="persistent-march-select" class="form-select">
-                <option value="MarchHunt">March 7th - ล่าสังหาร (The Hunt / จินตภาพ)</option>
-                <option value="MarchPreservation">March 7th - อนุรักษ์ (Preservation / น้ำแข็ง)</option>
+                <option value="MarchHunt">March 7th - ล่าสังหาร</option>
+                <option value="MarchPreservation">March 7th - อนุรักษ์</option>
               </select>
             </div>
 
@@ -305,7 +305,7 @@
         <div class="card-title" style="flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn btn-sm btn-primary active" id="btn-select-freesr">📄 freesr-data.json</button>
-            <button class="btn btn-sm btn-secondary" id="btn-select-persistent">💾 persistent (Save)</button>
+            <button class="btn btn-sm btn-secondary" id="btn-select-persistent">💾 ไฟล์เซฟ persistent</button>
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn btn-sm btn-secondary" id="btn-json-beautify">✨ จัดรูปแบบ JSON</button>
@@ -337,18 +337,18 @@
 
           <form id="form-settings">
             <div class="form-group">
-              <label class="form-label">โหมดเซิร์ฟเวอร์ (Target Server)</label>
+              <label class="form-label">โหมดเซิร์ฟเวอร์</label>
               <select id="setting-server-mode" class="form-select">
-                <option value="gac">⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก - แก้ได้ทั้ง FreeSR + Persistent)</option>
-                <option value="firefly">🔥 FireflyGo (FreeSR Standard)</option>
-                <option value="robin">🕊️ RobinSR (FreeSR Standard)</option>
+                <option value="gac">⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)</option>
+                <option value="firefly">🔥 FireflyGo (FreeSR)</option>
+                <option value="robin">🕊️ RobinSR (FreeSR)</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">REST API Gateway URL</label>
               <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
               <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
-                * ค่าเริ่มต้นพอร์ต 21000 (SDK server)
+                * พอร์ตเริ่มต้น 21000 สำหรับ SDK server
               </small>
             </div>
             <div class="form-group">
@@ -367,7 +367,7 @@
           <div class="card-title">💡 ข้อมูลโหมดเซิร์ฟเวอร์ & สำหรับผู้อื่น</div>
           <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem; color: var(--text-muted);">
             <div>
-              <strong style="color: var(--accent-cyan);">⚡ GaC-hkrpg-go (Full Access):</strong><br>
+              <strong style="color: var(--accent-cyan);">⚡ GaC-hkrpg-go:</strong><br>
               โหมดเฉพาะของเซิร์ฟเวอร์เรา สามารถอ่านและเขียนทั้ง <code>freesr-data.json</code> และ <code>persistent</code> ได้แบบ 100% เรียลไทม์ผ่าน REST API Gateway พร้อมระบบ Ex-Rank
             </div>
             <div>
@@ -404,14 +404,14 @@
           <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
         <button type="button" class="btn btn-gold btn-sm" id="btn-modal-max-all-char">
-          ⭐ MAX ALL (Lv.80 / E6 / 10)
+          ⭐ ปรับเต็มทั้งหมด (Lv.80 / E6 / สกิล 10)
         </button>
       </div>
 
       <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label class="form-label" style="margin: 0;">ระดับเลเวล (Level 1-80)</label>
+            <label class="form-label" style="margin: 0;">ระดับเลเวล (1-80)</label>
             <div style="display: flex; gap: 0.25rem;">
               <button type="button" class="btn btn-sm btn-secondary btn-lvl-preset" data-lvl="1" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;">1</button>
               <button type="button" class="btn btn-sm btn-secondary btn-lvl-preset" data-lvl="20" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;">20</button>
@@ -424,7 +424,7 @@
         </div>
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label class="form-label" style="margin: 0;">การเลื่อนขั้น (Ascension 0-6)</label>
+            <label class="form-label" style="margin: 0;">การเลื่อนขั้น (0-6)</label>
             <div style="display: flex; gap: 0.25rem;">
               <button type="button" class="btn btn-sm btn-secondary btn-prom-preset" data-prom="0" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;">0</button>
               <button type="button" class="btn btn-sm btn-secondary btn-prom-preset" data-prom="3" style="padding: 0.15rem 0.45rem; font-size: 0.75rem;">3</button>
@@ -437,13 +437,13 @@
 
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-          <label class="form-label" style="margin: 0;">Eidolon (E0 - E6)</label>
+          <label class="form-label" style="margin: 0;">ระดับ Eidolon (E0 - E6)</label>
           <div style="display: flex; gap: 0.4rem;">
             <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-quick-e0" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
-              E0 (รีเซ็ต)
+              รีเซ็ต E0
             </button>
             <button type="button" class="btn btn-sm btn-gold" id="btn-modal-quick-e6" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
-              ⭐ ปลด E6 เต็ม
+              ⭐ ปลดเต็ม E6
             </button>
           </div>
         </div>
@@ -453,10 +453,10 @@
       </div>
 
       <div class="form-group" style="margin-top: 1rem;">
-        <label class="form-label">สกิลและร่องรอย (Skills & Traces)</label>
+        <label class="form-label">สกิลและร่องรอย</label>
         <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
           <div style="font-size: 0.85rem; color: var(--text-muted);">
-            Basic ATK (Lv.6), Skill (Lv.10), Ultimate (Lv.10), Talent (Lv.10) & ทุกโหนดเสริม
+            โจมตีปกติ (Lv.6), สกิลต่อสู้ (Lv.10), ท่าไม้ตาย (Lv.10), พรสวรรค์ (Lv.10) และโหนดเสริมทั้งหมด
           </div>
           <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-skills">
             ⭐ อัพสกิล 10/10

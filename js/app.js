@@ -255,13 +255,13 @@ function setupServerModes() {
     if (el.settingServerMode) el.settingServerMode.value = mode;
 
     if (mode === 'gac') {
-      el.lblActiveMode.textContent = 'GaC-hkrpg-go (เซิร์ฟเวอร์หลัก / Full Control)';
+      el.lblActiveMode.textContent = 'GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)';
       if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'inline-flex';
     } else if (mode === 'firefly') {
-      el.lblActiveMode.textContent = 'FireflyGo (FreeSR Compatible)';
+      el.lblActiveMode.textContent = 'FireflyGo (FreeSR)';
       if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
     } else if (mode === 'robin') {
-      el.lblActiveMode.textContent = 'RobinSR (FreeSR Compatible)';
+      el.lblActiveMode.textContent = 'RobinSR (FreeSR)';
       if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
     }
   };

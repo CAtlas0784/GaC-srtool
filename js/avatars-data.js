@@ -4,7 +4,7 @@ export const AVATAR_METADATA = {
   "1001": {
     "names": {
       "en": "March 7th",
-      "th": "March 7th (มาร์ช 7th)",
+      "th": "มาร์ช 7th",
       "zh-CN": "三月七",
       "zh-TW": "三月七",
       "ja": "三月なのか",
@@ -19,7 +19,7 @@ export const AVATAR_METADATA = {
   "1002": {
     "names": {
       "en": "Dan Heng",
-      "th": "Dan Heng (ดันเฮง)",
+      "th": "ดันเฮง",
       "zh-CN": "丹恒",
       "zh-TW": "丹恆",
       "ja": "丹恒",
@@ -34,7 +34,7 @@ export const AVATAR_METADATA = {
   "1003": {
     "names": {
       "en": "Himeko",
-      "th": "Himeko (ฮิเมโกะ)",
+      "th": "ฮิเมโกะ",
       "zh-CN": "姬子",
       "zh-TW": "姬子",
       "ja": "姫子",
@@ -49,7 +49,7 @@ export const AVATAR_METADATA = {
   "1004": {
     "names": {
       "en": "Welt",
-      "th": "Welt (เวิลต์)",
+      "th": "เวิลต์",
       "zh-CN": "瓦尔特",
       "zh-TW": "瓦爾特",
       "ja": "ヴェルト",
@@ -64,7 +64,7 @@ export const AVATAR_METADATA = {
   "1005": {
     "names": {
       "en": "Kafka",
-      "th": "Kafka (คาฟกา)",
+      "th": "คาฟกา",
       "zh-CN": "卡芙卡",
       "zh-TW": "卡芙卡",
       "ja": "カフカ",
@@ -79,7 +79,7 @@ export const AVATAR_METADATA = {
   "1006": {
     "names": {
       "en": "Silver Wolf",
-      "th": "Silver Wolf (ซิลเวอร์วูล์ฟ)",
+      "th": "ซิลเวอร์วูล์ฟ",
       "zh-CN": "银狼",
       "zh-TW": "銀狼",
       "ja": "銀狼",
@@ -94,7 +94,7 @@ export const AVATAR_METADATA = {
   "1008": {
     "names": {
       "en": "Arlan",
-      "th": "Arlan (อาร์ลัน)",
+      "th": "อาร์ลัน",
       "zh-CN": "阿兰",
       "zh-TW": "阿蘭",
       "ja": "アーラン",
@@ -109,7 +109,7 @@ export const AVATAR_METADATA = {
   "1009": {
     "names": {
       "en": "Asta",
-      "th": "Asta (แอสต้า)",
+      "th": "แอสต้า",
       "zh-CN": "艾丝妲",
       "zh-TW": "艾絲妲",
       "ja": "アスター",
@@ -124,7 +124,7 @@ export const AVATAR_METADATA = {
   "1013": {
     "names": {
       "en": "Herta",
-      "th": "Herta (เฮอร์ต้า)",
+      "th": "เฮอร์ต้า",
       "zh-CN": "黑塔",
       "zh-TW": "黑塔",
       "ja": "ヘルタ",
@@ -139,7 +139,7 @@ export const AVATAR_METADATA = {
   "1014": {
     "names": {
       "en": "Saber",
-      "th": "Saber (เซเบอร์)",
+      "th": "เซเบอร์",
       "zh-CN": "阿尔托莉雅·潘德拉贡 (塞巴)",
       "zh-TW": "阿爾托莉雅·潘德拉貢",
       "ja": "セイバー",
@@ -154,7 +154,7 @@ export const AVATAR_METADATA = {
   "1015": {
     "names": {
       "en": "Archer",
-      "th": "Archer (อาร์เชอร์)",
+      "th": "อาร์เชอร์",
       "zh-CN": "卫宫士郎 (红A/阿茶)",
       "zh-TW": "衛宮士郎 (紅A)",
       "ja": "アーチャー",
@@ -169,7 +169,7 @@ export const AVATAR_METADATA = {
   "1101": {
     "names": {
       "en": "Bronya",
-      "th": "Bronya (โบรเนีย)",
+      "th": "โบรเนีย",
       "zh-CN": "布洛妮娅",
       "zh-TW": "布洛妮婭",
       "ja": "ブローニャ",
@@ -184,7 +184,7 @@ export const AVATAR_METADATA = {
   "1102": {
     "names": {
       "en": "Seele",
-      "th": "Seele (เซเล่)",
+      "th": "เซเล่",
       "zh-CN": "希儿",
       "zh-TW": "希兒",
       "ja": "ゼーレ",
@@ -199,7 +199,7 @@ export const AVATAR_METADATA = {
   "1103": {
     "names": {
       "en": "Serval",
-      "th": "Serval (เซอวัล)",
+      "th": "เซอวัล",
       "zh-CN": "希露瓦",
       "zh-TW": "希露瓦",
       "ja": "セーバル",
@@ -214,7 +214,7 @@ export const AVATAR_METADATA = {
   "1104": {
     "names": {
       "en": "Gepard",
-      "th": "Gepard (เกพาร์ด)",
+      "th": "เกพาร์ด",
       "zh-CN": "杰帕德",
       "zh-TW": "傑帕德",
       "ja": "ジェパード",
@@ -229,7 +229,7 @@ export const AVATAR_METADATA = {
   "1105": {
     "names": {
       "en": "Natasha",
-      "th": "Natasha (นาตาชา)",
+      "th": "นาตาชา",
       "zh-CN": "娜塔莎",
       "zh-TW": "娜塔莎",
       "ja": "ナターシャ",
@@ -244,7 +244,7 @@ export const AVATAR_METADATA = {
   "1106": {
     "names": {
       "en": "Pela",
-      "th": "Pela (เพล่า)",
+      "th": "เพล่า",
       "zh-CN": "佩拉",
       "zh-TW": "佩拉",
       "ja": "ペラ",
@@ -259,7 +259,7 @@ export const AVATAR_METADATA = {
   "1107": {
     "names": {
       "en": "Clara",
-      "th": "Clara (คลารา)",
+      "th": "คลารา",
       "zh-CN": "克拉拉",
       "zh-TW": "克拉拉",
       "ja": "クラーラ",
@@ -274,7 +274,7 @@ export const AVATAR_METADATA = {
   "1108": {
     "names": {
       "en": "Sampo",
-      "th": "Sampo (ซัมโป)",
+      "th": "ซัมโป",
       "zh-CN": "桑博",
       "zh-TW": "桑博",
       "ja": "サンポ",
@@ -289,7 +289,7 @@ export const AVATAR_METADATA = {
   "1109": {
     "names": {
       "en": "Hook",
-      "th": "Hook (ฮุค)",
+      "th": "ฮุค",
       "zh-CN": "虎克",
       "zh-TW": "虎克",
       "ja": "フック",
@@ -304,7 +304,7 @@ export const AVATAR_METADATA = {
   "1110": {
     "names": {
       "en": "Lynx",
-      "th": "Lynx (ลิงซ์)",
+      "th": "ลิงซ์",
       "zh-CN": "玲可",
       "zh-TW": "玲可",
       "ja": "リンクス",
@@ -319,7 +319,7 @@ export const AVATAR_METADATA = {
   "1111": {
     "names": {
       "en": "Luka",
-      "th": "Luka (ลูกา)",
+      "th": "ลูกา",
       "zh-CN": "卢卡",
       "zh-TW": "盧卡",
       "ja": "ルカ",
@@ -334,7 +334,7 @@ export const AVATAR_METADATA = {
   "1112": {
     "names": {
       "en": "Topaz & Numby",
-      "th": "Topaz & Numby (โทพาซ & นัมบี้)",
+      "th": "โทพาซ & นัมบี้",
       "zh-CN": "托帕&账账",
       "zh-TW": "托帕&賬賬",
       "ja": "トパーズ&カブ",
@@ -349,7 +349,7 @@ export const AVATAR_METADATA = {
   "1201": {
     "names": {
       "en": "Qingque",
-      "th": "Qingque (ชิงเชวี่ย)",
+      "th": "ชิงเชวี่ย",
       "zh-CN": "青雀",
       "zh-TW": "青雀",
       "ja": "青雀",
@@ -364,7 +364,7 @@ export const AVATAR_METADATA = {
   "1202": {
     "names": {
       "en": "Tingyun",
-      "th": "Tingyun (ถิงหยุน)",
+      "th": "ถิงหยุน",
       "zh-CN": "停云",
       "zh-TW": "停雲",
       "ja": "停雲",
@@ -379,7 +379,7 @@ export const AVATAR_METADATA = {
   "1203": {
     "names": {
       "en": "Luocha",
-      "th": "Luocha (หลัวชา)",
+      "th": "หลัวชา",
       "zh-CN": "罗刹",
       "zh-TW": "羅剎",
       "ja": "羅刹",
@@ -394,7 +394,7 @@ export const AVATAR_METADATA = {
   "1204": {
     "names": {
       "en": "Jing Yuan",
-      "th": "Jing Yuan (จิ่งหยวน)",
+      "th": "จิ่งหยวน",
       "zh-CN": "景元",
       "zh-TW": "景元",
       "ja": "景元",
@@ -409,7 +409,7 @@ export const AVATAR_METADATA = {
   "1205": {
     "names": {
       "en": "Blade",
-      "th": "Blade (เบลด)",
+      "th": "เบลด",
       "zh-CN": "刃",
       "zh-TW": "刃",
       "ja": "刃",
@@ -424,7 +424,7 @@ export const AVATAR_METADATA = {
   "1206": {
     "names": {
       "en": "Sushang",
-      "th": "Sushang (ซูซาง)",
+      "th": "ซูซาง",
       "zh-CN": "素裳",
       "zh-TW": "素裳",
       "ja": "素裳",
@@ -439,7 +439,7 @@ export const AVATAR_METADATA = {
   "1207": {
     "names": {
       "en": "Yukong",
-      "th": "Yukong (อวี้คง)",
+      "th": "อวี้คง",
       "zh-CN": "驭空",
       "zh-TW": "馭空",
       "ja": "御空",
@@ -454,7 +454,7 @@ export const AVATAR_METADATA = {
   "1208": {
     "names": {
       "en": "Fu Xuan",
-      "th": "Fu Xuan (ฟู่เสวียน)",
+      "th": "ฟู่เสวียน",
       "zh-CN": "符玄",
       "zh-TW": "符玄",
       "ja": "符玄",
@@ -469,7 +469,7 @@ export const AVATAR_METADATA = {
   "1209": {
     "names": {
       "en": "Yanqing",
-      "th": "Yanqing (เหยียนชิง)",
+      "th": "เหยียนชิง",
       "zh-CN": "彦卿",
       "zh-TW": "彥卿",
       "ja": "彦卿",
@@ -484,7 +484,7 @@ export const AVATAR_METADATA = {
   "1210": {
     "names": {
       "en": "Guinaifen",
-      "th": "Guinaifen (กุ้ยหน่ายเฟิน)",
+      "th": "กุ้ยหน่ายเฟิน",
       "zh-CN": "桂乃芬",
       "zh-TW": "桂乃芬",
       "ja": "桂乃芬",
@@ -499,7 +499,7 @@ export const AVATAR_METADATA = {
   "1211": {
     "names": {
       "en": "Bailu",
-      "th": "Bailu (ไป๋ลู่)",
+      "th": "ไป๋ลู่",
       "zh-CN": "白露",
       "zh-TW": "白露",
       "ja": "白露",
@@ -514,7 +514,7 @@ export const AVATAR_METADATA = {
   "1212": {
     "names": {
       "en": "Jingliu",
-      "th": "Jingliu (จิ้งหลิว)",
+      "th": "จิ้งหลิว",
       "zh-CN": "镜流",
       "zh-TW": "鏡流",
       "ja": "鏡流",
@@ -529,7 +529,7 @@ export const AVATAR_METADATA = {
   "1213": {
     "names": {
       "en": "Dan Heng • Imbibitor Lunae",
-      "th": "Dan Heng • IL (ดันเฮง จ้าวยลจันทรา)",
+      "th": "ดันเฮง จ้าวยลจันทรา",
       "zh-CN": "丹恒·饮月",
       "zh-TW": "丹恆·飲月",
       "ja": "丹恒・飲月",
@@ -544,7 +544,7 @@ export const AVATAR_METADATA = {
   "1214": {
     "names": {
       "en": "Xueyi",
-      "th": "Xueyi (เสวียอี้)",
+      "th": "เสวียอี้",
       "zh-CN": "雪衣",
       "zh-TW": "雪衣",
       "ja": "雪衣",
@@ -559,7 +559,7 @@ export const AVATAR_METADATA = {
   "1215": {
     "names": {
       "en": "Hanya",
-      "th": "Hanya (ฮันย่า)",
+      "th": "ฮันย่า",
       "zh-CN": "寒鸦",
       "zh-TW": "寒鴉",
       "ja": "寒鴉",
@@ -574,7 +574,7 @@ export const AVATAR_METADATA = {
   "1217": {
     "names": {
       "en": "Huohuo",
-      "th": "Huohuo (ฮัวฮัว)",
+      "th": "ฮัวฮัว",
       "zh-CN": "藿藿",
       "zh-TW": "藿藿",
       "ja": "フォフォ",
@@ -589,7 +589,7 @@ export const AVATAR_METADATA = {
   "1218": {
     "names": {
       "en": "Jiaoqiu",
-      "th": "Jiaoqiu (เจียวชิว)",
+      "th": "เจียวชิว",
       "zh-CN": "椒丘",
       "zh-TW": "椒丘",
       "ja": "椒丘",
@@ -604,7 +604,7 @@ export const AVATAR_METADATA = {
   "1220": {
     "names": {
       "en": "Feixiao",
-      "th": "Feixiao (เฟยเซียว)",
+      "th": "เฟยเซียว",
       "zh-CN": "飞霄",
       "zh-TW": "飛霄",
       "ja": "飛霄",
@@ -619,7 +619,7 @@ export const AVATAR_METADATA = {
   "1221": {
     "names": {
       "en": "Yunli",
-      "th": "Yunli (หยุนหลี่)",
+      "th": "หยุนหลี่",
       "zh-CN": "云璃",
       "zh-TW": "雲璃",
       "ja": "雲璃",
@@ -634,7 +634,7 @@ export const AVATAR_METADATA = {
   "1222": {
     "names": {
       "en": "Lingsha",
-      "th": "Lingsha (หลิงซา)",
+      "th": "หลิงซา",
       "zh-CN": "灵砂",
       "zh-TW": "靈砂",
       "ja": "霊砂",
@@ -649,7 +649,7 @@ export const AVATAR_METADATA = {
   "1223": {
     "names": {
       "en": "Moze",
-      "th": "Moze (โม่เจ๋อ)",
+      "th": "โม่เจ๋อ",
       "zh-CN": "貊泽",
       "zh-TW": "貊澤",
       "ja": "モゼ",
@@ -664,7 +664,7 @@ export const AVATAR_METADATA = {
   "1224": {
     "names": {
       "en": "March 7th • The Hunt",
-      "th": "March 7th (ล่าสังหาร)",
+      "th": "ล่าสังหาร",
       "zh-CN": "三月七·巡猎",
       "zh-TW": "三月七·巡獵",
       "ja": "三月なのか・巡狩",
@@ -679,7 +679,7 @@ export const AVATAR_METADATA = {
   "1225": {
     "names": {
       "en": "Fugue",
-      "th": "Fugue (ฟิวก์)",
+      "th": "ฟิวก์",
       "zh-CN": "忘归人",
       "zh-TW": "忘歸人",
       "ja": "忘帰人",
@@ -694,7 +694,7 @@ export const AVATAR_METADATA = {
   "1301": {
     "names": {
       "en": "Gallagher",
-      "th": "Gallagher (กัลลาเกอร์)",
+      "th": "กัลลาเกอร์",
       "zh-CN": "加拉赫",
       "zh-TW": "加拉赫",
       "ja": "ギャラガー",
@@ -709,7 +709,7 @@ export const AVATAR_METADATA = {
   "1302": {
     "names": {
       "en": "Argenti",
-      "th": "Argenti (อาร์เจนติ)",
+      "th": "อาร์เจนติ",
       "zh-CN": "银枝",
       "zh-TW": "銀枝",
       "ja": "アルジェンティ",
@@ -724,7 +724,7 @@ export const AVATAR_METADATA = {
   "1303": {
     "names": {
       "en": "Ruan Mei",
-      "th": "Ruan Mei (รวน เหมย)",
+      "th": "รวน เหมย",
       "zh-CN": "阮·梅",
       "zh-TW": "阮·梅",
       "ja": "ルアン・メェイ",
@@ -739,7 +739,7 @@ export const AVATAR_METADATA = {
   "1304": {
     "names": {
       "en": "Aventurine",
-      "th": "Aventurine (อเวนทูรีน)",
+      "th": "อเวนทูรีน",
       "zh-CN": "砂金",
       "zh-TW": "砂金",
       "ja": "アベンチュリン",
@@ -754,7 +754,7 @@ export const AVATAR_METADATA = {
   "1305": {
     "names": {
       "en": "Dr. Ratio",
-      "th": "Dr. Ratio (ดร. เรโช)",
+      "th": "ดร. เรโช",
       "zh-CN": "真理医生",
       "zh-TW": "真理醫生",
       "ja": "Dr.レイシオ",
@@ -769,7 +769,7 @@ export const AVATAR_METADATA = {
   "1306": {
     "names": {
       "en": "Sparkle",
-      "th": "Sparkle (สปาร์กเคิล)",
+      "th": "สปาร์กเคิล",
       "zh-CN": "花火",
       "zh-TW": "花火",
       "ja": "花火",
@@ -784,7 +784,7 @@ export const AVATAR_METADATA = {
   "1307": {
     "names": {
       "en": "Black Swan",
-      "th": "Black Swan (แบล็กสวอน)",
+      "th": "แบล็กสวอน",
       "zh-CN": "黑天鹅",
       "zh-TW": "黑天鵝",
       "ja": "ブラックスワン",
@@ -799,7 +799,7 @@ export const AVATAR_METADATA = {
   "1308": {
     "names": {
       "en": "Acheron",
-      "th": "Acheron (อาเคอรอน)",
+      "th": "อาเคอรอน",
       "zh-CN": "黄泉",
       "zh-TW": "黃泉",
       "ja": "黄泉",
@@ -814,7 +814,7 @@ export const AVATAR_METADATA = {
   "1309": {
     "names": {
       "en": "Robin",
-      "th": "Robin (โรบิน)",
+      "th": "โรบิน",
       "zh-CN": "知更鸟",
       "zh-TW": "知更鳥",
       "ja": "ロビン",
@@ -829,7 +829,7 @@ export const AVATAR_METADATA = {
   "1310": {
     "names": {
       "en": "Firefly",
-      "th": "Firefly (ไฟร์ฟลาย)",
+      "th": "ไฟร์ฟลาย",
       "zh-CN": "流萤",
       "zh-TW": "流螢",
       "ja": "ホタル",
@@ -844,7 +844,7 @@ export const AVATAR_METADATA = {
   "1312": {
     "names": {
       "en": "Misha",
-      "th": "Misha (มิชา)",
+      "th": "มิชา",
       "zh-CN": "米沙",
       "zh-TW": "米沙",
       "ja": "ミーシャ",
@@ -859,7 +859,7 @@ export const AVATAR_METADATA = {
   "1313": {
     "names": {
       "en": "Sunday",
-      "th": "Sunday (ซันเดย์)",
+      "th": "ซันเดย์",
       "zh-CN": "星期日",
       "zh-TW": "星期日",
       "ja": "サンデー",
@@ -874,7 +874,7 @@ export const AVATAR_METADATA = {
   "1314": {
     "names": {
       "en": "Jade",
-      "th": "Jade (เจด)",
+      "th": "เจด",
       "zh-CN": "翡翠",
       "zh-TW": "翡翠",
       "ja": "ジェイド",
@@ -889,7 +889,7 @@ export const AVATAR_METADATA = {
   "1315": {
     "names": {
       "en": "Boothill",
-      "th": "Boothill (บูทฮิลล์)",
+      "th": "บูทฮิลล์",
       "zh-CN": "波提欧",
       "zh-TW": "波提歐",
       "ja": "ブートヒル",
@@ -904,7 +904,7 @@ export const AVATAR_METADATA = {
   "1317": {
     "names": {
       "en": "Rappa",
-      "th": "Rappa (แรปปา)",
+      "th": "แรปปา",
       "zh-CN": "乱破",
       "zh-TW": "亂破",
       "ja": "乱破",
@@ -919,7 +919,7 @@ export const AVATAR_METADATA = {
   "1321": {
     "names": {
       "en": "Dahlia",
-      "th": "Dahlia (ดาเลีย)",
+      "th": "ดาเลีย",
       "zh-CN": "达莉亚",
       "zh-TW": "達莉亞",
       "ja": "ダリア",
@@ -934,7 +934,7 @@ export const AVATAR_METADATA = {
   "1401": {
     "names": {
       "en": "The Herta",
-      "th": "The Herta (เดอะ เฮอร์ต้า)",
+      "th": "เดอะ เฮอร์ต้า",
       "zh-CN": "大黑塔",
       "zh-TW": "大黑塔",
       "ja": "ザ・ヘルタ",
@@ -949,7 +949,7 @@ export const AVATAR_METADATA = {
   "1402": {
     "names": {
       "en": "Aglaea",
-      "th": "Aglaea (อักเลีย)",
+      "th": "อักเลีย",
       "zh-CN": "阿格莱雅",
       "zh-TW": "阿格萊雅",
       "ja": "アグラエア",
@@ -964,7 +964,7 @@ export const AVATAR_METADATA = {
   "1403": {
     "names": {
       "en": "Tribbie",
-      "th": "Tribbie (ทริบบี้)",
+      "th": "ทริบบี้",
       "zh-CN": "提比",
       "zh-TW": "提比",
       "ja": "トリビー",
@@ -979,7 +979,7 @@ export const AVATAR_METADATA = {
   "1404": {
     "names": {
       "en": "Mydei",
-      "th": "Mydei (ไมเดย์)",
+      "th": "ไมเดย์",
       "zh-CN": "麦狄",
       "zh-TW": "麥狄",
       "ja": "マイディ",
@@ -994,7 +994,7 @@ export const AVATAR_METADATA = {
   "1405": {
     "names": {
       "en": "Anaxa",
-      "th": "Anaxa (อนากซา)",
+      "th": "อนากซา",
       "zh-CN": "阿那克萨",
       "zh-TW": "阿那克薩",
       "ja": "アナクサ",
@@ -1009,7 +1009,7 @@ export const AVATAR_METADATA = {
   "1406": {
     "names": {
       "en": "Cipher",
-      "th": "Cipher (ไซเฟอร์)",
+      "th": "ไซเฟอร์",
       "zh-CN": "赛弗",
       "zh-TW": "賽弗",
       "ja": "サイファー",
@@ -1024,7 +1024,7 @@ export const AVATAR_METADATA = {
   "1407": {
     "names": {
       "en": "Castorice",
-      "th": "Castorice (คาสโตริเซ่)",
+      "th": "แคสโตริซ",
       "zh-CN": "遐蝶",
       "zh-TW": "遐蝶",
       "ja": "カストリセ",
@@ -1039,7 +1039,7 @@ export const AVATAR_METADATA = {
   "1408": {
     "names": {
       "en": "Phainon",
-      "th": "Phainon (ฟานอน)",
+      "th": "ไฟนอน",
       "zh-CN": "法埃农",
       "zh-TW": "法埃農",
       "ja": "ファイノン",
@@ -1054,7 +1054,7 @@ export const AVATAR_METADATA = {
   "1409": {
     "names": {
       "en": "Hyacine",
-      "th": "Hyacine (ไฮยาซีน)",
+      "th": "ไฮยาซีน",
       "zh-CN": "风信子",
       "zh-TW": "風信子",
       "ja": "ヒヤシンス",
@@ -1069,7 +1069,7 @@ export const AVATAR_METADATA = {
   "1410": {
     "names": {
       "en": "Hysilens",
-      "th": "Hysilens (ไฮซิเลนส์)",
+      "th": "ไฮซิเลนส์",
       "zh-CN": "海西伦斯",
       "zh-TW": "海西倫斯",
       "ja": "ヒシレンス",
@@ -1084,7 +1084,7 @@ export const AVATAR_METADATA = {
   "1412": {
     "names": {
       "en": "Cerydra",
-      "th": "Cerydra (เซอรีดรา)",
+      "th": "เซอรีดรา",
       "zh-CN": "塞利德拉",
       "zh-TW": "塞利德拉",
       "ja": "セリドラ",
@@ -1099,7 +1099,7 @@ export const AVATAR_METADATA = {
   "1413": {
     "names": {
       "en": "Evernight",
-      "th": "Evernight (เอเวอร์ไนท์)",
+      "th": "เอเวอร์ไนท์",
       "zh-CN": "永夜",
       "zh-TW": "永夜",
       "ja": "エバーナイト",
@@ -1114,7 +1114,7 @@ export const AVATAR_METADATA = {
   "1414": {
     "names": {
       "en": "Dan Heng • Permeating Thunder",
-      "th": "Dan Heng PT (ดันเฮงร่างใหม่)",
+      "th": "ดันเฮงร่างใหม่",
       "zh-CN": "丹恒·行者",
       "zh-TW": "丹恆·行者",
       "ja": "丹恒・行者",
@@ -1129,7 +1129,7 @@ export const AVATAR_METADATA = {
   "1415": {
     "names": {
       "en": "Cyrene",
-      "th": "Cyrene (ซีรีน)",
+      "th": "ไซรีน",
       "zh-CN": "赛琳",
       "zh-TW": "賽琳",
       "ja": "サイリーン",
@@ -1144,7 +1144,7 @@ export const AVATAR_METADATA = {
   "1501": {
     "names": {
       "en": "Sparxie",
-      "th": "Sparxie (สปาร์กซี่)",
+      "th": "สปาร์กซี่",
       "zh-CN": "斯帕克茜",
       "zh-TW": "斯帕克茜",
       "ja": "スパーキー",
@@ -1159,7 +1159,7 @@ export const AVATAR_METADATA = {
   "1502": {
     "names": {
       "en": "Yaoguang",
-      "th": "Yaoguang (เย่ากวง)",
+      "th": "เย่ากวง",
       "zh-CN": "瑶光",
       "zh-TW": "瑤光",
       "ja": "瑤光",
@@ -1174,7 +1174,7 @@ export const AVATAR_METADATA = {
   "1503": {
     "names": {
       "en": "Pearl",
-      "th": "Pearl (เพิร์ล)",
+      "th": "เพิร์ล",
       "zh-CN": "佩尔 (Pearl)",
       "zh-TW": "佩爾",
       "ja": "パール",
@@ -1189,7 +1189,7 @@ export const AVATAR_METADATA = {
   "1504": {
     "names": {
       "en": "Ashveil",
-      "th": "Ashveil (แอชเวล)",
+      "th": "แอชเวล",
       "zh-CN": "灰纱",
       "zh-TW": "灰紗",
       "ja": "アッシュヴェイル",
@@ -1204,7 +1204,7 @@ export const AVATAR_METADATA = {
   "1505": {
     "names": {
       "en": "Evanescia",
-      "th": "Evanescia (เอวาเนสเซีย)",
+      "th": "เอวาเนสเซีย",
       "zh-CN": "埃瓦内西亚",
       "zh-TW": "埃瓦內西亞",
       "ja": "エヴァネシア",
@@ -1219,7 +1219,7 @@ export const AVATAR_METADATA = {
   "1506": {
     "names": {
       "en": "Silver Wolf Lv.999",
-      "th": "Silver Wolf Lv.999 (ซิลเวอร์วูล์ฟ Lv.999)",
+      "th": "ซิลเวอร์วูล์ฟ Lv.999",
       "zh-CN": "银狼 Lv.999",
       "zh-TW": "銀狼 Lv.999",
       "ja": "銀狼 Lv.999",
@@ -1234,7 +1234,7 @@ export const AVATAR_METADATA = {
   "1507": {
     "names": {
       "en": "Mortenax Blade",
-      "th": "Mortenax Blade (มอร์เทแนกซ์ เบลด)",
+      "th": "มอร์เทแนกซ์ เบลด",
       "zh-CN": "摩天之刃",
       "zh-TW": "摩天之刃",
       "ja": "摩天の刃",
@@ -1249,7 +1249,7 @@ export const AVATAR_METADATA = {
   "1508": {
     "names": {
       "en": "Tohsaka Rin",
-      "th": "Tohsaka Rin (โทซากะ ริน)",
+      "th": "โทซากะ ริน",
       "zh-CN": "远坂凛",
       "zh-TW": "遠坂凜",
       "ja": "遠坂凛",
@@ -1264,7 +1264,7 @@ export const AVATAR_METADATA = {
   "1509": {
     "names": {
       "en": "Gilgamesh",
-      "th": "Gilgamesh (กิลกาเมช)",
+      "th": "กิลกาเมช",
       "zh-CN": "吉尔伽美什 (金闪闪)",
       "zh-TW": "吉爾伽美什",
       "ja": "ギルガメッシュ",
@@ -1279,7 +1279,7 @@ export const AVATAR_METADATA = {
   "1510": {
     "names": {
       "en": "Himeko Nova",
-      "th": "Himeko Nova (ฮิเมโกะ โนวา)",
+      "th": "ฮิเมโกะ โนวา",
       "zh-CN": "姬子·新星",
       "zh-TW": "姬子·新星",
       "ja": "姫子・ノヴァ",
@@ -1294,7 +1294,7 @@ export const AVATAR_METADATA = {
   "1511": {
     "names": {
       "en": "Nihilux",
-      "th": "Nihilux (นิฮิลักซ์)",
+      "th": "นิฮิลักซ์",
       "zh-CN": "虚无之神·尼希卢克斯",
       "zh-TW": "虛無之神·尼希盧克斯",
       "ja": "ニヒラックス",
@@ -1309,7 +1309,7 @@ export const AVATAR_METADATA = {
   "1512": {
     "names": {
       "en": "Robin • Summeretto",
-      "th": "Robin • Summeretto (โรบิน ซัมเมอร์)",
+      "th": "โรบิน ซัมเมอร์",
       "zh-CN": "知更鸟·夏日",
       "zh-TW": "知更鳥·夏日",
       "ja": "ロビン・サマー",
@@ -1324,7 +1324,7 @@ export const AVATAR_METADATA = {
   "1513": {
     "names": {
       "en": "Aventurine • Waveflair",
-      "th": "Aventurine • Waveflair (อเวนทูรีน คลื่นทะเล)",
+      "th": "อเวนทูรีน คลื่นทะเล",
       "zh-CN": "砂金·夏日浪潮",
       "zh-TW": "砂金·夏日浪潮",
       "ja": "アベンチュリン・サマー",
