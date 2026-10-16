@@ -1,5 +1,6 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { PRESET_TELEPORTS } from './teleports-data.js';
+import { PRESET_TELEPORTS, getTeleportName } from './teleports-data.js';
+import { SUPPORTED_LANGUAGES, getCurrentLanguage, setLanguage, t } from './i18n.js';
 
 // Application State
 const state = {
@@ -14,6 +15,7 @@ const state = {
 
 // UI Elements
 const el = {
+  langSelect: document.getElementById('lang-select'),
   statusDot: document.getElementById('status-dot'),
   connectionStatusText: document.getElementById('connection-status-text'),
   btnQuickPing: document.getElementById('btn-quick-ping'),
@@ -139,13 +141,57 @@ function setConnectionStatus(connected, extraText = '') {
   state.isConnected = connected;
   if (connected) {
     el.statusDot.classList.add('connected');
-    el.connectionStatusText.textContent = extraText || 'เชื่อมต่อแล้ว (Online)';
+    el.connectionStatusText.textContent = extraText || t('online');
     el.connectionStatusText.style.color = 'var(--accent-green)';
   } else {
     el.statusDot.classList.remove('connected');
-    el.connectionStatusText.textContent = extraText || 'ออฟไลน์ (Offline)';
+    el.connectionStatusText.textContent = extraText || t('offline');
     el.connectionStatusText.style.color = 'var(--accent-red)';
   }
+}
+
+// Apply multi-language translations across whole UI
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n');
+    elem.textContent = t(key);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n-placeholder');
+    elem.placeholder = t(key);
+  });
+
+  // Re-render localized UI parts
+  if (state.statusData) {
+    renderLineup(state.statusData.lineups);
+    renderExRanks(state.statusData.ex_ranks || []);
+  }
+  renderTeleportPresets();
+  if (state.avatarsList.length > 0) {
+    renderAvatarsGrid();
+  }
+}
+
+// Language selector initialization
+function setupLanguageSelector() {
+  el.langSelect.innerHTML = '';
+  SUPPORTED_LANGUAGES.forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang.code;
+    opt.textContent = `${lang.flag} ${lang.name}`;
+    if (lang.code === getCurrentLanguage()) {
+      opt.selected = true;
+    }
+    el.langSelect.appendChild(opt);
+  });
+
+  el.langSelect.addEventListener('change', (e) => {
+    const newLang = e.target.value;
+    setLanguage(newLang);
+    applyTranslations();
+    showToast(`Language switched to ${SUPPORTED_LANGUAGES.find(l => l.code === newLang)?.name || newLang}`, 'info');
+  });
 }
 
 // Refresh status from /api/status
@@ -173,14 +219,14 @@ async function refreshStatus() {
     renderLineup(data.lineups);
     renderExRanks(data.ex_ranks || []);
   } catch (err) {
-    setConnectionStatus(false, 'เชื่อมต่อไม่สำเร็จ');
+    setConnectionStatus(false, t('connectFailed'));
   }
 }
 
 // Render current lineup cards
 function renderLineup(lineups) {
   if (!lineups || Object.keys(lineups).length === 0) {
-    el.lineupContainer.innerHTML = '<div style="color: var(--text-muted); grid-column: 1/-1;">ไม่มีข้อมูลทีม</div>';
+    el.lineupContainer.innerHTML = `<div style="color: var(--text-muted); grid-column: 1/-1;">${t('slotEmpty')}</div>`;
     return;
   }
 
@@ -193,15 +239,26 @@ function renderLineup(lineups) {
 
     if (avatarId === 0) {
       card.innerHTML = `
-        <div style="font-size: 0.75rem; color: var(--text-muted);">ตำแหน่งที่ ${slot + 1}</div>
-        <div style="font-weight: 600; color: var(--text-muted); margin-top: 0.25rem;">(ว่าง)</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">${t('slot')} ${slot + 1}</div>
+        <div style="font-weight: 600; color: var(--text-muted); margin-top: 0.25rem;">${t('slotEmpty')}</div>
       `;
     } else {
       const info = getAvatarInfo(avatarId);
       card.innerHTML = `
-        <div style="font-size: 0.75rem; color: var(--accent-cyan);">ตำแหน่งที่ ${slot + 1}</div>
-        <div style="font-weight: 700; margin-top: 0.25rem;">${info.name}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">${info.element} • ${info.path}</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <div class="avatar-image-container" style="width: 44px; height: 44px;">
+            <img class="avatar-img"
+                 src="./assets/avatars/${avatarId}.png"
+                 onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+                 alt="${info.name}">
+            <div class="avatar-icon-placeholder" style="display: none;">${info.name.charAt(0)}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: var(--accent-cyan);">${t('slot')} ${slot + 1}</div>
+            <div style="font-weight: 700; margin-top: 0.15rem; font-size: 0.95rem;">${info.name}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${info.element} • ${info.path}</div>
+          </div>
+        </div>
       `;
     }
     el.lineupContainer.appendChild(card);
@@ -211,12 +268,12 @@ function renderLineup(lineups) {
 // Load and Render Avatars
 async function loadAvatars() {
   try {
-    el.avatarsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">กำลังโหลด...</div>';
+    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">${t('checking')}</div>`;
     const res = await apiCall('/api/freesr/avatars');
     state.avatarsList = res.avatars || [];
     renderAvatarsGrid();
   } catch (err) {
-    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--accent-red);">ดึงข้อมูลตัวละครไม่สำเร็จ: ${err.message}</div>`;
+    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--accent-red);">${err.message}</div>`;
   }
 }
 
@@ -232,7 +289,7 @@ function renderAvatarsGrid() {
   });
 
   if (filtered.length === 0) {
-    el.avatarsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบตัวละครที่ตรงกับเงื่อนไข</div>';
+    el.avatarsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">No matching avatars</div>';
     return;
   }
 
@@ -252,7 +309,13 @@ function renderAvatarsGrid() {
       <span class="avatar-badge-rarity rarity-${meta.rarity}">★ ${meta.rarity}</span>
       <div>
         <div class="avatar-header-info">
-          <div class="avatar-icon-placeholder">${meta.name.charAt(0)}</div>
+          <div class="avatar-image-container">
+            <img class="avatar-img"
+                 src="./assets/avatars/${item.avatar_id}.png"
+                 onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+                 alt="${meta.name}">
+            <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
+          </div>
           <div>
             <div class="avatar-name">${meta.name}</div>
             <div class="avatar-subinfo">
@@ -267,7 +330,7 @@ function renderAvatarsGrid() {
       </div>
 
       <div class="eidolon-selector">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">EIDOLON (E):</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">${t('eidolonLabel')}</span>
         <div class="eidolon-buttons">
           ${pipsHtml}
         </div>
@@ -292,7 +355,7 @@ function renderAvatarsGrid() {
 async function setAvatarRank(avatarId, rank) {
   try {
     await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank });
-    showToast(`ปรับตัวละคร ${avatarId} เป็น E${rank} สำเร็จ`, 'success');
+    showToast(t('avatarRankSuccess', { id: avatarId, rank }), 'success');
     
     // Update local state and re-render
     const target = state.avatarsList.find(a => a.avatar_id === avatarId);
@@ -301,27 +364,27 @@ async function setAvatarRank(avatarId, rank) {
       renderAvatarsGrid();
     }
   } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+    showToast(`Error: ${err.message}`, 'error');
   }
 }
 
 // Max all avatars API
 async function maxAllAvatars() {
-  if (!confirm('ยืนยันปรับตัวละครทั้งหมดให้เป็นเลเวล 80 และปลด E6 หรือไม่?')) return;
+  if (!confirm(t('confirmMaxAll'))) return;
   try {
     await apiCall('/api/avatar/max_all', 'POST', {});
-    showToast('ปรับ Max ทุกตัวละครสำเร็จแล้ว!', 'success');
+    showToast(t('maxAllSuccess'), 'success');
     loadAvatars();
     refreshStatus();
   } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+    showToast(`Error: ${err.message}`, 'error');
   }
 }
 
 // Render Ex-Ranks
 function renderExRanks(exList) {
   if (!exList || exList.length === 0) {
-    el.exrankList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">ไม่มีข้อมูลตัวละคร Ex-Rank</div>';
+    el.exrankList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">No Ex-Rank Avatars</div>';
     return;
   }
 
@@ -329,12 +392,22 @@ function renderExRanks(exList) {
   exList.forEach(item => {
     const card = document.createElement('div');
     card.className = 'ex-switch-card';
+    const localizedMeta = getAvatarInfo(item.avatar_id);
 
     card.innerHTML = `
-      <div>
-        <div style="font-weight: 700; font-size: 1rem;">${item.name}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">
-          Avatar ID: ${item.avatar_id} • Ex-Rank Skill ID: ${item.ex_rank_id}
+      <div style="display: flex; gap: 0.85rem; align-items: center;">
+        <div class="avatar-image-container" style="width: 44px; height: 44px;">
+          <img class="avatar-img"
+               src="./assets/avatars/${item.avatar_id}.png"
+               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+               alt="${localizedMeta.name}">
+          <div class="avatar-icon-placeholder" style="display: none;">${localizedMeta.name.charAt(0)}</div>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 1rem;">${localizedMeta.name}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Avatar ID: ${item.avatar_id} • Ex-Rank Skill ID: ${item.ex_rank_id}
+          </div>
         </div>
       </div>
       <label class="switch">
@@ -348,10 +421,11 @@ function renderExRanks(exList) {
       const avatarId = item.avatar_id;
       try {
         await apiCall('/api/exrank/toggle', 'POST', { avatar_id: avatarId, unlocked });
-        showToast(`${item.name}: ${unlocked ? 'เปิดใช้งาน' : 'ปิดใช้งาน'} Ex-Rank สำเร็จ`, 'success');
+        const statusText = unlocked ? t('enabled') : t('disabled');
+        showToast(t('exrankToggleSuccess', { name: localizedMeta.name, status: statusText }), 'success');
       } catch (err) {
         e.target.checked = !unlocked;
-        showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+        showToast(`Error: ${err.message}`, 'error');
       }
     });
 
@@ -370,15 +444,17 @@ function renderTeleportPresets() {
     item.style.justifyContent = 'space-between';
     item.style.alignItems = 'center';
 
+    const displayName = getTeleportName(preset);
+
     item.innerHTML = `
       <div>
-        <div style="font-weight: 700; font-size: 0.95rem;">${preset.name}</div>
+        <div style="font-weight: 700; font-size: 0.95rem;">${displayName}</div>
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
           Plane: ${preset.plane_id} • Floor: ${preset.floor_id} • Entry: ${preset.entry_id}
         </div>
       </div>
       <button class="btn btn-sm btn-primary btn-warp" style="white-space: nowrap;">
-        🚀 วาร์ป
+        ${t('warpBtn')}
       </button>
     `;
 
@@ -390,7 +466,7 @@ function renderTeleportPresets() {
         x: preset.x,
         y: preset.y,
         z: preset.z
-      }, preset.name);
+      }, displayName);
     });
 
     el.teleportPresetsList.appendChild(item);
@@ -401,10 +477,10 @@ function renderTeleportPresets() {
 async function executeTeleport(payload, label = '') {
   try {
     await apiCall('/api/teleport', 'POST', payload);
-    showToast(`วาร์ปไปยัง ${label || 'จุดที่ระบุ'} สำเร็จ (บันทึกลง Persistent)`, 'success');
+    showToast(t('warpSuccess', { label: label || `Plane ${payload.plane_id}` }), 'success');
     refreshStatus();
   } catch (err) {
-    showToast(`วาร์ปไม่สำเร็จ: ${err.message}`, 'error');
+    showToast(t('warpFailed', { err: err.message }), 'error');
   }
 }
 
@@ -414,22 +490,22 @@ async function loadJsonData(mode) {
   if (mode === 'freesr') {
     el.btnSelectFreesr.className = 'btn btn-sm btn-primary active';
     el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = 'กำลังเปิด: freesr-data.json';
+    el.jsonStatusInfo.textContent = t('jsonStatusOpening', { name: 'freesr-data.json' });
     try {
       const res = await apiCall('/api/freesr');
       el.jsonEditor.value = JSON.stringify(res.data, null, 2);
     } catch (err) {
-      showToast(`โหลด freesr-data ไม่สำเร็จ: ${err.message}`, 'error');
+      showToast(`Load failed: ${err.message}`, 'error');
     }
   } else {
     el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
     el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = 'กำลังเปิด: persistent';
+    el.jsonStatusInfo.textContent = t('jsonStatusOpening', { name: 'persistent' });
     try {
       const res = await apiCall('/api/persistent');
       el.jsonEditor.value = JSON.stringify(res.persistent, null, 2);
     } catch (err) {
-      showToast(`โหลด persistent ไม่สำเร็จ: ${err.message}`, 'error');
+      showToast(`Load failed: ${err.message}`, 'error');
     }
   }
 }
@@ -438,7 +514,7 @@ async function loadJsonData(mode) {
 async function saveJsonData() {
   const text = el.jsonEditor.value.trim();
   if (!text) {
-    showToast('ไม่มีข้อมูล JSON ให้บันทึก', 'error');
+    showToast('No JSON data to save', 'error');
     return;
   }
 
@@ -446,17 +522,17 @@ async function saveJsonData() {
   try {
     parsed = JSON.parse(text);
   } catch (err) {
-    showToast(`JSON ไม่ถูกต้อง: ${err.message}`, 'error');
+    showToast(`${t('jsonInvalid')}: ${err.message}`, 'error');
     return;
   }
 
   const endpoint = state.currentJsonMode === 'freesr' ? '/api/freesr' : '/api/persistent';
   try {
     await apiCall(endpoint, 'POST', parsed);
-    showToast(`บันทึกไฟล์ ${state.currentJsonMode} เรียบร้อยแล้ว`, 'success');
+    showToast(t('jsonSaveSuccess', { name: state.currentJsonMode }), 'success');
     refreshStatus();
   } catch (err) {
-    showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+    showToast(`Save failed: ${err.message}`, 'error');
   }
 }
 
@@ -465,7 +541,7 @@ function setupTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(tBtn => tBtn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
       tab.classList.add('active');
@@ -490,7 +566,7 @@ function setupTabs() {
 function setupEvents() {
   // Quick Ping & Refresh
   el.btnQuickPing.addEventListener('click', () => {
-    showToast('กำลังตรวจสอบการเชื่อมต่อ...', 'info');
+    showToast(t('checking'), 'info');
     refreshStatus();
   });
 
@@ -509,7 +585,7 @@ function setupEvents() {
       state.apiUrl = newUrl;
       localStorage.setItem('gac_srtool_api_url', newUrl);
       el.modalSettings.classList.remove('active');
-      showToast('บันทึกการตั้งค่าแล้ว กำลังเชื่อมต่อใหม่...', 'info');
+      showToast(t('settingsSaved'), 'info');
       refreshStatus();
     }
   });
@@ -520,16 +596,16 @@ function setupEvents() {
   
   el.btnQuickWarpExpress.addEventListener('click', () => {
     const express = PRESET_TELEPORTS[0];
-    executeTeleport(express, express.name);
+    executeTeleport(express, getTeleportName(express));
   });
 
   el.btnQuickSyncPersistent.addEventListener('click', async () => {
     try {
       await apiCall('/api/persistent');
-      showToast('ซิงค์ข้อมูล Persistent เรียบร้อย', 'success');
+      showToast('Persistent data synced', 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`ซิงค์ไม่สำเร็จ: ${err.message}`, 'error');
+      showToast(`Sync failed: ${err.message}`, 'error');
     }
   });
 
@@ -542,20 +618,20 @@ function setupEvents() {
   el.btnExrankEnableAll.addEventListener('click', async () => {
     try {
       await apiCall('/api/exrank/toggle', 'POST', { all: true, unlocked: true });
-      showToast('เปิดใช้งาน Ex-Rank ทุกตัวละครสำเร็จ', 'success');
+      showToast(t('exrankAllSuccess', { status: t('enabled') }), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      showToast(`Error: ${err.message}`, 'error');
     }
   });
 
   el.btnExrankDisableAll.addEventListener('click', async () => {
     try {
       await apiCall('/api/exrank/toggle', 'POST', { all: true, unlocked: false });
-      showToast('ปิดใช้งาน Ex-Rank ทุกตัวละครสำเร็จ', 'success');
+      showToast(t('exrankAllSuccess', { status: t('disabled') }), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      showToast(`Error: ${err.message}`, 'error');
     }
   });
 
@@ -581,9 +657,9 @@ function setupEvents() {
     try {
       const parsed = JSON.parse(el.jsonEditor.value);
       el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-      showToast('จัดรูปแบบ JSON สวยงามแล้ว', 'info');
+      showToast('JSON beautified', 'info');
     } catch (err) {
-      showToast('JSON ไม่ถูกต้อง ไม่สามารถจัดรูปแบบได้', 'error');
+      showToast(t('jsonInvalid'), 'error');
     }
   });
 
@@ -596,7 +672,7 @@ function setupEvents() {
     a.href = URL.createObjectURL(blob);
     a.download = `${state.currentJsonMode}-${Date.now()}.json`;
     a.click();
-    showToast(`ดาวน์โหลด backup ไฟล์ ${a.download} แล้ว`, 'success');
+    showToast(`Downloaded ${a.download}`, 'success');
   });
 
   el.jsonFileInput.addEventListener('change', (e) => {
@@ -607,9 +683,9 @@ function setupEvents() {
       try {
         const parsed = JSON.parse(event.target.result);
         el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-        showToast(`โหลดเนื้อหาไฟล์ ${file.name} เข้าสู่อิดิเตอร์แล้ว`, 'success');
+        showToast(`Loaded ${file.name}`, 'success');
       } catch (err) {
-        showToast('ไฟล์ไม่ใช่ JSON ที่ถูกต้อง', 'error');
+        showToast(t('jsonInvalid'), 'error');
       }
     };
     reader.readAsText(file);
@@ -627,7 +703,7 @@ function setupEvents() {
     localStorage.setItem('gac_srtool_api_url', state.apiUrl);
     localStorage.setItem('gac_srtool_ping_interval', state.pingIntervalSec);
 
-    showToast('บันทึกการตั้งค่าสำเร็จ!', 'success');
+    showToast(t('settingsSaved'), 'success');
     refreshStatus();
   });
 
@@ -638,7 +714,7 @@ function setupEvents() {
     el.settingPingInterval.value = state.pingIntervalSec;
     localStorage.removeItem('gac_srtool_api_url');
     localStorage.removeItem('gac_srtool_ping_interval');
-    showToast('คืนค่าเริ่มต้นเรียบร้อย', 'info');
+    showToast(t('settingsReset'), 'info');
     refreshStatus();
   });
 }
@@ -652,9 +728,10 @@ function startPingLoop() {
 
 // Initialize Application
 function init() {
+  setupLanguageSelector();
   setupTabs();
   setupEvents();
-  renderTeleportPresets();
+  applyTranslations();
   refreshStatus();
   startPingLoop();
 }
