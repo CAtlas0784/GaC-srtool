@@ -6,6 +6,7 @@
   <title>GaC-Srtool — Ultimate Star Rail Server & Build Manager</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" type="image/png" href="assets/logo.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -140,21 +141,21 @@
           </div>
           <p class="card-subtitle" data-i18n="quickActionsSubtitle">เครื่องมือจัดการทีมและเซิร์ฟเวอร์แบบทันที</p>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.75rem;">
-            <!-- 1. Set Team Energy to 50% (Standard) -->
-            <button type="button" class="btn btn-secondary" id="btn-quick-energy-50" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">🔋</span>
+            <!-- 1. Set Team Lineup to E0S1 (Standard) -->
+            <button type="button" class="btn btn-primary" id="btn-quick-lineup-e0s1" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
+              <span style="font-size: 1.35rem; line-height: 1;">⚡</span>
               <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaEnergy50Title">พลังงานทีม 50%</div>
-                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaEnergy50Desc">ค่าเริ่มต้นมาตรฐานเมื่อเข้าสู้</div>
+                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaLineupE0S1Title">ตั้งค่าทีมเป็น E0S1</div>
+                <div style="font-size: 0.725rem; opacity: 0.9;" data-i18n="qaLineupE0S1Desc">ปรับตัวละครในทีมเป็น Lv.80, E0, S1 สกิลเต็ม</div>
               </div>
             </button>
 
-            <!-- 2. Set Team Energy to 100% (Instant Burst) -->
-            <button type="button" class="btn btn-primary" id="btn-quick-energy-100" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">💥</span>
+            <!-- 2. Equip Recommended Relics for Team -->
+            <button type="button" class="btn btn-secondary" id="btn-quick-lineup-relics" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
+              <span style="font-size: 1.35rem; line-height: 1;">🛡️</span>
               <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaEnergy100Title">พลังงานทีม 100%</div>
-                <div style="font-size: 0.725rem; opacity: 0.85;" data-i18n="qaEnergy100Desc">พร้อมกดท่าไม้ตายทันที</div>
+                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaLineupRelicsTitle">ติดตั้งรีลิกส์แนะนำทั้งทีม</div>
+                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaLineupRelicsDesc">สวมใส่รีลิกส์และเครื่องประดับให้ทุกคนในทีม</div>
               </div>
             </button>
 
@@ -492,13 +493,14 @@
             <p class="card-subtitle" data-i18n="settingsBattleSubtitle">ปรับแต่งพฤติกรรมเริ่มต้นของระบบในเกมและการจัดทีม</p>
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-              <!-- Default Energy -->
-              <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label" data-i18n="lblDefaultEnergy">พลังงานเริ่มต้นของทีม (Battle Starting Energy)</label>
-                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.35rem;">
-                  <button type="button" class="btn btn-sm btn-primary btn-setting-energy active" data-energy="50">⚡ 50% (มาตรฐานเกม)</button>
-                  <button type="button" class="btn btn-sm btn-secondary btn-setting-energy" data-energy="100">🔥 100% (อัลติพร้อมใช้)</button>
-                  <button type="button" class="btn btn-sm btn-secondary btn-setting-energy" data-energy="0">❄️ 0% (ท้าทาย)</button>
+              <!-- Server Persistence Mode Information -->
+              <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.85rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 700; font-size: 0.875rem;" data-i18n="lblPersistenceInfo">ระบบบันทึกทีมและข้อมูล (Lineup Storage)</span>
+                  <span id="badge-persistence-mode" class="badge-super-tag" style="padding: 0.15rem 0.55rem; font-size: 0.75rem;">Persistent API (GaC)</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;" id="desc-persistence-mode">
+                  GaC Server เก็บทีมใน persistent.json (รองรับโหมดสร้างสรรค์) • สำหรับ FireflyGo เก็บใน freesr-data.json
                 </div>
               </div>
 
@@ -601,6 +603,11 @@
         <button class="btn btn-sm btn-secondary" id="btn-close-avatar-modal">✕</button>
       </div>
 
+      <!-- Quick Avatar Switcher Bar (like neonteam) -->
+      <div id="modal-char-switcher" class="modal-char-switcher-strip">
+        <!-- Injected character icons for instant switching -->
+      </div>
+
       <!-- Character Top Banner & Quick Max All -->
       <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap;">
         <div class="avatar-image-container" style="width: 76px; height: 76px;">
@@ -611,33 +618,137 @@
           <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          <button type="button" class="btn btn-gold" id="btn-modal-e6s5" style="padding: 0.5rem 0.95rem; font-weight: 800;" data-i18n="btnE6S5" title="Lv.80, E6, Max Skills, S5">
-            ⭐ E6S5
-          </button>
           <button type="button" class="btn btn-primary" id="btn-modal-e0s1" style="padding: 0.5rem 0.95rem; font-weight: 800;" data-i18n="btnE0S1" title="Lv.80, E0, Max Skills, S1">
             ⚡ E0S1
+          </button>
+          <button type="button" class="btn btn-gold" id="btn-modal-e6s5" style="padding: 0.5rem 0.95rem; font-weight: 800;" data-i18n="btnE6S5" title="Lv.80, E6, Max Skills, S5">
+            ⭐ E6S5
           </button>
         </div>
       </div>
 
-      <!-- Sub Tabs Navigation (srtools style) -->
+      <!-- Sub Tabs Navigation (srtools & neonteam style) -->
       <div class="modal-subtabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; overflow-x: auto;">
-        <button type="button" class="modal-subtab-btn active" data-modaltab="modaltab-skills" data-i18n="modalTabSkills">
+        <button type="button" class="modal-subtab-btn active" data-modaltab="modaltab-overview" data-i18n="modalTabOverview">
+          📋 ข้อมูลภาพรวม
+        </button>
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-relics" data-i18n="modalTabRelics">
+          🛡️ รีลิกส์
+        </button>
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone" data-i18n="modalTabLightcone">
+          🗡️ กรวยแสง
+        </button>
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-skills" data-i18n="modalTabSkills">
           ⚡ สกิลและร่องรอย
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-status" data-i18n="modalTabStatus">
           ⚙️ เลเวล & Eidolon
-        </button>
-        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone" data-i18n="modalTabLightcone">
-          🗡️ กรวยแสง
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-showcase" data-i18n="modalTabShowcase">
           🖼️ การ์ดแสดงผล
         </button>
       </div>
 
+      <!-- Sub Tab 0: Overview & Combat Stats (Neonteam style https://srtools.neonteam.dev/1001/detail) -->
+      <div id="modaltab-overview" class="modal-subtab-content active">
+        <div class="overview-layout">
+          <!-- Left: Big portrait art & character identity -->
+          <div class="overview-portrait-box">
+            <img id="overview-portrait-img" class="overview-portrait-img" src="" alt="Character Art">
+            <div class="overview-portrait-info">
+              <div id="overview-char-name" style="font-size: 1.35rem; font-weight: 800; color: #fff;">-</div>
+              <div id="overview-char-meta" style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.35rem; flex-wrap: wrap;"></div>
+              <div style="display: flex; gap: 0.4rem; margin-top: 0.75rem;">
+                <span id="overview-badge-lvl" class="badge-super-tag">Lv. 80 / 80</span>
+                <span id="overview-badge-eidolon" class="badge-super-tag" style="background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24;">E6</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Combat Stats, Equipped LC & Relic Summaries -->
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <!-- Combat Stats Panel -->
+            <div class="card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 1rem;">
+              <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-highlight); margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                <span data-i18n="overviewStatsTitle">⚔️ ค่าพลังการต่อสู้ (Combat Stats)</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="overviewStatsNote">รวมโบนัสกรวยแสงและรีลิกส์</span>
+              </div>
+              <div class="overview-stats-grid" id="overview-stats-grid">
+                <!-- Dynamically populated stats -->
+              </div>
+            </div>
+
+            <!-- Quick Equipped Equipment Glance -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+              <!-- LC Glance -->
+              <div class="card" id="overview-lc-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการ Light Cone">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                  <span data-i18n="overviewEquippedLc">🗡️ กรวยแสงที่สวมใส่</span>
+                  <span style="color: var(--accent-cyan); font-size: 0.7rem;">จัดการ ➔</span>
+                </div>
+                <div style="display: flex; gap: 0.65rem; align-items: center;">
+                  <img id="overview-lc-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-color);">
+                  <div style="min-width: 0; flex: 1;">
+                    <div id="overview-lc-name" style="font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+                    <div id="overview-lc-rank" style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.2rem;">S5 • Lv.80</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Relics Glance -->
+              <div class="card" id="overview-relics-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการรีลิกส์">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                  <span data-i18n="overviewEquippedRelics">🛡️ รีลิกส์และเซ็ต</span>
+                  <span style="color: var(--accent-cyan); font-size: 0.7rem;">จัดการ ➔</span>
+                </div>
+                <div id="overview-relics-summary" style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem;">
+                  <!-- Set bonuses active -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub Tab: Relics Inspection & Selection (6 Slots) -->
+      <div id="modaltab-relics" class="modal-subtab-content" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight);" data-i18n="modalRelicsTitle">
+              🛡️ สวมใส่รีลิกส์ (Relics 6 ชิ้น)
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="modalRelicsSubtitle">
+              เลือกเปลี่ยน ปรับสเตตัส หรือสวมใส่รีลิกส์แนะนำสำหรับตัวละครนี้
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm btn-gold" id="btn-modal-relics-auto" data-i18n="btnAutoEquipRelics">
+              ⚡ ติดตั้งเซ็ตแนะนำครบชุด
+            </button>
+            <button type="button" class="btn btn-sm btn-danger" id="btn-modal-relics-clear" data-i18n="btnClearAllRelics">
+              🧹 ถอดทั้งหมด
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 Relic Slots Grid -->
+        <div class="relics-slots-grid" id="modal-relics-slots-grid">
+          <!-- Dynamically generated 6 slot boxes -->
+        </div>
+
+        <!-- Active Set Bonuses -->
+        <div class="card" style="background: rgba(11, 15, 25, 0.75); border: 1px solid var(--border-color); padding: 0.85rem 1rem; margin-top: 1rem;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 0.5rem;" data-i18n="activeSetEffects">
+            ✨ เอฟเฟกต์เซ็ตที่เปิดใช้งาน
+          </div>
+          <div id="modal-relics-active-sets" style="display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; color: #cbd5e1;">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
       <!-- Sub Tab 1: Skills & Traces (Like https://srtools.punklorde.org/skills-info) -->
-      <div id="modaltab-skills" class="modal-subtab-content active">
+      <div id="modaltab-skills" class="modal-subtab-content" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
           <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight);" data-i18n="modalSkillCombatTitle">
             ระดับสกิลต่อสู้
@@ -648,11 +759,19 @@
         </div>
 
         <!-- 4 Core Skills -->
-        <div class="skills-grid" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div class="skills-grid" style="display: flex; flex-direction: column; gap: 0.85rem;">
           <!-- 1. Basic Attack -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name" data-i18n="modalSkillBasic">โจมตีปกติ</span>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <img id="skill-icon-basic" class="skill-row-icon" src="" alt="Basic ATK">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="skill-type-tag" data-i18n="modalSkillBasic">โจมตีปกติ</span>
+                    <span id="skill-real-name-basic" class="skill-name">-</span>
+                  </div>
+                </div>
+              </div>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-basic">6</strong> / 6</span>
             </div>
             <div class="skill-stepper">
@@ -661,12 +780,21 @@
               <button type="button" class="btn-step" id="btn-step-inc-basic">+</button>
               <button type="button" class="btn-max-pill" id="btn-skill-max-basic">MAX</button>
             </div>
+            <div id="skill-desc-basic" class="skill-desc-box"></div>
           </div>
 
           <!-- 2. Skill -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name" data-i18n="modalSkillSkill">สกิลต่อสู้</span>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <img id="skill-icon-skill" class="skill-row-icon" src="" alt="Skill">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="skill-type-tag" data-i18n="modalSkillSkill">สกิลต่อสู้</span>
+                    <span id="skill-real-name-skill" class="skill-name">-</span>
+                  </div>
+                </div>
+              </div>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-skill">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -675,12 +803,21 @@
               <button type="button" class="btn-step" id="btn-step-inc-skill">+</button>
               <button type="button" class="btn-max-pill" id="btn-skill-max-skill">MAX</button>
             </div>
+            <div id="skill-desc-skill" class="skill-desc-box"></div>
           </div>
 
           <!-- 3. Ultimate -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name" data-i18n="modalSkillUltra">ท่าไม้ตาย</span>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <img id="skill-icon-ultra" class="skill-row-icon" src="" alt="Ultimate">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="skill-type-tag" data-i18n="modalSkillUltra">ท่าไม้ตาย</span>
+                    <span id="skill-real-name-ultra" class="skill-name">-</span>
+                  </div>
+                </div>
+              </div>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-ultra">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -689,12 +826,21 @@
               <button type="button" class="btn-step" id="btn-step-inc-ultra">+</button>
               <button type="button" class="btn-max-pill" id="btn-skill-max-ultra">MAX</button>
             </div>
+            <div id="skill-desc-ultra" class="skill-desc-box"></div>
           </div>
 
           <!-- 4. Talent -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name" data-i18n="modalSkillTalent">พรสวรรค์</span>
+              <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <img id="skill-icon-talent" class="skill-row-icon" src="" alt="Talent">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span class="skill-type-tag" data-i18n="modalSkillTalent">พรสวรรค์</span>
+                    <span id="skill-real-name-talent" class="skill-name">-</span>
+                  </div>
+                </div>
+              </div>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-talent">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -703,6 +849,7 @@
               <button type="button" class="btn-step" id="btn-step-inc-talent">+</button>
               <button type="button" class="btn-max-pill" id="btn-skill-max-talent">MAX</button>
             </div>
+            <div id="skill-desc-talent" class="skill-desc-box"></div>
           </div>
         </div>
 
@@ -711,26 +858,72 @@
           <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight); margin-bottom: 0.75rem;" data-i18n="modalTracesTitle">
             ร่องรอยและเทคนิค
           </div>
-          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-            <label class="trace-toggle-label">
-              <input type="checkbox" id="check-trace-technique" checked class="trace-checkbox">
-              <span data-i18n="modalTraceTechnique">⚡ เทคนิค — เปิดใช้งานก่อนเริ่มการต่อสู้</span>
-            </label>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem;">
-              <label class="trace-toggle-label">
-                <input type="checkbox" id="check-trace-a2" checked class="trace-checkbox">
-                <span data-i18n="traceA2">🌟 ร่องรอยพิเศษ A2</span>
-              </label>
-              <label class="trace-toggle-label">
-                <input type="checkbox" id="check-trace-a4" checked class="trace-checkbox">
-                <span data-i18n="traceA4">🌟 ร่องรอยพิเศษ A4</span>
-              </label>
-              <label class="trace-toggle-label">
-                <input type="checkbox" id="check-trace-a6" checked class="trace-checkbox">
-                <span data-i18n="traceA6">🌟 ร่องรอยพิเศษ A6</span>
-              </label>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Technique -->
+            <div class="skill-row-card" style="padding: 0.75rem 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <img id="skill-icon-technique" class="skill-row-icon" src="" alt="Technique">
+                  <div>
+                    <span class="skill-type-tag" data-i18n="modalTraceTechnique">เทคนิค</span>
+                    <span id="skill-real-name-technique" class="skill-name">-</span>
+                  </div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="check-trace-technique" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div id="skill-desc-technique" class="skill-desc-box" style="margin-top: 0.35rem;"></div>
             </div>
-            <label class="trace-toggle-label">
+
+            <!-- Major Traces A2, A4, A6 -->
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <div class="trace-card-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <img id="trace-icon-a2" class="trace-icon-small" src="" alt="A2">
+                    <span id="trace-name-a2" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A2</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="check-trace-a2" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div id="trace-desc-a2" class="skill-desc-box" style="margin-top: 0.35rem;"></div>
+              </div>
+
+              <div class="trace-card-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <img id="trace-icon-a4" class="trace-icon-small" src="" alt="A4">
+                    <span id="trace-name-a4" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A4</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="check-trace-a4" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div id="trace-desc-a4" class="skill-desc-box" style="margin-top: 0.35rem;"></div>
+              </div>
+
+              <div class="trace-card-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <img id="trace-icon-a6" class="trace-icon-small" src="" alt="A6">
+                    <span id="trace-name-a6" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A6</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="check-trace-a6" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div id="trace-desc-a6" class="skill-desc-box" style="margin-top: 0.35rem;"></div>
+              </div>
+            </div>
+
+            <!-- 10 Stat Nodes -->
+            <label class="trace-toggle-label" style="margin-top: 0.25rem;">
               <input type="checkbox" id="check-trace-stats" checked class="trace-checkbox">
               <span data-i18n="traceStatNodes">💎 โหนดสเตตัสเสริมทั้งหมด (10 โหนด)</span>
             </label>
@@ -778,21 +971,6 @@
           </div>
           <div class="eidolon-buttons" id="modal-char-eidolon-btns" style="margin-top: 0.5rem; gap: 0.5rem;">
             <!-- Injected pips -->
-          </div>
-        </div>
-
-        <!-- Ultimate Energy Section -->
-        <div class="form-group" style="margin-top: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label class="form-label" style="margin: 0;" data-i18n="modalEnergyTitle">พลังงานท่าไม้ตาย</label>
-            <div style="display: flex; gap: 0.35rem;">
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-energy-50" data-i18n="modalEnergy50">ตั้งค่า 50%</button>
-              <button type="button" class="btn btn-sm btn-primary" id="btn-modal-energy-100" data-i18n="modalEnergy100">เต็ม 100%</button>
-            </div>
-          </div>
-          <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <input type="range" id="range-char-energy" min="0" max="140" value="70" class="skill-range" style="flex: 1;">
-            <span id="val-char-energy" style="font-weight: 800; font-family: monospace; min-width: 60px; text-align: right;">70/140</span>
           </div>
         </div>
       </div>
@@ -1028,6 +1206,32 @@
           <button type="submit" class="btn btn-success" data-i18n="btnAddRelicSubmit">💾 เพิ่มลง FreeSR</button>
         </div>
       </form>
+    </div>
+  <!-- Modal: Select Relic for Specific Slot -->
+  <div class="modal-overlay" id="modal-select-relic-slot">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="modal-slot-picker-title" style="font-weight: 800;" data-i18n="slotPickerTitle">
+          🛡️ เลือกสวมใส่รีลิกส์
+        </h3>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-close-slot-picker">✕</button>
+      </div>
+
+      <!-- Quick Option: Auto-generate recommended piece -->
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
+        <div>
+          <div style="font-weight: 700; font-size: 0.875rem; color: var(--accent-cyan);" data-i18n="quickGenRecTitle">⚡ สร้างชิ้นแนะนำสำหรับช่องนี้</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="quickGenRecDesc">สร้างรีลิกส์ 5★ +15 สเตตัสหลักและรองที่เหมาะสมที่สุด</div>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" id="btn-slot-picker-quick-gen" data-i18n="btnGenAndEquip">สร้าง & สวมใส่</button>
+      </div>
+
+      <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight); margin-bottom: 0.5rem;" data-i18n="selectFromInventory">
+        เลือกจากคลังรีลิกส์ที่มีอยู่ (ตรงช่อง)
+      </div>
+      <div id="slot-picker-inventory-list" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.35rem;">
+        <!-- Injected list of matching slot relics -->
+      </div>
     </div>
   </div>
 

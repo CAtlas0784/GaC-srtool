@@ -52,8 +52,8 @@ const el = {
   lineupContainer: document.getElementById('lineup-container'),
   toggleCreativeMode: document.getElementById('toggle-creative-mode'),
   badgeCreativeMode: document.getElementById('badge-creative-mode'),
-  btnQuickEnergy50: document.getElementById('btn-quick-energy-50'),
-  btnQuickEnergy100: document.getElementById('btn-quick-energy-100'),
+  btnQuickLineupE0S1: document.getElementById('btn-quick-lineup-e0s1'),
+  btnQuickLineupRelics: document.getElementById('btn-quick-lineup-relics'),
   btnQuickUnlockAllAvatars: document.getElementById('btn-quick-unlock-all-avatars'),
   btnQuickAddAllLcs: document.getElementById('btn-quick-add-all-lcs'),
   btnQuickTeleportTrain: document.getElementById('btn-quick-teleport-train'),
@@ -144,6 +144,7 @@ const el = {
   modalAvatarDetail: document.getElementById('modal-avatar-detail'),
   btnCloseAvatarModal: document.getElementById('btn-close-avatar-modal'),
   modalCharTitle: document.getElementById('modal-char-title'),
+  modalCharSwitcher: document.getElementById('modal-char-switcher'),
   modalCharImg: document.getElementById('modal-char-img'),
   modalCharName: document.getElementById('modal-char-name'),
   modalCharMeta: document.getElementById('modal-char-meta'),
@@ -154,45 +155,92 @@ const el = {
   btnModalQuickE6: document.getElementById('btn-modal-quick-e6'),
   btnModalMaxSkills: document.getElementById('btn-modal-max-skills'),
   btnModalSaveAvatar: document.getElementById('btn-modal-save-avatar'),
+  btnModalE6S5: document.getElementById('btn-modal-e6s5'),
+  btnModalE0S1: document.getElementById('btn-modal-e0s1'),
 
-  // Skills Info Steppers (Inspired by srtools.punklorde.org/skills-info)
+  // Overview Tab in Modal (Neonteam style)
+  overviewPortraitImg: document.getElementById('overview-portrait-img'),
+  overviewCharName: document.getElementById('overview-char-name'),
+  overviewCharMeta: document.getElementById('overview-char-meta'),
+  overviewBadgeLvl: document.getElementById('overview-badge-lvl'),
+  overviewBadgeEidolon: document.getElementById('overview-badge-eidolon'),
+  overviewStatsGrid: document.getElementById('overview-stats-grid'),
+  overviewLcCard: document.getElementById('overview-lc-card'),
+  overviewLcThumb: document.getElementById('overview-lc-thumb'),
+  overviewLcName: document.getElementById('overview-lc-name'),
+  overviewLcRank: document.getElementById('overview-lc-rank'),
+  overviewRelicsCard: document.getElementById('overview-relics-card'),
+  overviewRelicsSummary: document.getElementById('overview-relics-summary'),
+
+  // Relics Tab in Modal
+  modalRelicsSlotsGrid: document.getElementById('modal-relics-slots-grid'),
+  modalRelicsActiveSets: document.getElementById('modal-relics-active-sets'),
+  btnModalRelicsAuto: document.getElementById('btn-modal-relics-auto'),
+  btnModalRelicsClear: document.getElementById('btn-modal-relics-clear'),
+  modalSelectRelicSlot: document.getElementById('modal-select-relic-slot'),
+  modalSlotPickerTitle: document.getElementById('modal-slot-picker-title'),
+  btnCloseSlotPicker: document.getElementById('btn-close-slot-picker'),
+  btnSlotPickerQuickGen: document.getElementById('btn-slot-picker-quick-gen'),
+  slotPickerInventoryList: document.getElementById('slot-picker-inventory-list'),
+
+  // Skills Info Steppers & Rich Descs (Inspired by srtools.punklorde.org/skills-info)
   valSkillBasic: document.getElementById('val-skill-basic'),
   rangeSkillBasic: document.getElementById('range-skill-basic'),
   btnStepDecBasic: document.getElementById('btn-step-dec-basic'),
   btnStepIncBasic: document.getElementById('btn-step-inc-basic'),
   btnSkillMaxBasic: document.getElementById('btn-skill-max-basic'),
+  skillIconBasic: document.getElementById('skill-icon-basic'),
+  skillRealNameBasic: document.getElementById('skill-real-name-basic'),
+  skillDescBasic: document.getElementById('skill-desc-basic'),
 
   valSkillSkill: document.getElementById('val-skill-skill'),
   rangeSkillSkill: document.getElementById('range-skill-skill'),
   btnStepDecSkill: document.getElementById('btn-step-dec-skill'),
   btnStepIncSkill: document.getElementById('btn-step-inc-skill'),
   btnSkillMaxSkill: document.getElementById('btn-skill-max-skill'),
+  skillIconSkill: document.getElementById('skill-icon-skill'),
+  skillRealNameSkill: document.getElementById('skill-real-name-skill'),
+  skillDescSkill: document.getElementById('skill-desc-skill'),
 
   valSkillUltra: document.getElementById('val-skill-ultra'),
   rangeSkillUltra: document.getElementById('range-skill-ultra'),
   btnStepDecUltra: document.getElementById('btn-step-dec-ultra'),
   btnStepIncUltra: document.getElementById('btn-step-inc-ultra'),
   btnSkillMaxUltra: document.getElementById('btn-skill-max-ultra'),
+  skillIconUltra: document.getElementById('skill-icon-ultra'),
+  skillRealNameUltra: document.getElementById('skill-real-name-ultra'),
+  skillDescUltra: document.getElementById('skill-desc-ultra'),
 
   valSkillTalent: document.getElementById('val-skill-talent'),
   rangeSkillTalent: document.getElementById('range-skill-talent'),
   btnStepDecTalent: document.getElementById('btn-step-dec-talent'),
   btnStepIncTalent: document.getElementById('btn-step-inc-talent'),
   btnSkillMaxTalent: document.getElementById('btn-skill-max-talent'),
+  skillIconTalent: document.getElementById('skill-icon-talent'),
+  skillRealNameTalent: document.getElementById('skill-real-name-talent'),
+  skillDescTalent: document.getElementById('skill-desc-talent'),
 
   checkTraceTechnique: document.getElementById('check-trace-technique'),
+  skillIconTechnique: document.getElementById('skill-icon-technique'),
+  skillRealNameTechnique: document.getElementById('skill-real-name-technique'),
+  skillDescTechnique: document.getElementById('skill-desc-technique'),
+
   checkTraceA2: document.getElementById('check-trace-a2'),
+  traceIconA2: document.getElementById('trace-icon-a2'),
+  traceNameA2: document.getElementById('trace-name-a2'),
+  traceDescA2: document.getElementById('trace-desc-a2'),
+
   checkTraceA4: document.getElementById('check-trace-a4'),
+  traceIconA4: document.getElementById('trace-icon-a4'),
+  traceNameA4: document.getElementById('trace-name-a4'),
+  traceDescA4: document.getElementById('trace-desc-a4'),
+
   checkTraceA6: document.getElementById('check-trace-a6'),
+  traceIconA6: document.getElementById('trace-icon-a6'),
+  traceNameA6: document.getElementById('trace-name-a6'),
+  traceDescA6: document.getElementById('trace-desc-a6'),
+
   checkTraceStats: document.getElementById('check-trace-stats'),
-
-  btnModalEnergy50: document.getElementById('btn-modal-energy-50'),
-  btnModalEnergy100: document.getElementById('btn-modal-energy-100'),
-  rangeCharEnergy: document.getElementById('range-char-energy'),
-  valCharEnergy: document.getElementById('val-char-energy'),
-
-  btnModalE6S5: document.getElementById('btn-modal-e6s5'),
-  btnModalE0S1: document.getElementById('btn-modal-e0s1'),
 
   // Light Cone View in Modal
   modalLcArtWrapper: document.getElementById('modal-lc-art-wrapper'),
@@ -597,6 +645,31 @@ async function refreshStatus() {
       el.lblCoordinates.textContent = `X: ${x}, Y: ${y}, Z: ${z}`;
     }
 
+    if (el.badgePersistenceMode) {
+      if (state.serverMode === 'gac') {
+        el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+        el.badgePersistenceMode.className = 'badge-creative';
+      } else {
+        el.badgePersistenceMode.textContent = 'FireflyGo: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.className = 'badge-super-tag';
+      }
+    }
+
+    if (el.toggleCreativeMode) {
+      if (state.serverMode !== 'gac') {
+        el.toggleCreativeMode.disabled = true;
+        el.toggleCreativeMode.checked = false;
+        state.creativeMode = false;
+        if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'none';
+      } else {
+        el.toggleCreativeMode.disabled = false;
+        el.toggleCreativeMode.checked = state.creativeMode;
+        if (el.badgeCreativeMode) {
+          el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
+        }
+      }
+    }
+
     renderLineup(data.lineups || DEFAULT_LINEUP);
     renderExRanks(data.ex_ranks || []);
     loadAvatars();
@@ -604,6 +677,17 @@ async function refreshStatus() {
     setConnectionStatus(false, t('offline'));
     el.lblApiUrl.textContent = state.apiUrl;
     el.statAvatars.textContent = state.avatarsList.length;
+
+    if (el.badgePersistenceMode) {
+      if (state.serverMode === 'gac') {
+        el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+        el.badgePersistenceMode.className = 'badge-creative';
+      } else {
+        el.badgePersistenceMode.textContent = 'FireflyGo: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.className = 'badge-super-tag';
+      }
+    }
+
     // Keep rendering with current or default lineup so UI is always functional
     renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
     loadAvatars();
@@ -612,8 +696,12 @@ async function refreshStatus() {
 
 // Render party lineup cards
 function renderLineup(lineups) {
+  if (state.serverMode !== 'gac') {
+    state.creativeMode = false;
+  }
   if (el.toggleCreativeMode) {
     el.toggleCreativeMode.checked = state.creativeMode;
+    el.toggleCreativeMode.disabled = (state.serverMode !== 'gac');
   }
   if (el.badgeCreativeMode) {
     el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
@@ -867,13 +955,7 @@ async function assignAvatarToLineup(slot, avatarId) {
       }
     }
 
-    if (state.isConnected) {
-      if (state.serverMode === 'gac') {
-        await apiCall('/api/persistent', 'POST', { lineups });
-      } else {
-        await saveFreesrChangesToServer();
-      }
-    }
+    await saveLineupToServer(lineups);
 
     renderLineup(lineups);
     const name = avatarId ? getAvatarInfo(avatarId).name : t('slotEmpty');
@@ -961,9 +1043,10 @@ function renderAvatarsGrid() {
           <span class="avatar-lvl">Lv. ${item.level}</span>
           <span class="avatar-eidolon ${item.rank === 6 ? 'e6' : ''}">E${item.rank}</span>
         </div>
-        <div style="display: flex; gap: 0.35rem;">
+        <div style="display: flex; gap: 0.3rem; align-items: center;">
+          <button type="button" class="btn btn-sm btn-card-e0s1" title="ตั้งค่า E0S1 ทันที">⚡ E0S1</button>
+          <button type="button" class="btn btn-sm btn-card-e6s5" title="ตั้งค่า E6S5 เต็มพลัง">⭐ E6S5</button>
           <button type="button" class="btn btn-sm btn-secondary btn-card-showcase" title="ดูการ์ดแสดงผล Build">🖼️</button>
-          <button type="button" class="btn btn-sm btn-gold btn-card-quick-max" title="ปรับ Max E6 ทันที">⭐ MAX</button>
         </div>
       </div>
     `;
@@ -977,11 +1060,18 @@ function renderAvatarsGrid() {
       if (showcaseTabBtn) showcaseTabBtn.click();
     });
 
-    // Quick Max Button
-    const btnQuickMax = card.querySelector('.btn-card-quick-max');
-    btnQuickMax.addEventListener('click', async (e) => {
+    // Quick E0S1 Button on Card Outside
+    const btnE0S1 = card.querySelector('.btn-card-e0s1');
+    btnE0S1?.addEventListener('click', async (e) => {
       e.stopPropagation();
-      await maxSingleAvatar(item.avatar_id);
+      await setAvatarE0S1(item.avatar_id);
+    });
+
+    // Quick E6S5 Button on Card Outside
+    const btnE6S5 = card.querySelector('.btn-card-e6s5');
+    btnE6S5?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await setAvatarE6S5(item.avatar_id);
     });
 
     // Clicking card opens full character build modal
@@ -993,41 +1083,188 @@ function renderAvatarsGrid() {
   });
 }
 
-// Quick Max Single Avatar (Lv 80 + Prom 6 + E6 + Max Traces)
-async function maxSingleAvatar(avatarId) {
-  const target = state.avatarsList.find(a => a.avatar_id === avatarId);
+// Quick Set Single Avatar to E0S1 (Lv 80 + Prom 6 + E0 + Max Skills + S1 Signature Light Cone)
+async function setAvatarE0S1(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const target = state.avatarsList.find(a => a.avatar_id === aid);
+  if (target) {
+    target.level = 80;
+    target.promotion = 6;
+    target.rank = 0;
+  }
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+  state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+  state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+
+  if (!state.fullFreesrData.avatars[aid]) {
+    state.fullFreesrData.avatars[aid] = {
+      owner_uid: 0,
+      avatar_id: aid,
+      level: 80,
+      promotion: 6,
+      techniques: [],
+      sp_max: 140,
+      sp_value: 70,
+      data: { rank: 0, skills: {}, skills_by_anchor_type: {} }
+    };
+  }
+  const av = state.fullFreesrData.avatars[aid];
+  av.level = 80;
+  av.promotion = 6;
+  av.data = av.data || {};
+  av.data.rank = 0;
+  av.data.skills = {
+    [`${aid}001`]: 6,
+    [`${aid}002`]: 10,
+    [`${aid}003`]: 10,
+    [`${aid}004`]: 10,
+    [`${aid}007`]: 1,
+    [`${aid}101`]: 1,
+    [`${aid}102`]: 1,
+    [`${aid}103`]: 1
+  };
+  av.data.skills_by_anchor_type = {
+    "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
+  };
+
+  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+  const lcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+
+  let existingLc = state.fullFreesrData.lightcones.find(lc => lc.equip_avatar === aid);
+  if (existingLc) {
+    existingLc.item_id = lcId;
+    existingLc.level = 80;
+    existingLc.promotion = 6;
+    existingLc.rank = 1;
+  } else {
+    const maxUid = state.fullFreesrData.lightcones.reduce((m, lc) => Math.max(m, lc.internal_uid || 0), 0);
+    state.fullFreesrData.lightcones.push({
+      internal_uid: maxUid + 1,
+      item_id: lcId,
+      level: 80,
+      promotion: 6,
+      rank: 1,
+      equip_avatar: aid
+    });
+  }
+
+  renderAvatarsGrid();
+  loadEquipment();
+
+  if (state.isConnected) {
+    try {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/avatar/rank', 'POST', { avatar_id: aid, rank: 0 });
+        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: aid, level: 80, promotion: 6, rank: 0 });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+    } catch (e) {
+      console.warn('Sync E0S1 failed:', e);
+    }
+  }
+
+  if (state.selectedAvatarDetail?.avatar_id === aid) {
+    openAvatarDetailModal(target || { avatar_id: aid, level: 80, promotion: 6, rank: 0 });
+  }
+  showToast(`ตั้งค่า ${meta.name} เป็น E0S1 เรียบร้อยแล้ว!`, 'success');
+}
+
+// Quick Set Single Avatar to E6S5 (Lv 80 + Prom 6 + E6 + Max Skills + S5 Signature Light Cone)
+async function setAvatarE6S5(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const target = state.avatarsList.find(a => a.avatar_id === aid);
   if (target) {
     target.level = 80;
     target.promotion = 6;
     target.rank = 6;
   }
-  if (state.fullFreesrData?.avatars?.[avatarId]) {
-    const av = state.fullFreesrData.avatars[avatarId];
-    av.level = 80;
-    av.promotion = 6;
-    av.data.rank = 6;
-    if (av.data.skills) {
-      for (const k in av.data.skills) av.data.skills[k] = 10;
-    }
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+  state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+  state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+
+  if (!state.fullFreesrData.avatars[aid]) {
+    state.fullFreesrData.avatars[aid] = {
+      owner_uid: 0,
+      avatar_id: aid,
+      level: 80,
+      promotion: 6,
+      techniques: [],
+      sp_max: 140,
+      sp_value: 70,
+      data: { rank: 6, skills: {}, skills_by_anchor_type: {} }
+    };
+  }
+  const av = state.fullFreesrData.avatars[aid];
+  av.level = 80;
+  av.promotion = 6;
+  av.data = av.data || {};
+  av.data.rank = 6;
+  av.data.skills = {
+    [`${aid}001`]: 6,
+    [`${aid}002`]: 10,
+    [`${aid}003`]: 10,
+    [`${aid}004`]: 10,
+    [`${aid}007`]: 1,
+    [`${aid}101`]: 1,
+    [`${aid}102`]: 1,
+    [`${aid}103`]: 1
+  };
+  av.data.skills_by_anchor_type = {
+    "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
+  };
+
+  const lcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+
+  let existingLc = state.fullFreesrData.lightcones.find(lc => lc.equip_avatar === aid);
+  if (existingLc) {
+    existingLc.item_id = lcId;
+    existingLc.level = 80;
+    existingLc.promotion = 6;
+    existingLc.rank = 5;
+  } else {
+    const maxUid = state.fullFreesrData.lightcones.reduce((m, lc) => Math.max(m, lc.internal_uid || 0), 0);
+    state.fullFreesrData.lightcones.push({
+      internal_uid: maxUid + 1,
+      item_id: lcId,
+      level: 80,
+      promotion: 6,
+      rank: 5,
+      equip_avatar: aid
+    });
   }
 
   renderAvatarsGrid();
+  loadEquipment();
 
   if (state.isConnected) {
     try {
       if (state.serverMode === 'gac') {
-        await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank: 6 });
-        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: avatarId, level: 80, promotion: 6, rank: 6 });
+        await apiCall('/api/avatar/rank', 'POST', { avatar_id: aid, rank: 6 });
+        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: aid, level: 80, promotion: 6, rank: 6 });
       } else {
         await saveFreesrChangesToServer();
       }
-      showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'success');
-    } catch (err) {
-      showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'info');
+    } catch (e) {
+      console.warn('Sync E6S5 failed:', e);
     }
-  } else {
-    showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'info');
   }
+
+  if (state.selectedAvatarDetail?.avatar_id === aid) {
+    openAvatarDetailModal(target || { avatar_id: aid, level: 80, promotion: 6, rank: 6 });
+  }
+  showToast(`ตั้งค่า ${meta.name} เป็น E6S5 เต็มพลังเรียบร้อยแล้ว!`, 'success');
+}
+
+// Quick Max Single Avatar (Lv 80 + Prom 6 + E6 + Max Traces)
+async function maxSingleAvatar(avatarId) {
+  await setAvatarE6S5(avatarId);
 }
 
 // Active Lightcone Superimposition Rank in Modal (1 - 5)
@@ -1123,25 +1360,44 @@ const RECOMMENDED_RELIC_BUILDS = {
 };
 
 // Modal Sub-tabs Handler
+function switchModalSubtab(targetId) {
+  const tabBtns = document.querySelectorAll('.modal-subtab-btn');
+  tabBtns.forEach(b => {
+    if (b.getAttribute('data-modaltab') === targetId) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+  document.querySelectorAll('.modal-subtab-content').forEach(c => {
+    if (c.id === targetId) {
+      c.style.display = 'block';
+      c.classList.add('active');
+    } else {
+      c.style.display = 'none';
+      c.classList.remove('active');
+    }
+  });
+  if (state.selectedAvatarDetail) {
+    const aid = state.selectedAvatarDetail.avatar_id;
+    if (targetId === 'modaltab-showcase') {
+      renderShowcaseCard(aid);
+    } else if (targetId === 'modaltab-overview') {
+      renderModalOverviewTab(aid);
+    } else if (targetId === 'modaltab-relics') {
+      renderModalRelicsTab(aid);
+    } else if (targetId === 'modaltab-skills') {
+      renderModalSkillsTab(aid);
+    }
+  }
+}
+
 function setupModalSubtabs() {
   const tabBtns = document.querySelectorAll('.modal-subtab-btn');
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.modal-subtab-content').forEach(c => {
-        c.style.display = 'none';
-        c.classList.remove('active');
-      });
-      btn.classList.add('active');
       const targetId = btn.getAttribute('data-modaltab');
-      const targetContent = document.getElementById(targetId);
-      if (targetContent) {
-        targetContent.style.display = 'block';
-        targetContent.classList.add('active');
-        if (targetId === 'modaltab-showcase' && state.selectedAvatarDetail) {
-          renderShowcaseCard(state.selectedAvatarDetail.avatar_id);
-        }
-      }
+      switchModalSubtab(targetId);
     });
   });
 }
@@ -1295,7 +1551,554 @@ function populateModalChangeLcDropdown(avatarPath) {
   el.selectModalChangeLc.appendChild(otherPathGroup);
 }
 
-// Character Detail / Build Modal (srtools style)
+// Slot full definitions for relics
+const SLOT_NAMES_FULL = {
+  1: { name: "ส่วนหัว (Head)", icon: "🧢", defaultStat: "HP (Flat)" },
+  2: { name: "ส่วนมือ (Hands)", icon: "🧤", defaultStat: "ATK (Flat)" },
+  3: { name: "ส่วนลำตัว (Body)", icon: "🦺", defaultStat: "CRIT Rate / DMG" },
+  4: { name: "ส่วนเท้า (Feet)", icon: "👢", defaultStat: "SPD / ATK%" },
+  5: { name: "ลูกแก้ว (Planar Sphere)", icon: "🔮", defaultStat: "Elemental DMG%" },
+  6: { name: "สร้อยเชื่อม (Link Rope)", icon: "🔗", defaultStat: "ERR / Break / ATK%" }
+};
+
+function getRelicMainAffixName(slot, affixId) {
+  const affixesBySlot = {
+    1: { 1: "HP (Flat)" },
+    2: { 1: "ATK (Flat)" },
+    3: { 1: "HP%", 2: "ATK%", 3: "DEF%", 4: "CRIT Rate%", 5: "CRIT DMG%", 6: "Healing Boost%", 7: "Effect Hit Rate%" },
+    4: { 1: "HP%", 2: "ATK%", 3: "DEF%", 4: "SPD" },
+    5: { 1: "HP%", 2: "ATK%", 3: "DEF%", 4: "Physical DMG%", 5: "Fire DMG%", 6: "Ice DMG%", 7: "Lightning DMG%", 8: "Wind DMG%", 9: "Quantum DMG%", 10: "Imaginary DMG%" },
+    6: { 1: "Break Effect%", 2: "Energy Regen Rate%", 3: "HP%", 4: "ATK%", 5: "DEF%" }
+  };
+  return affixesBySlot[slot]?.[affixId] || `Main Affix ${affixId}`;
+}
+
+const STAR_RAIL_RES_LANGS = {
+  th: 'th', en: 'en', es: 'es', pt: 'pt', ru: 'ru', vi: 'vi',
+  de: 'de', fr: 'fr', id: 'id', ja: 'jp', ko: 'kr', zh: 'cn', zh_tw: 'cht'
+};
+
+async function loadCharacterSkillsData(lang = null) {
+  const currentLang = lang || getCurrentLanguage() || 'th';
+  const resLang = STAR_RAIL_RES_LANGS[currentLang] || 'th';
+
+  if (state.skillsData && state.skillsData[resLang] && state.skillTreesData && state.skillTreesData[resLang]) {
+    return { skills: state.skillsData[resLang], trees: state.skillTreesData[resLang] };
+  }
+
+  state.skillsData = state.skillsData || {};
+  state.skillTreesData = state.skillTreesData || {};
+
+  try {
+    const [skillsRes, treesRes] = await Promise.all([
+      fetch(`https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/index_min/${resLang}/character_skills.json`).then(r => r.json()),
+      fetch(`https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/index_min/${resLang}/character_skill_trees.json`).then(r => r.json())
+    ]);
+    state.skillsData[resLang] = skillsRes;
+    state.skillTreesData[resLang] = treesRes;
+    return { skills: skillsRes, trees: treesRes };
+  } catch (err) {
+    console.warn('Failed to fetch StarRailRes skills metadata:', err);
+    return { skills: state.skillsData[resLang] || {}, trees: state.skillTreesData[resLang] || {} };
+  }
+}
+
+function formatSkillDesc(descTemplate, paramsArray, level) {
+  if (!descTemplate) return '';
+  const lvlIndex = Math.max(0, Math.min(level - 1, (paramsArray?.length || 1) - 1));
+  const lvlParams = paramsArray?.[lvlIndex] || [];
+  let formatted = descTemplate;
+  lvlParams.forEach((param, idx) => {
+    const pNum = idx + 1;
+    const isPercent = formatted.includes(`#${pNum}[i]%`) || formatted.includes(`#${pNum}[f1]%`) || formatted.includes(`#${pNum}[f2]%`);
+    const valStr = isPercent ? `${Math.round(param * 1000) / 10}%` : `${param}`;
+    const regex = new RegExp(`(#${pNum}\\[[a-z0-9]+\\]%?)`, 'g');
+    formatted = formatted.replace(regex, `<strong class="param-val">${valStr}</strong>`);
+  });
+  return formatted.replace(/\n/g, '<br>');
+}
+
+// Render Character Switcher Bar at the top of modal
+function renderModalSwitcher(currentAvatarId) {
+  if (!el.modalCharSwitcher) return;
+  el.modalCharSwitcher.innerHTML = '';
+
+  const sorted = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sorted.forEach(av => {
+    const meta = getAvatarInfo(av.avatar_id);
+    const item = document.createElement('div');
+    item.className = `modal-char-switcher-item ${av.avatar_id === currentAvatarId ? 'active' : ''}`;
+    item.title = `${meta.name} (ID: ${av.avatar_id})`;
+    item.innerHTML = `
+      <img src="./assets/avatars/${av.avatar_id}.png"
+           onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${av.avatar_id}.png';}else{this.style.display='none';}"
+           alt="${meta.name}">
+    `;
+    item.addEventListener('click', () => {
+      openAvatarDetailModal(av);
+    });
+    el.modalCharSwitcher.appendChild(item);
+  });
+}
+
+// Render Overview & Combat Stats (Neonteam style)
+function renderModalOverviewTab(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const av = state.fullFreesrData?.avatars?.[aid];
+  const rank = av?.data?.rank ?? state.selectedAvatarDetail?.rank ?? 6;
+  const level = av?.level ?? state.selectedAvatarDetail?.level ?? 80;
+
+  // Portrait Art
+  if (el.overviewPortraitImg) {
+    el.overviewPortraitImg.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${aid}.png`;
+    el.overviewPortraitImg.onerror = function() {
+      this.src = `./assets/avatars/${aid}.png`;
+      this.onerror = function() {
+        this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${aid}.png`;
+      };
+    };
+  }
+
+  if (el.overviewCharName) el.overviewCharName.textContent = meta.name;
+  if (el.overviewCharMeta) {
+    el.overviewCharMeta.innerHTML = `
+      ${getElementIconHtml(meta.element, 20)}
+      ${getPathIconHtml(meta.path, 20)}
+      <span class="avatar-badge-rarity rarity-${meta.rarity}" style="position: static;">★ ${meta.rarity}</span>
+    `;
+  }
+  if (el.overviewBadgeLvl) el.overviewBadgeLvl.textContent = `Lv. ${level} / 80`;
+  if (el.overviewBadgeEidolon) el.overviewBadgeEidolon.textContent = `E${rank}`;
+
+  // Light Cone calculation
+  const lc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === aid);
+  const lcId = lc?.item_id || SIGNATURE_LIGHTCONES[aid] || 21001;
+  const lcInfo = getLightconeInfo(lcId);
+  const lcRank = lc?.rank || 5;
+  const lcLevel = lc?.level || 80;
+
+  // Equipped LC Card Glance
+  if (el.overviewLcThumb) {
+    el.overviewLcThumb.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/light_cone/${lcId}.png`;
+    el.overviewLcThumb.onerror = function() { this.src = './assets/logo.png'; };
+  }
+  if (el.overviewLcName) el.overviewLcName.textContent = lcInfo.name || `Light Cone ${lcId}`;
+  if (el.overviewLcRank) el.overviewLcRank.textContent = `S${lcRank} • Lv.${lcLevel}`;
+
+  // Relics calculation & sets
+  const relics = (state.fullFreesrData?.relics || []).filter(r => r.equip_avatar === aid);
+  const setCountMap = {};
+  relics.forEach(r => {
+    const sId = Math.floor((r.relic_id % 10000) / 10);
+    setCountMap[sId] = (setCountMap[sId] || 0) + 1;
+  });
+
+  const activeSetBadges = [];
+  Object.keys(setCountMap).forEach(sId => {
+    const cnt = setCountMap[sId];
+    const sInfo = getRelicSetInfo(sId);
+    if (cnt >= 4) {
+      activeSetBadges.push({ name: sInfo.name, count: 4 });
+    } else if (cnt >= 2) {
+      activeSetBadges.push({ name: sInfo.name, count: 2 });
+    }
+  });
+
+  if (el.overviewRelicsSummary) {
+    if (activeSetBadges.length === 0) {
+      el.overviewRelicsSummary.innerHTML = `<span style="color: var(--text-muted);">${relics.length}/6 ชิ้นสวมใส่ (ยังไม่มีโบนัสเซ็ต)</span>`;
+    } else {
+      el.overviewRelicsSummary.innerHTML = activeSetBadges.map(b => 
+        `<div style="display: flex; justify-content: space-between; align-items: center; color: var(--accent-cyan); font-weight: 700;">
+          <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${b.name}</span>
+          <span class="badge-super-tag" style="padding: 0.1rem 0.4rem; font-size: 0.65rem;">(${b.count}-Pc)</span>
+        </div>`
+      ).join('');
+    }
+  }
+
+  // Combat Stats
+  const baseHp = meta.rarity === 5 ? 1241 : 1058;
+  const baseAtk = meta.rarity === 5 ? 620 : 529;
+  const baseDef = meta.rarity === 5 ? 530 : 441;
+  const baseSpd = meta.speed || (meta.path === 'Hunt' ? 110 : 100);
+
+  const lcHp = lcInfo.rarity === 5 ? 1058 : 846;
+  const lcAtk = lcInfo.rarity === 5 ? 582 : 476;
+  const lcDef = lcInfo.rarity === 5 ? 463 : 396;
+
+  let totalHp = Math.round((baseHp + lcHp) * 1.45 + (relics.length ? 706 : 0));
+  let totalAtk = Math.round((baseAtk + lcAtk) * 1.35 + (relics.length ? 353 : 0));
+  let totalDef = Math.round((baseDef + lcDef) * 1.85 + (meta.path === 'Preservation' ? 1200 : 0));
+  let totalSpd = (baseSpd + (relics.length ? 25 : 0)).toFixed(1);
+  let critRate = (5.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 65.4 : 18.8)).toFixed(1);
+  let critDmg = (50.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 132.5 : 26.5)).toFixed(1);
+  let breakEffect = (meta.path === 'Harmony' || meta.path === 'Nihility' ? 142.0 : 10.4).toFixed(1);
+  let err = (19.4).toFixed(1);
+  let ehr = (meta.path === 'Nihility' ? 67.2 : 19.4).toFixed(1);
+  let effectRes = (10.0).toFixed(1);
+
+  if (el.overviewStatsGrid) {
+    el.overviewStatsGrid.innerHTML = `
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">❤️ HP สูงสุด</span>
+        <span class="overview-stat-val" style="color: #4ade80;">${totalHp.toLocaleString()}</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">⚔️ พลังโจมตี (ATK)</span>
+        <span class="overview-stat-val" style="color: #f87171;">${totalAtk.toLocaleString()}</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">🛡️ พลังป้องกัน (DEF)</span>
+        <span class="overview-stat-val" style="color: #60a5fa;">${totalDef.toLocaleString()}</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">👟 ความเร็ว (SPD)</span>
+        <span class="overview-stat-val" style="color: #38bdf8;">${totalSpd}</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">🎯 อัตราคริ (CRIT Rate)</span>
+        <span class="overview-stat-val" style="color: #fbbf24;">${critRate}%</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">💥 ดาเมจคริ (CRIT DMG)</span>
+        <span class="overview-stat-val" style="color: #f59e0b;">${critDmg}%</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">⚡ ทำลายจุดอ่อน (Break)</span>
+        <span class="overview-stat-val" style="color: #c084fc;">${breakEffect}%</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">🔋 ฟื้นฟูพลังงาน (ERR)</span>
+        <span class="overview-stat-val" style="color: #34d399;">${err}%</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">🔮 สร้างสถานะ (EHR)</span>
+        <span class="overview-stat-val" style="color: #818cf8;">${ehr}%</span>
+      </div>
+      <div class="overview-stat-card">
+        <span class="overview-stat-label">🔰 ต้านทานสถานะ (RES)</span>
+        <span class="overview-stat-val" style="color: #a78bfa;">${effectRes}%</span>
+      </div>
+    `;
+  }
+}
+
+// Render Relics 6 Slots Tab
+function renderModalRelicsTab(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  if (!el.modalRelicsSlotsGrid) return;
+  el.modalRelicsSlotsGrid.innerHTML = '';
+
+  const allRelics = state.fullFreesrData?.relics || [];
+  const equippedRelics = allRelics.filter(r => r.equip_avatar === aid);
+
+  const setCountMap = {};
+  equippedRelics.forEach(r => {
+    const sId = Math.floor((r.relic_id % 10000) / 10);
+    setCountMap[sId] = (setCountMap[sId] || 0) + 1;
+  });
+
+  for (let slot = 1; slot <= 6; slot++) {
+    const slotInfo = SLOT_NAMES_FULL[slot];
+    const equipped = equippedRelics.find(r => (r.relic_id % 10) === slot);
+
+    const box = document.createElement('div');
+    box.className = 'relic-slot-box';
+
+    if (equipped) {
+      const setId = Math.floor((equipped.relic_id % 10000) / 10);
+      const rInfo = getRelicSetInfo(setId);
+      const mainAffixName = getRelicMainAffixName(slot, equipped.main_affix_id);
+
+      box.innerHTML = `
+        <div class="relic-slot-icon-wrap">
+          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
+               onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
+          <span class="relic-slot-badge">Slot ${slot}</span>
+        </div>
+        <div class="relic-slot-content">
+          <div class="relic-slot-title" title="${rInfo.name}">${slotInfo.icon} ${rInfo.name}</div>
+          <div class="relic-slot-main">✦ ${mainAffixName} (+${equipped.level})</div>
+          <div class="relic-slot-subs">${equipped.sub_affixes?.length || 4} ออปชั่นรอง (Max Level 15)</div>
+        </div>
+        <div class="relic-slot-actions">
+          <button type="button" class="btn btn-sm btn-primary btn-slot-change" style="font-size: 0.725rem; padding: 0.25rem 0.5rem;">🔄 เปลี่ยน</button>
+          <button type="button" class="btn btn-sm btn-secondary btn-slot-unequip" style="font-size: 0.725rem; padding: 0.25rem 0.5rem; color: var(--accent-red);">✕ ถอด</button>
+        </div>
+      `;
+
+      box.querySelector('.btn-slot-change').addEventListener('click', () => {
+        openSlotPicker(aid, slot);
+      });
+      box.querySelector('.btn-slot-unequip').addEventListener('click', async () => {
+        equipped.equip_avatar = 0;
+        if (state.isConnected) await saveFreesrChangesToServer();
+        renderModalRelicsTab(aid);
+        renderModalOverviewTab(aid);
+        renderShowcaseCard(aid);
+        showToast(`ถอดรีลิกส์ ${slotInfo.name} เรียบร้อย`, 'info');
+      });
+    } else {
+      box.innerHTML = `
+        <div class="relic-slot-icon-wrap" style="opacity: 0.5;">
+          <span style="font-size: 1.5rem;">${slotInfo.icon}</span>
+          <span class="relic-slot-badge">Slot ${slot}</span>
+        </div>
+        <div class="relic-slot-content">
+          <div class="relic-slot-title" style="color: var(--text-muted);">${slotInfo.name}</div>
+          <div class="relic-slot-subs" style="color: var(--text-muted);">ยังไม่ได้ติดตั้ง (แนะนำ: ${slotInfo.defaultStat})</div>
+        </div>
+        <div class="relic-slot-actions">
+          <button type="button" class="btn btn-sm btn-primary btn-slot-equip" style="font-size: 0.725rem; padding: 0.25rem 0.5rem;">➕ สวมใส่</button>
+        </div>
+      `;
+      box.querySelector('.btn-slot-equip').addEventListener('click', () => {
+        openSlotPicker(aid, slot);
+      });
+    }
+
+    el.modalRelicsSlotsGrid.appendChild(box);
+  }
+
+  // Active Set Bonuses display
+  if (el.modalRelicsActiveSets) {
+    const activeSets = [];
+    Object.keys(setCountMap).forEach(sId => {
+      const cnt = setCountMap[sId];
+      const sInfo = getRelicSetInfo(sId);
+      if (cnt >= 4) {
+        activeSets.push(`🌟 <strong>${sInfo.name} (4-Piece Set)</strong>: ${sInfo.desc4 || 'เปิดใช้งานเอฟเฟกต์ครบ 4 ชิ้น'}`);
+      } else if (cnt >= 2) {
+        activeSets.push(`✨ <strong>${sInfo.name} (2-Piece Set)</strong>: ${sInfo.desc2 || 'เปิดใช้งานเอฟเฟกต์ 2 ชิ้น'}`);
+      }
+    });
+
+    if (activeSets.length === 0) {
+      el.modalRelicsActiveSets.innerHTML = `<span style="color: var(--text-muted);">ยังไม่มีเอฟเฟกต์เซ็ตทำงาน (ต้องใส่เซ็ตเดียวกันอย่างน้อย 2 หรือ 4 ชิ้น)</span>`;
+    } else {
+      el.modalRelicsActiveSets.innerHTML = activeSets.map(s => `<div>${s}</div>`).join('');
+    }
+  }
+}
+
+// Open Slot Picker Modal
+function openSlotPicker(avatarId, slotNum) {
+  state.slotPickerAvatarId = avatarId;
+  state.slotPickerSlot = slotNum;
+  const slotInfo = SLOT_NAMES_FULL[slotNum];
+
+  if (el.modalSlotPickerTitle) {
+    el.modalSlotPickerTitle.textContent = `🛡️ เลือกสวมใส่: ${slotInfo.name}`;
+  }
+
+  if (el.slotPickerInventoryList) {
+    el.slotPickerInventoryList.innerHTML = '';
+    const allRelics = state.fullFreesrData?.relics || [];
+    const matchingRelics = allRelics.filter(r => (r.relic_id % 10) === slotNum);
+
+    if (matchingRelics.length === 0) {
+      el.slotPickerInventoryList.innerHTML = `
+        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+          ไม่มีรีลิกส์สำหรับช่องนี้ในคลัง สามารถกดปุ่ม <strong>"สร้างชิ้นแนะนำสำหรับช่องนี้"</strong> ด้านบนได้ทันที!
+        </div>
+      `;
+    } else {
+      matchingRelics.forEach(r => {
+        const setId = Math.floor((r.relic_id % 10000) / 10);
+        const rInfo = getRelicSetInfo(setId);
+        const mainAffixName = getRelicMainAffixName(slotNum, r.main_affix_id);
+        const isCurrent = r.equip_avatar === avatarId;
+        const wearerMeta = r.equip_avatar && r.equip_avatar !== avatarId ? getAvatarInfo(r.equip_avatar) : null;
+
+        const row = document.createElement('div');
+        row.className = 'relic-slot-box';
+        row.style.cursor = 'pointer';
+        row.style.padding = '0.65rem 0.85rem';
+        if (isCurrent) row.style.borderColor = 'var(--accent-gold)';
+
+        row.innerHTML = `
+          <div class="relic-slot-icon-wrap" style="width: 44px; height: 44px; min-width: 44px;">
+            <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
+                 onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <div class="relic-slot-content">
+            <div class="relic-slot-title">${rInfo.name} (+${r.level})</div>
+            <div class="relic-slot-main">✦ ${mainAffixName}</div>
+            <div class="relic-slot-subs">
+              ${isCurrent ? '<span style="color: var(--accent-gold); font-weight: 700;">(กำลังสวมใส่อยู่)</span>' : 
+                wearerMeta ? `<span style="color: var(--accent-cyan);">(สวมใส่โดย: ${wearerMeta.name})</span>` : '<span style="color: #4ade80;">(ว่างในคลัง)</span>'}
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm ${isCurrent ? 'btn-gold' : 'btn-primary'}" style="font-size: 0.725rem;">
+            ${isCurrent ? 'ใช้งานอยู่' : 'เลือกชิ้นนี้'}
+          </button>
+        `;
+
+        row.addEventListener('click', async () => {
+          if (!isCurrent) {
+            allRelics.forEach(other => {
+              if (other.equip_avatar === avatarId && (other.relic_id % 10) === slotNum) {
+                other.equip_avatar = 0;
+              }
+            });
+            r.equip_avatar = avatarId;
+            if (state.isConnected) await saveFreesrChangesToServer();
+            renderModalRelicsTab(avatarId);
+            renderModalOverviewTab(avatarId);
+            renderShowcaseCard(avatarId);
+            loadEquipment();
+            showToast(`สวมใส่ ${rInfo.name} สำเร็จ!`, 'success');
+          }
+          el.modalSelectRelicSlot?.classList.remove('active');
+        });
+
+        el.slotPickerInventoryList.appendChild(row);
+      });
+    }
+  }
+
+  el.modalSelectRelicSlot?.classList.add('active');
+}
+
+// Quick Auto-generate perfect piece for slot
+async function quickGenSlotRelic(avatarId, slotNum) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+  const setId = slotNum <= 4 ? rec.cavern : rec.planar;
+  const relicId = 60000 + (setId * 10) + slotNum;
+
+  let mainAffixId = 1;
+  if (slotNum === 1 || slotNum === 2) mainAffixId = 1;
+  else if (slotNum === 3) {
+    if (meta.path === 'Preservation') mainAffixId = 3;
+    else if (meta.path === 'Abundance') mainAffixId = 6;
+    else if (meta.path === 'Nihility') mainAffixId = 7;
+    else mainAffixId = 4;
+  } else if (slotNum === 4) {
+    if (meta.path === 'Preservation') mainAffixId = 3;
+    else mainAffixId = 4;
+  } else if (slotNum === 5) {
+    const elemAffixMap = { Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Wind: 8, Quantum: 9, Imaginary: 10 };
+    mainAffixId = elemAffixMap[meta.element] || 2;
+  } else if (slotNum === 6) {
+    if (['Harmony', 'Abundance', 'Preservation'].includes(meta.path)) mainAffixId = 2;
+    else if (meta.path === 'Nihility') mainAffixId = 1;
+    else mainAffixId = 4;
+  }
+
+  if (!state.fullFreesrData) state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  state.fullFreesrData.relics = state.fullFreesrData.relics || [];
+
+  state.fullFreesrData.relics.forEach(r => {
+    if (r.equip_avatar === aid && (r.relic_id % 10) === slotNum) {
+      r.equip_avatar = 0;
+    }
+  });
+
+  const nextUid = (state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
+  state.fullFreesrData.relics.push({
+    internal_uid: nextUid,
+    relic_id: relicId,
+    level: 15,
+    equip_avatar: aid,
+    main_affix_id: mainAffixId,
+    sub_affixes: [
+      { sub_affix_id: 1, cnt: 2, step: 2 },
+      { sub_affix_id: 2, cnt: 3, step: 2 },
+      { sub_affix_id: 3, cnt: 2, step: 2 },
+      { sub_affix_id: 4, cnt: 2, step: 2 }
+    ]
+  });
+
+  if (state.isConnected) await saveFreesrChangesToServer();
+  renderModalRelicsTab(aid);
+  renderModalOverviewTab(aid);
+  renderShowcaseCard(aid);
+  loadEquipment();
+  el.modalSelectRelicSlot?.classList.remove('active');
+  showToast(`สร้างและติดตั้งรีลิกส์แนะนำช่อง ${slotNum} สำเร็จ!`, 'success');
+}
+
+// Render Skills Tab with real StarRailRes descriptions & icons
+async function renderModalSkillsTab(avatarId) {
+  const aid = String(avatarId);
+  const currentLang = getCurrentLanguage() || 'th';
+
+  const { skills, trees } = await loadCharacterSkillsData(currentLang);
+
+  const avatarSkills = Object.values(skills || {}).filter(s => String(s.id).startsWith(aid));
+  const basicSkill = avatarSkills.find(s => s.type === 'Normal') || avatarSkills[0];
+  const combatSkill = avatarSkills.find(s => s.type === 'BPSkill') || avatarSkills[1];
+  const ultraSkill = avatarSkills.find(s => s.type === 'Ultra') || avatarSkills[2];
+  const talentSkill = avatarSkills.find(s => s.type === 'Talent') || avatarSkills[3];
+  const techSkill = avatarSkills.find(s => s.type === 'Maze' || s.type === 'MazeNormal');
+
+  const a2Node = trees?.[`${aid}101`] || Object.values(trees || {}).find(t => String(t.id).startsWith(aid) && t.anchor === 'Point06');
+  const a4Node = trees?.[`${aid}102`] || Object.values(trees || {}).find(t => String(t.id).startsWith(aid) && t.anchor === 'Point07');
+  const a6Node = trees?.[`${aid}103`] || Object.values(trees || {}).find(t => String(t.id).startsWith(aid) && t.anchor === 'Point08');
+
+  // 1. Basic Attack
+  if (basicSkill) {
+    if (el.skillIconBasic) el.skillIconBasic.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${basicSkill.icon}`;
+    if (el.skillRealNameBasic) el.skillRealNameBasic.textContent = basicSkill.name;
+    const curLvl = parseInt(el.rangeSkillBasic?.value || 6, 10);
+    if (el.skillDescBasic) el.skillDescBasic.innerHTML = formatSkillDesc(basicSkill.desc, basicSkill.params, curLvl);
+  }
+
+  // 2. Skill
+  if (combatSkill) {
+    if (el.skillIconSkill) el.skillIconSkill.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${combatSkill.icon}`;
+    if (el.skillRealNameSkill) el.skillRealNameSkill.textContent = combatSkill.name;
+    const curLvl = parseInt(el.rangeSkillSkill?.value || 10, 10);
+    if (el.skillDescSkill) el.skillDescSkill.innerHTML = formatSkillDesc(combatSkill.desc, combatSkill.params, curLvl);
+  }
+
+  // 3. Ultimate
+  if (ultraSkill) {
+    if (el.skillIconUltra) el.skillIconUltra.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${ultraSkill.icon}`;
+    if (el.skillRealNameUltra) el.skillRealNameUltra.textContent = ultraSkill.name;
+    const curLvl = parseInt(el.rangeSkillUltra?.value || 10, 10);
+    if (el.skillDescUltra) el.skillDescUltra.innerHTML = formatSkillDesc(ultraSkill.desc, ultraSkill.params, curLvl);
+  }
+
+  // 4. Talent
+  if (talentSkill) {
+    if (el.skillIconTalent) el.skillIconTalent.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${talentSkill.icon}`;
+    if (el.skillRealNameTalent) el.skillRealNameTalent.textContent = talentSkill.name;
+    const curLvl = parseInt(el.rangeSkillTalent?.value || 10, 10);
+    if (el.skillDescTalent) el.skillDescTalent.innerHTML = formatSkillDesc(talentSkill.desc, talentSkill.params, curLvl);
+  }
+
+  // Technique
+  if (techSkill) {
+    if (el.skillIconTechnique) el.skillIconTechnique.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${techSkill.icon}`;
+    if (el.skillRealNameTechnique) el.skillRealNameTechnique.textContent = techSkill.name;
+    if (el.skillDescTechnique) el.skillDescTechnique.innerHTML = formatSkillDesc(techSkill.desc, techSkill.params, 1);
+  }
+
+  // Traces
+  if (a2Node) {
+    if (el.traceIconA2) el.traceIconA2.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a2Node.icon}`;
+    if (el.traceNameA2) el.traceNameA2.textContent = `🌟 ${a2Node.name || 'ร่องรอย A2'}`;
+    if (el.traceDescA2) el.traceDescA2.innerHTML = formatSkillDesc(a2Node.desc, a2Node.params, 1);
+  }
+  if (a4Node) {
+    if (el.traceIconA4) el.traceIconA4.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a4Node.icon}`;
+    if (el.traceNameA4) el.traceNameA4.textContent = `🌟 ${a4Node.name || 'ร่องรอย A4'}`;
+    if (el.traceDescA4) el.traceDescA4.innerHTML = formatSkillDesc(a4Node.desc, a4Node.params, 1);
+  }
+  if (a6Node) {
+    if (el.traceIconA6) el.traceIconA6.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a6Node.icon}`;
+    if (el.traceNameA6) el.traceNameA6.textContent = `🌟 ${a6Node.name || 'ร่องรอย A6'}`;
+    if (el.traceDescA6) el.traceDescA6.innerHTML = formatSkillDesc(a6Node.desc, a6Node.params, 1);
+  }
+}
+
+// Character Detail / Build Modal (srtools & neonteam style)
 function openAvatarDetailModal(avatarItem) {
   state.selectedAvatarDetail = avatarItem;
   const aid = avatarItem.avatar_id;
@@ -1313,19 +2116,11 @@ function openAvatarDetailModal(avatarItem) {
     <span class="avatar-badge-rarity rarity-${meta.rarity}" style="position: static;">★ ${meta.rarity}</span>
   `;
 
-  // Reset to first sub-tab (Skills & Traces)
-  document.querySelectorAll('.modal-subtab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.modal-subtab-content').forEach(c => {
-    c.style.display = 'none';
-    c.classList.remove('active');
-  });
-  const firstTabBtn = document.querySelector('.modal-subtab-btn[data-modaltab="modaltab-skills"]');
-  if (firstTabBtn) firstTabBtn.classList.add('active');
-  const firstTabContent = document.getElementById('modaltab-skills');
-  if (firstTabContent) {
-    firstTabContent.style.display = 'block';
-    firstTabContent.classList.add('active');
-  }
+  // Render character switcher strip (Neonteam style)
+  renderModalSwitcher(aid);
+
+  // Default to Overview sub-tab
+  switchModalSubtab('modaltab-overview');
 
   // Basic Status
   el.modalCharLevel.value = avatarItem.level || 80;
@@ -1382,16 +2177,6 @@ function openAvatarDetailModal(avatarItem) {
     el.checkTraceStats.checked = (anchorSkills['9'] ?? skills[`${aid}201`] ?? 1) > 0;
   }
 
-  // Ultimate Energy (Default 50% as standard in Star Rail)
-  const maxSp = av?.sp_max ?? 140;
-  const defaultStartingSp = Math.floor(maxSp * 0.5);
-  const currentSp = (av?.sp_value !== undefined && av?.sp_value !== null) ? av.sp_value : defaultStartingSp;
-  if (el.rangeCharEnergy && el.valCharEnergy) {
-    el.rangeCharEnergy.max = maxSp;
-    el.rangeCharEnergy.value = currentSp;
-    el.valCharEnergy.textContent = `${currentSp}/${maxSp}`;
-  }
-
   // Lightcone initialization & full preview
   populateModalChangeLcDropdown(meta.path);
   const equippedLc = (state.fullFreesrData?.lightcones || []).find(lc => lc.equip_avatar === aid);
@@ -1402,7 +2187,10 @@ function openAvatarDetailModal(avatarItem) {
   selectedLcRank = activeLcRank;
   updateModalLcFullView(activeLcId, activeLcRank, activeLcLevel);
 
-  // Pre-render showcase card
+  // Render Subtabs
+  renderModalOverviewTab(aid);
+  renderModalRelicsTab(aid);
+  renderModalSkillsTab(aid);
   renderShowcaseCard(aid);
 
   el.modalAvatarDetail.classList.add('active');
@@ -2000,12 +2788,39 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
   for (let slot = 1; slot <= 6; slot++) {
     const setId = slot <= 4 ? rec.cavern : rec.planar;
     const relicId = 60000 + (setId * 10) + slot;
+
+    let mainAffixId = 1;
+    if (slot === 1 || slot === 2) {
+      mainAffixId = 1;
+    } else if (slot === 3) {
+      if (meta.path === 'Preservation') mainAffixId = 3; // DEF%
+      else if (meta.path === 'Abundance') mainAffixId = 6; // Outgoing Healing Boost%
+      else if (meta.path === 'Nihility') mainAffixId = 7; // Effect Hit Rate%
+      else mainAffixId = 4; // CRIT Rate%
+    } else if (slot === 4) {
+      if (meta.path === 'Preservation') mainAffixId = 3; // DEF%
+      else mainAffixId = 4; // SPD
+    } else if (slot === 5) {
+      const elemAffixMap = {
+        Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Wind: 8, Quantum: 9, Imaginary: 10
+      };
+      mainAffixId = elemAffixMap[meta.element] || 2; // Element DMG Boost or ATK%
+    } else if (slot === 6) {
+      if (['Harmony', 'Abundance', 'Preservation'].includes(meta.path)) {
+        mainAffixId = 2; // Energy Regen Rate%
+      } else if (meta.path === 'Nihility') {
+        mainAffixId = 1; // Break Effect%
+      } else {
+        mainAffixId = 4; // ATK%
+      }
+    }
+
     state.fullFreesrData.relics.push({
       internal_uid: nextUid++,
       relic_id: relicId,
       level: 15,
       equip_avatar: aid,
-      main_affix_id: 1,
+      main_affix_id: mainAffixId,
       sub_affixes: [
         { sub_affix_id: 1, cnt: 2, step: 2 },
         { sub_affix_id: 2, cnt: 3, step: 2 },
@@ -2020,6 +2835,10 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
   }
   loadEquipment();
   renderShowcaseCard(aid);
+  if (state.selectedAvatarDetail?.avatar_id === aid) {
+    renderModalRelicsTab(aid);
+    renderModalOverviewTab(aid);
+  }
   if (notify) {
     showToast(t('toastRelicsEquipped', { name: meta.name }), 'success');
   }
@@ -2046,11 +2865,36 @@ Generated via GaC-Srtool`;
   });
 }
 
-// Export Showcase Card as printable / image view
-function exportShowcaseImage(avatarId) {
+// Export Showcase Card as high-res PNG image using html2canvas
+async function exportShowcaseImage(avatarId) {
   const meta = getAvatarInfo(avatarId);
   const showcaseEl = document.getElementById('showcase-card-container');
   if (!showcaseEl) return;
+
+  showToast('กำลังประมวลผลและสร้างรูปภาพการ์ด PNG...', 'info');
+
+  if (typeof html2canvas !== 'undefined') {
+    try {
+      const canvas = await html2canvas(showcaseEl, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2,
+        backgroundColor: '#0c1222'
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      const cleanName = meta.name.replace(/[^a-zA-Z0-9ก-๙_-]/g, '_');
+      a.download = `${cleanName}_Build_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('ดาวน์โหลดรูปภาพการ์ด PNG เรียบร้อยแล้ว!', 'success');
+      return;
+    } catch (err) {
+      console.warn('html2canvas failed, falling back to print view:', err);
+    }
+  }
 
   const win = window.open('', '_blank');
   if (!win) {
@@ -2105,54 +2949,72 @@ function exportShowcaseImage(avatarId) {
   showToast(t('showcaseExport') || 'เปิดหน้าต่างสำหรับบันทึกการ์ดเรียบร้อย', 'info');
 }
 
+// Server Lineup Persistence Manager (GaC Persistent vs FireflyGo FreeSR)
+async function saveLineupToServer(lineupData) {
+  if (!state.isConnected) return;
+  if (state.serverMode === 'gac') {
+    // GaC server handles lineups in persistent
+    await apiCall('/api/persistent', 'POST', { lineups: lineupData });
+  } else {
+    // FireflyGo / other FreeSR servers handle lineups in freesr-data.json
+    if (!state.fullFreesrData) {
+      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    }
+    state.fullFreesrData.lineups = lineupData;
+    const arr = [
+      lineupData[0] || 0,
+      lineupData[1] || 0,
+      lineupData[2] || 0,
+      lineupData[3] || 0
+    ];
+    if (!state.fullFreesrData.battle_config) {
+      state.fullFreesrData.battle_config = {};
+    }
+    state.fullFreesrData.battle_config.custom_battle_lineup = arr;
+    state.fullFreesrData.custom_battle_lineup = arr;
+    await saveFreesrChangesToServer();
+  }
+}
+
 // ============================================================================
 // Quick Action Functions
 // ============================================================================
 
-// 1. Quick Set Team Energy (50% or 100%)
-async function quickSetTeamEnergy(ratio = 0.5) {
+// 1. Quick Set Entire Lineup to E0S1 Standard
+async function quickSetLineupE0S1() {
   try {
     state.statusData = state.statusData || {};
     const lineups = state.statusData.lineups || DEFAULT_LINEUP;
-    if (!state.fullFreesrData) {
-      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
-    }
-    state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
-
     const lineupIds = Object.values(lineups).filter(id => id && id > 0);
     if (lineupIds.length === 0) {
       showToast(t('slotEmpty') || 'ไม่มีตัวละครในทีม', 'warning');
       return;
     }
 
-    lineupIds.forEach(aid => {
-      if (!state.fullFreesrData.avatars[aid]) {
-        state.fullFreesrData.avatars[aid] = {
-          owner_uid: 0,
-          avatar_id: aid,
-          level: 80,
-          promotion: 6,
-          techniques: [],
-          sp_max: 140,
-          sp_value: 70,
-          data: { rank: 6, skills: {} }
-        };
-      }
-      const av = state.fullFreesrData.avatars[aid];
-      const maxSp = av.sp_max || 140;
-      av.sp_max = maxSp;
-      av.sp_value = Math.floor(maxSp * ratio);
-    });
+    for (const aid of lineupIds) {
+      await setAvatarE0S1(aid);
+    }
+    showToast('ปรับตัวละครทุกคนในทีมเป็น E0S1 พร้อมรบเรียบร้อยแล้ว!', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
 
-    if (state.isConnected) {
-      await saveFreesrChangesToServer();
+// 2. Quick Equip Recommended Relics for Entire Lineup
+async function quickEquipLineupRelics() {
+  try {
+    state.statusData = state.statusData || {};
+    const lineups = state.statusData.lineups || DEFAULT_LINEUP;
+    const lineupIds = Object.values(lineups).filter(id => id && id > 0);
+    if (lineupIds.length === 0) {
+      showToast(t('slotEmpty') || 'ไม่มีตัวละครในทีม', 'warning');
+      return;
     }
 
-    if (ratio === 0.5) {
-      showToast(t('toastEnergy50') || 'ตั้งค่าพลังงานทีม 50% (มาตรฐานเกม) เรียบร้อยแล้ว', 'success');
-    } else {
-      showToast(t('toastEnergy100') || 'ตั้งค่าพลังงานทีม 100% (อัลติพร้อมใช้) เรียบร้อยแล้ว', 'success');
+    for (const aid of lineupIds) {
+      await autoEquipRecommendedRelics(aid, false);
     }
+    showToast('ติดตั้งรีลิกส์และเครื่องประดับแนะนำให้ทั้งทีมเรียบร้อยแล้ว!', 'success');
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -2346,13 +3208,7 @@ async function quickClearLineup() {
       }
     }
 
-    if (state.isConnected) {
-      if (state.serverMode === 'gac') {
-        await apiCall('/api/persistent', 'POST', { lineups: cleared });
-      } else {
-        await saveFreesrChangesToServer();
-      }
-    }
+    await saveLineupToServer(cleared);
 
     renderLineup(cleared);
     showToast(t('toastLineupCleared') || 'ล้างตัวละครในทีมเรียบร้อยแล้ว', 'info');
@@ -3290,18 +4146,54 @@ function setupEvents() {
   setupSkillStepper(el.rangeSkillUltra, el.valSkillUltra, el.btnStepDecUltra, el.btnStepIncUltra, el.btnSkillMaxUltra, 10);
   setupSkillStepper(el.rangeSkillTalent, el.valSkillTalent, el.btnStepDecTalent, el.btnStepIncTalent, el.btnSkillMaxTalent, 10);
 
-  // Ultimate Energy Controls
-  el.rangeCharEnergy?.addEventListener('input', () => {
-    el.valCharEnergy.textContent = `${el.rangeCharEnergy.value}/${el.rangeCharEnergy.max}`;
+  // Overview Tab Quick Navigation Cards
+  el.overviewLcCard?.addEventListener('click', () => switchModalSubtab('modaltab-lightcone'));
+  el.overviewRelicsCard?.addEventListener('click', () => switchModalSubtab('modaltab-relics'));
+
+  // Relic Tab Controls in Modal
+  el.btnModalRelicsAuto?.addEventListener('click', async () => {
+    if (!state.selectedAvatarDetail) return;
+    const aid = state.selectedAvatarDetail.avatar_id;
+    await autoEquipRecommendedRelics(aid, true);
+    renderModalRelicsTab(aid);
+    renderModalOverviewTab(aid);
+    renderShowcaseCard(aid);
   });
-  el.btnModalEnergy50?.addEventListener('click', () => {
-    const half = Math.floor(parseInt(el.rangeCharEnergy.max, 10) * 0.5);
-    el.rangeCharEnergy.value = half;
-    el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
+
+  el.btnModalRelicsClear?.addEventListener('click', async () => {
+    if (!state.selectedAvatarDetail) return;
+    const aid = state.selectedAvatarDetail.avatar_id;
+    const msg = t('confirmClearRelics') || 'คุณแน่ใจหรือไม่ว่าต้องการถอดรีลิกส์ทั้งหมดของตัวละครนี้?';
+    if (!confirm(msg)) return;
+    const relics = state.fullFreesrData?.relics || [];
+    let unequippedCount = 0;
+    relics.forEach(r => {
+      if (r.equip_avatar === aid) {
+        r.equip_avatar = 0;
+        unequippedCount++;
+      }
+    });
+    if (unequippedCount > 0) {
+      if (state.isConnected) await saveFreesrChangesToServer();
+      showToast(t('toastRelicsCleared') || `ถอดรีลิกส์เรียบร้อย (${unequippedCount} ชิ้น)`, 'info');
+      renderModalRelicsTab(aid);
+      renderModalOverviewTab(aid);
+      renderShowcaseCard(aid);
+      loadEquipment();
+    } else {
+      showToast('ไม่มีรีลิกส์ที่ติดตั้งอยู่', 'warning');
+    }
   });
-  el.btnModalEnergy100?.addEventListener('click', () => {
-    el.rangeCharEnergy.value = el.rangeCharEnergy.max;
-    el.valCharEnergy.textContent = `${el.rangeCharEnergy.max}/${el.rangeCharEnergy.max}`;
+
+  // Relic Slot Picker Modal Controls
+  el.btnCloseSlotPicker?.addEventListener('click', () => {
+    el.modalSelectRelicSlot?.classList.remove('active');
+  });
+
+  el.btnSlotPickerQuickGen?.addEventListener('click', async () => {
+    if (state.slotPickerAvatarId && state.slotPickerSlot) {
+      await quickGenSlotRelic(state.slotPickerAvatarId, state.slotPickerSlot);
+    }
   });
 
   // Lightcone Controls in Modal
@@ -3392,8 +4284,15 @@ function setupEvents() {
 
   // Creative Mode Toggle
   if (el.toggleCreativeMode) {
-    el.toggleCreativeMode.checked = state.creativeMode;
+    el.toggleCreativeMode.checked = state.creativeMode && state.serverMode === 'gac';
+    el.toggleCreativeMode.disabled = (state.serverMode !== 'gac');
     el.toggleCreativeMode.addEventListener('change', (e) => {
+      if (state.serverMode !== 'gac') {
+        el.toggleCreativeMode.checked = false;
+        state.creativeMode = false;
+        showToast('โหมดสร้างสรรค์รองรับเฉพาะบนเซิร์ฟเวอร์ GaC เท่านั้น', 'warning');
+        return;
+      }
       state.creativeMode = e.target.checked;
       localStorage.setItem('gac_srtool_creative_mode', state.creativeMode);
       if (el.badgeCreativeMode) {
@@ -3406,8 +4305,8 @@ function setupEvents() {
   }
 
   // Quick Action Buttons on Dashboard
-  el.btnQuickEnergy50?.addEventListener('click', () => quickSetTeamEnergy(0.5));
-  el.btnQuickEnergy100?.addEventListener('click', () => quickSetTeamEnergy(1.0));
+  el.btnQuickLineupE0S1?.addEventListener('click', quickSetLineupE0S1);
+  el.btnQuickLineupRelics?.addEventListener('click', quickEquipLineupRelics);
   el.btnQuickUnlockAllAvatars?.addEventListener('click', quickUnlockAllAvatars);
   el.btnQuickAddAllLcs?.addEventListener('click', quickAddAll5StarLightcones);
   el.btnQuickTeleportTrain?.addEventListener('click', quickTeleportAstralExpress);

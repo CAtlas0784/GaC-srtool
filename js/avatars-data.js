@@ -2096,7 +2096,12 @@ export function getAvatarInfo(avatarId, langOverride = null) {
     };
   }
 
-  const localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Avatar ${avatarId}`;
+  let localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Avatar ${avatarId}`;
+  if (localizedName.includes('{NICKNAME}')) {
+    const tbName = lang === 'th' ? 'ผู้บุกเบิก (Trailblazer)' : 'Trailblazer';
+    localizedName = localizedName.replace(/\{NICKNAME\}/g, tbName).trim();
+    if (!localizedName) localizedName = tbName;
+  }
 
   return {
     name: localizedName,
