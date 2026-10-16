@@ -292,7 +292,9 @@ export const TRANSLATIONS = {
     "quickGenRecDesc": "สร้างรีลิกส์ 5★ +15 ตรงเซ็ตและสเตตัสหลักที่ดีที่สุด",
     "btnGenAndEquip": "สร้าง & สวมใส่",
     "selectFromInventory": "เลือกจากคลังเก็บของ (ตรงช่อง)",
-    "btnAllE0S1": "⚡ ปรับ E0S1 ทุกตัว"
+    "btnAllE0S1": "⚡ ปรับ E0S1 ทุกตัว",
+    "qaGachabaseTitle": "ดึงข้อมูล Gachabase",
+    "qaGachabaseDesc": "นำเข้าตัวละคร/กรวยแสง เบต้าหรือใหม่ล่าสุด"
   },
   "en": {
     "ahaGlobalDesc": "Enable server-wide Aeon ★ Aha special trait",
@@ -327,6 +329,8 @@ export const TRANSLATIONS = {
     "qaTeleportDesc": "Return to Parlor Car safe hub",
     "qaClearLineupTitle": "Clear Team Lineup",
     "qaClearLineupDesc": "Empty all slots to rebuild team",
+    "qaGachabaseTitle": "Fetch from Gachabase",
+    "qaGachabaseDesc": "Import latest beta & datamined characters/LCs",
     "toastEnergy50": "Team energy set to 50% (standard)",
     "toastEnergy100": "Team energy set to 100% (instant burst)",
     "toastUnlockedAll": "Unlocked all 70+ characters at E6",
