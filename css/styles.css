@@ -712,7 +712,7 @@ body {
    ========================================================================== */
 .lineup-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.25rem;
 }
 
@@ -764,6 +764,64 @@ body {
   padding: 0.2rem 0.5rem;
   border-radius: 9999px;
   border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.btn-lineup-remove-slot {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.btn-lineup-remove-slot:hover {
+  background: rgba(239, 68, 68, 0.5);
+  border-color: var(--accent-red);
+  color: #fff;
+  transform: scale(1.12);
+}
+
+.lineup-add-slot-card {
+  border-style: dashed;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.lineup-add-slot-card:hover {
+  border-color: var(--accent-green);
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.25);
+}
+
+.badge-creative {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  letter-spacing: 0.03em;
+  animation: pulseCreativeGlow 2.5s infinite;
+}
+
+@keyframes pulseCreativeGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.6); }
 }
 
 /* Ex Rank Toggle Switch */
@@ -1127,7 +1185,7 @@ input:checked + .slider:before {
 /* Responsive */
 @media (max-width: 900px) {
   .lineup-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   }
 }
 
@@ -1143,4 +1201,144 @@ input:checked + .slider:before {
   .lineup-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   Lineup Character Picker Modal Grid & Cards
+   ========================================================================== */
+.picker-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+  align-content: start;
+  grid-auto-rows: min-content;
+  min-height: 0;
+  width: 100%;
+}
+
+.picker-card-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0.65rem 0.85rem !important;
+  min-height: 60px !important;
+  height: auto !important;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.picker-card-item:hover {
+  transform: translateY(-2px);
+  background: var(--bg-card-hover);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.picker-card-item.card-rarity-5 {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(18, 24, 38, 0.95) 100%);
+}
+
+.picker-card-item.card-rarity-5:hover {
+  border-color: rgba(251, 191, 36, 0.9);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25);
+}
+
+.picker-card-item.card-rarity-4 {
+  border-color: rgba(192, 132, 252, 0.4);
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.08) 0%, rgba(18, 24, 38, 0.95) 100%);
+}
+
+.picker-card-item.card-rarity-4:hover {
+  border-color: rgba(192, 132, 252, 0.9);
+  box-shadow: 0 6px 20px rgba(192, 132, 252, 0.25);
+}
+
+.picker-card-item .picker-avatar-img-wrap {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.picker-card-item.card-rarity-5 .picker-avatar-img-wrap {
+  border-color: var(--accent-gold);
+}
+
+.picker-card-item.card-rarity-4 .picker-avatar-img-wrap {
+  border-color: var(--accent-purple);
+}
+
+.picker-card-item .picker-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.picker-card-item .picker-avatar-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.picker-card-item .picker-avatar-name {
+  font-weight: 700;
+  font-size: 0.925rem;
+  color: var(--text-highlight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.picker-card-item .picker-avatar-subinfo {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.picker-remove-card {
+  grid-column: 1 / -1;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.6rem !important;
+  padding: 0.75rem 1rem !important;
+  min-height: 48px !important;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px dashed rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+  box-sizing: border-box;
+}
+
+.picker-remove-card:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: var(--accent-red);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
 }

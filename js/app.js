@@ -15,7 +15,8 @@ const state = {
   currentJsonMode: 'freesr',
   activeTab: 'tab-dashboard',
   selectedLineupSlot: null,
-  selectedAvatarDetail: null
+  selectedAvatarDetail: null,
+  creativeMode: localStorage.getItem('gac_srtool_creative_mode') === 'true'
 };
 
 // UI Elements Map
@@ -43,6 +44,8 @@ const el = {
   lblFloorId: document.getElementById('lbl-floor-id'),
   lblCoordinates: document.getElementById('lbl-coordinates'),
   lineupContainer: document.getElementById('lineup-container'),
+  toggleCreativeMode: document.getElementById('toggle-creative-mode'),
+  badgeCreativeMode: document.getElementById('badge-creative-mode'),
   btnQuickMaxAll: document.getElementById('btn-quick-max-all'),
   btnQuickSyncPersistent: document.getElementById('btn-quick-sync-persistent'),
 
@@ -566,6 +569,13 @@ async function refreshStatus() {
 
 // Render party lineup cards
 function renderLineup(lineups) {
+  if (el.toggleCreativeMode) {
+    el.toggleCreativeMode.checked = state.creativeMode;
+  }
+  if (el.badgeCreativeMode) {
+    el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
+  }
+
   el.lineupContainer.innerHTML = '';
   let currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
 
@@ -576,15 +586,29 @@ function renderLineup(lineups) {
     currentLineup = mapped;
   }
 
-  for (let slot = 0; slot < 4; slot++) {
+  // Determine slots to render
+  let slotKeys = [];
+  if (state.creativeMode) {
+    slotKeys = Object.keys(currentLineup).map(k => parseInt(k, 10)).sort((a, b) => a - b);
+    if (slotKeys.length === 0) slotKeys = [0];
+  } else {
+    slotKeys = [0, 1, 2, 3];
+  }
+
+  slotKeys.forEach(slot => {
     const avatarId = currentLineup[slot] || currentLineup[String(slot)] || 0;
     const slotCard = document.createElement('div');
     slotCard.className = `lineup-slot-card ${avatarId ? 'filled' : ''}`;
     slotCard.title = t('slotTooltip');
 
+    const removeSlotBtnHtml = state.creativeMode ? `
+      <button type="button" class="btn-lineup-remove-slot" title="${t('deleteItem') || 'ลบ'}" data-slot="${slot}">✕</button>
+    ` : '';
+
     if (avatarId === 0) {
       slotCard.innerHTML = `
         <div class="lineup-slot-num">Slot ${slot + 1}</div>
+        ${removeSlotBtnHtml}
         <div style="font-size: 2.2rem; color: var(--text-muted); opacity: 0.5;">➕</div>
         <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">${t('slotEmpty')}</div>
       `;
@@ -592,11 +616,12 @@ function renderLineup(lineups) {
       const info = getAvatarInfo(avatarId);
       slotCard.innerHTML = `
         <div class="lineup-slot-num">Slot ${slot + 1}</div>
+        ${removeSlotBtnHtml}
         <img class="lineup-slot-img"
              src="./assets/avatars/${avatarId}.png"
              onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';}"
              alt="${info.name}">
-        <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem;">${info.name}</div>
+        <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${info.name}</div>
         <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem; justify-content: center; align-items: center;">
           ${getElementIconHtml(info.element, 20)}
           ${getPathIconHtml(info.path, 20)}
@@ -604,12 +629,111 @@ function renderLineup(lineups) {
       `;
     }
 
-    slotCard.addEventListener('click', () => {
+    slotCard.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-lineup-remove-slot')) {
+        e.stopPropagation();
+        removeLineupSlot(slot);
+        return;
+      }
       openLineupPicker(slot);
     });
 
     el.lineupContainer.appendChild(slotCard);
+  });
+
+  // In Creative Mode: render "+ เพิ่ม Slot" button card
+  if (state.creativeMode) {
+    const addSlotCard = document.createElement('div');
+    addSlotCard.className = 'lineup-slot-card lineup-add-slot-card';
+    addSlotCard.title = t('btnAddSlot') || '+ เพิ่ม Slot';
+    addSlotCard.innerHTML = `
+      <div style="font-size: 2.2rem; color: var(--accent-green); line-height: 1;">➕</div>
+      <div style="font-weight: 700; color: var(--accent-green); margin-top: 0.5rem;">${t('btnAddSlot') || '+ เพิ่ม Slot'}</div>
+    `;
+    addSlotCard.addEventListener('click', () => {
+      addLineupSlot();
+    });
+    el.lineupContainer.appendChild(addSlotCard);
   }
+}
+
+// Add extra slot in Creative Mode
+async function addLineupSlot() {
+  state.statusData = state.statusData || {};
+  let currentLineup = { ...(state.statusData.lineups || DEFAULT_LINEUP) };
+  if (Array.isArray(currentLineup)) {
+    const mapped = {};
+    currentLineup.forEach((id, idx) => { mapped[idx] = id; });
+    currentLineup = mapped;
+  }
+  const keys = Object.keys(currentLineup).map(k => parseInt(k, 10)).sort((a, b) => a - b);
+  const nextSlot = keys.length > 0 ? Math.max(...keys) + 1 : 0;
+  currentLineup[nextSlot] = 0;
+  state.statusData.lineups = currentLineup;
+
+  if (state.fullFreesrData) {
+    state.fullFreesrData.lineups = currentLineup;
+    if (state.fullFreesrData.battle_config) {
+      state.fullFreesrData.battle_config.custom_battle_lineup = currentLineup;
+    }
+  }
+
+  if (state.isConnected) {
+    if (state.serverMode === 'gac') {
+      await apiCall('/api/persistent', 'POST', { lineups: currentLineup }).catch(() => {});
+    } else {
+      await saveFreesrChangesToServer().catch(() => {});
+    }
+  }
+
+  renderLineup(currentLineup);
+  openLineupPicker(nextSlot);
+}
+
+// Remove slot in Creative Mode
+async function removeLineupSlot(slotIndex) {
+  state.statusData = state.statusData || {};
+  let currentLineup = { ...(state.statusData.lineups || DEFAULT_LINEUP) };
+  if (Array.isArray(currentLineup)) {
+    const mapped = {};
+    currentLineup.forEach((id, idx) => { mapped[idx] = id; });
+    currentLineup = mapped;
+  }
+
+  const keys = Object.keys(currentLineup).map(k => parseInt(k, 10)).sort((a, b) => a - b);
+  const newLineup = {};
+  let newIdx = 0;
+  for (const k of keys) {
+    if (k !== slotIndex) {
+      newLineup[newIdx] = currentLineup[k];
+      newIdx++;
+    }
+  }
+
+  if (Object.keys(newLineup).length === 0) {
+    newLineup[0] = 0;
+  }
+
+  state.statusData.lineups = newLineup;
+
+  if (state.fullFreesrData) {
+    state.fullFreesrData.lineups = newLineup;
+    if (state.fullFreesrData.battle_config) {
+      state.fullFreesrData.battle_config.custom_battle_lineup = newLineup;
+    }
+  }
+
+  if (state.isConnected) {
+    if (state.serverMode === 'gac') {
+      await apiCall('/api/persistent', 'POST', { lineups: newLineup }).catch(() => {});
+    } else {
+      await saveFreesrChangesToServer().catch(() => {});
+    }
+  }
+
+  renderLineup(newLineup);
+  const toastMsg = t('toastSlotRemoved', { slot: slotIndex + 1 }) || `ลบ Slot ${slotIndex + 1} เรียบร้อยแล้ว`;
+  showToast(toastMsg, 'info');
 }
 
 // Lineup Picker Modal
@@ -627,13 +751,10 @@ function renderPickerGrid() {
 
   // Option to remove character from slot
   const removeCard = document.createElement('div');
-  removeCard.className = 'card';
-  removeCard.style.padding = '0.75rem';
-  removeCard.style.textAlign = 'center';
-  removeCard.style.cursor = 'pointer';
+  removeCard.className = 'picker-remove-card';
   removeCard.innerHTML = `
-    <div style="font-size: 1.5rem; color: var(--accent-red);">❌</div>
-    <div style="font-size: 0.85rem; font-weight: bold; margin-top: 0.35rem; color: var(--accent-red);">${t('removeFromTeam')}</div>
+    <span style="font-size: 1.15rem; line-height: 1;">❌</span>
+    <span>${t('removeFromTeam')}</span>
   `;
   removeCard.addEventListener('click', async () => {
     await assignAvatarToLineup(state.selectedLineupSlot, 0);
@@ -650,26 +771,21 @@ function renderPickerGrid() {
     }
 
     const card = document.createElement('div');
-    card.className = `card avatar-card card-rarity-${meta.rarity}`;
-    card.style.minHeight = 'auto';
-    card.style.padding = '0.85rem';
-    card.style.cursor = 'pointer';
+    card.className = `picker-card-item card-rarity-${meta.rarity}`;
 
     card.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 0.65rem;">
-        <div class="avatar-image-container" style="width: 44px; height: 44px;">
-          <img class="avatar-img"
-               src="./assets/avatars/${item.avatar_id}.png"
-               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';}"
-               alt="${meta.name}">
-        </div>
-        <div>
-          <div style="font-weight: 700; font-size: 0.9rem;">${meta.name}</div>
-          <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
-            ${getElementIconHtml(meta.element, 16)}
-            ${getPathIconHtml(meta.path, 16)}
-            <span style="margin-left: 0.25rem;">Lv. ${item.level} • E${item.rank}</span>
-          </div>
+      <div class="picker-avatar-img-wrap">
+        <img class="picker-avatar-img"
+             src="./assets/avatars/${item.avatar_id}.png"
+             onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';}"
+             alt="${meta.name}">
+      </div>
+      <div class="picker-avatar-info">
+        <div class="picker-avatar-name" title="${meta.name}">${meta.name}</div>
+        <div class="picker-avatar-subinfo">
+          ${getElementIconHtml(meta.element, 18)}
+          ${getPathIconHtml(meta.path, 18)}
+          <span style="font-weight: 600; margin-left: 0.2rem;">Lv. ${item.level} • E${item.rank}</span>
         </div>
       </div>
     `;
@@ -688,8 +804,25 @@ async function assignAvatarToLineup(slot, avatarId) {
   try {
     state.statusData = state.statusData || {};
     const lineups = { ...(state.statusData.lineups || DEFAULT_LINEUP) };
+
+    // In Normal Mode: Prevent duplicates by clearing other slots that had this avatar
+    if (!state.creativeMode && avatarId !== 0) {
+      for (const s in lineups) {
+        if (parseInt(s, 10) !== slot && lineups[s] === avatarId) {
+          lineups[s] = 0;
+        }
+      }
+    }
+
     lineups[slot] = avatarId;
     state.statusData.lineups = lineups;
+
+    if (state.fullFreesrData) {
+      state.fullFreesrData.lineups = lineups;
+      if (state.fullFreesrData.battle_config) {
+        state.fullFreesrData.battle_config.custom_battle_lineup = lineups;
+      }
+    }
 
     if (state.isConnected) {
       if (state.serverMode === 'gac') {
@@ -1951,6 +2084,21 @@ function setupEvents() {
   // Lineup Picker Modal Controls
   el.btnClosePickerModal.addEventListener('click', () => el.modalLineupPicker.classList.remove('active'));
   el.pickerSearch.addEventListener('input', renderPickerGrid);
+
+  // Creative Mode Toggle
+  if (el.toggleCreativeMode) {
+    el.toggleCreativeMode.checked = state.creativeMode;
+    el.toggleCreativeMode.addEventListener('change', (e) => {
+      state.creativeMode = e.target.checked;
+      localStorage.setItem('gac_srtool_creative_mode', state.creativeMode);
+      if (el.badgeCreativeMode) {
+        el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
+      }
+      renderLineup(state.statusData?.lineups);
+      const title = t('lblCreativeMode') || 'โหมดสร้างสรรค์';
+      showToast(`${title}: ${state.creativeMode ? 'ON' : 'OFF'}`, 'info');
+    });
+  }
 
   // Quick Action Buttons on Dashboard
   el.btnQuickMaxAll.addEventListener('click', maxAllAvatars);
