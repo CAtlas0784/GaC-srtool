@@ -1,5 +1,4 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { PRESET_TELEPORTS, getTeleportName } from './teleports-data.js';
 import { SUPPORTED_LANGUAGES, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
 
 // Application State
@@ -18,7 +17,7 @@ const state = {
   selectedAvatarDetail: null
 };
 
-// UI Elements
+// UI Elements Map
 const el = {
   serverModeSelect: document.getElementById('server-mode-select'),
   settingServerMode: document.getElementById('setting-server-mode'),
@@ -44,7 +43,6 @@ const el = {
   lblCoordinates: document.getElementById('lbl-coordinates'),
   lineupContainer: document.getElementById('lineup-container'),
   btnQuickMaxAll: document.getElementById('btn-quick-max-all'),
-  btnQuickWarpExpress: document.getElementById('btn-quick-warp-express'),
   btnQuickSyncPersistent: document.getElementById('btn-quick-sync-persistent'),
 
   // Avatars
@@ -75,17 +73,7 @@ const el = {
   btnExrankEnableAll: document.getElementById('btn-exrank-enable-all'),
   btnExrankDisableAll: document.getElementById('btn-exrank-disable-all'),
 
-  // Teleport
-  teleportPresetsList: document.getElementById('teleport-presets-list'),
-  formCustomTeleport: document.getElementById('form-custom-teleport'),
-  tpPlane: document.getElementById('tp-plane'),
-  tpFloor: document.getElementById('tp-floor'),
-  tpEntry: document.getElementById('tp-entry'),
-  tpX: document.getElementById('tp-x'),
-  tpY: document.getElementById('tp-y'),
-  tpZ: document.getElementById('tp-z'),
-
-  // JSON
+  // JSON Tab
   btnSelectFreesr: document.getElementById('btn-select-freesr'),
   btnSelectPersistent: document.getElementById('btn-select-persistent'),
   btnJsonBeautify: document.getElementById('btn-json-beautify'),
@@ -111,6 +99,8 @@ const el = {
   modalCharLevel: document.getElementById('modal-char-level'),
   modalCharPromotion: document.getElementById('modal-char-promotion'),
   modalCharEidolonBtns: document.getElementById('modal-char-eidolon-btns'),
+  btnModalQuickE0: document.getElementById('btn-modal-quick-e0'),
+  btnModalQuickE6: document.getElementById('btn-modal-quick-e6'),
   btnModalMaxSkills: document.getElementById('btn-modal-max-skills'),
   btnModalSaveAvatar: document.getElementById('btn-modal-save-avatar'),
 
@@ -129,22 +119,28 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   
-  let icon = 'ℹ️';
-  if (type === 'success') icon = '✅';
-  if (type === 'error') icon = '❌';
+  const icons = {
+    info: 'ℹ️',
+    success: '✅',
+    warning: '⚠️',
+    error: '❌'
+  };
 
-  toast.innerHTML = `<span>${icon}</span><span style="flex: 1;">${message}</span>`;
+  toast.innerHTML = `
+    <span>${icons[type] || 'ℹ️'}</span>
+    <span style="flex: 1; word-break: break-word;">${message}</span>
+  `;
+
   el.toastContainer.appendChild(toast);
-
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
+    toast.style.transform = 'translateX(100%)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 4000);
 }
 
-// API Fetch Helper
+// Low-level API caller
 async function apiCall(endpoint, method = 'GET', data = null) {
   const cleanBase = state.apiUrl.replace(/\/+$/, '');
   const url = `${cleanBase}${endpoint}`;
@@ -162,7 +158,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
     options.signal = controller.signal;
 
     const res = await fetch(url, options);
@@ -220,11 +216,10 @@ function applyTranslations() {
     elem.placeholder = t(key);
   });
 
-  if (state.statusData) {
-    renderLineup(state.statusData.lineups);
-    renderExRanks(state.statusData.ex_ranks || []);
+  renderLineup(state.statusData?.lineups);
+  if (state.statusData?.ex_ranks) {
+    renderExRanks(state.statusData.ex_ranks);
   }
-  renderTeleportPresets();
   if (state.avatarsList.length > 0) {
     renderAvatarsGrid();
   }
@@ -251,26 +246,23 @@ function setupLanguageSelector() {
   });
 }
 
-// Setup Server Mode Selector
+// Server Mode Setup
 function setupServerModes() {
   const updateModeDisplay = (mode) => {
     state.serverMode = mode;
     localStorage.setItem('gac_srtool_mode', mode);
     el.serverModeSelect.value = mode;
-    el.settingServerMode.value = mode;
+    if (el.settingServerMode) el.settingServerMode.value = mode;
 
     if (mode === 'gac') {
       el.lblActiveMode.textContent = 'GaC-hkrpg-go (เซิร์ฟเวอร์หลัก / Full Control)';
-      el.lblActiveMode.style.color = 'var(--accent-cyan)';
-      el.tabBtnPersistent.style.display = 'inline-flex';
+      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'inline-flex';
     } else if (mode === 'firefly') {
       el.lblActiveMode.textContent = 'FireflyGo (FreeSR Compatible)';
-      el.lblActiveMode.style.color = '#f87171';
-      el.tabBtnPersistent.style.display = 'none';
+      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
     } else if (mode === 'robin') {
       el.lblActiveMode.textContent = 'RobinSR (FreeSR Compatible)';
-      el.lblActiveMode.style.color = '#c084fc';
-      el.tabBtnPersistent.style.display = 'none';
+      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
     }
   };
 
@@ -280,14 +272,27 @@ function setupServerModes() {
     refreshStatus();
   });
 
-  el.settingServerMode.addEventListener('change', (e) => {
-    updateModeDisplay(e.target.value);
-    showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode.textContent}`, 'info');
-    refreshStatus();
-  });
-
   updateModeDisplay(state.serverMode);
 }
+
+// Initialize Avatars Database: Populates all known avatars from metadata
+function initAvatarsList() {
+  if (state.avatarsList.length > 0) return;
+  const list = [];
+  for (const aidStr in AVATAR_METADATA) {
+    const aid = parseInt(aidStr, 10);
+    list.push({
+      avatar_id: aid,
+      level: 80,
+      promotion: 6,
+      rank: 6
+    });
+  }
+  state.avatarsList = list;
+}
+
+// Default lineup matching our persistent server data
+const DEFAULT_LINEUP = { 0: 1511, 1: 1506, 2: 1502, 3: 1503 };
 
 // Refresh status from server
 async function refreshStatus() {
@@ -296,7 +301,6 @@ async function refreshStatus() {
     if (state.serverMode === 'gac') {
       data = await apiCall('/api/status');
     } else {
-      // FireflyGo / RobinSR fallback check
       const freesr = await apiCall('/api/freesr').catch(() => null);
       if (freesr && freesr.data) {
         data = {
@@ -304,7 +308,7 @@ async function refreshStatus() {
           avatar_count: Object.keys(freesr.data.avatars || {}).length,
           lightcone_count: (freesr.data.lightcones || []).length,
           relic_count: (freesr.data.relics || []).length,
-          lineups: freesr.data.lineups || { 0: 8001 },
+          lineups: freesr.data.lineups || DEFAULT_LINEUP,
           scene: freesr.data.scene,
           position: freesr.data.position,
           ex_ranks: []
@@ -318,7 +322,7 @@ async function refreshStatus() {
     setConnectionStatus(true);
 
     el.lblApiUrl.textContent = state.apiUrl;
-    el.statAvatars.textContent = data.avatar_count ?? 0;
+    el.statAvatars.textContent = data.avatar_count ?? state.avatarsList.length;
     el.statLightcones.textContent = data.lightcone_count ?? 0;
     el.statRelics.textContent = data.relic_count ?? 0;
 
@@ -332,18 +336,25 @@ async function refreshStatus() {
       el.lblCoordinates.textContent = `X: ${x}, Y: ${y}, Z: ${z}`;
     }
 
-    renderLineup(data.lineups);
+    renderLineup(data.lineups || DEFAULT_LINEUP);
     renderExRanks(data.ex_ranks || []);
+    loadAvatars();
   } catch (err) {
-    setConnectionStatus(false, t('connectFailed'));
+    setConnectionStatus(false, t('offline'));
+    el.lblApiUrl.textContent = state.apiUrl;
+    el.statAvatars.textContent = state.avatarsList.length;
+    // Keep rendering with current or default lineup so UI is always functional
+    renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   }
 }
 
 // Render party lineup cards
 function renderLineup(lineups) {
   el.lineupContainer.innerHTML = '';
+  const currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
+
   for (let slot = 0; slot < 4; slot++) {
-    const avatarId = lineups ? (lineups[slot] || 0) : 0;
+    const avatarId = currentLineup[slot] || currentLineup[String(slot)] || 0;
     const slotCard = document.createElement('div');
     slotCard.className = `lineup-slot-card ${avatarId ? 'filled' : ''}`;
     slotCard.title = 'คลิกเพื่อเลือกตัวละครลงตำแหน่งนี้';
@@ -363,7 +374,7 @@ function renderLineup(lineups) {
              src="./assets/avatars/${avatarId}.png"
              onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';}"
              alt="${info.name}">
-        <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight);">${info.name}</div>
+        <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem;">${info.name}</div>
         <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
           <span class="element-badge ${elemClass}">${info.element}</span>
           <span class="path-badge">${info.path}</span>
@@ -392,7 +403,7 @@ function renderPickerGrid() {
   const search = el.pickerSearch.value.trim().toLowerCase();
   el.pickerAvatarsGrid.innerHTML = '';
 
-  // Add Remove button
+  // Option to remove character from slot
   const removeCard = document.createElement('div');
   removeCard.className = 'card';
   removeCard.style.padding = '0.75rem';
@@ -432,7 +443,10 @@ function renderPickerGrid() {
         </div>
         <div>
           <div style="font-weight: 700; font-size: 0.9rem;">${meta.name}</div>
-          <div style="font-size: 0.725rem; color: var(--text-muted);">Lv. ${item.level} • E${item.rank}</div>
+          <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.15rem;">
+            <span class="element-badge ${elemClass}" style="font-size: 0.65rem; padding: 0.05rem 0.3rem;">${meta.element}</span>
+            <span>Lv. ${item.level} • E${item.rank}</span>
+          </div>
         </div>
       </div>
     `;
@@ -449,38 +463,48 @@ function renderPickerGrid() {
 // Assign avatar to lineup slot
 async function assignAvatarToLineup(slot, avatarId) {
   try {
-    if (!state.statusData || !state.statusData.lineups) return;
-    const lineups = { ...state.statusData.lineups };
+    state.statusData = state.statusData || {};
+    const lineups = { ...(state.statusData.lineups || DEFAULT_LINEUP) };
     lineups[slot] = avatarId;
     state.statusData.lineups = lineups;
 
-    if (state.serverMode === 'gac') {
-      await apiCall('/api/persistent', 'POST', { lineups });
-    } else {
-      // In FreeSR standard mode
-      const freesr = await apiCall('/api/freesr');
-      if (freesr && freesr.data) {
-        freesr.data.lineups = lineups;
-        await apiCall('/api/freesr', 'POST', freesr.data);
+    if (state.isConnected) {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/persistent', 'POST', { lineups });
+      } else {
+        await saveFreesrChangesToServer();
       }
     }
-    showToast(`อัปเดตทีม Slot ${slot + 1} เรียบร้อย`, 'success');
+
     renderLineup(lineups);
+    const name = avatarId ? getAvatarInfo(avatarId).name : 'ว่าง';
+    showToast(`อัปเดตทีม Slot ${slot + 1} เป็น: ${name}`, 'success');
   } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+    showToast(`เกิดข้อผิดพลาดในการเปลี่ยนทีม: ${err.message}`, 'error');
   }
 }
 
 // Load and Render Avatars
 async function loadAvatars() {
-  try {
-    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">${t('checking')}</div>`;
-    const res = await apiCall('/api/freesr/avatars');
-    state.avatarsList = res.avatars || [];
-    renderAvatarsGrid();
-  } catch (err) {
-    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--accent-red);">${err.message}</div>`;
+  initAvatarsList();
+  if (state.isConnected) {
+    try {
+      const res = await apiCall('/api/freesr/avatars');
+      if (res && res.avatars && res.avatars.length > 0) {
+        res.avatars.forEach(serverAv => {
+          const found = state.avatarsList.find(a => a.avatar_id === serverAv.avatar_id);
+          if (found) {
+            found.level = serverAv.level;
+            found.promotion = serverAv.promotion;
+            found.rank = serverAv.rank;
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Live avatar list fetch failed, using local list:', err);
+    }
   }
+  renderAvatarsGrid();
 }
 
 function renderAvatarsGrid() {
@@ -509,7 +533,7 @@ function renderAvatarsGrid() {
     card.className = `card avatar-card card-rarity-${meta.rarity}`;
 
     const pipsHtml = [0, 1, 2, 3, 4, 5, 6].map(rank => `
-      <button class="eidolon-pip ${item.rank >= rank ? 'active' : ''}" data-avatar="${item.avatar_id}" data-rank="${rank}" title="Eidolon ${rank}">
+      <button type="button" class="eidolon-pip ${item.rank >= rank ? 'active' : ''}" data-avatar="${item.avatar_id}" data-rank="${rank}" title="Eidolon ${rank}">
         ${rank}
       </button>
     `).join('');
@@ -537,14 +561,14 @@ function renderAvatarsGrid() {
       </div>
 
       <div class="eidolon-selector">
-        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">${t('eidolonLabel')}</span>
+        <span style="font-size: 0.75rem; color: #cbd5e1; font-weight: 700;">Eidolon:</span>
         <div class="eidolon-buttons">
           ${pipsHtml}
         </div>
       </div>
     `;
 
-    // Eidolon button clicks
+    // Eidolon quick button clicks
     card.querySelectorAll('.eidolon-pip').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -554,7 +578,7 @@ function renderAvatarsGrid() {
       });
     });
 
-    // Clicking card opens full character build modal!
+    // Clicking card opens full character build modal
     card.addEventListener('click', () => {
       openAvatarDetailModal(item);
     });
@@ -584,26 +608,59 @@ function openAvatarDetailModal(avatarItem) {
   el.modalCharLevel.value = avatarItem.level || 80;
   el.modalCharPromotion.value = avatarItem.promotion || 6;
 
-  // Render modal eidolon pips
+  renderModalEidolonPips(avatarItem.rank ?? 6);
+  el.modalAvatarDetail.classList.add('active');
+}
+
+function renderModalEidolonPips(currentRank) {
   el.modalCharEidolonBtns.innerHTML = '';
   for (let r = 0; r <= 6; r++) {
     const btn = document.createElement('button');
-    btn.className = `eidolon-pip ${avatarItem.rank >= r ? 'active' : ''}`;
-    btn.textContent = r;
-    btn.style.width = '32px';
-    btn.style.height = '32px';
-    btn.style.fontSize = '0.9rem';
+    btn.type = 'button';
+    btn.className = `eidolon-pip modal-eidolon-pip ${currentRank >= r ? 'active' : ''}`;
+    btn.textContent = `E${r}`;
+    btn.title = `Eidolon ${r}`;
     btn.addEventListener('click', () => {
-      avatarItem.rank = r;
-      el.modalCharEidolonBtns.querySelectorAll('.eidolon-pip').forEach((b, idx) => {
-        if (idx <= r) b.classList.add('active');
-        else b.classList.remove('active');
-      });
+      if (state.selectedAvatarDetail) {
+        state.selectedAvatarDetail.rank = r;
+      }
+      renderModalEidolonPips(r);
     });
     el.modalCharEidolonBtns.appendChild(btn);
   }
+}
 
-  el.modalAvatarDetail.classList.add('active');
+// Set avatar rank (Used by both card pips and modal)
+async function setAvatarRank(avatarId, rank) {
+  const target = state.avatarsList.find(a => a.avatar_id === avatarId);
+  if (target) {
+    target.rank = rank;
+  }
+  if (state.fullFreesrData?.avatars?.[avatarId]) {
+    state.fullFreesrData.avatars[avatarId].data.rank = rank;
+  }
+
+  renderAvatarsGrid();
+
+  if (state.selectedAvatarDetail && state.selectedAvatarDetail.avatar_id === avatarId) {
+    state.selectedAvatarDetail.rank = rank;
+    renderModalEidolonPips(rank);
+  }
+
+  if (state.isConnected) {
+    try {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+      showToast(t('avatarRankSuccess', { id: avatarId, rank }), 'success');
+    } catch (err) {
+      console.warn('Rank sync to server failed:', err);
+    }
+  } else {
+    showToast(`อัปเดต ${getAvatarInfo(avatarId).name} เป็น E${rank} (บันทึกในเครื่อง)`, 'info');
+  }
 }
 
 // Save avatar details from modal
@@ -614,26 +671,39 @@ async function saveAvatarDetails() {
   const promotion = parseInt(el.modalCharPromotion.value, 10) || 6;
   const rank = state.selectedAvatarDetail.rank ?? 6;
 
-  try {
-    await apiCall('/api/freesr/avatars', 'POST', {
-      avatar_id: aid,
-      level,
-      promotion,
-      rank
-    });
-    showToast(`บันทึกตัวละคร ${aid} สำเร็จ (Lv. ${level}, Prom. ${promotion}, E${rank})`, 'success');
-    el.modalAvatarDetail.classList.remove('active');
+  state.selectedAvatarDetail.level = level;
+  state.selectedAvatarDetail.promotion = promotion;
+  state.selectedAvatarDetail.rank = rank;
 
-    // Update local state and re-render
-    const target = state.avatarsList.find(a => a.avatar_id === aid);
-    if (target) {
-      target.level = level;
-      target.promotion = promotion;
-      target.rank = rank;
-      renderAvatarsGrid();
+  const target = state.avatarsList.find(a => a.avatar_id === aid);
+  if (target) {
+    target.level = level;
+    target.promotion = promotion;
+    target.rank = rank;
+  }
+
+  if (state.fullFreesrData?.avatars?.[aid]) {
+    state.fullFreesrData.avatars[aid].level = level;
+    state.fullFreesrData.avatars[aid].promotion = promotion;
+    state.fullFreesrData.avatars[aid].data.rank = rank;
+  }
+
+  renderAvatarsGrid();
+  el.modalAvatarDetail.classList.remove('active');
+
+  if (state.isConnected) {
+    try {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: aid, level, promotion, rank });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+      showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย (Lv. ${level}, Prom. ${promotion}, E${rank})`, 'success');
+    } catch (err) {
+      showToast(`บันทึกในเครื่องแล้ว (ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message})`, 'warning');
     }
-  } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+  } else {
+    showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย (Lv. ${level}, Prom. ${promotion}, E${rank})`, 'success');
   }
 }
 
@@ -641,293 +711,331 @@ async function saveAvatarDetails() {
 async function maxSkillsForAvatar() {
   if (!state.selectedAvatarDetail) return;
   const aid = state.selectedAvatarDetail.avatar_id;
-  try {
-    // Read freesr data, max skill levels for this avatar, and push back
-    const freesr = await apiCall('/api/freesr');
-    if (freesr && freesr.data && freesr.data.avatars && freesr.data.avatars[aid]) {
-      const av = freesr.data.avatars[aid];
-      if (av.data && av.data.skills) {
-        for (const k in av.data.skills) {
-          av.data.skills[k] = 10;
-        }
-      }
+  el.modalCharLevel.value = 80;
+  el.modalCharPromotion.value = 6;
+  state.selectedAvatarDetail.level = 80;
+  state.selectedAvatarDetail.promotion = 6;
+  state.selectedAvatarDetail.rank = 6;
+  renderModalEidolonPips(6);
+
+  if (state.fullFreesrData?.avatars?.[aid]) {
+    const av = state.fullFreesrData.avatars[aid];
+    av.level = 80;
+    av.promotion = 6;
+    av.data.rank = 6;
+    if (av.data.skills) {
+      for (const k in av.data.skills) av.data.skills[k] = 10;
+    }
+  }
+
+  showToast(`อัพเลเวล 80, เลื่อนขั้น 6, E6 และ Traces 10/10 สำหรับ ${getAvatarInfo(aid).name} สำเร็จ!`, 'success');
+}
+
+// Max all avatars
+async function maxAllAvatars() {
+  if (!confirm(t('confirmMaxAll'))) return;
+  state.avatarsList.forEach(a => {
+    a.level = 80;
+    a.promotion = 6;
+    a.rank = 6;
+  });
+
+  if (state.fullFreesrData?.avatars) {
+    for (const aid in state.fullFreesrData.avatars) {
+      const av = state.fullFreesrData.avatars[aid];
       av.level = 80;
       av.promotion = 6;
       av.data.rank = 6;
-      await apiCall('/api/freesr', 'POST', freesr.data);
-      showToast(`อัพสกิลและ Traces ทั้งหมดของตัวละคร ${aid} เป็น 10/10 สำเร็จ!`, 'success');
-      loadAvatars();
+      if (av.data.skills) {
+        for (const k in av.data.skills) av.data.skills[k] = 10;
+      }
     }
-  } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+  }
+
+  renderAvatarsGrid();
+
+  if (state.isConnected) {
+    try {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/avatar/max_all', 'POST', {});
+      } else {
+        await saveFreesrChangesToServer();
+      }
+      showToast(t('maxAllSuccess'), 'success');
+      refreshStatus();
+    } catch (err) {
+      showToast(`ปรับในเครื่องสำเร็จ แต่ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message}`, 'warning');
+    }
+  } else {
+    showToast('ปรับ Max Lv.80, เลื่อนขั้น 6, E6 ตัวละครทั้งหมดเรียบร้อย (โหมดออฟไลน์)', 'success');
   }
 }
 
-// Set avatar rank API
-async function setAvatarRank(avatarId, rank) {
-  try {
-    await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank });
-    showToast(t('avatarRankSuccess', { id: avatarId, rank }), 'success');
-    
-    const target = state.avatarsList.find(a => a.avatar_id === avatarId);
-    if (target) {
-      target.rank = rank;
-      renderAvatarsGrid();
+// Push local freesr changes to server
+async function saveFreesrChangesToServer() {
+  if (!state.fullFreesrData) return;
+  if (state.serverMode === 'firefly' || state.serverMode === 'robin') {
+    try {
+      await apiCall('/srtools', 'POST', { data: state.fullFreesrData });
+    } catch (e) {
+      await apiCall('/api/freesr', 'POST', state.fullFreesrData);
     }
-  } catch (err) {
-    showToast(`Error: ${err.message}`, 'error');
-  }
-}
-
-// Max all avatars API
-async function maxAllAvatars() {
-  if (!confirm(t('confirmMaxAll'))) return;
-  try {
-    await apiCall('/api/avatar/max_all', 'POST', {});
-    showToast(t('maxAllSuccess'), 'success');
-    loadAvatars();
-    refreshStatus();
-  } catch (err) {
-    showToast(`Error: ${err.message}`, 'error');
+  } else {
+    await apiCall('/api/freesr', 'POST', state.fullFreesrData);
   }
 }
 
 // Load Equipment (Lightcones & Relics)
 async function loadEquipment() {
   try {
-    const res = await apiCall('/api/freesr');
-    if (!res || !res.data) return;
-    state.fullFreesrData = res.data;
+    let lcs = [];
+    let relics = [];
 
-    const lcs = res.data.lightcones || [];
-    const relics = res.data.relics || [];
+    if (state.fullFreesrData) {
+      lcs = state.fullFreesrData.lightcones || [];
+      relics = state.fullFreesrData.relics || [];
+    } else if (state.isConnected) {
+      const res = await apiCall('/api/freesr');
+      if (res && res.data) {
+        state.fullFreesrData = res.data;
+        lcs = res.data.lightcones || [];
+        relics = res.data.relics || [];
+      }
+    }
 
     el.badgeTotalLc.textContent = `${lcs.length} ชิ้น`;
     el.badgeTotalRelics.textContent = `${relics.length} ชิ้น`;
 
     // Render Lightcones
     el.lightconesList.innerHTML = '';
-    lcs.slice(0, 100).forEach(lc => {
-      const item = document.createElement('div');
-      item.className = 'card';
-      item.style.padding = '0.75rem';
-      item.style.display = 'flex';
-      item.style.justifyContent = 'space-between';
-      item.style.alignItems = 'center';
+    if (lcs.length === 0) {
+      el.lightconesList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">ยังไม่มีข้อมูลกรวยแสง (สามารถอัปโหลด freesr-data.json ในแท็บ JSON เพื่อดูได้)</div>';
+    } else {
+      lcs.slice(0, 100).forEach(lc => {
+        const item = document.createElement('div');
+        item.className = 'card';
+        item.style.padding = '0.75rem';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
 
-      const equipped = lc.equip_avatar ? getAvatarInfo(lc.equip_avatar).name : 'ไม่ได้สวมใส่';
-      item.innerHTML = `
-        <div>
-          <div style="font-weight: 700; font-size: 0.95rem;">Lightcone ID: ${lc.item_id} (UID: ${lc.internal_uid})</div>
-          <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-            Lv. ${lc.level} • ขัดเกลา S${lc.rank} • สวมใส่โดย: <strong style="color: var(--accent-cyan);">${equipped}</strong>
+        const equipped = lc.equip_avatar ? getAvatarInfo(lc.equip_avatar).name : 'ไม่ได้สวมใส่';
+        item.innerHTML = `
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Lightcone ID: ${lc.item_id} (UID: ${lc.internal_uid})</div>
+            <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Lv. ${lc.level} • ขัดเกลา S${lc.rank} • สวมใส่โดย: <strong style="color: var(--accent-cyan);">${equipped}</strong>
+            </div>
           </div>
-        </div>
-      `;
-      el.lightconesList.appendChild(item);
-    });
+        `;
+        el.lightconesList.appendChild(item);
+      });
+    }
 
     // Render Relics
     el.relicsList.innerHTML = '';
-    relics.slice(0, 100).forEach(r => {
-      const item = document.createElement('div');
-      item.className = 'card';
-      item.style.padding = '0.75rem';
-      item.style.display = 'flex';
-      item.style.justifyContent = 'space-between';
-      item.style.alignItems = 'center';
+    if (relics.length === 0) {
+      el.relicsList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">ยังไม่มีข้อมูลรีลิกส์ (สามารถอัปโหลด freesr-data.json ในแท็บ JSON เพื่อดูได้)</div>';
+    } else {
+      relics.slice(0, 100).forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'card';
+        item.style.padding = '0.75rem';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
 
-      const equipped = r.equip_avatar ? getAvatarInfo(r.equip_avatar).name : 'ไม่ได้สวมใส่';
-      const slotNum = r.relic_id % 10;
-      item.innerHTML = `
-        <div>
-          <div style="font-weight: 700; font-size: 0.95rem;">Relic ID: ${r.relic_id} (Slot: ${slotNum})</div>
-          <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-            Lv. ${r.level} • สเตตัสหลัก: ${r.main_affix_id} • สวมใส่โดย: <strong style="color: var(--accent-gold);">${equipped}</strong>
+        const equipped = r.equip_avatar ? getAvatarInfo(r.equip_avatar).name : 'ไม่ได้สวมใส่';
+        item.innerHTML = `
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">Relic ID: ${r.item_id} (UID: ${r.internal_uid})</div>
+            <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Lv. ${r.level} • สวมใส่โดย: <strong style="color: var(--accent-cyan);">${equipped}</strong>
+            </div>
           </div>
-        </div>
-      `;
-      el.relicsList.appendChild(item);
-    });
-
+        `;
+        el.relicsList.appendChild(item);
+      });
+    }
   } catch (err) {
-    showToast(`โหลดคลังอุปกรณ์ไม่สำเร็จ: ${err.message}`, 'error');
+    console.warn('Equipment loading error:', err);
   }
 }
 
-// Load Persistent Save Settings
+// Load Persistent Save Settings (Exclusive to GaC-hkrpg-go)
 async function loadPersistentSettings() {
+  if (state.serverMode !== 'gac') return;
   try {
     const res = await apiCall('/api/persistent');
-    if (!res || !res.persistent) return;
-    const p = res.persistent;
-    state.persistentData = p;
+    if (!res || !res.data) return;
+    state.persistentData = res.data;
 
-    if (p.main_character) {
-      el.persistentMcSelect.value = p.main_character;
+    if (res.data.main_character) {
+      el.persistentMcSelect.value = res.data.main_character;
     }
-    if (p.march_type) {
-      el.persistentMarchSelect.value = p.march_type;
+    if (res.data.march_type) {
+      el.persistentMarchSelect.value = res.data.march_type;
     }
-    el.toggleSwGlobal.checked = !!p.enable_sw_global;
-    el.toggleCastoriceGlobal.checked = !!p.enable_castorice_global;
+
+    el.toggleSwGlobal.checked = res.data.enable_sw_global !== false;
+    el.toggleCastoriceGlobal.checked = res.data.enable_castorice_global !== false;
   } catch (err) {
-    console.warn('Persistent settings not available in current mode:', err.message);
+    console.warn('Persistent settings loading error:', err);
   }
 }
 
-// Render Ex-Ranks
+// Render Ex-Rank Cards
 function renderExRanks(exList) {
+  if (!el.exrankList) return;
+  el.exrankList.innerHTML = '';
   if (!exList || exList.length === 0) {
-    el.exrankList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1rem;">ไม่มีข้อมูลตัวละคร Ex-Rank</div>';
+    el.exrankList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 2rem;">ไม่มีข้อมูล Ex-Rank</div>';
     return;
   }
 
-  el.exrankList.innerHTML = '';
-  exList.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'ex-switch-card';
-    const localizedMeta = getAvatarInfo(item.avatar_id);
-
-    card.innerHTML = `
-      <div style="display: flex; gap: 0.85rem; align-items: center;">
-        <div class="avatar-image-container" style="width: 52px; height: 52px;">
-          <img class="avatar-img"
-               src="./assets/avatars/${item.avatar_id}.png"
-               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
-               alt="${localizedMeta.name}">
-          <div class="avatar-icon-placeholder" style="display: none;">${localizedMeta.name.charAt(0)}</div>
-        </div>
-        <div>
-          <div style="font-weight: 800; font-size: 1.05rem;">${localizedMeta.name}</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">
-            Avatar ID: ${item.avatar_id} • Ex-Rank Skill ID: ${item.ex_rank_id}
-          </div>
-        </div>
-      </div>
-      <label class="switch">
-        <input type="checkbox" ${item.unlocked ? 'checked' : ''} data-avatar="${item.avatar_id}">
-        <span class="slider"></span>
-      </label>
-    `;
-
-    card.querySelector('input[type="checkbox"]').addEventListener('change', async (e) => {
-      const unlocked = e.target.checked;
-      const avatarId = item.avatar_id;
-      try {
-        await apiCall('/api/exrank/toggle', 'POST', { avatar_id: avatarId, unlocked });
-        const statusText = unlocked ? t('enabled') : t('disabled');
-        showToast(t('exrankToggleSuccess', { name: localizedMeta.name, status: statusText }), 'success');
-      } catch (err) {
-        e.target.checked = !unlocked;
-        showToast(`Error: ${err.message}`, 'error');
-      }
-    });
-
-    el.exrankList.appendChild(card);
-  });
-}
-
-// Render Teleport Presets
-function renderTeleportPresets() {
-  el.teleportPresetsList.innerHTML = '';
-  PRESET_TELEPORTS.forEach(preset => {
+  exList.forEach(ex => {
     const item = document.createElement('div');
-    item.className = 'card';
-    item.style.padding = '0.85rem';
+    item.className = 'card exrank-item';
+    item.style.padding = '1.25rem';
     item.style.display = 'flex';
     item.style.justifyContent = 'space-between';
     item.style.alignItems = 'center';
+    item.style.flexWrap = 'wrap';
+    item.style.gap = '1rem';
 
-    const displayName = getTeleportName(preset);
+    const info = getAvatarInfo(ex.avatar_id);
+    const elemClass = getElementClass(info.element);
 
     item.innerHTML = `
-      <div>
-        <div style="font-weight: 700; font-size: 0.95rem;">${displayName}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
-          Plane: ${preset.plane_id} • Floor: ${preset.floor_id} • Entry: ${preset.entry_id}
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="avatar-image-container" style="width: 52px; height: 52px;">
+          <img class="avatar-img"
+               src="./assets/avatars/${ex.avatar_id}.png"
+               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${ex.avatar_id}.png';}else{this.style.display='none';}"
+               alt="${info.name}">
+        </div>
+        <div>
+          <div style="font-weight: 800; font-size: 1.05rem;">${info.name}</div>
+          <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
+            <span class="element-badge ${elemClass}">${info.element}</span>
+            <span class="path-badge">${info.path}</span>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">Ex-Rank ID: ${ex.ex_rank_id}</span>
+          </div>
         </div>
       </div>
-      <button class="btn btn-sm btn-primary btn-warp" style="white-space: nowrap;">
-        ${t('warpBtn')}
-      </button>
+      <div>
+        <button class="btn btn-sm ${ex.unlocked ? 'btn-success' : 'btn-secondary'} btn-toggle-ex"
+                data-avatar="${ex.avatar_id}"
+                data-unlocked="${ex.unlocked}">
+          ${ex.unlocked ? '⚡ ปลดล็อคแล้ว (Active)' : '🔒 ปิดการใช้งาน (Locked)'}
+        </button>
+      </div>
     `;
 
-    item.querySelector('.btn-warp').addEventListener('click', async () => {
-      await executeTeleport({
-        plane_id: preset.plane_id,
-        floor_id: preset.floor_id,
-        entry_id: preset.entry_id,
-        x: preset.x,
-        y: preset.y,
-        z: preset.z
-      }, displayName);
+    item.querySelector('.btn-toggle-ex').addEventListener('click', async (e) => {
+      const aid = parseInt(e.target.getAttribute('data-avatar'), 10);
+      const cur = e.target.getAttribute('data-unlocked') === 'true';
+      await toggleSingleExRank(aid, !cur);
     });
 
-    el.teleportPresetsList.appendChild(item);
+    el.exrankList.appendChild(item);
   });
 }
 
-// Execute Teleport API
-async function executeTeleport(payload, label = '') {
+async function toggleSingleExRank(avatarId, unlock) {
   try {
-    await apiCall('/api/teleport', 'POST', payload);
-    showToast(t('warpSuccess', { label: label || `Plane ${payload.plane_id}` }), 'success');
+    await apiCall('/api/exrank/toggle', 'POST', { avatar_id: avatarId, unlocked: unlock });
+    showToast(unlock ? 'ปลดล็อค Ex-Rank สำเร็จ!' : 'ปิดใช้งาน Ex-Rank เรียบร้อย', 'success');
     refreshStatus();
   } catch (err) {
-    showToast(t('warpFailed', { err: err.message }), 'error');
+    showToast(`Error: ${err.message}`, 'error');
   }
 }
 
-// Load and Switch JSON
+// Load and Switch JSON Tab Data
 async function loadJsonData(mode) {
   state.currentJsonMode = mode;
   if (mode === 'freesr') {
     el.btnSelectFreesr.className = 'btn btn-sm btn-primary active';
     el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = t('jsonStatusOpening', { name: 'freesr-data.json' });
+    el.jsonStatusInfo.textContent = 'กำลังโหลด freesr-data.json...';
     try {
-      const res = await apiCall('/api/freesr');
-      el.jsonEditor.value = JSON.stringify(res.data, null, 2);
+      if (state.fullFreesrData) {
+        el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
+        el.jsonStatusInfo.textContent = 'freesr-data.json (Loaded from memory)';
+      } else {
+        const res = await apiCall('/api/freesr');
+        state.fullFreesrData = res.data;
+        el.jsonEditor.value = JSON.stringify(res.data, null, 2);
+        el.jsonStatusInfo.textContent = 'freesr-data.json (Loaded from server)';
+      }
     } catch (err) {
-      showToast(`Load failed: ${err.message}`, 'error');
+      el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+      if (!el.jsonEditor.value) {
+        el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
+      }
     }
   } else {
-    el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
     el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = t('jsonStatusOpening', { name: 'persistent' });
+    el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
+    el.jsonStatusInfo.textContent = 'กำลังโหลด persistent...';
     try {
-      const res = await apiCall('/api/persistent');
-      el.jsonEditor.value = JSON.stringify(res.persistent, null, 2);
+      if (state.persistentData) {
+        el.jsonEditor.value = JSON.stringify(state.persistentData, null, 2);
+        el.jsonStatusInfo.textContent = 'persistent (Loaded from memory)';
+      } else {
+        const res = await apiCall('/api/persistent');
+        state.persistentData = res.data;
+        el.jsonEditor.value = JSON.stringify(res.data, null, 2);
+        el.jsonStatusInfo.textContent = 'persistent (Loaded from server)';
+      }
     } catch (err) {
-      showToast(`Load failed: ${err.message}`, 'error');
+      el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+      if (!el.jsonEditor.value) {
+        el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
+      }
     }
   }
 }
 
-// Save JSON to Server
+// Save JSON Tab Data
 async function saveJsonData() {
-  const text = el.jsonEditor.value.trim();
-  if (!text) {
-    showToast('ไม่มีข้อมูล JSON ให้บันทึก', 'error');
-    return;
-  }
-
-  let parsed;
   try {
-    parsed = JSON.parse(text);
-  } catch (err) {
-    showToast(`${t('jsonInvalid')}: ${err.message}`, 'error');
-    return;
-  }
-
-  const endpoint = state.currentJsonMode === 'freesr' ? '/api/freesr' : '/api/persistent';
-  try {
-    await apiCall(endpoint, 'POST', parsed);
-    showToast(t('jsonSaveSuccess', { name: state.currentJsonMode }), 'success');
+    const parsed = JSON.parse(el.jsonEditor.value);
+    if (state.currentJsonMode === 'freesr') {
+      state.fullFreesrData = parsed;
+      if (state.isConnected) {
+        await saveFreesrChangesToServer();
+      }
+      // Sync loaded characters to local list
+      if (parsed.avatars) {
+        for (const aid in parsed.avatars) {
+          const av = parsed.avatars[aid];
+          const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
+          if (found) {
+            found.level = av.level || 80;
+            found.promotion = av.promotion || 6;
+            found.rank = av.data?.rank ?? 6;
+          }
+        }
+        renderAvatarsGrid();
+      }
+      showToast('บันทึก freesr-data.json เรียบร้อย', 'success');
+    } else {
+      state.persistentData = parsed;
+      if (state.isConnected && state.serverMode === 'gac') {
+        await apiCall('/api/persistent', 'POST', parsed);
+      }
+      if (parsed.lineups) {
+        state.statusData = state.statusData || {};
+        state.statusData.lineups = parsed.lineups;
+        renderLineup(parsed.lineups);
+      }
+      showToast('บันทึกไฟล์ persistent เรียบร้อย', 'success');
+    }
     refreshStatus();
   } catch (err) {
-    showToast(`Save failed: ${err.message}`, 'error');
+    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
   }
 }
 
@@ -947,8 +1055,8 @@ function setupTabs() {
         state.activeTab = targetId;
 
         // On-demand tab refresh
-        if (targetId === 'tab-avatars' && state.avatarsList.length === 0) {
-          loadAvatars();
+        if (targetId === 'tab-avatars') {
+          renderAvatarsGrid();
         } else if (targetId === 'tab-equipment') {
           loadEquipment();
         } else if (targetId === 'tab-persistent') {
@@ -961,7 +1069,7 @@ function setupTabs() {
   });
 }
 
-// Event Listeners setup
+// Setup Event Listeners
 function setupEvents() {
   // Quick Ping & Refresh
   el.btnQuickPing.addEventListener('click', () => {
@@ -984,7 +1092,7 @@ function setupEvents() {
       state.apiUrl = newUrl;
       localStorage.setItem('gac_srtool_api_url', newUrl);
       el.modalSettings.classList.remove('active');
-      showToast(t('settingsSaved'), 'info');
+      showToast(t('settingsSaved'), 'success');
       refreshStatus();
     }
   });
@@ -994,18 +1102,43 @@ function setupEvents() {
   el.btnModalSaveAvatar.addEventListener('click', saveAvatarDetails);
   el.btnModalMaxSkills.addEventListener('click', maxSkillsForAvatar);
 
+  // Quick Preset Buttons for Character Modal
+  document.querySelectorAll('.btn-lvl-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lvl = parseInt(btn.getAttribute('data-lvl'), 10);
+      el.modalCharLevel.value = lvl;
+      if (lvl > 70) el.modalCharPromotion.value = 6;
+      else if (lvl > 60) el.modalCharPromotion.value = 5;
+      else if (lvl > 50) el.modalCharPromotion.value = 4;
+      else if (lvl > 40) el.modalCharPromotion.value = 3;
+      else if (lvl > 20) el.modalCharPromotion.value = 1;
+      else el.modalCharPromotion.value = 0;
+    });
+  });
+
+  document.querySelectorAll('.btn-prom-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.modalCharPromotion.value = btn.getAttribute('data-prom');
+    });
+  });
+
+  el.btnModalQuickE0?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) state.selectedAvatarDetail.rank = 0;
+    renderModalEidolonPips(0);
+  });
+
+  el.btnModalQuickE6?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) state.selectedAvatarDetail.rank = 6;
+    renderModalEidolonPips(6);
+  });
+
   // Lineup Picker Modal Controls
   el.btnClosePickerModal.addEventListener('click', () => el.modalLineupPicker.classList.remove('active'));
   el.pickerSearch.addEventListener('input', renderPickerGrid);
 
-  // Quick Action Buttons
+  // Quick Action Buttons on Dashboard
   el.btnQuickMaxAll.addEventListener('click', maxAllAvatars);
   el.btnMaxAllAvatars.addEventListener('click', maxAllAvatars);
-  
-  el.btnQuickWarpExpress.addEventListener('click', () => {
-    const express = PRESET_TELEPORTS[0];
-    executeTeleport(express, getTeleportName(express));
-  });
 
   el.btnQuickSyncPersistent.addEventListener('click', async () => {
     try {
@@ -1077,20 +1210,6 @@ function setupEvents() {
     }
   });
 
-  // Custom Teleport Form
-  el.formCustomTeleport.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const payload = {
-      plane_id: parseInt(el.tpPlane.value, 10),
-      floor_id: parseInt(el.tpFloor.value, 10),
-      entry_id: parseInt(el.tpEntry.value, 10),
-      x: el.tpX.value ? parseInt(el.tpX.value, 10) : 0,
-      y: el.tpY.value ? parseInt(el.tpY.value, 10) : 0,
-      z: el.tpZ.value ? parseInt(el.tpZ.value, 10) : 0
-    };
-    executeTeleport(payload, `Plane ${payload.plane_id}`);
-  });
-
   // JSON Tab Controls
   el.btnSelectFreesr.addEventListener('click', () => loadJsonData('freesr'));
   el.btnSelectPersistent.addEventListener('click', () => loadJsonData('persistent'));
@@ -1125,7 +1244,30 @@ function setupEvents() {
       try {
         const parsed = JSON.parse(event.target.result);
         el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-        showToast(`โหลดเนื้อหาไฟล์ ${file.name} เรียบร้อย`, 'success');
+        
+        // If freesr-data.json was uploaded
+        if (parsed.avatars) {
+          state.fullFreesrData = parsed;
+          for (const aid in parsed.avatars) {
+            const av = parsed.avatars[aid];
+            const found = state.avatarsList.find(a => a.avatar_id === parseInt(aid, 10));
+            if (found) {
+              found.level = av.level || 80;
+              found.promotion = av.promotion || 6;
+              found.rank = av.data?.rank ?? 6;
+            }
+          }
+          renderAvatarsGrid();
+        }
+        
+        // If persistent or has lineups
+        if (parsed.lineups) {
+          state.statusData = state.statusData || {};
+          state.statusData.lineups = parsed.lineups;
+          renderLineup(parsed.lineups);
+        }
+        
+        showToast(`โหลดไฟล์ ${file.name} สำเร็จและซิงค์ข้อมูลแล้ว`, 'success');
       } catch (err) {
         showToast(t('jsonInvalid'), 'error');
       }
@@ -1159,9 +1301,27 @@ function setupEvents() {
     showToast(t('settingsReset'), 'info');
     refreshStatus();
   });
+
+  // Modal Backdrop Click to close
+  [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings].forEach(modal => {
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    }
+  });
+
+  // ESC Key to close any active modal
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    }
+  });
 }
 
-// Background ping loop
+// Background Ping Loop
 function startPingLoop() {
   setInterval(() => {
     refreshStatus();
@@ -1170,13 +1330,14 @@ function startPingLoop() {
 
 // Initialize Application
 function init() {
+  initAvatarsList();
   setupServerModes();
   setupLanguageSelector();
   setupTabs();
   setupEvents();
   applyTranslations();
   refreshStatus();
-  loadAvatars();
+  renderAvatarsGrid();
   startPingLoop();
 }
 

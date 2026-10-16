@@ -534,6 +534,144 @@ export const AVATAR_METADATA = {
     path: "Remembrance",
     element: "Wind",
     rarity: 5
+  },
+  1014: {
+    names: { en: "Saber", th: "Saber (เซเบอร์)", "zh-CN": "阿尔托莉雅·潘德拉贡 (塞巴)", "zh-TW": "阿爾托莉雅·潘德拉貢", ja: "セイバー", ko: "세이버", ru: "Сэйбер" },
+    path: "Destruction",
+    element: "Wind",
+    rarity: 5
+  },
+  1015: {
+    names: { en: "Archer", th: "Archer (อาร์เชอร์)", "zh-CN": "卫宫士郎 (红A/阿茶)", "zh-TW": "衛宮士郎 (紅A)", ja: "アーチャー", ko: "아처", ru: "Арчер" },
+    path: "Hunt",
+    element: "Quantum",
+    rarity: 5
+  },
+  1321: {
+    names: { en: "Dahlia", th: "Dahlia (ดาเลีย)", "zh-CN": "达莉亚", "zh-TW": "達莉亞", ja: "ダリア", ko: "달리아", ru: "Далия" },
+    path: "Nihility",
+    element: "Fire",
+    rarity: 5
+  },
+  1406: {
+    names: { en: "Cipher", th: "Cipher (ไซเฟอร์)", "zh-CN": "赛弗", "zh-TW": "賽弗", ja: "サイファー", ko: "사이퍼", ru: "Сайфер" },
+    path: "Nihility",
+    element: "Quantum",
+    rarity: 5
+  },
+  1412: {
+    names: { en: "Cerydra", th: "Cerydra (เซอรีดรา)", "zh-CN": "塞利德拉", "zh-TW": "塞利德拉", ja: "セリドラ", ko: "세리드라", ru: "Серидра" },
+    path: "Harmony",
+    element: "Wind",
+    rarity: 5
+  },
+  1413: {
+    names: { en: "Evernight", th: "Evernight (เอเวอร์ไนท์)", "zh-CN": "永夜", "zh-TW": "永夜", ja: "エバーナイト", ko: "에버나이트", ru: "Эвернайт" },
+    path: "Remembrance",
+    element: "Ice",
+    rarity: 5
+  },
+  1414: {
+    names: { en: "Dan Heng • Permeating Thunder", th: "Dan Heng PT (ดันเฮงร่างใหม่)", "zh-CN": "丹恒·行者", "zh-TW": "丹恆·行者", ja: "丹恒・行者", ko: "단항·행자", ru: "Дань Хэн • Странник" },
+    path: "Preservation",
+    element: "Physical",
+    rarity: 5
+  },
+  1415: {
+    names: { en: "Cyrene", th: "Cyrene (ซีรีน)", "zh-CN": "赛琳", "zh-TW": "賽琳", ja: "サイリーン", ko: "키레네", ru: "Кирена" },
+    path: "Remembrance",
+    element: "Ice",
+    rarity: 5
+  },
+  1501: {
+    names: { en: "Sparxie", th: "Sparxie (สปาร์กซี่)", "zh-CN": "斯帕克茜", "zh-TW": "斯帕克茜", ja: "スパーキー", ko: "스팍시", ru: "Спаркси" },
+    path: "Elation",
+    element: "Fire",
+    rarity: 5
+  },
+  1502: {
+    names: { en: "Yaoguang", th: "Yaoguang (เย่ากวง)", "zh-CN": "瑶光", "zh-TW": "瑤光", ja: "瑤光", ko: "요광", ru: "Яогуан" },
+    path: "Elation",
+    element: "Physical",
+    rarity: 5
+  },
+  1503: {
+    names: { en: "Pearl", th: "Pearl (เพิร์ล)", "zh-CN": "佩尔 (Pearl)", "zh-TW": "佩爾", ja: "パール", ko: "펄", ru: "Перл" },
+    path: "Elation",
+    element: "Ice",
+    rarity: 5
+  },
+  1504: {
+    names: { en: "Ashveil", th: "Ashveil (แอชเวล)", "zh-CN": "灰纱", "zh-TW": "灰紗", ja: "アッシュヴェイル", ko: "애쉬베일", ru: "Эшвейл" },
+    path: "Hunt",
+    element: "Lightning",
+    rarity: 5
+  },
+  1505: {
+    names: { en: "Evanescia", th: "Evanescia (เอวาเนสเซีย)", "zh-CN": "埃瓦内西亚", "zh-TW": "埃瓦內西亞", ja: "エヴァネシア", ko: "에바네시아", ru: "Эванесия" },
+    path: "Elation",
+    element: "Physical",
+    rarity: 5
+  },
+  1506: {
+    names: { en: "Silver Wolf Lv.999", th: "Silver Wolf Lv.999 (ซิลเวอร์วูล์ฟ Lv.999)", "zh-CN": "银狼 Lv.999", "zh-TW": "銀狼 Lv.999", ja: "銀狼 Lv.999", ko: "은랑 Lv.999", ru: "Серебряный Волк Lv.999" },
+    path: "Elation",
+    element: "Imaginary",
+    rarity: 5
+  },
+  1507: {
+    names: { en: "Mortenax Blade", th: "Mortenax Blade (มอร์เทแนกซ์ เบลด)", "zh-CN": "摩天之刃", "zh-TW": "摩天之刃", ja: "摩天の刃", ko: "모르테낙스 블레이드", ru: "Мортенакс Блейд" },
+    path: "Nihility",
+    element: "Fire",
+    rarity: 5
+  },
+  1508: {
+    names: { en: "Tohsaka Rin", th: "Tohsaka Rin (โทซากะ ริน)", "zh-CN": "远坂凛", "zh-TW": "遠坂凜", ja: "遠坂凛", ko: "토오사카 린", ru: "Рин Тосака" },
+    path: "Erudition",
+    element: "Quantum",
+    rarity: 5
+  },
+  1509: {
+    names: { en: "Gilgamesh", th: "Gilgamesh (กิลกาเมช)", "zh-CN": "吉尔伽美什 (金闪闪)", "zh-TW": "吉爾伽美什", ja: "ギルガメッシュ", ko: "길가메시", ru: "Гильгамеш" },
+    path: "Destruction",
+    element: "Lightning",
+    rarity: 5
+  },
+  1510: {
+    names: { en: "Himeko Nova", th: "Himeko Nova (ฮิเมโกะ โนวา)", "zh-CN": "姬子·新星", "zh-TW": "姬子·新星", ja: "姫子・ノヴァ", ko: "히메코 노바", ru: "Химеко Нова" },
+    path: "Erudition",
+    element: "Fire",
+    rarity: 5
+  },
+  1511: {
+    names: { en: "Nihilux", th: "Nihilux (นิฮิลักซ์)", "zh-CN": "虚无之神·尼希卢克斯", "zh-TW": "虛無之神·尼希盧克斯", ja: "ニヒラックス", ko: "니힐룩스", ru: "Нихилюкс" },
+    path: "Elation",
+    element: "Quantum",
+    rarity: 5
+  },
+  1512: {
+    names: { en: "Robin • Summeretto", th: "Robin • Summeretto (โรบิน ซัมเมอร์)", "zh-CN": "知更鸟·夏日", "zh-TW": "知更鳥·夏日", ja: "ロビン・サマー", ko: "로빈·서머", ru: "Зарянка • Лето" },
+    path: "Remembrance",
+    element: "Wind",
+    rarity: 5
+  },
+  1513: {
+    names: { en: "Aventurine • Waveflair", th: "Aventurine • Waveflair (อเวนทูรีน คลื่นทะเล)", "zh-CN": "砂金·夏日浪潮", "zh-TW": "砂金·夏日浪潮", ja: "アベンチュリン・サマー", ko: "어벤츄린·웨이브", ru: "Авантюрин • Волна" },
+    path: "Elation",
+    element: "Quantum",
+    rarity: 5
+  },
+  8009: {
+    names: { en: "Trailblazer (Elation ♂)", th: "ผู้บุกเบิก (ปีติ ♂)", "zh-CN": "开拓者 (欢愉 ♂)", "zh-TW": "開拓者 (歡愉 ♂)", ja: "開拓者 (愉悦 ♂)", ko: "개척자 (환락 ♂)", ru: "Первопроходец (Радость ♂)" },
+    path: "Elation",
+    element: "Lightning",
+    rarity: 5
+  },
+  8010: {
+    names: { en: "Trailblazer (Elation ♀)", th: "ผู้บุกเบิก (ปีติ ♀)", "zh-CN": "开拓者 (欢愉 ♀)", "zh-TW": "開拓者 (歡愉 ♀)", ja: "開拓者 (愉悦 ♀)", ko: "개척자 (환락 ♀)", ru: "Первопроходец (Радость ♀)" },
+    path: "Elation",
+    element: "Lightning",
+    rarity: 5
   }
 };
 

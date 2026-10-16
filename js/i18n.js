@@ -119,7 +119,8 @@ export const TRANSLATIONS = {
       Preservation: "อนุรักษ์",
       Abundance: "เฟื่องฟู",
       Remembrance: "ความทรงจำ",
-      Unknown: "ไม่ระบุ"
+      Unknown: "ไม่ระบุ",
+      Elation: "ปีติ (Elation)"
     }
   },
 
@@ -215,7 +216,8 @@ export const TRANSLATIONS = {
       Preservation: "Preservation",
       Abundance: "Abundance",
       Remembrance: "Remembrance",
-      Unknown: "Unknown"
+      Unknown: "Unknown",
+      Elation: "Elation"
     }
   },
 
@@ -311,7 +313,8 @@ export const TRANSLATIONS = {
       Preservation: "存护",
       Abundance: "丰饶",
       Remembrance: "记忆",
-      Unknown: "未知"
+      Unknown: "未知",
+      Elation: "欢愉"
     }
   },
 
@@ -407,7 +410,8 @@ export const TRANSLATIONS = {
       Preservation: "存護",
       Abundance: "豐饒",
       Remembrance: "記憶",
-      Unknown: "未知"
+      Unknown: "未知",
+      Elation: "歡愉"
     }
   },
 
@@ -503,7 +507,8 @@ export const TRANSLATIONS = {
       Preservation: "存護",
       Abundance: "豊穣",
       Remembrance: "記憶",
-      Unknown: "不明"
+      Unknown: "不明",
+      Elation: "愉悦"
     }
   },
 
@@ -599,7 +604,8 @@ export const TRANSLATIONS = {
       Preservation: "보존",
       Abundance: "풍요",
       Remembrance: "기억",
-      Unknown: "알 수 없음"
+      Unknown: "알 수 없음",
+      Elation: "환락"
     }
   },
 
@@ -695,7 +701,8 @@ export const TRANSLATIONS = {
       Preservation: "Bảo Hộ",
       Abundance: "Trù Phú",
       Remembrance: "Ký Ức",
-      Unknown: "Không xác định"
+      Unknown: "Không xác định",
+      Elation: "Vui Vẻ"
     }
   },
 
@@ -791,7 +798,8 @@ export const TRANSLATIONS = {
       Preservation: "Pelestarian",
       Abundance: "Kelimpahan",
       Remembrance: "Ingatan",
-      Unknown: "Tidak Diketahui"
+      Unknown: "Tidak Diketahui",
+      Elation: "Kegembiraan"
     }
   },
 
@@ -887,7 +895,8 @@ export const TRANSLATIONS = {
       Preservation: "Conservación",
       Abundance: "Abundancia",
       Remembrance: "Reminiscencia",
-      Unknown: "Desconocido"
+      Unknown: "Desconocido",
+      Elation: "Exultación"
     }
   },
 
@@ -983,7 +992,8 @@ export const TRANSLATIONS = {
       Preservation: "Préservation",
       Abundance: "Abondance",
       Remembrance: "Souvenir",
-      Unknown: "Inconnu"
+      Unknown: "Inconnu",
+      Elation: "Allégresse"
     }
   },
 
@@ -1079,7 +1089,8 @@ export const TRANSLATIONS = {
       Preservation: "Bewahrung",
       Abundance: "Überfluss",
       Remembrance: "Erinnerung",
-      Unknown: "Unbekannt"
+      Unknown: "Unbekannt",
+      Elation: "Frohsinn"
     }
   },
 
@@ -1175,7 +1186,8 @@ export const TRANSLATIONS = {
       Preservation: "Сохранение",
       Abundance: "Изобилие",
       Remembrance: "Память",
-      Unknown: "Неизвестно"
+      Unknown: "Неизвестно",
+      Elation: "Радость"
     }
   },
 
@@ -1271,7 +1283,8 @@ export const TRANSLATIONS = {
       Preservation: "Preservação",
       Abundance: "Abundância",
       Remembrance: "Recordação",
-      Unknown: "Desconhecido"
+      Unknown: "Desconhecido",
+      Elation: "Alegria"
     }
   }
 };

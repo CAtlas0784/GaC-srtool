@@ -8,7 +8,10 @@ const ids = [
   1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112,
   1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, 1209, 1210, 1211, 1212, 1213, 1214, 1215, 1217, 1218, 1220, 1221, 1222, 1223, 1225,
   1005, 1006, 1301, 1302, 1303, 1304, 1305, 1306, 1307, 1308, 1309, 1310, 1312, 1313, 1314, 1315, 1317,
-  1401, 1402, 1403, 1404, 1405, 1407, 1408, 1409, 1410
+  1401, 1402, 1403, 1404, 1405, 1407, 1408, 1409, 1410,
+  1014, 1015, 1321, 1406, 1412, 1413, 1414, 1415,
+  1501, 1502, 1503, 1504, 1505, 1506, 1507, 1508, 1509, 1510, 1511, 1512, 1513,
+  8009, 8010
 ];
 
 const targetDir = path.join(__dirname, '..', 'assets', 'avatars');
@@ -53,12 +56,20 @@ async function processId(id) {
   ok = await fetchUrl(rawUrl, dest);
   if (ok) return { id, status: 'ok (raw)' };
 
-  // Fallbacks for trailblazer female variants if not directly mapped
-  if ([8004, 8006, 8008].includes(id) && fs.existsSync(path.join(targetDir, '8002.png'))) {
+  // Fallbacks for special & collab variants
+  if (id === 1506 && fs.existsSync(path.join(targetDir, '1006.png'))) {
+    fs.copyFileSync(path.join(targetDir, '1006.png'), dest);
+    return { id, status: 'fallback 1006 (Silver Wolf)' };
+  }
+  if (id === 1511 && fs.existsSync(path.join(targetDir, '1308.png'))) {
+    fs.copyFileSync(path.join(targetDir, '1308.png'), dest);
+    return { id, status: 'fallback 1308 (Acheron)' };
+  }
+  if ([8004, 8006, 8008, 8010].includes(id) && fs.existsSync(path.join(targetDir, '8002.png'))) {
     fs.copyFileSync(path.join(targetDir, '8002.png'), dest);
     return { id, status: 'fallback 8002' };
   }
-  if ([8003, 8005, 8007].includes(id) && fs.existsSync(path.join(targetDir, '8001.png'))) {
+  if ([8003, 8005, 8007, 8009].includes(id) && fs.existsSync(path.join(targetDir, '8001.png'))) {
     fs.copyFileSync(path.join(targetDir, '8001.png'), dest);
     return { id, status: 'fallback 8001' };
   }
