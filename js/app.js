@@ -308,7 +308,7 @@ async function refreshStatus() {
           avatar_count: Object.keys(freesr.data.avatars || {}).length,
           lightcone_count: (freesr.data.lightcones || []).length,
           relic_count: (freesr.data.relics || []).length,
-          lineups: freesr.data.lineups || DEFAULT_LINEUP,
+          lineups: freesr.data.lineups || freesr.data.battle_config?.custom_battle_lineup || DEFAULT_LINEUP,
           scene: freesr.data.scene,
           position: freesr.data.position,
           ex_ranks: []
@@ -345,13 +345,21 @@ async function refreshStatus() {
     el.statAvatars.textContent = state.avatarsList.length;
     // Keep rendering with current or default lineup so UI is always functional
     renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
+    loadAvatars();
   }
 }
 
 // Render party lineup cards
 function renderLineup(lineups) {
   el.lineupContainer.innerHTML = '';
-  const currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
+  let currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
+
+  // Handle array format if provided
+  if (Array.isArray(currentLineup)) {
+    const mapped = {};
+    currentLineup.forEach((id, idx) => { mapped[idx] = id; });
+    currentLineup = mapped;
+  }
 
   for (let slot = 0; slot < 4; slot++) {
     const avatarId = currentLineup[slot] || currentLineup[String(slot)] || 0;
@@ -532,50 +540,39 @@ function renderAvatarsGrid() {
     const card = document.createElement('div');
     card.className = `card avatar-card card-rarity-${meta.rarity}`;
 
-    const pipsHtml = [0, 1, 2, 3, 4, 5, 6].map(rank => `
-      <button type="button" class="eidolon-pip ${item.rank >= rank ? 'active' : ''}" data-avatar="${item.avatar_id}" data-rank="${rank}" title="Eidolon ${rank}">
-        ${rank}
-      </button>
-    `).join('');
-
     card.innerHTML = `
       <span class="avatar-badge-rarity rarity-${meta.rarity}">★ ${meta.rarity}</span>
-      <div>
-        <div class="avatar-header-info">
-          <div class="avatar-image-container">
-            <img class="avatar-img"
-                 src="./assets/avatars/${item.avatar_id}.png"
-                 onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
-                 alt="${meta.name}">
-            <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
-          </div>
-          <div>
-            <div class="avatar-name">${meta.name}</div>
-            <div class="avatar-subinfo">
-              <span class="element-badge ${elemClass}">${meta.element}</span>
-              <span class="path-badge">${meta.path}</span>
-              <span style="font-weight: 700; color: var(--accent-cyan);">Lv. ${item.level}</span>
-            </div>
+      <div class="avatar-header-info">
+        <div class="avatar-image-container">
+          <img class="avatar-img"
+               src="./assets/avatars/${item.avatar_id}.png"
+               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+               alt="${meta.name}">
+          <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
+        </div>
+        <div class="avatar-meta-details">
+          <div class="avatar-name" title="${meta.name}">${meta.name}</div>
+          <div class="avatar-subinfo">
+            <span class="element-badge ${elemClass}">${translateElement(meta.element)}</span>
+            <span class="path-badge">${translatePath(meta.path)}</span>
           </div>
         </div>
       </div>
 
-      <div class="eidolon-selector">
-        <span style="font-size: 0.75rem; color: #cbd5e1; font-weight: 700;">Eidolon:</span>
-        <div class="eidolon-buttons">
-          ${pipsHtml}
+      <div class="avatar-card-footer">
+        <div class="avatar-status-pill">
+          <span class="avatar-lvl">Lv. ${item.level}</span>
+          <span class="avatar-eidolon ${item.rank === 6 ? 'e6' : ''}">E${item.rank}</span>
         </div>
+        <button type="button" class="btn btn-sm btn-gold btn-card-quick-max" title="ปรับ Max E6 ทันที">⭐ MAX</button>
       </div>
     `;
 
-    // Eidolon quick button clicks
-    card.querySelectorAll('.eidolon-pip').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const avatarId = parseInt(btn.getAttribute('data-avatar'), 10);
-        const rank = parseInt(btn.getAttribute('data-rank'), 10);
-        await setAvatarRank(avatarId, rank);
-      });
+    // Quick Max Button
+    const btnQuickMax = card.querySelector('.btn-card-quick-max');
+    btnQuickMax.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await maxSingleAvatar(item.avatar_id);
     });
 
     // Clicking card opens full character build modal
@@ -585,6 +582,43 @@ function renderAvatarsGrid() {
 
     el.avatarsGrid.appendChild(card);
   });
+}
+
+// Quick Max Single Avatar (Lv 80 + Prom 6 + E6 + Max Traces)
+async function maxSingleAvatar(avatarId) {
+  const target = state.avatarsList.find(a => a.avatar_id === avatarId);
+  if (target) {
+    target.level = 80;
+    target.promotion = 6;
+    target.rank = 6;
+  }
+  if (state.fullFreesrData?.avatars?.[avatarId]) {
+    const av = state.fullFreesrData.avatars[avatarId];
+    av.level = 80;
+    av.promotion = 6;
+    av.data.rank = 6;
+    if (av.data.skills) {
+      for (const k in av.data.skills) av.data.skills[k] = 10;
+    }
+  }
+
+  renderAvatarsGrid();
+
+  if (state.isConnected) {
+    try {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank: 6 });
+        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: avatarId, level: 80, promotion: 6, rank: 6 });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+      showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 เรียบร้อย`, 'success');
+    } catch (err) {
+      showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 (บันทึกในเครื่อง)`, 'info');
+    }
+  } else {
+    showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 (บันทึกในเครื่อง)`, 'info');
+  }
 }
 
 // Character Detail / Build Modal
@@ -1099,8 +1133,21 @@ function setupEvents() {
 
   // Character Detail Modal Controls
   el.btnCloseAvatarModal.addEventListener('click', () => el.modalAvatarDetail.classList.remove('active'));
+  document.getElementById('btn-modal-cancel-avatar')?.addEventListener('click', () => el.modalAvatarDetail.classList.remove('active'));
   el.btnModalSaveAvatar.addEventListener('click', saveAvatarDetails);
   el.btnModalMaxSkills.addEventListener('click', maxSkillsForAvatar);
+
+  document.getElementById('btn-modal-max-all-char')?.addEventListener('click', async () => {
+    if (!state.selectedAvatarDetail) return;
+    el.modalCharLevel.value = 80;
+    el.modalCharPromotion.value = 6;
+    state.selectedAvatarDetail.level = 80;
+    state.selectedAvatarDetail.promotion = 6;
+    state.selectedAvatarDetail.rank = 6;
+    renderModalEidolonPips(6);
+    await maxSkillsForAvatar();
+    await saveAvatarDetails();
+  });
 
   // Quick Preset Buttons for Character Modal
   document.querySelectorAll('.btn-lvl-preset').forEach(btn => {

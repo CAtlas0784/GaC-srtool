@@ -368,7 +368,7 @@
           <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem; color: var(--text-muted);">
             <div>
               <strong style="color: var(--accent-cyan);">⚡ GaC-hkrpg-go (Full Access):</strong><br>
-              โหมดเฉพาะของเซิร์ฟเวอร์เรา สามารถอ่านและเขียนทั้ง <code>freesr-data.json</code> และ <code>persistent</code> ได้แบบ 100% เรียลไทม์ผ่าน REST API Gateway พร้อมระบบ Ex-Rank และ Teleport
+              โหมดเฉพาะของเซิร์ฟเวอร์เรา สามารถอ่านและเขียนทั้ง <code>freesr-data.json</code> และ <code>persistent</code> ได้แบบ 100% เรียลไทม์ผ่าน REST API Gateway พร้อมระบบ Ex-Rank
             </div>
             <div>
               <strong style="color: #f87171;">🔥 FireflyGo:</strong><br>
@@ -395,14 +395,17 @@
         <button class="btn btn-sm btn-secondary" id="btn-close-avatar-modal">✕</button>
       </div>
 
-      <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.25rem;">
+      <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap;">
         <div class="avatar-image-container" style="width: 76px; height: 76px;">
           <img id="modal-char-img" class="avatar-img" src="" alt="">
         </div>
-        <div>
+        <div style="flex: 1; min-width: 180px;">
           <div id="modal-char-name" style="font-size: 1.25rem; font-weight: 800;"></div>
-          <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;"></div>
+          <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
+        <button type="button" class="btn btn-gold btn-sm" id="btn-modal-max-all-char">
+          ⭐ MAX ALL (Lv.80 / E6 / 10)
+        </button>
       </div>
 
       <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
@@ -449,9 +452,21 @@
         </div>
       </div>
 
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-label">สกิลและร่องรอย (Skills & Traces)</label>
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Basic ATK (Lv.6), Skill (Lv.10), Ultimate (Lv.10), Talent (Lv.10) & ทุกโหนดเสริม
+          </div>
+          <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-skills">
+            ⭐ อัพสกิล 10/10
+          </button>
+        </div>
+      </div>
+
       <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end; flex-wrap: wrap;">
-        <button type="button" class="btn btn-gold" id="btn-modal-max-skills">
-          ⭐ อัพสกิล & Traces ทั้งหมด (10/10)
+        <button type="button" class="btn btn-secondary" id="btn-modal-cancel-avatar">
+          ✕ ปิด
         </button>
         <button type="button" class="btn btn-success" id="btn-modal-save-avatar">
           💾 บันทึกตัวละคร

@@ -1289,7 +1289,7 @@ export const TRANSLATIONS = {
   }
 };
 
-let currentLang = localStorage.getItem('gac_srtool_lang') || 'th';
+let currentLang = typeof localStorage !== 'undefined' ? (localStorage.getItem('gac_srtool_lang') || 'th') : 'th';
 
 export function getCurrentLanguage() {
   return currentLang;
@@ -1298,7 +1298,9 @@ export function getCurrentLanguage() {
 export function setLanguage(langCode) {
   if (TRANSLATIONS[langCode]) {
     currentLang = langCode;
-    localStorage.setItem('gac_srtool_lang', langCode);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('gac_srtool_lang', langCode);
+    }
   }
 }
 
