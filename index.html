@@ -246,35 +246,64 @@
 
     <!-- 3. Equipment Tab (Lightcones & Relics) -->
     <section id="tab-equipment" class="tab-content">
-      <div class="grid-2">
-        <!-- Lightcones Card -->
-        <div class="card">
-          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span data-i18n="eqLcTitle">🗡️ กรวยแสงในคลัง</span>
-              <span class="btn-sm btn-secondary" id="badge-total-lc">0 ชิ้น</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary" id="btn-open-add-lc" data-i18n="btnAddLc">+ เพิ่ม LC</button>
+      <!-- Toolbar & Subtabs Card -->
+      <div class="card" style="margin-bottom: 1rem; padding: 0.85rem 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          
+          <!-- Subtab Buttons: Light Cones vs Relics -->
+          <div style="display: flex; gap: 0.4rem; background: var(--bg-card-hover); padding: 0.3rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <button type="button" class="btn btn-sm btn-primary eq-subtab-btn active" id="btn-eq-subtab-lc" data-subtab="lc" style="display: flex; align-items: center; gap: 0.45rem;">
+              <span data-i18n="eqLcTitle">🗡️ กรวยแสง (Light Cones)</span>
+              <span class="badge-super-tag" id="badge-total-lc" style="padding: 0.05rem 0.4rem; font-size: 0.75rem;">0</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary eq-subtab-btn" id="btn-eq-subtab-relic" data-subtab="relic" style="display: flex; align-items: center; gap: 0.45rem;">
+              <span data-i18n="eqRelicTitle">🛡️ รีลิกส์ (Relics)</span>
+              <span class="badge-super-tag" id="badge-total-relics" style="padding: 0.05rem 0.4rem; font-size: 0.75rem;">0</span>
+            </button>
           </div>
-          <p class="card-subtitle" data-i18n="eqLcSubtitle">รายการกรวยแสงทั้งหมดจาก freesr-data.json</p>
-          <div id="lightcones-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;" data-i18n="eqLcLoading">กำลังโหลดข้อมูลกรวยแสง...</div>
+
+          <!-- Search & Filter Controls -->
+          <div style="display: flex; gap: 0.4rem; flex: 1; max-width: 620px; flex-wrap: wrap;">
+            <input type="text" id="eq-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID อุปกรณ์..." style="flex: 1; min-width: 160px;">
+            <select id="eq-filter-rarity" class="form-select" style="max-width: 110px;">
+              <option value="all" data-i18n="filterAllRarity">ทุกดาว</option>
+              <option value="5" data-i18n="filter5Star">5 ดาว</option>
+              <option value="4" data-i18n="filter4Star">4 ดาว</option>
+              <option value="3">3 ดาว</option>
+            </select>
+            <select id="eq-filter-equipped" class="form-select" style="max-width: 130px;">
+              <option value="all">สถานะทั้งหมด</option>
+              <option value="equipped">สวมใส่อยู่</option>
+              <option value="unequipped">ในกระเป๋า</option>
+            </select>
+            <select id="eq-filter-extra" class="form-select" style="max-width: 120px;">
+              <option value="all">ทุกประเภท</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 0.4rem;">
+            <button type="button" class="btn btn-sm btn-success" id="btn-open-add-lc" data-i18n="btnAddLc">+ เพิ่ม LC</button>
+            <button type="button" class="btn btn-sm btn-success" id="btn-open-add-relic" data-i18n="btnAddRelic" style="display: none;">+ เพิ่มรีลิกส์</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout: Tiles Grid + Inspector Side Panel -->
+      <div style="display: flex; gap: 1rem; align-items: flex-start;">
+        <!-- Left: Inventory Tiles Grid -->
+        <div style="flex: 1; min-width: 0;">
+          <div id="lightcones-grid" class="eq-tiles-grid">
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem; grid-column: 1/-1;" data-i18n="eqLcLoading">กำลังโหลดข้อมูลกรวยแสง...</div>
+          </div>
+          <div id="relics-grid" class="eq-tiles-grid" style="display: none;">
+            <div style="color: var(--text-muted); text-align: center; padding: 2rem; grid-column: 1/-1;" data-i18n="eqRelicLoading">กำลังโหลดข้อมูลรีลิกส์...</div>
           </div>
         </div>
 
-        <!-- Relics Card -->
-        <div class="card">
-          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span data-i18n="eqRelicTitle">🛡️ รีลิกส์ในคลัง</span>
-              <span class="btn-sm btn-secondary" id="badge-total-relics">0 ชิ้น</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary" id="btn-open-add-relic" data-i18n="btnAddRelic">+ เพิ่มรีลิกส์</button>
-          </div>
-          <p class="card-subtitle" data-i18n="eqRelicSubtitle">รายการรีลิกส์ทั้งหมดจาก freesr-data.json</p>
-          <div id="relics-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;" data-i18n="eqRelicLoading">กำลังโหลดข้อมูลรีลิกส์...</div>
-          </div>
+        <!-- Right: Inspector Side Card -->
+        <div id="eq-inspector-card" class="eq-inspector-wrapper" style="width: 320px; position: sticky; top: 80px; flex-shrink: 0; display: none;">
+          <!-- Populated by JS -->
         </div>
       </div>
     </section>

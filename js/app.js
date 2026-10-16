@@ -21,7 +21,8 @@ const state = {
   autoSync: localStorage.getItem('gac_srtool_auto_sync') !== 'false',
   defaultCreative: localStorage.getItem('gac_srtool_default_creative') === 'true',
   showcaseRolls: localStorage.getItem('gac_srtool_showcase_rolls') !== 'false',
-  showcaseAura: localStorage.getItem('gac_srtool_showcase_aura') !== 'false'
+  showcaseAura: localStorage.getItem('gac_srtool_showcase_aura') !== 'false',
+  eqActiveSubtab: 'lc'
 };
 
 // UI Elements Map
@@ -68,10 +69,17 @@ const el = {
   btnReloadAvatars: document.getElementById('btn-reload-avatars'),
 
   // Equipment
-  lightconesList: document.getElementById('lightcones-list'),
-  relicsList: document.getElementById('relics-list'),
+  lightconesGrid: document.getElementById('lightcones-grid'),
+  relicsGrid: document.getElementById('relics-grid'),
   badgeTotalLc: document.getElementById('badge-total-lc'),
   badgeTotalRelics: document.getElementById('badge-total-relics'),
+  eqSearch: document.getElementById('eq-search'),
+  eqFilterRarity: document.getElementById('eq-filter-rarity'),
+  eqFilterEquipped: document.getElementById('eq-filter-equipped'),
+  eqFilterExtra: document.getElementById('eq-filter-extra'),
+  btnEqSubtabLc: document.getElementById('btn-eq-subtab-lc'),
+  btnEqSubtabRelic: document.getElementById('btn-eq-subtab-relic'),
+  eqInspectorCard: document.getElementById('eq-inspector-card'),
   btnOpenAddLc: document.getElementById('btn-open-add-lc'),
   modalAddLc: document.getElementById('modal-add-lc'),
   btnCloseAddLcModal: document.getElementById('btn-close-add-lc-modal'),
@@ -1113,9 +1121,6 @@ const RECOMMENDED_RELIC_BUILDS = {
   Erudition: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" },
   Remembrance: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" }
 };
-
-// Active Lightcone Superimposition Rank in Modal (1 - 5)
-let selectedLcRank = 5;
 
 // Modal Sub-tabs Handler
 function setupModalSubtabs() {
@@ -2410,6 +2415,17 @@ async function saveFreesrChangesToServer() {
   }
 }
 
+// Equipment Sub-tab & Filter Helpers (Matching srtools neonteam)
+const ROMAN_RANKS = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' };
+const RELIC_SLOT_NAMES = {
+  1: "ส่วนหัว",
+  2: "ส่วนมือ",
+  3: "ลำตัว",
+  4: "รองเท้า",
+  5: "ลูกแก้ว",
+  6: "สร้อย"
+};
+
 // Load Equipment (Lightcones & Relics)
 async function loadEquipment() {
   try {
@@ -2428,105 +2444,373 @@ async function loadEquipment() {
       }
     }
 
-    el.badgeTotalLc.textContent = t('itemCount', { n: lcs.length });
-    el.badgeTotalRelics.textContent = t('itemCount', { n: relics.length });
+    if (el.badgeTotalLc) el.badgeTotalLc.textContent = lcs.length;
+    if (el.badgeTotalRelics) el.badgeTotalRelics.textContent = relics.length;
 
-    // Render Lightcones
-    el.lightconesList.innerHTML = '';
-    if (lcs.length === 0) {
-      el.lightconesList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">${t('noLcData')}</div>`;
-    } else {
-      lcs.slice(0, 100).forEach(lc => {
-        const item = document.createElement('div');
-        item.className = 'card';
-        item.style.padding = '0.75rem';
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-
-        const lcInfo = getLightconeInfo(lc.item_id);
-        const equipped = lc.equip_avatar ? getAvatarInfo(lc.equip_avatar).name : t('notEquipped');
-        item.innerHTML = `
-          <div>
-            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-              <span>${lcInfo.name}</span>
-              <span class="avatar-badge-rarity rarity-${lcInfo.rarity}" style="position: static; font-size: 0.7rem; padding: 0.1rem 0.4rem;">★ ${lcInfo.rarity}</span>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">(ID: ${lc.item_id})</span>
-            </div>
-            <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-              Lv. ${lc.level} • S${lc.rank} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
-            </div>
-          </div>
-          <div>
-            <button type="button" class="btn btn-sm btn-danger btn-delete-lc" data-uid="${lc.internal_uid}" title="${t('deleteItem')}">🗑️</button>
-          </div>
-        `;
-        el.lightconesList.appendChild(item);
-      });
-
-      // Bind delete LC buttons
-      el.lightconesList.querySelectorAll('.btn-delete-lc').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const uid = parseInt(e.currentTarget.getAttribute('data-uid'), 10);
-          if (state.fullFreesrData?.lightcones) {
-            state.fullFreesrData.lightcones = state.fullFreesrData.lightcones.filter(l => l.internal_uid !== uid);
-            await saveFreesrChangesToServer();
-            loadEquipment();
-            showToast(t('toastItemDeleted'), 'info');
-          }
-        });
-      });
-    }
-
-    // Render Relics
-    el.relicsList.innerHTML = '';
-    if (relics.length === 0) {
-      el.relicsList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">${t('noRelicData')}</div>`;
-    } else {
-      relics.slice(0, 100).forEach(r => {
-        const item = document.createElement('div');
-        item.className = 'card';
-        item.style.padding = '0.75rem';
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-
-        const setId = r.relic_set_id || r.relic_id || r.item_id;
-        const relicInfo = getRelicSetInfo(setId);
-        const equipped = r.equip_avatar ? getAvatarInfo(r.equip_avatar).name : t('notEquipped');
-        item.innerHTML = `
-          <div>
-            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-              <span>${relicInfo.name}</span>
-              <span style="font-size: 0.8rem; color: var(--text-muted);">(ID: ${r.relic_id || setId})</span>
-            </div>
-            <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-              Lv. ${r.level} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
-            </div>
-          </div>
-          <div>
-            <button type="button" class="btn btn-sm btn-danger btn-delete-relic" data-uid="${r.internal_uid}" title="${t('deleteItem')}">🗑️</button>
-          </div>
-        `;
-        el.relicsList.appendChild(item);
-      });
-
-      // Bind delete Relic buttons
-      el.relicsList.querySelectorAll('.btn-delete-relic').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const uid = parseInt(e.currentTarget.getAttribute('data-uid'), 10);
-          if (state.fullFreesrData?.relics) {
-            state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.internal_uid !== uid);
-            await saveFreesrChangesToServer();
-            loadEquipment();
-            showToast(t('toastItemDeleted'), 'info');
-          }
-        });
-      });
-    }
+    renderEquipment();
   } catch (err) {
     console.warn('Equipment loading error:', err);
   }
+}
+
+// Render active equipment subtab
+function renderEquipment() {
+  if (state.eqActiveSubtab === 'relic') {
+    renderRelicsGrid();
+  } else {
+    renderLightconesGrid();
+  }
+}
+
+// Render Light Cones Grid
+function renderLightconesGrid() {
+  if (!el.lightconesGrid) return;
+  const lcs = state.fullFreesrData?.lightcones || [];
+  const search = el.eqSearch?.value.trim().toLowerCase() || '';
+  const rarity = el.eqFilterRarity?.value || 'all';
+  const equipped = el.eqFilterEquipped?.value || 'all';
+  const pathFilter = el.eqFilterExtra?.value || 'all';
+
+  const filtered = lcs.filter(lc => {
+    const meta = getLightconeInfo(lc.item_id);
+    const matchesSearch = !search || meta.name.toLowerCase().includes(search) || String(lc.item_id).includes(search);
+    const matchesRarity = rarity === 'all' || String(meta.rarity) === rarity;
+    const matchesEquipped = equipped === 'all' || 
+      (equipped === 'equipped' && lc.equip_avatar) || 
+      (equipped === 'unequipped' && !lc.equip_avatar);
+    const matchesPath = pathFilter === 'all' || normalizePath(meta.path) === normalizePath(pathFilter);
+    return matchesSearch && matchesRarity && matchesEquipped && matchesPath;
+  });
+
+  el.lightconesGrid.innerHTML = '';
+  if (filtered.length === 0) {
+    el.lightconesGrid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 2.5rem; grid-column: 1/-1;">${t('noLcData')}</div>`;
+    return;
+  }
+
+  filtered.forEach(lc => {
+    const meta = getLightconeInfo(lc.item_id);
+    const roman = ROMAN_RANKS[lc.rank] || `S${lc.rank || 1}`;
+    const card = document.createElement('div');
+    card.className = `eq-tile-card rarity-${meta.rarity || 4}`;
+    card.setAttribute('data-uid', lc.internal_uid);
+    card.title = `${meta.name} (★${meta.rarity} ${meta.path || ''})`;
+
+    const wearerBadgeHtml = lc.equip_avatar ? `
+      <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(lc.equip_avatar).name}">
+        <img class="eq-tile-wearer-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/${lc.equip_avatar}.png" onerror="if(this.src!=='./assets/avatars/${lc.equip_avatar}.png')this.src='./assets/avatars/${lc.equip_avatar}.png';else this.src='./assets/logo.png';" alt="Wearer">
+      </div>
+    ` : '';
+
+    const primaryImg = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lc.item_id}.png`;
+    const fallbackImg = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${lc.item_id}.png`;
+
+    card.innerHTML = `
+      <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${meta.name}">
+      <div class="eq-tile-top-tag">${roman}</div>
+      ${wearerBadgeHtml}
+      <div class="eq-tile-bottom-bar">
+        <span class="eq-tile-level">Lv.${lc.level || 80}</span>
+        <span class="eq-tile-name-snippet">${meta.name}</span>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('#lightcones-grid .eq-tile-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      showLcInspector(lc);
+    });
+
+    el.lightconesGrid.appendChild(card);
+  });
+}
+
+// Render Relics Grid
+function renderRelicsGrid() {
+  if (!el.relicsGrid) return;
+  const relics = state.fullFreesrData?.relics || [];
+  const search = el.eqSearch?.value.trim().toLowerCase() || '';
+  const rarity = el.eqFilterRarity?.value || 'all';
+  const equipped = el.eqFilterEquipped?.value || 'all';
+  const slotFilter = el.eqFilterExtra?.value || 'all';
+
+  const filtered = relics.filter(r => {
+    const slotNum = (r.relic_id % 10) || 1;
+    const setId = Math.floor((r.relic_id % 10000) / 10);
+    const rInfo = getRelicSetInfo(setId);
+    const matchesSearch = !search || rInfo.name.toLowerCase().includes(search) || String(r.relic_id).includes(search);
+    const matchesRarity = rarity === 'all' || (rarity === '5');
+    const matchesEquipped = equipped === 'all' || 
+      (equipped === 'equipped' && r.equip_avatar) || 
+      (equipped === 'unequipped' && !r.equip_avatar);
+    const matchesSlot = slotFilter === 'all' || String(slotNum) === slotFilter;
+    return matchesSearch && matchesRarity && matchesEquipped && matchesSlot;
+  });
+
+  el.relicsGrid.innerHTML = '';
+  if (filtered.length === 0) {
+    el.relicsGrid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 2.5rem; grid-column: 1/-1;">${t('noRelicData')}</div>`;
+    return;
+  }
+
+  filtered.forEach(r => {
+    const slotNum = (r.relic_id % 10) || 1;
+    const setId = Math.floor((r.relic_id % 10000) / 10);
+    const rInfo = getRelicSetInfo(setId);
+    const slotName = RELIC_SLOT_NAMES[slotNum] || `Slot ${slotNum}`;
+
+    const card = document.createElement('div');
+    card.className = 'eq-tile-card rarity-5';
+    card.setAttribute('data-uid', r.internal_uid);
+    card.title = `${rInfo.name} (${slotName})`;
+
+    const wearerBadgeHtml = r.equip_avatar ? `
+      <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(r.equip_avatar).name}">
+        <img class="eq-tile-wearer-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/${r.equip_avatar}.png" onerror="if(this.src!=='./assets/avatars/${r.equip_avatar}.png')this.src='./assets/avatars/${r.equip_avatar}.png';else this.src='./assets/logo.png';" alt="Wearer">
+      </div>
+    ` : '';
+
+    const primaryImg = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png`;
+    const fallbackImg = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png`;
+
+    card.innerHTML = `
+      <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${rInfo.name}">
+      <div class="eq-tile-top-tag">${slotName}</div>
+      ${wearerBadgeHtml}
+      <div class="eq-tile-bottom-bar">
+        <span class="eq-tile-level">+${r.level || 15}</span>
+        <span class="eq-tile-name-snippet">${rInfo.name}</span>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('#relics-grid .eq-tile-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      showRelicInspector(r);
+    });
+
+    el.relicsGrid.appendChild(card);
+  });
+}
+
+// Show Light Cone Details Inspector
+function showLcInspector(lc) {
+  if (!el.eqInspectorCard) return;
+  const lcInfo = getLightconeInfo(lc.item_id);
+  const lcMeta = LIGHTCONE_METADATA[lc.item_id] || {};
+  const roman = ROMAN_RANKS[lc.rank] || `S${lc.rank || 1}`;
+
+  let avatarOpts = `<option value="0">${t('unassigned')}</option>`;
+  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sortedAvatars.forEach(av => {
+    const info = getAvatarInfo(av.avatar_id);
+    const sel = (lc.equip_avatar === av.avatar_id) ? 'selected' : '';
+    avatarOpts += `<option value="${av.avatar_id}" ${sel}>${info.name} (ID: ${av.avatar_id})</option>`;
+  });
+
+  const hp = lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846);
+  const atk = lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317);
+  const def = lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264);
+
+  el.eqInspectorCard.style.display = 'flex';
+  el.eqInspectorCard.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="eq-inspector-hero">
+        <img class="eq-inspector-thumb" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lc.item_id}.png" onerror="this.src='./assets/logo.png'" alt="${lcInfo.name}">
+        <div class="eq-inspector-info">
+          <div class="eq-inspector-title">${lcInfo.name}</div>
+          <div class="eq-inspector-stars">${'★'.repeat(lcInfo.rarity || 5)}</div>
+          <div style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700; margin-top: 0.25rem;">
+            ${getPathIconHtml(lcInfo.path, 16)} ${lcInfo.path || 'All'} • Lv. ${lc.level || 80}/80
+          </div>
+          <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 800; margin-top: 0.2rem;">
+            Superimposition ${roman}
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm btn-secondary" id="btn-close-eq-inspector" style="padding: 0.2rem 0.5rem; border-radius: 6px;">✕</button>
+    </div>
+
+    <!-- Stats Box -->
+    <div class="eq-inspector-stats">
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">❤️ HP</span>
+        <strong style="color: #fff; font-family: monospace;">+${hp}</strong>
+      </div>
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">⚔️ ATK</span>
+        <strong style="color: #fff; font-family: monospace;">+${atk}</strong>
+      </div>
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">🛡️ DEF</span>
+        <strong style="color: #fff; font-family: monospace;">+${def}</strong>
+      </div>
+    </div>
+
+    <!-- Passive Skill -->
+    <div class="eq-inspector-ability">
+      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">${lcMeta.skill_name || 'สกิลพิเศษประจำกรวยแสง'}</div>
+      <div>${lcMeta.desc || 'เพิ่มพลังต่อสู้และเสริมกลไกเฉพาะสายของตัวละครเมื่อติดตั้ง'}</div>
+    </div>
+
+    <!-- Wearer Form & Actions -->
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
+      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">ผู้สวมใส่ (Equipped By):</label>
+      <select id="sel-inspector-wearer" class="form-select">
+        ${avatarOpts}
+      </select>
+
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
+        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">💾 บันทึกสวมใส่</button>
+        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="ลบออกจากคลัง">🗑️ ลบ</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-close-eq-inspector')?.addEventListener('click', () => {
+    el.eqInspectorCard.style.display = 'none';
+    document.querySelectorAll('.eq-tile-card.active').forEach(c => c.classList.remove('active'));
+  });
+
+  document.getElementById('btn-inspector-save-wearer')?.addEventListener('click', async () => {
+    const newAvatarId = parseInt(document.getElementById('sel-inspector-wearer').value, 10);
+    if (newAvatarId !== 0 && state.fullFreesrData?.lightcones) {
+      state.fullFreesrData.lightcones.forEach(otherLc => {
+        if (otherLc.equip_avatar === newAvatarId && otherLc.internal_uid !== lc.internal_uid) {
+          otherLc.equip_avatar = 0;
+        }
+      });
+    }
+    lc.equip_avatar = newAvatarId;
+    if (state.isConnected) {
+      await saveFreesrChangesToServer();
+    }
+    showToast(`อัปเดตผู้สวมใส่ ${lcInfo.name} เรียบร้อย`, 'success');
+    renderEquipment();
+    showLcInspector(lc);
+  });
+
+  document.getElementById('btn-inspector-delete')?.addEventListener('click', async () => {
+    if (!confirm(`ยืนยันการลบ ${lcInfo.name} ออกจากคลัง FreeSR หรือไม่?`)) return;
+    if (state.fullFreesrData?.lightcones) {
+      state.fullFreesrData.lightcones = state.fullFreesrData.lightcones.filter(l => l.internal_uid !== lc.internal_uid);
+      if (state.isConnected) {
+        await saveFreesrChangesToServer();
+      }
+      el.eqInspectorCard.style.display = 'none';
+      showToast(t('toastItemDeleted'), 'info');
+      renderEquipment();
+    }
+  });
+}
+
+// Show Relic Details Inspector
+function showRelicInspector(relic) {
+  if (!el.eqInspectorCard) return;
+  const slotNum = (relic.relic_id % 10) || 1;
+  const setId = Math.floor((relic.relic_id % 10000) / 10);
+  const rInfo = getRelicSetInfo(setId);
+  const slotName = RELIC_SLOT_NAMES[slotNum] || `ชิ้นที่ ${slotNum}`;
+
+  let avatarOpts = `<option value="0">${t('unassigned')}</option>`;
+  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sortedAvatars.forEach(av => {
+    const info = getAvatarInfo(av.avatar_id);
+    const sel = (relic.equip_avatar === av.avatar_id) ? 'selected' : '';
+    avatarOpts += `<option value="${av.avatar_id}" ${sel}>${info.name} (ID: ${av.avatar_id})</option>`;
+  });
+
+  el.eqInspectorCard.style.display = 'flex';
+  el.eqInspectorCard.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div class="eq-inspector-hero">
+        <img class="eq-inspector-thumb" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
+        <div class="eq-inspector-info">
+          <div class="eq-inspector-title">${rInfo.name}</div>
+          <div class="eq-inspector-stars">★★★★★</div>
+          <div style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700; margin-top: 0.25rem;">
+            ${slotName} • +${relic.level || 15}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+            ID: ${relic.relic_id || setId}
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm btn-secondary" id="btn-close-eq-inspector" style="padding: 0.2rem 0.5rem; border-radius: 6px;">✕</button>
+    </div>
+
+    <!-- Stats Box -->
+    <div class="eq-inspector-stats">
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">Main Stat</span>
+        <strong style="color: var(--accent-cyan); font-family: monospace;">+15 Max</strong>
+      </div>
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">CRIT Rate / DMG</span>
+        <strong style="color: var(--accent-gold); font-family: monospace;">+3.2% / +6.4%</strong>
+      </div>
+      <div class="eq-inspector-stat-row">
+        <span style="color: var(--text-muted);">SPD / ATK</span>
+        <strong style="color: #fff; font-family: monospace;">+4 / +4.3%</strong>
+      </div>
+    </div>
+
+    <!-- Set Description -->
+    <div class="eq-inspector-ability">
+      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">Set Bonus (${rInfo.name})</div>
+      <div>2-Piece: เพิ่มประสิทธิภาพตามเซ็ตที่กำหนด<br>4-Piece: ปลดล็อกเอฟเฟกต์ต่อสู้ขั้นสูง</div>
+    </div>
+
+    <!-- Wearer Form & Actions -->
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
+      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">ผู้สวมใส่ (Equipped By):</label>
+      <select id="sel-inspector-wearer" class="form-select">
+        ${avatarOpts}
+      </select>
+
+      <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
+        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">💾 บันทึกสวมใส่</button>
+        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="ลบออกจากคลัง">🗑️ ลบ</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-close-eq-inspector')?.addEventListener('click', () => {
+    el.eqInspectorCard.style.display = 'none';
+    document.querySelectorAll('.eq-tile-card.active').forEach(c => c.classList.remove('active'));
+  });
+
+  document.getElementById('btn-inspector-save-wearer')?.addEventListener('click', async () => {
+    const newAvatarId = parseInt(document.getElementById('sel-inspector-wearer').value, 10);
+    if (newAvatarId !== 0 && state.fullFreesrData?.relics) {
+      state.fullFreesrData.relics.forEach(otherR => {
+        const otherSlot = (otherR.relic_id % 10) || 1;
+        if (otherR.equip_avatar === newAvatarId && otherSlot === slotNum && otherR.internal_uid !== relic.internal_uid) {
+          otherR.equip_avatar = 0;
+        }
+      });
+    }
+    relic.equip_avatar = newAvatarId;
+    if (state.isConnected) {
+      await saveFreesrChangesToServer();
+    }
+    showToast(`อัปเดตผู้สวมใส่ ${rInfo.name} (${slotName}) เรียบร้อย`, 'success');
+    renderEquipment();
+    showRelicInspector(relic);
+  });
+
+  document.getElementById('btn-inspector-delete')?.addEventListener('click', async () => {
+    if (!confirm(`ยืนยันการลบ ${rInfo.name} ออกจากคลัง FreeSR หรือไม่?`)) return;
+    if (state.fullFreesrData?.relics) {
+      state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.internal_uid !== relic.internal_uid);
+      if (state.isConnected) {
+        await saveFreesrChangesToServer();
+      }
+      el.eqInspectorCard.style.display = 'none';
+      showToast(t('toastItemDeleted'), 'info');
+      renderEquipment();
+    }
+  });
 }
 
 // Open Add Light Cone Modal
@@ -3195,6 +3479,76 @@ function setupEvents() {
     el.formAddRelic.addEventListener('submit', handleAddRelicSubmit);
   }
 
+  // Equipment Subtab Switching & Filters (Tiles View)
+  const updateEqFiltersExtra = () => {
+    if (!el.eqFilterExtra) return;
+    el.eqFilterExtra.innerHTML = '';
+    if (state.eqActiveSubtab === 'relic') {
+      el.eqFilterExtra.innerHTML = `
+        <option value="all">ทุกชิ้นส่วน</option>
+        <option value="1">1 - ส่วนหัว</option>
+        <option value="2">2 - ส่วนมือ</option>
+        <option value="3">3 - ลำตัว</option>
+        <option value="4">4 - รองเท้า</option>
+        <option value="5">5 - ลูกแก้ว</option>
+        <option value="6">6 - สร้อย</option>
+      `;
+    } else {
+      el.eqFilterExtra.innerHTML = `
+        <option value="all">ทุกประเภท</option>
+        <option value="Destruction">ทำลายล้าง</option>
+        <option value="Hunt">ล่าสังหาร</option>
+        <option value="Erudition">ปัญญา</option>
+        <option value="Harmony">ประสาน</option>
+        <option value="Nihility">ลบล้าง</option>
+        <option value="Preservation">อนุรักษ์</option>
+        <option value="Abundance">เฟื่องฟู</option>
+        <option value="Remembrance">ความทรงจำ</option>
+      `;
+    }
+  };
+
+  if (el.btnEqSubtabLc) {
+    el.btnEqSubtabLc.addEventListener('click', () => {
+      state.eqActiveSubtab = 'lc';
+      el.btnEqSubtabLc.classList.add('active', 'btn-primary');
+      el.btnEqSubtabLc.classList.remove('btn-secondary');
+      el.btnEqSubtabRelic.classList.remove('active', 'btn-primary');
+      el.btnEqSubtabRelic.classList.add('btn-secondary');
+      if (el.lightconesGrid) el.lightconesGrid.style.display = 'grid';
+      if (el.relicsGrid) el.relicsGrid.style.display = 'none';
+      if (el.btnOpenAddLc) el.btnOpenAddLc.style.display = '';
+      if (el.btnOpenAddRelic) el.btnOpenAddRelic.style.display = 'none';
+      if (el.eqInspectorCard) el.eqInspectorCard.style.display = 'none';
+      updateEqFiltersExtra();
+      renderEquipment();
+    });
+  }
+
+  if (el.btnEqSubtabRelic) {
+    el.btnEqSubtabRelic.addEventListener('click', () => {
+      state.eqActiveSubtab = 'relic';
+      el.btnEqSubtabRelic.classList.add('active', 'btn-primary');
+      el.btnEqSubtabRelic.classList.remove('btn-secondary');
+      el.btnEqSubtabLc.classList.remove('active', 'btn-primary');
+      el.btnEqSubtabLc.classList.add('btn-secondary');
+      if (el.relicsGrid) el.relicsGrid.style.display = 'grid';
+      if (el.lightconesGrid) el.lightconesGrid.style.display = 'none';
+      if (el.btnOpenAddRelic) el.btnOpenAddRelic.style.display = '';
+      if (el.btnOpenAddLc) el.btnOpenAddLc.style.display = 'none';
+      if (el.eqInspectorCard) el.eqInspectorCard.style.display = 'none';
+      updateEqFiltersExtra();
+      renderEquipment();
+    });
+  }
+
+  if (el.eqSearch) el.eqSearch.addEventListener('input', renderEquipment);
+  if (el.eqFilterRarity) el.eqFilterRarity.addEventListener('change', renderEquipment);
+  if (el.eqFilterEquipped) el.eqFilterEquipped.addEventListener('change', renderEquipment);
+  if (el.eqFilterExtra) el.eqFilterExtra.addEventListener('change', renderEquipment);
+
+  updateEqFiltersExtra();
+
   // Avatar Search & Filters
   el.avatarSearch.addEventListener('input', renderAvatarsGrid);
   el.avatarFilterRarity.addEventListener('change', renderAvatarsGrid);
@@ -3500,8 +3854,10 @@ function init() {
   setupModalSubtabs();
   setupEvents();
   applyTranslations();
-  refreshStatus();
+  renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   renderAvatarsGrid();
+  loadEquipment();
+  refreshStatus();
   startPingLoop();
 }
 
