@@ -245,9 +245,20 @@ function renderLineup(lineups) {
     } else {
       const info = getAvatarInfo(avatarId);
       card.innerHTML = `
-        <div style="font-size: 0.75rem; color: var(--accent-cyan);">${t('slot')} ${slot + 1}</div>
-        <div style="font-weight: 700; margin-top: 0.25rem;">${info.name}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">${info.element} • ${info.path}</div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <div class="avatar-image-container" style="width: 44px; height: 44px;">
+            <img class="avatar-img"
+                 src="./assets/avatars/${avatarId}.png"
+                 onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+                 alt="${info.name}">
+            <div class="avatar-icon-placeholder" style="display: none;">${info.name.charAt(0)}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: var(--accent-cyan);">${t('slot')} ${slot + 1}</div>
+            <div style="font-weight: 700; margin-top: 0.15rem; font-size: 0.95rem;">${info.name}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${info.element} • ${info.path}</div>
+          </div>
+        </div>
       `;
     }
     el.lineupContainer.appendChild(card);
@@ -298,7 +309,13 @@ function renderAvatarsGrid() {
       <span class="avatar-badge-rarity rarity-${meta.rarity}">★ ${meta.rarity}</span>
       <div>
         <div class="avatar-header-info">
-          <div class="avatar-icon-placeholder">${meta.name.charAt(0)}</div>
+          <div class="avatar-image-container">
+            <img class="avatar-img"
+                 src="./assets/avatars/${item.avatar_id}.png"
+                 onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+                 alt="${meta.name}">
+            <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
+          </div>
           <div>
             <div class="avatar-name">${meta.name}</div>
             <div class="avatar-subinfo">
@@ -378,10 +395,19 @@ function renderExRanks(exList) {
     const localizedMeta = getAvatarInfo(item.avatar_id);
 
     card.innerHTML = `
-      <div>
-        <div style="font-weight: 700; font-size: 1rem;">${localizedMeta.name}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">
-          Avatar ID: ${item.avatar_id} • Ex-Rank Skill ID: ${item.ex_rank_id}
+      <div style="display: flex; gap: 0.85rem; align-items: center;">
+        <div class="avatar-image-container" style="width: 44px; height: 44px;">
+          <img class="avatar-img"
+               src="./assets/avatars/${item.avatar_id}.png"
+               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+               alt="${localizedMeta.name}">
+          <div class="avatar-icon-placeholder" style="display: none;">${localizedMeta.name.charAt(0)}</div>
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 1rem;">${localizedMeta.name}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Avatar ID: ${item.avatar_id} • Ex-Rank Skill ID: ${item.ex_rank_id}
+          </div>
         </div>
       </div>
       <label class="switch">
