@@ -106,6 +106,47 @@ const el = {
   btnModalMaxSkills: document.getElementById('btn-modal-max-skills'),
   btnModalSaveAvatar: document.getElementById('btn-modal-save-avatar'),
 
+  // Skills Info Steppers (Inspired by srtools.punklorde.org/skills-info)
+  valSkillBasic: document.getElementById('val-skill-basic'),
+  rangeSkillBasic: document.getElementById('range-skill-basic'),
+  btnStepDecBasic: document.getElementById('btn-step-dec-basic'),
+  btnStepIncBasic: document.getElementById('btn-step-inc-basic'),
+  btnSkillMaxBasic: document.getElementById('btn-skill-max-basic'),
+
+  valSkillSkill: document.getElementById('val-skill-skill'),
+  rangeSkillSkill: document.getElementById('range-skill-skill'),
+  btnStepDecSkill: document.getElementById('btn-step-dec-skill'),
+  btnStepIncSkill: document.getElementById('btn-step-inc-skill'),
+  btnSkillMaxSkill: document.getElementById('btn-skill-max-skill'),
+
+  valSkillUltra: document.getElementById('val-skill-ultra'),
+  rangeSkillUltra: document.getElementById('range-skill-ultra'),
+  btnStepDecUltra: document.getElementById('btn-step-dec-ultra'),
+  btnStepIncUltra: document.getElementById('btn-step-inc-ultra'),
+  btnSkillMaxUltra: document.getElementById('btn-skill-max-ultra'),
+
+  valSkillTalent: document.getElementById('val-skill-talent'),
+  rangeSkillTalent: document.getElementById('range-skill-talent'),
+  btnStepDecTalent: document.getElementById('btn-step-dec-talent'),
+  btnStepIncTalent: document.getElementById('btn-step-inc-talent'),
+  btnSkillMaxTalent: document.getElementById('btn-skill-max-talent'),
+
+  checkTraceTechnique: document.getElementById('check-trace-technique'),
+  checkTraceA2: document.getElementById('check-trace-a2'),
+  checkTraceA4: document.getElementById('check-trace-a4'),
+  checkTraceA6: document.getElementById('check-trace-a6'),
+  checkTraceStats: document.getElementById('check-trace-stats'),
+
+  btnModalEnergy50: document.getElementById('btn-modal-energy-50'),
+  btnModalEnergy100: document.getElementById('btn-modal-energy-100'),
+  rangeCharEnergy: document.getElementById('range-char-energy'),
+  valCharEnergy: document.getElementById('val-char-energy'),
+
+  modalLcId: document.getElementById('modal-lc-id'),
+  modalLcLevel: document.getElementById('modal-lc-level'),
+  btnModalMaxLc: document.getElementById('btn-modal-max-lc'),
+  modalLcRankBtns: document.getElementById('modal-lc-rank-btns'),
+
   // Lineup Picker Modal
   modalLineupPicker: document.getElementById('modal-lineup-picker'),
   btnClosePickerModal: document.getElementById('btn-close-picker-modal'),
@@ -671,15 +712,52 @@ async function maxSingleAvatar(avatarId) {
   }
 }
 
-// Character Detail / Build Modal
+// Active Lightcone Superimposition Rank in Modal (1 - 5)
+let selectedLcRank = 5;
+
+// Modal Sub-tabs Handler
+function setupModalSubtabs() {
+  const tabBtns = document.querySelectorAll('.modal-subtab-btn');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.modal-subtab-content').forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('active');
+      });
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-modaltab');
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.style.display = 'block';
+        targetContent.classList.add('active');
+      }
+    });
+  });
+}
+
+function updateLcRankPips(rank) {
+  selectedLcRank = rank;
+  document.querySelectorAll('.lc-super-pip').forEach(btn => {
+    const r = parseInt(btn.getAttribute('data-rank'), 10);
+    if (r === rank) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+// Character Detail / Build Modal (Inspired by srtools.punklorde.org/skills-info)
 function openAvatarDetailModal(avatarItem) {
   state.selectedAvatarDetail = avatarItem;
-  const meta = getAvatarInfo(avatarItem.avatar_id);
+  const aid = avatarItem.avatar_id;
+  const meta = getAvatarInfo(aid);
 
-  el.modalCharTitle.textContent = `ปรับแต่งตัวละคร: ${meta.name} (ID: ${avatarItem.avatar_id})`;
-  el.modalCharImg.src = `./assets/avatars/${avatarItem.avatar_id}.png`;
+  el.modalCharTitle.textContent = `ปรับแต่งตัวละคร: ${meta.name} (ID: ${aid})`;
+  el.modalCharImg.src = `./assets/avatars/${aid}.png`;
   el.modalCharImg.onerror = function() {
-    this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarItem.avatar_id}.png`;
+    this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${aid}.png`;
   };
   el.modalCharName.textContent = meta.name;
   el.modalCharMeta.innerHTML = `
@@ -688,10 +766,97 @@ function openAvatarDetailModal(avatarItem) {
     <span class="avatar-badge-rarity rarity-${meta.rarity}" style="position: static;">★ ${meta.rarity}</span>
   `;
 
+  // Reset to first sub-tab (Skills & Traces)
+  document.querySelectorAll('.modal-subtab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.modal-subtab-content').forEach(c => {
+    c.style.display = 'none';
+    c.classList.remove('active');
+  });
+  const firstTabBtn = document.querySelector('.modal-subtab-btn[data-modaltab="modaltab-skills"]');
+  if (firstTabBtn) firstTabBtn.classList.add('active');
+  const firstTabContent = document.getElementById('modaltab-skills');
+  if (firstTabContent) {
+    firstTabContent.style.display = 'block';
+    firstTabContent.classList.add('active');
+  }
+
+  // Basic Status
   el.modalCharLevel.value = avatarItem.level || 80;
   el.modalCharPromotion.value = avatarItem.promotion || 6;
-
   renderModalEidolonPips(avatarItem.rank ?? 6);
+
+  // Load avatar data from fullFreesrData if available
+  const av = state.fullFreesrData?.avatars?.[aid];
+  const skills = av?.data?.skills || {};
+  const anchorSkills = av?.data?.skills_by_anchor_type || {};
+
+  // 1. Basic Attack: anchor 1 or aid + '001' (1-6)
+  const basicVal = anchorSkills['1'] ?? skills[`${aid}001`] ?? 6;
+  if (el.rangeSkillBasic && el.valSkillBasic) {
+    el.rangeSkillBasic.value = Math.min(6, Math.max(1, basicVal));
+    el.valSkillBasic.textContent = el.rangeSkillBasic.value;
+  }
+
+  // 2. Skill: anchor 2 or aid + '002' (1-10)
+  const skillVal = anchorSkills['2'] ?? skills[`${aid}002`] ?? 10;
+  if (el.rangeSkillSkill && el.valSkillSkill) {
+    el.rangeSkillSkill.value = Math.min(10, Math.max(1, skillVal));
+    el.valSkillSkill.textContent = el.rangeSkillSkill.value;
+  }
+
+  // 3. Ultimate: anchor 3 or aid + '003' (1-10)
+  const ultraVal = anchorSkills['3'] ?? skills[`${aid}003`] ?? 10;
+  if (el.rangeSkillUltra && el.valSkillUltra) {
+    el.rangeSkillUltra.value = Math.min(10, Math.max(1, ultraVal));
+    el.valSkillUltra.textContent = el.rangeSkillUltra.value;
+  }
+
+  // 4. Talent: anchor 4 or aid + '004' (1-10)
+  const talentVal = anchorSkills['4'] ?? skills[`${aid}004`] ?? 10;
+  if (el.rangeSkillTalent && el.valSkillTalent) {
+    el.rangeSkillTalent.value = Math.min(10, Math.max(1, talentVal));
+    el.valSkillTalent.textContent = el.rangeSkillTalent.value;
+  }
+
+  // Traces & Technique
+  if (el.checkTraceTechnique) {
+    el.checkTraceTechnique.checked = (anchorSkills['5'] ?? skills[`${aid}007`] ?? 1) > 0;
+  }
+  if (el.checkTraceA2) {
+    el.checkTraceA2.checked = (anchorSkills['6'] ?? skills[`${aid}101`] ?? 1) > 0;
+  }
+  if (el.checkTraceA4) {
+    el.checkTraceA4.checked = (anchorSkills['7'] ?? skills[`${aid}102`] ?? 1) > 0;
+  }
+  if (el.checkTraceA6) {
+    el.checkTraceA6.checked = (anchorSkills['8'] ?? skills[`${aid}103`] ?? 1) > 0;
+  }
+  if (el.checkTraceStats) {
+    el.checkTraceStats.checked = (anchorSkills['9'] ?? skills[`${aid}201`] ?? 1) > 0;
+  }
+
+  // Ultimate Energy
+  const maxSp = av?.sp_max ?? 140;
+  const currentSp = av?.sp_value ?? maxSp;
+  if (el.rangeCharEnergy && el.valCharEnergy) {
+    el.rangeCharEnergy.max = maxSp;
+    el.rangeCharEnergy.value = currentSp;
+    el.valCharEnergy.textContent = `${currentSp}/${maxSp}`;
+  }
+
+  // Lightcone
+  const equippedLc = (state.fullFreesrData?.lightcones || []).find(lc => lc.equip_avatar === aid);
+  if (equippedLc) {
+    if (el.modalLcId) el.modalLcId.value = equippedLc.item_id || '';
+    if (el.modalLcLevel) el.modalLcLevel.value = equippedLc.level || 80;
+    selectedLcRank = equippedLc.rank || 5;
+  } else {
+    if (el.modalLcId) el.modalLcId.value = '';
+    if (el.modalLcLevel) el.modalLcLevel.value = 80;
+    selectedLcRank = 5;
+  }
+  updateLcRankPips(selectedLcRank);
+
   el.modalAvatarDetail.classList.add('active');
 }
 
@@ -746,6 +911,63 @@ async function setAvatarRank(avatarId, rank) {
   }
 }
 
+// Max Skills & Traces for character
+function maxSkillsForAvatar() {
+  if (el.rangeSkillBasic && el.valSkillBasic) {
+    el.rangeSkillBasic.value = 6;
+    el.valSkillBasic.textContent = 6;
+  }
+  if (el.rangeSkillSkill && el.valSkillSkill) {
+    el.rangeSkillSkill.value = 10;
+    el.valSkillSkill.textContent = 10;
+  }
+  if (el.rangeSkillUltra && el.valSkillUltra) {
+    el.rangeSkillUltra.value = 10;
+    el.valSkillUltra.textContent = 10;
+  }
+  if (el.rangeSkillTalent && el.valSkillTalent) {
+    el.rangeSkillTalent.value = 10;
+    el.valSkillTalent.textContent = 10;
+  }
+  if (el.checkTraceTechnique) el.checkTraceTechnique.checked = true;
+  if (el.checkTraceA2) el.checkTraceA2.checked = true;
+  if (el.checkTraceA4) el.checkTraceA4.checked = true;
+  if (el.checkTraceA6) el.checkTraceA6.checked = true;
+  if (el.checkTraceStats) el.checkTraceStats.checked = true;
+
+  showToast('⭐ ปรับสกิลและร่องรอยเต็มทั้งหมดแล้ว', 'info');
+}
+
+// Max All Build For Current Avatar (Lv.80, Prom 6, E6, Max Skills, Max Traces, 100% Energy, LC Lv.80 S5)
+async function maxAllBuildForCurrentAvatar() {
+  if (!state.selectedAvatarDetail) return;
+  const aid = state.selectedAvatarDetail.avatar_id;
+
+  // Level & Eidolon
+  el.modalCharLevel.value = 80;
+  el.modalCharPromotion.value = 6;
+  state.selectedAvatarDetail.level = 80;
+  state.selectedAvatarDetail.promotion = 6;
+  state.selectedAvatarDetail.rank = 6;
+  renderModalEidolonPips(6);
+
+  // Skills & Traces
+  maxSkillsForAvatar();
+
+  // Energy 100%
+  if (el.rangeCharEnergy && el.valCharEnergy) {
+    el.rangeCharEnergy.value = el.rangeCharEnergy.max;
+    el.valCharEnergy.textContent = `${el.rangeCharEnergy.max}/${el.rangeCharEnergy.max}`;
+  }
+
+  // Lightcone
+  if (el.modalLcLevel) el.modalLcLevel.value = 80;
+  updateLcRankPips(5);
+
+  // Save changes
+  await saveAvatarDetails();
+}
+
 // Save avatar details from modal
 async function saveAvatarDetails() {
   if (!state.selectedAvatarDetail) return;
@@ -765,53 +987,131 @@ async function saveAvatarDetails() {
     target.rank = rank;
   }
 
-  if (state.fullFreesrData?.avatars?.[aid]) {
-    state.fullFreesrData.avatars[aid].level = level;
-    state.fullFreesrData.avatars[aid].promotion = promotion;
-    state.fullFreesrData.avatars[aid].data.rank = rank;
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+  if (!state.fullFreesrData.avatars) {
+    state.fullFreesrData.avatars = {};
+  }
+  if (!state.fullFreesrData.avatars[aid]) {
+    state.fullFreesrData.avatars[aid] = {
+      owner_uid: 0,
+      avatar_id: aid,
+      level,
+      promotion,
+      techniques: [],
+      sp_value: parseInt(el.rangeCharEnergy?.value, 10) || 140,
+      sp_max: parseInt(el.rangeCharEnergy?.max, 10) || 140,
+      data: {
+        rank,
+        skills: {},
+        skills_by_anchor_type: {}
+      }
+    };
+  }
+
+  const av = state.fullFreesrData.avatars[aid];
+  av.level = level;
+  av.promotion = promotion;
+  av.data = av.data || {};
+  av.data.rank = rank;
+  if (el.rangeCharEnergy) {
+    av.sp_value = parseInt(el.rangeCharEnergy.value, 10) || av.sp_max || 140;
+  }
+
+  // Extract skills values
+  const basicVal = parseInt(el.rangeSkillBasic?.value, 10) || 6;
+  const skillVal = parseInt(el.rangeSkillSkill?.value, 10) || 10;
+  const ultraVal = parseInt(el.rangeSkillUltra?.value, 10) || 10;
+  const talentVal = parseInt(el.rangeSkillTalent?.value, 10) || 10;
+  const techVal = el.checkTraceTechnique?.checked ? 1 : 0;
+  const a2Val = el.checkTraceA2?.checked ? 1 : 0;
+  const a4Val = el.checkTraceA4?.checked ? 1 : 0;
+  const a6Val = el.checkTraceA6?.checked ? 1 : 0;
+  const statVal = el.checkTraceStats?.checked ? 1 : 0;
+
+  av.data.skills = av.data.skills || {};
+  av.data.skills[`${aid}001`] = basicVal;
+  av.data.skills[`${aid}002`] = skillVal;
+  av.data.skills[`${aid}003`] = ultraVal;
+  av.data.skills[`${aid}004`] = talentVal;
+  av.data.skills[`${aid}007`] = techVal;
+  av.data.skills[`${aid}101`] = a2Val;
+  av.data.skills[`${aid}102`] = a4Val;
+  av.data.skills[`${aid}103`] = a6Val;
+  for (let i = 1; i <= 10; i++) {
+    const pad = i < 10 ? `0${i}` : `${i}`;
+    av.data.skills[`${aid}2${pad}`] = statVal;
+  }
+
+  av.data.skills_by_anchor_type = {
+    "1": basicVal,
+    "2": skillVal,
+    "3": ultraVal,
+    "4": talentVal,
+    "5": techVal,
+    "6": a2Val,
+    "7": a4Val,
+    "8": a6Val,
+    "9": statVal,
+    "10": statVal,
+    "11": statVal,
+    "12": statVal,
+    "13": statVal,
+    "14": statVal,
+    "15": statVal,
+    "16": statVal,
+    "17": statVal,
+    "18": statVal
+  };
+
+  // Lightcone update
+  state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+  const lcId = parseInt(el.modalLcId?.value, 10);
+  const lcLevel = parseInt(el.modalLcLevel?.value, 10) || 80;
+  const lcRank = selectedLcRank || 5;
+  const lcProm = lcLevel > 70 ? 6 : (lcLevel > 60 ? 5 : (lcLevel > 50 ? 4 : (lcLevel > 40 ? 3 : (lcLevel > 20 ? 1 : 0))));
+
+  const existingLcIndex = state.fullFreesrData.lightcones.findIndex(lc => lc.equip_avatar === aid);
+  if (lcId && lcId > 0) {
+    if (existingLcIndex !== -1) {
+      state.fullFreesrData.lightcones[existingLcIndex].item_id = lcId;
+      state.fullFreesrData.lightcones[existingLcIndex].level = lcLevel;
+      state.fullFreesrData.lightcones[existingLcIndex].rank = lcRank;
+      state.fullFreesrData.lightcones[existingLcIndex].promotion = lcProm;
+    } else {
+      state.fullFreesrData.lightcones.push({
+        internal_uid: state.fullFreesrData.lightcones.length,
+        item_id: lcId,
+        equip_avatar: aid,
+        level: lcLevel,
+        rank: lcRank,
+        promotion: lcProm
+      });
+    }
+  } else if (existingLcIndex !== -1) {
+    state.fullFreesrData.lightcones[existingLcIndex].equip_avatar = null;
   }
 
   renderAvatarsGrid();
+  loadEquipment();
   el.modalAvatarDetail.classList.remove('active');
 
   if (state.isConnected) {
     try {
       if (state.serverMode === 'gac') {
         await apiCall('/api/freesr/avatars', 'POST', { avatar_id: aid, level, promotion, rank });
+        await saveFreesrChangesToServer();
       } else {
         await saveFreesrChangesToServer();
       }
-      showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย (Lv. ${level}, Prom. ${promotion}, E${rank})`, 'success');
+      showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย`, 'success');
     } catch (err) {
       showToast(`บันทึกในเครื่องแล้ว (ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message})`, 'warning');
     }
   } else {
-    showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย (Lv. ${level}, Prom. ${promotion}, E${rank})`, 'success');
+    showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย`, 'success');
   }
-}
-
-// Max Skills & Traces for character
-async function maxSkillsForAvatar() {
-  if (!state.selectedAvatarDetail) return;
-  const aid = state.selectedAvatarDetail.avatar_id;
-  el.modalCharLevel.value = 80;
-  el.modalCharPromotion.value = 6;
-  state.selectedAvatarDetail.level = 80;
-  state.selectedAvatarDetail.promotion = 6;
-  state.selectedAvatarDetail.rank = 6;
-  renderModalEidolonPips(6);
-
-  if (state.fullFreesrData?.avatars?.[aid]) {
-    const av = state.fullFreesrData.avatars[aid];
-    av.level = 80;
-    av.promotion = 6;
-    av.data.rank = 6;
-    if (av.data.skills) {
-      for (const k in av.data.skills) av.data.skills[k] = 10;
-    }
-  }
-
-  showToast(`อัพเลเวล 80, เลื่อนขั้น 6, E6 และ Traces 10/10 สำหรับ ${getAvatarInfo(aid).name} สำเร็จ!`, 'success');
 }
 
 // Max all avatars
@@ -1184,17 +1484,62 @@ function setupEvents() {
   document.getElementById('btn-modal-cancel-avatar')?.addEventListener('click', () => el.modalAvatarDetail.classList.remove('active'));
   el.btnModalSaveAvatar.addEventListener('click', saveAvatarDetails);
   el.btnModalMaxSkills.addEventListener('click', maxSkillsForAvatar);
+  document.getElementById('btn-modal-max-all-char')?.addEventListener('click', maxAllBuildForCurrentAvatar);
 
-  document.getElementById('btn-modal-max-all-char')?.addEventListener('click', async () => {
-    if (!state.selectedAvatarDetail) return;
-    el.modalCharLevel.value = 80;
-    el.modalCharPromotion.value = 6;
-    state.selectedAvatarDetail.level = 80;
-    state.selectedAvatarDetail.promotion = 6;
-    state.selectedAvatarDetail.rank = 6;
-    renderModalEidolonPips(6);
-    await maxSkillsForAvatar();
-    await saveAvatarDetails();
+  // Steppers for 4 Skills (Basic, Skill, Ultra, Talent)
+  const setupSkillStepper = (rangeEl, valEl, decBtn, incBtn, maxBtn, maxVal) => {
+    if (!rangeEl || !valEl) return;
+    rangeEl.addEventListener('input', () => { valEl.textContent = rangeEl.value; });
+    decBtn?.addEventListener('click', () => {
+      let cur = parseInt(rangeEl.value, 10);
+      if (cur > parseInt(rangeEl.min, 10)) {
+        rangeEl.value = cur - 1;
+        valEl.textContent = rangeEl.value;
+      }
+    });
+    incBtn?.addEventListener('click', () => {
+      let cur = parseInt(rangeEl.value, 10);
+      if (cur < parseInt(rangeEl.max, 10)) {
+        rangeEl.value = cur + 1;
+        valEl.textContent = rangeEl.value;
+      }
+    });
+    maxBtn?.addEventListener('click', () => {
+      rangeEl.value = maxVal;
+      valEl.textContent = maxVal;
+    });
+  };
+
+  setupSkillStepper(el.rangeSkillBasic, el.valSkillBasic, el.btnStepDecBasic, el.btnStepIncBasic, el.btnSkillMaxBasic, 6);
+  setupSkillStepper(el.rangeSkillSkill, el.valSkillSkill, el.btnStepDecSkill, el.btnStepIncSkill, el.btnSkillMaxSkill, 10);
+  setupSkillStepper(el.rangeSkillUltra, el.valSkillUltra, el.btnStepDecUltra, el.btnStepIncUltra, el.btnSkillMaxUltra, 10);
+  setupSkillStepper(el.rangeSkillTalent, el.valSkillTalent, el.btnStepDecTalent, el.btnStepIncTalent, el.btnSkillMaxTalent, 10);
+
+  // Ultimate Energy Controls
+  el.rangeCharEnergy?.addEventListener('input', () => {
+    el.valCharEnergy.textContent = `${el.rangeCharEnergy.value}/${el.rangeCharEnergy.max}`;
+  });
+  el.btnModalEnergy50?.addEventListener('click', () => {
+    const half = Math.floor(parseInt(el.rangeCharEnergy.max, 10) * 0.5);
+    el.rangeCharEnergy.value = half;
+    el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
+  });
+  el.btnModalEnergy100?.addEventListener('click', () => {
+    el.rangeCharEnergy.value = el.rangeCharEnergy.max;
+    el.valCharEnergy.textContent = `${el.rangeCharEnergy.max}/${el.rangeCharEnergy.max}`;
+  });
+
+  // Lightcone Controls in Modal
+  document.querySelectorAll('.lc-super-pip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const r = parseInt(btn.getAttribute('data-rank'), 10);
+      updateLcRankPips(r);
+    });
+  });
+  el.btnModalMaxLc?.addEventListener('click', () => {
+    if (el.modalLcLevel) el.modalLcLevel.value = 80;
+    updateLcRankPips(5);
+    showToast('ปรับกรวยแสงเป็นเลเวล 80 ขัดเกลา 5 เรียบร้อย', 'info');
   });
 
   // Quick Preset Buttons for Character Modal
@@ -1430,6 +1775,7 @@ function init() {
   setupServerModes();
   setupLanguageSelector();
   setupTabs();
+  setupModalSubtabs();
   setupEvents();
   applyTranslations();
   refreshStatus();
