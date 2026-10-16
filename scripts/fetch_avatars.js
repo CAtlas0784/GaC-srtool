@@ -61,9 +61,10 @@ async function processId(id) {
     fs.copyFileSync(path.join(targetDir, '1006.png'), dest);
     return { id, status: 'fallback 1006 (Silver Wolf)' };
   }
-  if (id === 1511 && fs.existsSync(path.join(targetDir, '1308.png'))) {
-    fs.copyFileSync(path.join(targetDir, '1308.png'), dest);
-    return { id, status: 'fallback 1308 (Acheron)' };
+  if (id === 1511) {
+    const ahaUrl = 'https://cdn.gachabase.net/hsr/assets/2115ff73d049abc984df3ea560d469ac.png';
+    ok = await fetchUrl(ahaUrl, dest);
+    if (ok) return { id, status: 'ok (gachabase)' };
   }
   if ([8004, 8006, 8008, 8010].includes(id) && fs.existsSync(path.join(targetDir, '8002.png'))) {
     fs.copyFileSync(path.join(targetDir, '8002.png'), dest);

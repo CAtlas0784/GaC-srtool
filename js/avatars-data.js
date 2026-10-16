@@ -1807,6 +1807,27 @@ export const AVATAR_METADATA = {
     "rarity": 5,
     "hasExRank": false
   },
+  "1511": {
+    "names": {
+      "th": "Aeon ★ Aha",
+      "en": "Aeon ★ Aha",
+      "zh-CN": "星神★阿哈",
+      "zh-TW": "星神★阿哈",
+      "ja": "星神★アッハ",
+      "ko": "에이언즈★아하",
+      "ru": "Эон ★ Аха",
+      "vi": "Aeon ★ Aha",
+      "id": "Aeon ★ Aha",
+      "es": "Eón ★ Aha",
+      "fr": "Éon ★ Aha",
+      "de": "Äon ★ Aha",
+      "pt": "Aeon ★ Aha"
+    },
+    "path": "Elation",
+    "element": "Quantum",
+    "rarity": 5,
+    "hasExRank": false
+  },
   "1512": {
     "names": {
       "th": "Robin - คีตะคิมหันต์",
