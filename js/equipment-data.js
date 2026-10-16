@@ -3098,6 +3098,31 @@ export const LIGHTCONE_METADATA = {
     "rarity": 5,
     "path": "Elation"
   },
+  "23065": {
+    "names": {
+      "th": "เสียงสะท้อนแรกของ \"Aha\"",
+      "en": "Upon the First Echo of \"Aha\"",
+      "zh-CN": "「阿哈」最初的啼鸣",
+      "zh-TW": "「阿哈」最初的啼鳴",
+      "ja": "「アハ」最初の啼き声",
+      "ko": "「아하」 최초의 울음소리",
+      "ru": "При первом эхе Ахи",
+      "vi": "Tiếng Vọng Đầu Tiên Của \"Aha\"",
+      "id": "Upon the First Echo of \"Aha\"",
+      "es": "Tras el primer eco de Aha",
+      "fr": "Au premier écho d'Aha",
+      "de": "Beim ersten Echo von Aha",
+      "pt": "No Primeiro Eco de Aha"
+    },
+    "rarity": 5,
+    "path": "Elation",
+    "hp": 952,
+    "atk": 582,
+    "def": 529,
+    "skill_name": "IMPROV TOUR",
+    "desc": "เพิ่มความเร็วพื้นฐานของผู้สวมใส่ 12 เมื่อใช้สกิลการต่อสู้กับเป้าหมายฝ่ายเรา 1 ตัว จะได้รับ \"Punchline\" 10 แต้ม เอฟเฟกต์นี้เกิดขึ้นได้มากสุด 1 ครั้งในทุก 1 เทิร์น จากนั้นจะทำให้ฝ่ายเราทั้งหมดเพิกเฉยต่อ DEF ของเป้าหมายศัตรู 16% เมื่อสร้าง DMG ในการต่อสู้นี้ โดยเอฟเฟกต์นี้ไม่สามารถซ้อนทับได้",
+    "desc_en": "Increases the wearer's base Speed by 12. When using a Skill on one other ally, gains 10 Punchline. This effect can trigger at most once every interval of 1 turn(s). Then, causes all allies to ignore 16% of the enemy target's DEF when dealing DMG during this combat. This effect cannot be stacked."
+  },
   "24000": {
     "names": {
       "th": "On the Fall of an Aeon",

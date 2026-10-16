@@ -1423,6 +1423,7 @@ const SIGNATURE_LIGHTCONES = {
   1404: 23037, // Anaxa -> If Time Were a Flower
   1405: 23038, // Tribbie
   1406: 23039, // Mydei
+  1511: 23065, // Aeon ★ Aha -> Upon the First Echo of "Aha"
   8001: 24001, // Trailblazer Male Destruction -> On the Fall of an Aeon
   8002: 24001, // Trailblazer Female Destruction
   8003: 24002, // Trailblazer Male Preservation -> Texture of Memories
@@ -1442,8 +1443,26 @@ const RECOMMENDED_RELIC_BUILDS = {
   Hunt: { cavern: 120, planar: 309, name: "Valorous (4) + Rutilant Arena (2)" },
   Destruction: { cavern: 119, planar: 315, name: "Iron Cavalry (4) + Kalpagni (2)" },
   Erudition: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" },
-  Remembrance: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" }
+  Remembrance: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" },
+  Elation: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" }
 };
+
+// Lightcone Art URL Resolvers (Local asset -> Gachabase -> StarRailRes)
+function getLightconeArtSrc(lcId) {
+  const id = parseInt(lcId, 10);
+  if (id === 23065) {
+    return './assets/lightcones/23065.png';
+  }
+  return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+}
+
+function getLightconeArtFallback(lcId) {
+  const id = parseInt(lcId, 10);
+  if (id === 23065) {
+    return 'https://cdn.gachabase.net/hsr/assets/500cfc18698932759756f6b3ba4db417.png';
+  }
+  return `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${id}.png`;
+}
 
 // Modal Sub-tabs Handler
 function switchModalSubtab(targetId) {
@@ -1522,12 +1541,14 @@ function getLightconePassiveDesc(lcId, rank = 5) {
     23032: `ทำให้ Energy Regeneration Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยสกิลต่อสู้หรือท่าไม้ตาย จะเพิ่ม CRIT DMG ของพันธมิตร <strong>${48 + (r - 1) * 8}%</strong>`,
     23034: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยท่าไม้ตาย จะสร้าง DMG น้ำแข็งเพิ่มเติม <strong>${60 + (r - 1) * 10}%</strong> ของ ATK แก่ศัตรูทั้งหมด`,
     23036: `ทำให้ HP สูงสุดของผู้สวมใส่เพิ่มขึ้น <strong>${30 + (r - 1) * 5}%</strong> และเมื่ออยู่ในสนามรบ สมาชิกทีมทุกคนสร้าง DMG เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong>`,
+    23065: `ทำให้ความเร็วพื้นฐานของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 3}</strong> เมื่อใช้สกิลการต่อสู้กับเพื่อนร่วมทีม 1 ตัว จะได้รับ "Punchline" 10 แต้ม (เกิดได้สูงสุด 1 ครั้งทุกๆ 1 เทิร์น) และทำให้เพื่อนร่วมทีมทั้งหมดเมิน DEF ศัตรู <strong>${16 + (r - 1) * 4}%</strong> เมื่อสร้าง DMG ในการต่อสู้นี้ (ไม่ซ้อนทับ)`,
     24001: `เมื่อผู้สวมใส่โจมตี จะเพิ่ม ATK <strong>${8 + (r - 1) * 2}%</strong> สูงสุด 4 ชั้น และเมื่อทำลายจุดอ่อนศัตรู จะเพิ่ม DMG <strong>${12 + (r - 1) * 3}%</strong> เป็นเวลา 2 เทิร์น`
   };
 
   if (passives[id]) return passives[id];
 
   const meta = LIGHTCONE_METADATA[id];
+  if (meta?.desc) return meta.desc;
   const pathName = meta ? translatePath(meta.path) : "สายต่อสู้";
   return `เพิ่มค่าสถานะพื้นฐานตามสาย <strong>${pathName}</strong> และเพิ่มประสิทธิภาพความเสียหายและการสนับสนุน <strong>${12 + (r - 1) * 3}%</strong> เมื่อเข้าสู่การต่อสู้`;
 }
@@ -1557,8 +1578,8 @@ function updateModalLcFullView(lcId, rank = 5, level = 80) {
   if (el.modalLcFullImg) {
     el.modalLcFullImg.style.display = 'block';
     if (el.modalLcNoArt) el.modalLcNoArt.style.display = 'none';
-    const primarySrc = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
-    const fallbackSrc = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${id}.png`;
+    const primarySrc = getLightconeArtSrc(id);
+    const fallbackSrc = getLightconeArtFallback(id);
     el.modalLcFullImg.src = primarySrc;
     el.modalLcFullImg.onerror = function() {
       if (this.src !== fallbackSrc) {
@@ -1766,8 +1787,15 @@ function renderModalOverviewTab(avatarId) {
 
   // Equipped LC Card Glance
   if (el.overviewLcThumb) {
-    el.overviewLcThumb.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/light_cone/${lcId}.png`;
-    el.overviewLcThumb.onerror = function() { this.src = './assets/logo.png'; };
+    el.overviewLcThumb.src = getLightconeArtSrc(lcId);
+    el.overviewLcThumb.onerror = function() {
+      const fallback = getLightconeArtFallback(lcId);
+      if (this.src !== fallback) {
+        this.src = fallback;
+      } else {
+        this.src = './assets/logo.png';
+      }
+    };
   }
   if (el.overviewLcName) el.overviewLcName.textContent = lcInfo.name || `Light Cone ${lcId}`;
   if (el.overviewLcRank) el.overviewLcRank.textContent = `S${lcRank} • Lv.${lcLevel}`;
@@ -2650,9 +2678,9 @@ function renderShowcaseCard(avatarId) {
   const baseDef = meta.rarity === 5 ? 600 : 573;
   const baseSpd = 100;
 
-  const lcHp = lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846);
-  const lcAtk = lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317);
-  const lcDef = lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264);
+  const lcHp = lcMeta.hp || (lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846));
+  const lcAtk = lcMeta.atk || (lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317));
+  const lcDef = lcMeta.def || (lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264));
 
   // 2. Relics & Set Bonuses
   const avatarRelics = (state.fullFreesrData?.relics || []).filter(r => r.equip_avatar === aid);
@@ -2757,8 +2785,8 @@ function renderShowcaseCard(avatarId) {
 
   const primaryPortrait = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${aid}.png`;
   const fallbackPortrait = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${aid}.png`;
-  const lcArtThumb = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lcId}.png`;
-  const fallbackLcThumb = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${lcId}.png`;
+  const lcArtThumb = getLightconeArtSrc(lcId);
+  const fallbackLcThumb = getLightconeArtFallback(lcId);
 
   el.showcaseCardContainer.innerHTML = `
     <!-- 1. Left Splash Art Column -->
@@ -3457,8 +3485,8 @@ function renderLightconesGrid() {
       </div>
     ` : '';
 
-    const primaryImg = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lc.item_id}.png`;
-    const fallbackImg = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${lc.item_id}.png`;
+    const primaryImg = getLightconeArtSrc(lc.item_id);
+    const fallbackImg = getLightconeArtFallback(lc.item_id);
 
     card.innerHTML = `
       <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${meta.name}">
@@ -3563,15 +3591,18 @@ function showLcInspector(lc) {
     avatarOpts += `<option value="${av.avatar_id}" ${sel}>${info.name} (ID: ${av.avatar_id})</option>`;
   });
 
-  const hp = lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846);
-  const atk = lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317);
-  const def = lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264);
+  const hp = lcMeta.hp || (lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846));
+  const atk = lcMeta.atk || (lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317));
+  const def = lcMeta.def || (lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264));
+
+  const primaryThumb = getLightconeArtSrc(lc.item_id);
+  const fallbackThumb = getLightconeArtFallback(lc.item_id);
 
   el.eqInspectorCard.style.display = 'flex';
   el.eqInspectorCard.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div class="eq-inspector-hero">
-        <img class="eq-inspector-thumb" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lc.item_id}.png" onerror="this.src='./assets/logo.png'" alt="${lcInfo.name}">
+        <img class="eq-inspector-thumb" src="${primaryThumb}" onerror="if(this.src!=='${fallbackThumb}')this.src='${fallbackThumb}';else this.src='./assets/logo.png';" alt="${lcInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${lcInfo.name}</div>
           <div class="eq-inspector-stars">${'★'.repeat(lcInfo.rarity || 5)}</div>
