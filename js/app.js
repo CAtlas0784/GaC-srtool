@@ -69,6 +69,7 @@ const el = {
   btnSavePersistentToggles: document.getElementById('btn-save-persistent-toggles'),
 
   // Ex-Rank
+  tabBtnExrank: document.getElementById('tab-btn-exrank'),
   exrankList: document.getElementById('exrank-list'),
   btnExrankEnableAll: document.getElementById('btn-exrank-enable-all'),
   btnExrankDisableAll: document.getElementById('btn-exrank-disable-all'),
@@ -251,26 +252,50 @@ function setupServerModes() {
   const updateModeDisplay = (mode) => {
     state.serverMode = mode;
     localStorage.setItem('gac_srtool_mode', mode);
-    el.serverModeSelect.value = mode;
+    if (el.serverModeSelect) el.serverModeSelect.value = mode;
     if (el.settingServerMode) el.settingServerMode.value = mode;
 
     if (mode === 'gac') {
-      el.lblActiveMode.textContent = 'GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)';
-      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'inline-flex';
-    } else if (mode === 'firefly') {
-      el.lblActiveMode.textContent = 'FireflyGo (FreeSR)';
+      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaC-hkrpg-go';
+      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = '';
+      if (el.tabBtnExrank) el.tabBtnExrank.style.display = '';
+      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = '';
+      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = '';
+    } else {
+      if (el.lblActiveMode) el.lblActiveMode.textContent = mode === 'firefly' ? 'FireflyGo' : 'RobinSR';
       if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
-    } else if (mode === 'robin') {
-      el.lblActiveMode.textContent = 'RobinSR (FreeSR)';
-      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
+      if (el.tabBtnExrank) el.tabBtnExrank.style.display = 'none';
+      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
+      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
+
+      // If user is currently viewing a hidden tab, auto switch back to dashboard
+      if (state.activeTab === 'tab-persistent' || state.activeTab === 'tab-exrank') {
+        const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
+        if (dashboardBtn) dashboardBtn.click();
+      }
+
+      // If user is viewing persistent JSON, switch back to freesr
+      if (state.currentJsonMode === 'persistent') {
+        loadJsonData('freesr');
+      }
     }
   };
 
-  el.serverModeSelect.addEventListener('change', (e) => {
-    updateModeDisplay(e.target.value);
-    showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode.textContent}`, 'info');
-    refreshStatus();
-  });
+  if (el.serverModeSelect) {
+    el.serverModeSelect.addEventListener('change', (e) => {
+      updateModeDisplay(e.target.value);
+      showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value}`, 'info');
+      refreshStatus();
+    });
+  }
+
+  if (el.settingServerMode) {
+    el.settingServerMode.addEventListener('change', (e) => {
+      updateModeDisplay(e.target.value);
+      showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value}`, 'info');
+      refreshStatus();
+    });
+  }
 
   updateModeDisplay(state.serverMode);
 }

@@ -33,7 +33,7 @@ export const TRANSLATIONS = {
     tabExrank: "⚡ สกิลพิเศษ Ex-Rank",
     tabTeleport: "🚀 วาร์ปฉาก",
     tabJson: "📝 จัดการไฟล์ JSON",
-    tabSettings: "⚙️ ตั้งค่า & ข้อมูลโหมด",
+    tabSettings: "⚙️ ตั้งค่า",
     // Dashboard
     statAvatars: "ตัวละครที่ครอบครอง",
     statLightcones: "กรวยแสง",
@@ -137,7 +137,7 @@ export const TRANSLATIONS = {
     tabExrank: "⚡ Ex-Rank Skills",
     tabTeleport: "🚀 Teleport",
     tabJson: "📝 JSON Management",
-    tabSettings: "⚙️ Settings & Guide",
+    tabSettings: "⚙️ Settings",
     statAvatars: "Owned Avatars",
     statLightcones: "Lightcones",
     statRelics: "Relics",

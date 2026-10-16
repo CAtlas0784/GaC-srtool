@@ -24,9 +24,9 @@
       <div class="server-mode-badge" title="โหมดการเชื่อมต่อเซิร์ฟเวอร์">
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
-          <option value="gac" selected>⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)</option>
-          <option value="firefly">🔥 FireflyGo (FreeSR)</option>
-          <option value="robin">🕊️ RobinSR (FreeSR)</option>
+          <option value="gac" selected>⚡ GaC-hkrpg-go</option>
+          <option value="firefly">🔥 FireflyGo</option>
+          <option value="robin">🕊️ RobinSR</option>
         </select>
       </div>
 
@@ -52,9 +52,9 @@
     <button class="tab-btn" data-tab="tab-avatars">👥 ตัวละคร</button>
     <button class="tab-btn" data-tab="tab-equipment">🗡️ กรวยแสง & รีลิกส์</button>
     <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent">💾 จัดการเซฟ GaC</button>
-    <button class="tab-btn" data-tab="tab-exrank">⚡ สกิลพิเศษ Ex-Rank</button>
+    <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json">📝 จัดการไฟล์ JSON</button>
-    <button class="tab-btn" data-tab="tab-settings">⚙️ ตั้งค่า & ข้อมูลโหมด</button>
+    <button class="tab-btn" data-tab="tab-settings">⚙️ ตั้งค่า</button>
   </nav>
 
   <!-- Main Container -->
@@ -327,9 +327,9 @@
       </div>
     </section>
 
-    <!-- 8. Settings & Compatibility Guide -->
+    <!-- 8. Settings -->
     <section id="tab-settings" class="tab-content">
-      <div class="grid-2">
+      <div style="max-width: 620px; margin: 0 auto;">
         <!-- Endpoint config -->
         <div class="card">
           <div class="card-title">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
@@ -339,9 +339,9 @@
             <div class="form-group">
               <label class="form-label">โหมดเซิร์ฟเวอร์</label>
               <select id="setting-server-mode" class="form-select">
-                <option value="gac">⚡ GaC-hkrpg-go (เซิร์ฟเวอร์หลัก)</option>
-                <option value="firefly">🔥 FireflyGo (FreeSR)</option>
-                <option value="robin">🕊️ RobinSR (FreeSR)</option>
+                <option value="gac">⚡ GaC-hkrpg-go</option>
+                <option value="firefly">🔥 FireflyGo</option>
+                <option value="robin">🕊️ RobinSR</option>
               </select>
             </div>
             <div class="form-group">
@@ -360,25 +360,6 @@
               <button type="button" class="btn btn-secondary" id="btn-reset-settings">คืนค่าเริ่มต้น</button>
             </div>
           </form>
-        </div>
-
-        <!-- Mode Explanation Card -->
-        <div class="card">
-          <div class="card-title">💡 ข้อมูลโหมดเซิร์ฟเวอร์ & สำหรับผู้อื่น</div>
-          <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem; color: var(--text-muted);">
-            <div>
-              <strong style="color: var(--accent-cyan);">⚡ GaC-hkrpg-go:</strong><br>
-              โหมดเฉพาะของเซิร์ฟเวอร์เรา สามารถอ่านและเขียนทั้ง <code>freesr-data.json</code> และ <code>persistent</code> ได้แบบ 100% เรียลไทม์ผ่าน REST API Gateway พร้อมระบบ Ex-Rank
-            </div>
-            <div>
-              <strong style="color: #f87171;">🔥 FireflyGo:</strong><br>
-              สำหรับผู้ใช้งานที่รันเซิร์ฟเวอร์ FireflyGo สามารถใช้เครื่องมือนี้จัดทีม, แม็กซ์ตัวละคร, หรือปรับแต่งอาวุธ/รีลิกส์ แล้วสั่งซิงค์ผ่าน <code>/srtools</code> หรือกดดาวน์โหลดไฟล์ <code>freesr-data.json</code> ไปวางในเซิร์ฟเวอร์ได้ทันที
-            </div>
-            <div>
-              <strong style="color: #c084fc;">🕊️ RobinSR:</strong><br>
-              สำหรับผู้ใช้งาน RobinSR สามารถใช้เครื่องมือนี้ในการสร้างเซฟและตัวละครตามมาตรฐาน FreeSR ได้อย่างสมบูรณ์แบบ
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -404,7 +385,7 @@
           <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
         <button type="button" class="btn btn-gold btn-sm" id="btn-modal-max-all-char">
-          ⭐ ปรับเต็มทั้งหมด (Lv.80 / E6 / สกิล 10)
+          ⭐ ปรับเต็มทั้งหมด
         </button>
       </div>
 
@@ -437,7 +418,7 @@
 
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-          <label class="form-label" style="margin: 0;">ระดับ Eidolon (E0 - E6)</label>
+          <label class="form-label" style="margin: 0;">ระดับ Eidolon</label>
           <div style="display: flex; gap: 0.4rem;">
             <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-quick-e0" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
               รีเซ็ต E0
@@ -456,7 +437,7 @@
         <label class="form-label">สกิลและร่องรอย</label>
         <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
           <div style="font-size: 0.85rem; color: var(--text-muted);">
-            โจมตีปกติ (Lv.6), สกิลต่อสู้ (Lv.10), ท่าไม้ตาย (Lv.10), พรสวรรค์ (Lv.10) และโหนดเสริมทั้งหมด
+            โจมตีปกติเลเวล 6, สกิลต่อสู้เลเวล 10, ท่าไม้ตายเลเวล 10, พรสวรรค์เลเวล 10 และโหนดเสริมทั้งหมด
           </div>
           <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-skills">
             ⭐ อัพสกิล 10/10
