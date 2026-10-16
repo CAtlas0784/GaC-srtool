@@ -15,7 +15,7 @@
       <img src="assets/logo.png" alt="GaC Logo" class="brand-logo-img">
       <div>
         <div class="brand-title">GaC-Srtool</div>
-        <div class="brand-subtitle">Star Rail FreeSR & Server Controller</div>
+        <div class="brand-subtitle" data-i18n="appSubtitle">Star Rail FreeSR & Server Controller</div>
       </div>
     </div>
 
@@ -40,7 +40,7 @@
         <span id="connection-status-text">กำลังตรวจสอบ...</span>
       </div>
 
-      <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="รีเฟรชการเชื่อมต่อ">
+      <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="รีเฟรชการเชื่อมต่อ" data-i18n="refresh">
         🔄 รีเฟรช
       </button>
     </div>
@@ -48,13 +48,13 @@
 
   <!-- Navigation Bar -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="tab-dashboard">📊 แดชบอร์ด & จัดทีม</button>
-    <button class="tab-btn" data-tab="tab-avatars">👥 ตัวละคร</button>
-    <button class="tab-btn" data-tab="tab-equipment">🗡️ กรวยแสง & รีลิกส์</button>
-    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent">💾 จัดการเซฟ GaC</button>
-    <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank">⚡ สกิลพิเศษ Ex-Rank</button>
-    <button class="tab-btn" data-tab="tab-json">📝 จัดการไฟล์ JSON</button>
-    <button class="tab-btn" data-tab="tab-settings">⚙️ ตั้งค่า</button>
+    <button class="tab-btn active" data-tab="tab-dashboard" data-i18n="tabDashboard">📊 แดชบอร์ด & จัดทีม</button>
+    <button class="tab-btn" data-tab="tab-avatars" data-i18n="tabAvatars">👥 ตัวละคร</button>
+    <button class="tab-btn" data-tab="tab-equipment" data-i18n="tabEquipment">🗡️ กรวยแสง & รีลิกส์</button>
+    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaC</button>
+    <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
+    <button class="tab-btn" data-tab="tab-json" data-i18n="tabJson">📝 จัดการไฟล์ JSON</button>
+    <button class="tab-btn" data-tab="tab-settings" data-i18n="tabSettings">⚙️ ตั้งค่า</button>
   </nav>
 
   <!-- Main Container -->
@@ -65,23 +65,22 @@
       <div class="grid-3" style="margin-bottom: 1.5rem;">
         <div class="card stat-box">
           <div class="stat-number" id="stat-avatars">0</div>
-          <div class="stat-label">ตัวละครที่ครอบครอง</div>
+          <div class="stat-label" data-i18n="statAvatars">ตัวละครที่ครอบครอง</div>
         </div>
         <div class="card stat-box">
           <div class="stat-number" id="stat-lightcones">0</div>
-          <div class="stat-label">กรวยแสง</div>
+          <div class="stat-label" data-i18n="statLightcones">กรวยแสง</div>
         </div>
         <div class="card stat-box">
           <div class="stat-number" id="stat-relics">0</div>
-          <div class="stat-label">รีลิกส์</div>
+          <div class="stat-label" data-i18n="statRelics">รีลิกส์</div>
         </div>
       </div>
 
       <!-- Party Lineup Visualizer -->
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span>🎮 สมาชิกในทีมปัจจุบัน</span>
-          <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: normal;">* คลิกที่ช่องเพื่อเปลี่ยนตัวละครในทีม</span>
+          <span data-i18n="currentLineupTitle">🎮 ทีมปัจจุบัน</span>
         </div>
         <div class="lineup-grid" id="lineup-container">
           <!-- Rendered by JS -->
@@ -92,30 +91,30 @@
         <!-- Server & Map Card -->
         <div class="card">
           <div class="card-title">
-            <span>📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
+            <span data-i18n="serverStatusTitle">📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
             <span class="btn-sm btn-secondary" id="badge-version">API Live</span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <div>
-              <span class="form-label">โหมดเซิร์ฟเวอร์ที่ใช้งาน</span>
+              <span class="form-label" data-i18n="lblServerModeActive">โหมดเซิร์ฟเวอร์ที่ใช้งาน</span>
               <strong id="lbl-active-mode" style="color: var(--accent-cyan);">GaC-hkrpg-go</strong>
             </div>
             <div>
-              <span class="form-label">API Gateway Endpoint</span>
+              <span class="form-label" data-i18n="lblApiEndpoint">API Gateway Endpoint</span>
               <code id="lbl-api-url" style="color: var(--accent-cyan); font-size: 0.9rem;">-</code>
             </div>
             <div style="display: flex; gap: 1rem;">
               <div>
-                <span class="form-label">Plane ID</span>
+                <span class="form-label" data-i18n="lblPlaneId">Plane ID</span>
                 <span id="lbl-plane-id" style="font-weight: bold;">-</span>
               </div>
               <div>
-                <span class="form-label">Floor ID</span>
+                <span class="form-label" data-i18n="lblFloorId">Floor ID</span>
                 <span id="lbl-floor-id" style="font-weight: bold;">-</span>
               </div>
             </div>
             <div>
-              <span class="form-label">พิกัดตัวละคร XYZ</span>
+              <span class="form-label" data-i18n="coords">พิกัดตัวละคร XYZ</span>
               <span id="lbl-coordinates" style="color: var(--text-muted); font-size: 0.85rem;">-</span>
             </div>
           </div>
@@ -123,13 +122,13 @@
 
         <!-- Quick Actions Card -->
         <div class="card">
-          <div class="card-title">⚡ ดำเนินการด่วน</div>
-          <p class="card-subtitle">ส่งคำสั่งไปยังเซิร์ฟเวอร์ทันที</p>
+          <div class="card-title" data-i18n="quickActionsTitle">⚡ ดำเนินการด่วน</div>
+          <p class="card-subtitle" data-i18n="quickActionsSubtitle">ส่งคำสั่งไปยังเซิร์ฟเวอร์ทันที</p>
           <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <button class="btn btn-gold" id="btn-quick-max-all">
+            <button class="btn btn-gold" id="btn-quick-max-all" data-i18n="btnMaxAll">
               ⭐ ปรับเลเวล 80 & ปลด E6 ตัวละครทั้งหมด
             </button>
-            <button class="btn btn-secondary" id="btn-quick-sync-persistent">
+            <button class="btn btn-secondary" id="btn-quick-sync-persistent" data-i18n="btnSyncPersistent">
               💾 ซิงค์ข้อมูล Persistent ล่าสุด
             </button>
           </div>
@@ -141,14 +140,14 @@
     <section id="tab-avatars" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
         <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 680px; flex-wrap: wrap;">
-          <input type="text" id="avatar-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร..." style="min-width: 180px; flex: 1;">
+          <input type="text" id="avatar-search" class="form-input" data-i18n-placeholder="searchPlaceholder" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร..." style="min-width: 180px; flex: 1;">
           <select id="avatar-filter-rarity" class="form-select" style="max-width: 130px;">
-            <option value="all">ทุกระดับดาว</option>
-            <option value="5">5 ดาว</option>
-            <option value="4">4 ดาว</option>
+            <option value="all" data-i18n="filterAllRarity">ทุกระดับดาว</option>
+            <option value="5" data-i18n="filter5Star">5 ดาว</option>
+            <option value="4" data-i18n="filter4Star">4 ดาว</option>
           </select>
           <select id="avatar-filter-element" class="form-select" style="max-width: 130px;">
-            <option value="all">ทุกธาตุ</option>
+            <option value="all" data-i18n="filterAllElements">ทุกธาตุ</option>
             <option value="Fire">ไฟ</option>
             <option value="Ice">น้ำแข็ง</option>
             <option value="Lightning">สายฟ้า</option>
@@ -158,7 +157,7 @@
             <option value="Imaginary">จินตภาพ</option>
           </select>
           <select id="avatar-filter-path" class="form-select" style="max-width: 130px;">
-            <option value="all">ทุกประเภท</option>
+            <option value="all" data-i18n="filterAllPaths">ทุกประเภท</option>
             <option value="Destruction">ทำลายล้าง</option>
             <option value="Hunt">ล่าสังหาร</option>
             <option value="Erudition">ปัญญา</option>
@@ -171,13 +170,13 @@
           </select>
         </div>
         <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-gold" id="btn-max-all-avatars">⭐ ปรับ Max E6 ทุกตัว</button>
-          <button class="btn btn-secondary" id="btn-reload-avatars">🔄 รีโหลด</button>
+          <button class="btn btn-gold" id="btn-max-all-avatars" data-i18n="btnMaxAll">⭐ ปรับ Max E6 ทุกตัว</button>
+          <button class="btn btn-secondary" id="btn-reload-avatars" data-i18n="btnReload">🔄 รีโหลด</button>
         </div>
       </div>
 
       <div id="avatars-grid" class="grid-4">
-        <div style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;">
+        <div style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;" data-i18n="avatarsLoading">
           กำลังดึงข้อมูลตัวละคร...
         </div>
       </div>
@@ -189,24 +188,24 @@
         <!-- Lightcones Card -->
         <div class="card">
           <div class="card-title">
-            <span>🗡️ กรวยแสงในคลัง</span>
+            <span data-i18n="eqLcTitle">🗡️ กรวยแสงในคลัง</span>
             <span class="btn-sm btn-secondary" id="badge-total-lc">0 ชิ้น</span>
           </div>
-          <p class="card-subtitle">รายการกรวยแสงทั้งหมดจาก freesr-data.json</p>
+          <p class="card-subtitle" data-i18n="eqLcSubtitle">รายการกรวยแสงทั้งหมดจาก freesr-data.json</p>
           <div id="lightcones-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">กำลังโหลดข้อมูลกรวยแสง...</div>
+            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;" data-i18n="eqLcLoading">กำลังโหลดข้อมูลกรวยแสง...</div>
           </div>
         </div>
 
         <!-- Relics Card -->
         <div class="card">
           <div class="card-title">
-            <span>🛡️ รีลิกส์ในคลัง</span>
+            <span data-i18n="eqRelicTitle">🛡️ รีลิกส์ในคลัง</span>
             <span class="btn-sm btn-secondary" id="badge-total-relics">0 ชิ้น</span>
           </div>
-          <p class="card-subtitle">รายการรีลิกส์ทั้งหมดจาก freesr-data.json</p>
+          <p class="card-subtitle" data-i18n="eqRelicSubtitle">รายการรีลิกส์ทั้งหมดจาก freesr-data.json</p>
           <div id="relics-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">กำลังโหลดข้อมูลรีลิกส์...</div>
+            <div style="color: var(--text-muted); text-align: center; padding: 1.5rem;" data-i18n="eqRelicLoading">กำลังโหลดข้อมูลรีลิกส์...</div>
           </div>
         </div>
       </div>
@@ -216,21 +215,21 @@
     <section id="tab-persistent" class="tab-content">
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span>💾 จัดการไฟล์เซฟ GaC</span>
-          <span class="btn-sm btn-success">เซิร์ฟเวอร์ของเราเอง</span>
+          <span data-i18n="persistentTitle">💾 จัดการไฟล์เซฟ GaC</span>
+          <span class="btn-sm btn-success" data-i18n="persistentBadge">เซิร์ฟเวอร์ของเราเอง</span>
         </div>
-        <p class="card-subtitle">
-          ไฟล์ <code>persistent</code> เก็บการตั้งค่าสถานะผู้เล่นเฉพาะของเซิร์ฟเวอร์ GaC เช่น เพศ/ธาตุตัวเอก, สเตตัส March 7th, สวิตช์ฟังก์ชัน Global ต่างๆ
+        <p class="card-subtitle" data-i18n="persistentSubtitle">
+          ไฟล์ persistent เก็บการตั้งค่าสถานะผู้เล่นเฉพาะของเซิร์ฟเวอร์ GaC เช่น เพศ/ธาตุตัวเอก, สเตตัส March 7th, สวิตช์ฟังก์ชัน Global ต่างๆ
         </p>
       </div>
 
       <div class="grid-2">
         <!-- Main Character & March Path -->
         <div class="card">
-          <div class="card-title">👤 ผู้บุกเบิก & March 7th</div>
+          <div class="card-title" data-i18n="persistentTbM7Title">👤 ผู้บุกเบิก & March 7th</div>
           <form id="form-persistent-chars">
             <div class="form-group">
-              <label class="form-label">เพศ & ธาตุของตัวเอก</label>
+              <label class="form-label" data-i18n="lblTbGenderElement">เพศ & ธาตุของตัวเอก</label>
               <select id="persistent-mc-select" class="form-select">
                 <option value="MalePhysical">ผู้บุกเบิกชาย - กายภาพ</option>
                 <option value="FemalePhysical">ผู้บุกเบิกหญิง - กายภาพ</option>
@@ -244,14 +243,14 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label">สายของ March 7th</label>
+              <label class="form-label" data-i18n="lblM7Path">สายของ March 7th</label>
               <select id="persistent-march-select" class="form-select">
                 <option value="MarchHunt">March 7th - ล่าสังหาร</option>
                 <option value="MarchPreservation">March 7th - อนุรักษ์</option>
               </select>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="btnSaveCharSettings">
               💾 บันทึกการตั้งค่าตัวละคร
             </button>
           </form>
@@ -259,12 +258,12 @@
 
         <!-- Global Features & Toggles -->
         <div class="card">
-          <div class="card-title">⚙️ สวิตช์ระบบพิเศษของ GaC</div>
+          <div class="card-title" data-i18n="persistentGlobalTitle">⚙️ สวิตช์ระบบพิเศษของ GaC</div>
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
             <div class="ex-switch-card">
               <div>
                 <div style="font-weight: 700;">Silver Wolf Global Feature</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">เปิดใช้งานฟังก์ชันพิเศษ SW ทั่วทั้งเซิร์ฟเวอร์</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="swGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ SW ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>
               <label class="switch">
                 <input type="checkbox" id="toggle-sw-global">
@@ -275,7 +274,7 @@
             <div class="ex-switch-card">
               <div>
                 <div style="font-weight: 700;">Castorice Global Feature</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">เปิดใช้งานฟังก์ชันพิเศษ Castorice ทั่วทั้งเซิร์ฟเวอร์</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="castoriceGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ Castorice ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>
               <label class="switch">
                 <input type="checkbox" id="toggle-castorice-global">
@@ -283,7 +282,7 @@
               </label>
             </div>
 
-            <button class="btn btn-success" id="btn-save-persistent-toggles">
+            <button class="btn btn-success" id="btn-save-persistent-toggles" data-i18n="btnSaveGlobalSwitch">
               💾 บันทึกสวิตช์ Global
             </button>
           </div>
@@ -295,13 +294,13 @@
     <section id="tab-exrank" class="tab-content">
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span>⚡ ระบบปลดล็อค Ex-Rank Skill</span>
+          <span data-i18n="exrankTitle">⚡ ระบบปลดล็อค Ex-Rank Skill</span>
           <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-success btn-sm" id="btn-exrank-enable-all">เปิด Ex-Rank ทั้งหมด</button>
-            <button class="btn btn-secondary btn-sm" id="btn-exrank-disable-all">ปิด Ex-Rank ทั้งหมด</button>
+            <button class="btn btn-success btn-sm" id="btn-exrank-enable-all" data-i18n="btnEnableAll">เปิด Ex-Rank ทั้งหมด</button>
+            <button class="btn btn-secondary btn-sm" id="btn-exrank-disable-all" data-i18n="btnDisableAll">ปิด Ex-Rank ทั้งหมด</button>
           </div>
         </div>
-        <p class="card-subtitle">
+        <p class="card-subtitle" data-i18n="exrankSubtitle">
           เปิดใช้งานพรสวรรค์และกลไกพิเศษ Ex-Rank สำหรับตัวละครเฉพาะใน FreeSR (เช่น Jing Yuan โดน CC ไม่หยุดชะงัก, Dan Heng IL, Acheron)
         </p>
       </div>
@@ -316,24 +315,24 @@
       <div class="card">
         <div class="card-title" style="flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-sm btn-primary active" id="btn-select-freesr">📄 freesr-data.json</button>
-            <button class="btn btn-sm btn-secondary" id="btn-select-persistent">💾 ไฟล์เซฟ persistent</button>
+            <button class="btn btn-sm btn-primary active" id="btn-select-freesr" data-i18n="btnFreesr">📄 freesr-data.json</button>
+            <button class="btn btn-sm btn-secondary" id="btn-select-persistent" data-i18n="btnPersistent">💾 ไฟล์เซฟ persistent</button>
           </div>
           <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-sm btn-secondary" id="btn-json-beautify">✨ จัดรูปแบบ JSON</button>
-            <button class="btn btn-sm btn-secondary" id="btn-json-download">📥 ดาวน์โหลด Backup</button>
+            <button class="btn btn-sm btn-secondary" id="btn-json-beautify" data-i18n="btnBeautify">✨ จัดรูปแบบ JSON</button>
+            <button class="btn btn-sm btn-secondary" id="btn-json-download" data-i18n="btnDownload">📥 ดาวน์โหลด Backup</button>
             <label class="btn btn-sm btn-secondary" style="cursor: pointer; margin: 0;">
-              <span>📤 อัปโหลดไฟล์</span> <input type="file" id="json-file-input" accept=".json,text/plain" style="display: none;">
+              <span data-i18n="btnUpload">📤 อัปโหลดไฟล์</span> <input type="file" id="json-file-input" accept=".json,text/plain" style="display: none;">
             </label>
-            <button class="btn btn-sm btn-success" id="btn-json-save">💾 บันทึกไปยังเซิร์ฟเวอร์</button>
+            <button class="btn btn-sm btn-success" id="btn-json-save" data-i18n="btnSaveServer">💾 บันทึกไปยังเซิร์ฟเวอร์</button>
           </div>
         </div>
 
         <div class="json-editor-wrapper">
           <textarea id="json-editor" class="json-textarea" spellcheck="false" placeholder="..."></textarea>
           <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
-            <span id="json-status-info">พร้อมใช้งาน</span>
-            <span>Tip: สามารถแก้ไขค่าดิบแล้วกด 'บันทึกไปยังเซิร์ฟเวอร์' ได้ทันที</span>
+            <span id="json-status-info" data-i18n="jsonStatusReady">พร้อมใช้งาน</span>
+            <span data-i18n="jsonTip">คำแนะนำ: สามารถแก้ไขค่าดิบแล้วกด 'บันทึกไปยังเซิร์ฟเวอร์' ได้ทันที</span>
           </div>
         </div>
       </div>
@@ -344,12 +343,12 @@
       <div style="max-width: 620px; margin: 0 auto;">
         <!-- Endpoint config -->
         <div class="card">
-          <div class="card-title">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
-          <p class="card-subtitle">ปรับเปลี่ยนพอร์ตหรือ IP ได้ตามเซิร์ฟเวอร์ที่คุณใช้</p>
+          <div class="card-title" data-i18n="apiSettingsTitle">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
+          <p class="card-subtitle" data-i18n="apiSettingsSubtitle">ปรับเปลี่ยนพอร์ตหรือ IP ได้ตามเซิร์ฟเวอร์ที่คุณใช้</p>
 
           <form id="form-settings">
             <div class="form-group">
-              <label class="form-label">โหมดเซิร์ฟเวอร์</label>
+              <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
               <select id="setting-server-mode" class="form-select">
                 <option value="gac">⚡ GaC-hkrpg-go</option>
                 <option value="firefly">🔥 FireflyGo</option>
@@ -357,19 +356,19 @@
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">REST API Gateway URL</label>
+              <label class="form-label" data-i18n="lblApiGatewayUrl">REST API Gateway URL</label>
               <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
               <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
                 * พอร์ตเริ่มต้น 21000 สำหรับ SDK server
               </small>
             </div>
             <div class="form-group">
-              <label class="form-label">ความถี่ในการตรวจสอบสถานะ (วินาที)</label>
+              <label class="form-label" data-i18n="lblPingInterval">ความถี่ในการตรวจสอบสถานะ (วินาที)</label>
               <input type="number" id="setting-ping-interval" class="form-input" min="3" max="60" value="10">
             </div>
             <div style="display: flex; gap: 0.75rem;">
-              <button type="submit" class="btn btn-success" style="flex: 1;">💾 บันทึกการตั้งค่า</button>
-              <button type="button" class="btn btn-secondary" id="btn-reset-settings">คืนค่าเริ่มต้น</button>
+              <button type="submit" class="btn btn-success" style="flex: 1;" data-i18n="btnSaveSettings">💾 บันทึกการตั้งค่า</button>
+              <button type="button" class="btn btn-secondary" id="btn-reset-settings" data-i18n="btnResetDefault">คืนค่าเริ่มต้น</button>
             </div>
           </form>
         </div>
@@ -383,7 +382,7 @@
     <div class="modal-content" style="max-width: 760px;">
       <!-- Modal Header -->
       <div class="modal-header">
-        <h3 id="modal-char-title" style="font-weight: 800; font-size: 1.15rem; color: var(--text-highlight);">
+        <h3 id="modal-char-title" style="font-weight: 800; font-size: 1.15rem; color: var(--text-highlight);" data-i18n="modalTitleCharEdit">
           ปรับแต่งตัวละคร
         </h3>
         <button class="btn btn-sm btn-secondary" id="btn-close-avatar-modal">✕</button>
@@ -398,20 +397,20 @@
           <div id="modal-char-name" style="font-size: 1.25rem; font-weight: 800;"></div>
           <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
-        <button type="button" class="btn btn-gold" id="btn-modal-max-all-char" style="padding: 0.5rem 1rem; font-weight: 800;">
+        <button type="button" class="btn btn-gold" id="btn-modal-max-all-char" style="padding: 0.5rem 1rem; font-weight: 800;" data-i18n="modalBtnMaxAllChar">
           ⭐ ปรับเต็มทั้งหมด
         </button>
       </div>
 
       <!-- Sub Tabs Navigation (srtools style) -->
       <div class="modal-subtabs" style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; overflow-x: auto;">
-        <button type="button" class="modal-subtab-btn active" data-modaltab="modaltab-skills">
+        <button type="button" class="modal-subtab-btn active" data-modaltab="modaltab-skills" data-i18n="modalTabSkills">
           ⚡ สกิลและร่องรอย
         </button>
-        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-status">
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-status" data-i18n="modalTabStatus">
           ⚙️ เลเวล & Eidolon
         </button>
-        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone">
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone" data-i18n="modalTabLightcone">
           🗡️ กรวยแสง
         </button>
       </div>
@@ -419,10 +418,10 @@
       <!-- Sub Tab 1: Skills & Traces (Like https://srtools.punklorde.org/skills-info) -->
       <div id="modaltab-skills" class="modal-subtab-content active">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight);">
+          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight);" data-i18n="modalSkillCombatTitle">
             ระดับสกิลต่อสู้
           </div>
-          <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-skills">
+          <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-skills" data-i18n="modalBtnMaxSkills">
             ⭐ ปรับสกิลเต็ม 10/10
           </button>
         </div>
@@ -432,7 +431,7 @@
           <!-- 1. Basic Attack -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name">โจมตีปกติ</span>
+              <span class="skill-name" data-i18n="modalSkillBasic">โจมตีปกติ</span>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-basic">6</strong> / 6</span>
             </div>
             <div class="skill-stepper">
@@ -446,7 +445,7 @@
           <!-- 2. Skill -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name">สกิลต่อสู้</span>
+              <span class="skill-name" data-i18n="modalSkillSkill">สกิลต่อสู้</span>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-skill">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -460,7 +459,7 @@
           <!-- 3. Ultimate -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name">ท่าไม้ตาย</span>
+              <span class="skill-name" data-i18n="modalSkillUltra">ท่าไม้ตาย</span>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-ultra">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -474,7 +473,7 @@
           <!-- 4. Talent -->
           <div class="skill-row-card">
             <div class="skill-row-header">
-              <span class="skill-name">พรสวรรค์</span>
+              <span class="skill-name" data-i18n="modalSkillTalent">พรสวรรค์</span>
               <span class="skill-lvl-badge">Lv. <strong id="val-skill-talent">10</strong> / 10</span>
             </div>
             <div class="skill-stepper">
@@ -488,31 +487,31 @@
 
         <!-- Traces & Technique Section -->
         <div style="margin-top: 1.25rem;">
-          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight); margin-bottom: 0.75rem;">
+          <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-highlight); margin-bottom: 0.75rem;" data-i18n="modalTracesTitle">
             ร่องรอยและเทคนิค
           </div>
           <div style="display: flex; flex-direction: column; gap: 0.6rem;">
             <label class="trace-toggle-label">
               <input type="checkbox" id="check-trace-technique" checked class="trace-checkbox">
-              <span>⚡ เทคนิค — เปิดใช้งานก่อนเริ่มการต่อสู้</span>
+              <span data-i18n="modalTraceTechnique">⚡ เทคนิค — เปิดใช้งานก่อนเริ่มการต่อสู้</span>
             </label>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.6rem;">
               <label class="trace-toggle-label">
                 <input type="checkbox" id="check-trace-a2" checked class="trace-checkbox">
-                <span>🌟 ร่องรอยพิเศษ A2</span>
+                <span data-i18n="traceA2">🌟 ร่องรอยพิเศษ A2</span>
               </label>
               <label class="trace-toggle-label">
                 <input type="checkbox" id="check-trace-a4" checked class="trace-checkbox">
-                <span>🌟 ร่องรอยพิเศษ A4</span>
+                <span data-i18n="traceA4">🌟 ร่องรอยพิเศษ A4</span>
               </label>
               <label class="trace-toggle-label">
                 <input type="checkbox" id="check-trace-a6" checked class="trace-checkbox">
-                <span>🌟 ร่องรอยพิเศษ A6</span>
+                <span data-i18n="traceA6">🌟 ร่องรอยพิเศษ A6</span>
               </label>
             </div>
             <label class="trace-toggle-label">
               <input type="checkbox" id="check-trace-stats" checked class="trace-checkbox">
-              <span>💎 โหนดสเตตัสเสริมทั้งหมด (10 โหนด)</span>
+              <span data-i18n="traceStatNodes">💎 โหนดสเตตัสเสริมทั้งหมด (10 โหนด)</span>
             </label>
           </div>
         </div>
@@ -523,7 +522,7 @@
         <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-              <label class="form-label" style="margin: 0;">ระดับเลเวล (1-80)</label>
+              <label class="form-label" style="margin: 0;" data-i18n="lblLevelRange">ระดับเลเวล (1-80)</label>
               <div style="display: flex; gap: 0.25rem;">
                 <button type="button" class="btn btn-sm btn-secondary btn-lvl-preset" data-lvl="1">1</button>
                 <button type="button" class="btn btn-sm btn-secondary btn-lvl-preset" data-lvl="20">20</button>
@@ -536,7 +535,7 @@
           </div>
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-              <label class="form-label" style="margin: 0;">การเลื่อนขั้น (0-6)</label>
+              <label class="form-label" style="margin: 0;" data-i18n="lblPromotionRange">การเลื่อนขั้น (0-6)</label>
               <div style="display: flex; gap: 0.25rem;">
                 <button type="button" class="btn btn-sm btn-secondary btn-prom-preset" data-prom="0">0</button>
                 <button type="button" class="btn btn-sm btn-secondary btn-prom-preset" data-prom="3">3</button>
@@ -550,10 +549,10 @@
         <!-- Eidolon Section -->
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label class="form-label" style="margin: 0;">ระดับ Eidolon</label>
+            <label class="form-label" style="margin: 0;" data-i18n="lblEidolonLevel">ระดับ Eidolon</label>
             <div style="display: flex; gap: 0.4rem;">
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-quick-e0">รีเซ็ต E0</button>
-              <button type="button" class="btn btn-sm btn-gold" id="btn-modal-quick-e6">⭐ ปลดเต็ม E6</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-quick-e0" data-i18n="btnResetE0">รีเซ็ต E0</button>
+              <button type="button" class="btn btn-sm btn-gold" id="btn-modal-quick-e6" data-i18n="btnMaxE6">⭐ ปลดเต็ม E6</button>
             </div>
           </div>
           <div class="eidolon-buttons" id="modal-char-eidolon-btns" style="margin-top: 0.5rem; gap: 0.5rem;">
@@ -564,10 +563,10 @@
         <!-- Ultimate Energy Section -->
         <div class="form-group" style="margin-top: 1.25rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-            <label class="form-label" style="margin: 0;">พลังงานท่าไม้ตาย</label>
+            <label class="form-label" style="margin: 0;" data-i18n="modalEnergyTitle">พลังงานท่าไม้ตาย</label>
             <div style="display: flex; gap: 0.35rem;">
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-energy-50">ตั้งค่า 50%</button>
-              <button type="button" class="btn btn-sm btn-primary" id="btn-modal-energy-100">เต็ม 100%</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-modal-energy-50" data-i18n="modalEnergy50">ตั้งค่า 50%</button>
+              <button type="button" class="btn btn-sm btn-primary" id="btn-modal-energy-100" data-i18n="modalEnergy100">เต็ม 100%</button>
             </div>
           </div>
           <div style="display: flex; gap: 0.75rem; align-items: center;">
@@ -581,20 +580,21 @@
       <div id="modaltab-lightcone" class="modal-subtab-content" style="display: none;">
         <div class="card" style="padding: 1.25rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="font-weight: 800; font-size: 1rem; color: var(--text-highlight);">กรวยแสงที่สวมใส่</span>
-            <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-lc">⭐ ปรับกรวยแสงเต็มขั้น</button>
+            <span style="font-weight: 800; font-size: 1rem; color: var(--text-highlight);" data-i18n="modalLcTitle">กรวยแสงที่สวมใส่</span>
+            <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-lc" data-i18n="modalBtnMaxLc">⭐ ปรับกรวยแสงเต็มขั้น</button>
           </div>
           <div class="form-group">
-            <label class="form-label">ID กรวยแสง</label>
-            <input type="number" id="modal-lc-id" class="form-input" placeholder="เช่น 21002 หรือ 24001">
+            <label class="form-label" data-i18n="lblLcId">ID กรวยแสง</label>
+            <input type="number" id="modal-lc-id" class="form-input" data-i18n-placeholder="modalLcIdPlaceholder" placeholder="เช่น 21002 หรือ 24001">
+            <div id="modal-lc-preview" style="margin-top: 0.35rem; font-size: 0.875rem; font-weight: 700; color: var(--accent-cyan);"></div>
           </div>
           <div class="grid-2" style="gap: 1rem;">
             <div class="form-group">
-              <label class="form-label">เลเวลกรวยแสง (1-80)</label>
+              <label class="form-label" data-i18n="lblLcLevel">เลเวลกรวยแสง (1-80)</label>
               <input type="number" id="modal-lc-level" class="form-input" min="1" max="80" value="80">
             </div>
             <div class="form-group">
-              <label class="form-label">ระดับการขัดเกลา</label>
+              <label class="form-label" data-i18n="lblLcRank">ระดับการขัดเกลา</label>
               <div class="eidolon-buttons" id="modal-lc-rank-btns" style="margin-top: 0.25rem;">
                 <button type="button" class="eidolon-pip lc-super-pip" data-rank="1">S1</button>
                 <button type="button" class="eidolon-pip lc-super-pip" data-rank="2">S2</button>
@@ -609,10 +609,10 @@
 
       <!-- Modal Footer -->
       <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; justify-content: flex-end; flex-wrap: wrap;">
-        <button type="button" class="btn btn-secondary" id="btn-modal-cancel-avatar">
+        <button type="button" class="btn btn-secondary" id="btn-modal-cancel-avatar" data-i18n="modalBtnClose">
           ✕ ปิด
         </button>
-        <button type="button" class="btn btn-success" id="btn-modal-save-avatar">
+        <button type="button" class="btn btn-success" id="btn-modal-save-avatar" data-i18n="modalBtnSave">
           💾 บันทึกตัวละคร
         </button>
       </div>
@@ -623,10 +623,10 @@
   <div class="modal-overlay" id="modal-lineup-picker">
     <div class="modal-content" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
       <div class="modal-header">
-        <h3 id="modal-picker-title" style="font-weight: 800;">เลือกตัวละครเข้าทีม</h3>
+        <h3 id="modal-picker-title" style="font-weight: 800;" data-i18n="pickerTitle">เลือกตัวละครเข้าทีม</h3>
         <button class="btn btn-sm btn-secondary" id="btn-close-picker-modal">✕</button>
       </div>
-      <input type="text" id="picker-search" class="form-input" placeholder="🔍 ค้นหาตัวละครเพื่อลงทีม..." style="margin-bottom: 1rem;">
+      <input type="text" id="picker-search" class="form-input" data-i18n-placeholder="pickerSearchPlaceholder" placeholder="🔍 ค้นหาตัวละครเพื่อลงทีม..." style="margin-bottom: 1rem;">
       <div id="picker-avatars-grid" class="grid-4" style="overflow-y: auto; flex: 1; padding-right: 0.5rem;">
         <!-- Injected by JS -->
       </div>
@@ -637,17 +637,17 @@
   <div class="modal-overlay" id="modal-settings">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 style="font-weight: 700;">⚙️ ตั้งค่าการเชื่อมต่อ API Server</h3>
+        <h3 style="font-weight: 700;" data-i18n="apiModalTitle">⚙️ ตั้งค่าการเชื่อมต่อ API Server</h3>
         <button class="btn btn-sm btn-secondary" id="btn-close-modal">✕</button>
       </div>
       <div>
         <div class="form-group">
-          <label class="form-label">Server REST API URL</label>
+          <label class="form-label" data-i18n="lblApiGatewayUrl">Server REST API URL</label>
           <input type="text" id="modal-api-url" class="form-input">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-          <button class="btn btn-secondary" id="btn-modal-cancel">ยกเลิก</button>
-          <button class="btn btn-primary" id="btn-modal-save">บันทึก & ทดสอบ</button>
+          <button class="btn btn-secondary" id="btn-modal-cancel" data-i18n="btnCancel">ยกเลิก</button>
+          <button class="btn btn-primary" id="btn-modal-save" data-i18n="btnSaveTest">บันทึก & ทดสอบ</button>
         </div>
       </div>
     </div>

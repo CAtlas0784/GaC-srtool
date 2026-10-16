@@ -1,15 +1,21 @@
-import { getCurrentLanguage, translateElement, translatePath } from './i18n.js';
+import { getCurrentLanguage, translateElement, translatePath } from "./i18n.js";
 
 export const AVATAR_METADATA = {
   "1001": {
     "names": {
+      "th": "March 7th",
       "en": "March 7th",
-      "th": "มาร์ช 7th",
       "zh-CN": "三月七",
       "zh-TW": "三月七",
       "ja": "三月なのか",
-      "ko": "March 7th",
-      "ru": "Март 7"
+      "ko": "Mar. 7th",
+      "ru": "Март 7",
+      "vi": "March 7th",
+      "id": "March 7th",
+      "es": "Siete de Marzo",
+      "fr": "March 7th",
+      "de": "7. März",
+      "pt": "7 de Março"
     },
     "path": "Preservation",
     "element": "Ice",
@@ -18,13 +24,19 @@ export const AVATAR_METADATA = {
   },
   "1002": {
     "names": {
+      "th": "Dan Heng",
       "en": "Dan Heng",
-      "th": "ดันเฮง",
       "zh-CN": "丹恒",
       "zh-TW": "丹恆",
       "ja": "丹恒",
       "ko": "단항",
-      "ru": "Дань Хэн"
+      "ru": "Дань Хэн",
+      "vi": "Dan Heng",
+      "id": "Dan Heng",
+      "es": "Dan Heng",
+      "fr": "Dan Heng",
+      "de": "Dan Heng",
+      "pt": "Dan Heng"
     },
     "path": "Hunt",
     "element": "Wind",
@@ -33,13 +45,19 @@ export const AVATAR_METADATA = {
   },
   "1003": {
     "names": {
+      "th": "Himeko",
       "en": "Himeko",
-      "th": "ฮิเมโกะ",
       "zh-CN": "姬子",
       "zh-TW": "姬子",
       "ja": "姫子",
       "ko": "히메코",
-      "ru": "Химеко"
+      "ru": "Химеко",
+      "vi": "Himeko",
+      "id": "Himeko",
+      "es": "Himeko",
+      "fr": "Himeko",
+      "de": "Himeko",
+      "pt": "Himeko"
     },
     "path": "Erudition",
     "element": "Fire",
@@ -48,13 +66,19 @@ export const AVATAR_METADATA = {
   },
   "1004": {
     "names": {
+      "th": "Welt",
       "en": "Welt",
-      "th": "เวิลต์",
       "zh-CN": "瓦尔特",
       "zh-TW": "瓦爾特",
       "ja": "ヴェルト",
       "ko": "웰트",
-      "ru": "Вельт"
+      "ru": "Вельт",
+      "vi": "Welt",
+      "id": "Welt",
+      "es": "Welt",
+      "fr": "Welt",
+      "de": "Welt",
+      "pt": "Welt"
     },
     "path": "Nihility",
     "element": "Imaginary",
@@ -63,13 +87,19 @@ export const AVATAR_METADATA = {
   },
   "1005": {
     "names": {
+      "th": "Kafka",
       "en": "Kafka",
-      "th": "คาฟกา",
       "zh-CN": "卡芙卡",
       "zh-TW": "卡芙卡",
       "ja": "カフカ",
       "ko": "카프카",
-      "ru": "Кафка"
+      "ru": "Кафка",
+      "vi": "Kafka",
+      "id": "Kafka",
+      "es": "Kafka",
+      "fr": "Kafka",
+      "de": "Kafka",
+      "pt": "Kafka"
     },
     "path": "Nihility",
     "element": "Lightning",
@@ -78,13 +108,19 @@ export const AVATAR_METADATA = {
   },
   "1006": {
     "names": {
+      "th": "Silver Wolf",
       "en": "Silver Wolf",
-      "th": "ซิลเวอร์วูล์ฟ",
       "zh-CN": "银狼",
       "zh-TW": "銀狼",
       "ja": "銀狼",
       "ko": "은랑",
-      "ru": "Серебряный Волк"
+      "ru": "Серебряный Волк",
+      "vi": "Sói Bạc",
+      "id": "Silver Wolf",
+      "es": "Silver Wolf",
+      "fr": "Louve d'argent",
+      "de": "Silberwolf",
+      "pt": "Loba Prateada"
     },
     "path": "Nihility",
     "element": "Quantum",
@@ -93,13 +129,19 @@ export const AVATAR_METADATA = {
   },
   "1008": {
     "names": {
+      "th": "Arlan",
       "en": "Arlan",
-      "th": "อาร์ลัน",
       "zh-CN": "阿兰",
       "zh-TW": "阿蘭",
       "ja": "アーラン",
       "ko": "아를란",
-      "ru": "Арлан"
+      "ru": "Арлан",
+      "vi": "Arlan",
+      "id": "Arlan",
+      "es": "Arlan",
+      "fr": "Arlan",
+      "de": "Arlan",
+      "pt": "Arlan"
     },
     "path": "Destruction",
     "element": "Lightning",
@@ -108,13 +150,19 @@ export const AVATAR_METADATA = {
   },
   "1009": {
     "names": {
+      "th": "Asta",
       "en": "Asta",
-      "th": "แอสต้า",
       "zh-CN": "艾丝妲",
       "zh-TW": "艾絲妲",
       "ja": "アスター",
       "ko": "아스타",
-      "ru": "Аста"
+      "ru": "Аста",
+      "vi": "Asta",
+      "id": "Asta",
+      "es": "Asta",
+      "fr": "Asta",
+      "de": "Asta",
+      "pt": "Asta"
     },
     "path": "Harmony",
     "element": "Fire",
@@ -123,13 +171,19 @@ export const AVATAR_METADATA = {
   },
   "1013": {
     "names": {
+      "th": "Herta",
       "en": "Herta",
-      "th": "เฮอร์ต้า",
       "zh-CN": "黑塔",
       "zh-TW": "黑塔",
       "ja": "ヘルタ",
       "ko": "헤르타",
-      "ru": "Герта"
+      "ru": "Герта",
+      "vi": "Herta",
+      "id": "Herta",
+      "es": "Herta",
+      "fr": "Herta",
+      "de": "Herta",
+      "pt": "Herta"
     },
     "path": "Erudition",
     "element": "Ice",
@@ -138,13 +192,19 @@ export const AVATAR_METADATA = {
   },
   "1014": {
     "names": {
+      "th": "Saber",
       "en": "Saber",
-      "th": "เซเบอร์",
-      "zh-CN": "阿尔托莉雅·潘德拉贡 (塞巴)",
-      "zh-TW": "阿爾托莉雅·潘德拉貢",
+      "zh-CN": "Saber",
+      "zh-TW": "Saber",
       "ja": "セイバー",
       "ko": "세이버",
-      "ru": "Сэйбер"
+      "ru": "Сэйбер",
+      "vi": "Saber",
+      "id": "Saber",
+      "es": "Saber",
+      "fr": "Saber",
+      "de": "Saber",
+      "pt": "Saber"
     },
     "path": "Destruction",
     "element": "Wind",
@@ -153,13 +213,19 @@ export const AVATAR_METADATA = {
   },
   "1015": {
     "names": {
+      "th": "Archer",
       "en": "Archer",
-      "th": "อาร์เชอร์",
-      "zh-CN": "卫宫士郎 (红A/阿茶)",
-      "zh-TW": "衛宮士郎 (紅A)",
+      "zh-CN": "Archer",
+      "zh-TW": "Archer",
       "ja": "アーチャー",
       "ko": "아처",
-      "ru": "Арчер"
+      "ru": "Арчер",
+      "vi": "Archer",
+      "id": "Archer",
+      "es": "Archer",
+      "fr": "Archer",
+      "de": "Archer",
+      "pt": "Archer"
     },
     "path": "Hunt",
     "element": "Quantum",
@@ -168,13 +234,19 @@ export const AVATAR_METADATA = {
   },
   "1101": {
     "names": {
+      "th": "Bronya",
       "en": "Bronya",
-      "th": "โบรเนีย",
       "zh-CN": "布洛妮娅",
       "zh-TW": "布洛妮婭",
       "ja": "ブローニャ",
       "ko": "브로냐",
-      "ru": "Броня"
+      "ru": "Броня",
+      "vi": "Bronya",
+      "id": "Bronya",
+      "es": "Bronya",
+      "fr": "Bronya",
+      "de": "Bronya",
+      "pt": "Bronya"
     },
     "path": "Harmony",
     "element": "Wind",
@@ -183,13 +255,19 @@ export const AVATAR_METADATA = {
   },
   "1102": {
     "names": {
+      "th": "Seele",
       "en": "Seele",
-      "th": "เซเล่",
       "zh-CN": "希儿",
       "zh-TW": "希兒",
       "ja": "ゼーレ",
       "ko": "제레",
-      "ru": "Зеле"
+      "ru": "Зеле",
+      "vi": "Seele",
+      "id": "Seele",
+      "es": "Seele",
+      "fr": "Seele",
+      "de": "Seele",
+      "pt": "Seele"
     },
     "path": "Hunt",
     "element": "Quantum",
@@ -198,13 +276,19 @@ export const AVATAR_METADATA = {
   },
   "1103": {
     "names": {
+      "th": "Serval",
       "en": "Serval",
-      "th": "เซอวัล",
       "zh-CN": "希露瓦",
       "zh-TW": "希露瓦",
       "ja": "セーバル",
       "ko": "서벌",
-      "ru": "Сервал"
+      "ru": "Сервал",
+      "vi": "Serval",
+      "id": "Serval",
+      "es": "Serval",
+      "fr": "Serval",
+      "de": "Serval",
+      "pt": "Serval"
     },
     "path": "Erudition",
     "element": "Lightning",
@@ -213,13 +297,19 @@ export const AVATAR_METADATA = {
   },
   "1104": {
     "names": {
+      "th": "Gepard",
       "en": "Gepard",
-      "th": "เกพาร์ด",
       "zh-CN": "杰帕德",
       "zh-TW": "傑帕德",
       "ja": "ジェパード",
       "ko": "게파드",
-      "ru": "Гепард"
+      "ru": "Гепард",
+      "vi": "Gepard",
+      "id": "Gepard",
+      "es": "Gepard",
+      "fr": "Gepard",
+      "de": "Gepard",
+      "pt": "Gepard"
     },
     "path": "Preservation",
     "element": "Ice",
@@ -228,13 +318,19 @@ export const AVATAR_METADATA = {
   },
   "1105": {
     "names": {
+      "th": "Natasha",
       "en": "Natasha",
-      "th": "นาตาชา",
       "zh-CN": "娜塔莎",
       "zh-TW": "娜塔莎",
       "ja": "ナターシャ",
       "ko": "나타샤",
-      "ru": "Наташа"
+      "ru": "Наташа",
+      "vi": "Natasha",
+      "id": "Natasha",
+      "es": "Natasha",
+      "fr": "Natasha",
+      "de": "Natasha",
+      "pt": "Natasha"
     },
     "path": "Abundance",
     "element": "Physical",
@@ -243,13 +339,19 @@ export const AVATAR_METADATA = {
   },
   "1106": {
     "names": {
+      "th": "Pela",
       "en": "Pela",
-      "th": "เพล่า",
       "zh-CN": "佩拉",
       "zh-TW": "佩拉",
       "ja": "ペラ",
       "ko": "페라",
-      "ru": "Пела"
+      "ru": "Пела",
+      "vi": "Pela",
+      "id": "Pela",
+      "es": "Pela",
+      "fr": "Pela",
+      "de": "Pela",
+      "pt": "Pela"
     },
     "path": "Nihility",
     "element": "Ice",
@@ -258,13 +360,19 @@ export const AVATAR_METADATA = {
   },
   "1107": {
     "names": {
+      "th": "Clara",
       "en": "Clara",
-      "th": "คลารา",
       "zh-CN": "克拉拉",
       "zh-TW": "克拉拉",
       "ja": "クラーラ",
       "ko": "클라라",
-      "ru": "Клара"
+      "ru": "Клара",
+      "vi": "Clara",
+      "id": "Clara",
+      "es": "Clara",
+      "fr": "Clara",
+      "de": "Clara",
+      "pt": "Clara"
     },
     "path": "Destruction",
     "element": "Physical",
@@ -273,13 +381,19 @@ export const AVATAR_METADATA = {
   },
   "1108": {
     "names": {
+      "th": "Sampo",
       "en": "Sampo",
-      "th": "ซัมโป",
       "zh-CN": "桑博",
       "zh-TW": "桑博",
       "ja": "サンポ",
       "ko": "삼포",
-      "ru": "Сампо"
+      "ru": "Сампо",
+      "vi": "Sampo",
+      "id": "Sampo",
+      "es": "Sampo",
+      "fr": "Sampo",
+      "de": "Sampo",
+      "pt": "Sampo"
     },
     "path": "Nihility",
     "element": "Wind",
@@ -288,13 +402,19 @@ export const AVATAR_METADATA = {
   },
   "1109": {
     "names": {
+      "th": "Hook",
       "en": "Hook",
-      "th": "ฮุค",
       "zh-CN": "虎克",
       "zh-TW": "虎克",
       "ja": "フック",
       "ko": "후크",
-      "ru": "Хук"
+      "ru": "Хук",
+      "vi": "Hook",
+      "id": "Hook",
+      "es": "Hook",
+      "fr": "Hook",
+      "de": "Hook",
+      "pt": "Hook"
     },
     "path": "Destruction",
     "element": "Fire",
@@ -303,13 +423,19 @@ export const AVATAR_METADATA = {
   },
   "1110": {
     "names": {
+      "th": "Lynx",
       "en": "Lynx",
-      "th": "ลิงซ์",
       "zh-CN": "玲可",
       "zh-TW": "玲可",
       "ja": "リンクス",
-      "ko": "링크스",
-      "ru": "Рысь"
+      "ko": "링스",
+      "ru": "Рысь",
+      "vi": "Lynx",
+      "id": "Lynx",
+      "es": "Lynx",
+      "fr": "Lynx",
+      "de": "Lynx",
+      "pt": "Lynx"
     },
     "path": "Abundance",
     "element": "Quantum",
@@ -318,13 +444,19 @@ export const AVATAR_METADATA = {
   },
   "1111": {
     "names": {
+      "th": "Luka",
       "en": "Luka",
-      "th": "ลูกา",
       "zh-CN": "卢卡",
       "zh-TW": "盧卡",
       "ja": "ルカ",
       "ko": "루카",
-      "ru": "Лука"
+      "ru": "Лука",
+      "vi": "Luka",
+      "id": "Luka",
+      "es": "Luka",
+      "fr": "Luka",
+      "de": "Luka",
+      "pt": "Luka"
     },
     "path": "Nihility",
     "element": "Physical",
@@ -333,13 +465,19 @@ export const AVATAR_METADATA = {
   },
   "1112": {
     "names": {
+      "th": "Topaz & Numby",
       "en": "Topaz & Numby",
-      "th": "โทพาซ & นัมบี้",
       "zh-CN": "托帕&账账",
-      "zh-TW": "托帕&賬賬",
+      "zh-TW": "托帕&帳帳",
       "ja": "トパーズ&カブ",
       "ko": "토파즈&복순이",
-      "ru": "Топаз и Счетовод"
+      "ru": "Топаз и Счетовод",
+      "vi": "Topaz & Numby",
+      "id": "Topaz & Numby",
+      "es": "Topaz y Conti",
+      "fr": "Topaz et Compti",
+      "de": "Topaz & Kontie",
+      "pt": "Topaz e Dinheirinho"
     },
     "path": "Hunt",
     "element": "Fire",
@@ -348,13 +486,19 @@ export const AVATAR_METADATA = {
   },
   "1201": {
     "names": {
+      "th": "Qingque",
       "en": "Qingque",
-      "th": "ชิงเชวี่ย",
       "zh-CN": "青雀",
       "zh-TW": "青雀",
       "ja": "青雀",
       "ko": "청작",
-      "ru": "Цинцюэ"
+      "ru": "Цинцюэ",
+      "vi": "Qingque",
+      "id": "Qingque",
+      "es": "Qingque",
+      "fr": "Qingque",
+      "de": "Qingque",
+      "pt": "Qingque"
     },
     "path": "Erudition",
     "element": "Quantum",
@@ -363,13 +507,19 @@ export const AVATAR_METADATA = {
   },
   "1202": {
     "names": {
+      "th": "Tingyun",
       "en": "Tingyun",
-      "th": "ถิงหยุน",
       "zh-CN": "停云",
       "zh-TW": "停雲",
       "ja": "停雲",
       "ko": "정운",
-      "ru": "Тинъюнь"
+      "ru": "Тинъюнь",
+      "vi": "Tingyun",
+      "id": "Tingyun",
+      "es": "Tingyun",
+      "fr": "Tingyun",
+      "de": "Tingyun",
+      "pt": "Tingyun"
     },
     "path": "Harmony",
     "element": "Lightning",
@@ -378,13 +528,19 @@ export const AVATAR_METADATA = {
   },
   "1203": {
     "names": {
+      "th": "Luocha",
       "en": "Luocha",
-      "th": "หลัวชา",
       "zh-CN": "罗刹",
       "zh-TW": "羅剎",
       "ja": "羅刹",
       "ko": "나찰",
-      "ru": "Лоча"
+      "ru": "Лоча",
+      "vi": "Luocha",
+      "id": "Luocha",
+      "es": "Luocha",
+      "fr": "Luocha",
+      "de": "Luocha",
+      "pt": "Luocha"
     },
     "path": "Abundance",
     "element": "Imaginary",
@@ -393,13 +549,19 @@ export const AVATAR_METADATA = {
   },
   "1204": {
     "names": {
+      "th": "Jing Yuan",
       "en": "Jing Yuan",
-      "th": "จิ่งหยวน",
       "zh-CN": "景元",
       "zh-TW": "景元",
       "ja": "景元",
       "ko": "경원",
-      "ru": "Цзин Юань"
+      "ru": "Цзин Юань",
+      "vi": "Jing Yuan",
+      "id": "Jing Yuan",
+      "es": "Jing Yuan",
+      "fr": "Jing Yuan",
+      "de": "Jing Yuan",
+      "pt": "Jing Yuan"
     },
     "path": "Erudition",
     "element": "Lightning",
@@ -408,13 +570,19 @@ export const AVATAR_METADATA = {
   },
   "1205": {
     "names": {
+      "th": "Blade",
       "en": "Blade",
-      "th": "เบลด",
       "zh-CN": "刃",
       "zh-TW": "刃",
       "ja": "刃",
       "ko": "블레이드",
-      "ru": "Блэйд"
+      "ru": "Блэйд",
+      "vi": "Blade",
+      "id": "Blade",
+      "es": "Blade",
+      "fr": "Blade",
+      "de": "Blade",
+      "pt": "Blade"
     },
     "path": "Destruction",
     "element": "Wind",
@@ -423,13 +591,19 @@ export const AVATAR_METADATA = {
   },
   "1206": {
     "names": {
+      "th": "Sushang",
       "en": "Sushang",
-      "th": "ซูซาง",
       "zh-CN": "素裳",
       "zh-TW": "素裳",
       "ja": "素裳",
       "ko": "소상",
-      "ru": "Сушан"
+      "ru": "Сушан",
+      "vi": "Sushang",
+      "id": "Sushang",
+      "es": "Sushang",
+      "fr": "Sushang",
+      "de": "Sushang",
+      "pt": "Sushang"
     },
     "path": "Hunt",
     "element": "Physical",
@@ -438,13 +612,19 @@ export const AVATAR_METADATA = {
   },
   "1207": {
     "names": {
+      "th": "Yukong",
       "en": "Yukong",
-      "th": "อวี้คง",
       "zh-CN": "驭空",
       "zh-TW": "馭空",
       "ja": "御空",
       "ko": "어공",
-      "ru": "Юйкун"
+      "ru": "Юйкун",
+      "vi": "Yukong",
+      "id": "Yukong",
+      "es": "Yukong",
+      "fr": "Yukong",
+      "de": "Yukong",
+      "pt": "Yukong"
     },
     "path": "Harmony",
     "element": "Imaginary",
@@ -453,13 +633,19 @@ export const AVATAR_METADATA = {
   },
   "1208": {
     "names": {
+      "th": "Fu Xuan",
       "en": "Fu Xuan",
-      "th": "ฟู่เสวียน",
       "zh-CN": "符玄",
       "zh-TW": "符玄",
       "ja": "符玄",
       "ko": "부현",
-      "ru": "Фу Сюань"
+      "ru": "Фу Сюань",
+      "vi": "Fu Xuan",
+      "id": "Fu Xuan",
+      "es": "Fu Xuan",
+      "fr": "Fu Xuan",
+      "de": "Fu Xuan",
+      "pt": "Fu Xuan"
     },
     "path": "Preservation",
     "element": "Quantum",
@@ -468,13 +654,19 @@ export const AVATAR_METADATA = {
   },
   "1209": {
     "names": {
+      "th": "Yanqing",
       "en": "Yanqing",
-      "th": "เหยียนชิง",
       "zh-CN": "彦卿",
       "zh-TW": "彥卿",
       "ja": "彦卿",
       "ko": "연경",
-      "ru": "Яньцин"
+      "ru": "Яньцин",
+      "vi": "Yanqing",
+      "id": "Yanqing",
+      "es": "Yanqing",
+      "fr": "Yanqing",
+      "de": "Yanqing",
+      "pt": "Yanqing"
     },
     "path": "Hunt",
     "element": "Ice",
@@ -483,13 +675,19 @@ export const AVATAR_METADATA = {
   },
   "1210": {
     "names": {
+      "th": "Guinaifen",
       "en": "Guinaifen",
-      "th": "กุ้ยหน่ายเฟิน",
       "zh-CN": "桂乃芬",
       "zh-TW": "桂乃芬",
       "ja": "桂乃芬",
       "ko": "계네빈",
-      "ru": "Гуйнайфэнь"
+      "ru": "Гуйнайфэнь",
+      "vi": "Guinaifen",
+      "id": "Guinaifen",
+      "es": "Guinaifen",
+      "fr": "Guinaifen",
+      "de": "Guinaifen",
+      "pt": "Guinaifen"
     },
     "path": "Nihility",
     "element": "Fire",
@@ -498,13 +696,19 @@ export const AVATAR_METADATA = {
   },
   "1211": {
     "names": {
+      "th": "Bailu",
       "en": "Bailu",
-      "th": "ไป๋ลู่",
       "zh-CN": "白露",
       "zh-TW": "白露",
       "ja": "白露",
       "ko": "백로",
-      "ru": "Байлу"
+      "ru": "Байлу",
+      "vi": "Bailu",
+      "id": "Bailu",
+      "es": "Bailu",
+      "fr": "Bailu",
+      "de": "Bailu",
+      "pt": "Bailu"
     },
     "path": "Abundance",
     "element": "Lightning",
@@ -513,13 +717,19 @@ export const AVATAR_METADATA = {
   },
   "1212": {
     "names": {
+      "th": "Jingliu",
       "en": "Jingliu",
-      "th": "จิ้งหลิว",
       "zh-CN": "镜流",
       "zh-TW": "鏡流",
       "ja": "鏡流",
       "ko": "경류",
-      "ru": "Цзинлю"
+      "ru": "Цзинлю",
+      "vi": "Jingliu",
+      "id": "Jingliu",
+      "es": "Jingliu",
+      "fr": "Jingliu",
+      "de": "Jingliu",
+      "pt": "Jingliu"
     },
     "path": "Destruction",
     "element": "Ice",
@@ -528,13 +738,19 @@ export const AVATAR_METADATA = {
   },
   "1213": {
     "names": {
+      "th": "Dan Heng - จ้าวยลจันทรา",
       "en": "Dan Heng • Imbibitor Lunae",
-      "th": "ดันเฮง จ้าวยลจันทรา",
-      "zh-CN": "丹恒·饮月",
-      "zh-TW": "丹恆·飲月",
+      "zh-CN": "丹恒•饮月",
+      "zh-TW": "丹恆•飲月",
       "ja": "丹恒・飲月",
-      "ko": "단항·음월",
-      "ru": "Дань Хэн: Пожиратель Луны"
+      "ko": "단항•음월",
+      "ru": "Дань Хэн: Пожиратель Луны",
+      "vi": "Dan Heng - Ẩm Nguyệt",
+      "id": "Dan Heng · Imbibitor Lunae",
+      "es": "Dan Heng - Imbibitor Lunae",
+      "fr": "Dan Heng • Imbibitor Lunae",
+      "de": "Dan Heng – Imbibitor Lunae",
+      "pt": "Dan Heng - Embebidor Lunae"
     },
     "path": "Destruction",
     "element": "Imaginary",
@@ -543,13 +759,19 @@ export const AVATAR_METADATA = {
   },
   "1214": {
     "names": {
+      "th": "Xueyi",
       "en": "Xueyi",
-      "th": "เสวียอี้",
       "zh-CN": "雪衣",
       "zh-TW": "雪衣",
       "ja": "雪衣",
       "ko": "설의",
-      "ru": "Сюэи"
+      "ru": "Сюэи",
+      "vi": "Xueyi",
+      "id": "Xueyi",
+      "es": "Xueyi",
+      "fr": "Xueyi",
+      "de": "Xueyi",
+      "pt": "Xueyi"
     },
     "path": "Destruction",
     "element": "Quantum",
@@ -558,13 +780,19 @@ export const AVATAR_METADATA = {
   },
   "1215": {
     "names": {
+      "th": "Hanya",
       "en": "Hanya",
-      "th": "ฮันย่า",
       "zh-CN": "寒鸦",
       "zh-TW": "寒鴉",
       "ja": "寒鴉",
       "ko": "한아",
-      "ru": "Ханья"
+      "ru": "Ханья",
+      "vi": "Hanya",
+      "id": "Hanya",
+      "es": "Hanya",
+      "fr": "Hanya",
+      "de": "Hanya",
+      "pt": "Hanya"
     },
     "path": "Harmony",
     "element": "Physical",
@@ -573,13 +801,19 @@ export const AVATAR_METADATA = {
   },
   "1217": {
     "names": {
+      "th": "Huohuo",
       "en": "Huohuo",
-      "th": "ฮัวฮัว",
       "zh-CN": "藿藿",
       "zh-TW": "藿藿",
       "ja": "フォフォ",
       "ko": "곽향",
-      "ru": "Хохо"
+      "ru": "Хохо",
+      "vi": "Huohuo",
+      "id": "Huohuo",
+      "es": "Huohuo",
+      "fr": "Huohuo",
+      "de": "Huohuo",
+      "pt": "Huohuo"
     },
     "path": "Abundance",
     "element": "Wind",
@@ -588,13 +822,19 @@ export const AVATAR_METADATA = {
   },
   "1218": {
     "names": {
+      "th": "Jiaoqiu",
       "en": "Jiaoqiu",
-      "th": "เจียวชิว",
       "zh-CN": "椒丘",
       "zh-TW": "椒丘",
       "ja": "椒丘",
       "ko": "초구",
-      "ru": "Цзяоцю"
+      "ru": "Цзяоцю",
+      "vi": "Jiaoqiu",
+      "id": "Jiaoqiu",
+      "es": "Jiaoqiu",
+      "fr": "Jiaoqiu",
+      "de": "Jiaoqiu",
+      "pt": "Jiaoqiu"
     },
     "path": "Nihility",
     "element": "Fire",
@@ -603,13 +843,19 @@ export const AVATAR_METADATA = {
   },
   "1220": {
     "names": {
+      "th": "Feixiao",
       "en": "Feixiao",
-      "th": "เฟยเซียว",
       "zh-CN": "飞霄",
       "zh-TW": "飛霄",
       "ja": "飛霄",
       "ko": "비소",
-      "ru": "Фэйсяо"
+      "ru": "Фэйсяо",
+      "vi": "Feixiao",
+      "id": "Feixiao",
+      "es": "Feixiao",
+      "fr": "Feixiao",
+      "de": "Feixiao",
+      "pt": "Feixiao"
     },
     "path": "Hunt",
     "element": "Wind",
@@ -618,13 +864,19 @@ export const AVATAR_METADATA = {
   },
   "1221": {
     "names": {
+      "th": "Yunli",
       "en": "Yunli",
-      "th": "หยุนหลี่",
       "zh-CN": "云璃",
       "zh-TW": "雲璃",
       "ja": "雲璃",
       "ko": "운리",
-      "ru": "Юньли"
+      "ru": "Юньли",
+      "vi": "Yunli",
+      "id": "Yunli",
+      "es": "Yunli",
+      "fr": "Yunli",
+      "de": "Yunli",
+      "pt": "Yunli"
     },
     "path": "Destruction",
     "element": "Physical",
@@ -633,13 +885,19 @@ export const AVATAR_METADATA = {
   },
   "1222": {
     "names": {
+      "th": "Lingsha",
       "en": "Lingsha",
-      "th": "หลิงซา",
       "zh-CN": "灵砂",
       "zh-TW": "靈砂",
       "ja": "霊砂",
       "ko": "영사",
-      "ru": "Линша"
+      "ru": "Линша",
+      "vi": "Lingsha",
+      "id": "Lingsha",
+      "es": "Lingsha",
+      "fr": "Lingsha",
+      "de": "Lingsha",
+      "pt": "Lingsha"
     },
     "path": "Abundance",
     "element": "Fire",
@@ -648,13 +906,19 @@ export const AVATAR_METADATA = {
   },
   "1223": {
     "names": {
+      "th": "Moze",
       "en": "Moze",
-      "th": "โม่เจ๋อ",
       "zh-CN": "貊泽",
       "zh-TW": "貊澤",
       "ja": "モゼ",
       "ko": "맥택",
-      "ru": "Моцзэ"
+      "ru": "Моцзэ",
+      "vi": "Moze",
+      "id": "Moze",
+      "es": "Moze",
+      "fr": "Moze",
+      "de": "Moze",
+      "pt": "Moze"
     },
     "path": "Hunt",
     "element": "Lightning",
@@ -663,13 +927,19 @@ export const AVATAR_METADATA = {
   },
   "1224": {
     "names": {
-      "en": "March 7th • The Hunt",
-      "th": "ล่าสังหาร",
-      "zh-CN": "三月七·巡猎",
-      "zh-TW": "三月七·巡獵",
-      "ja": "三月なのか・巡狩",
-      "ko": "March 7th·수렵",
-      "ru": "Март 7 • Охота"
+      "th": "March 7th",
+      "en": "March 7th",
+      "zh-CN": "三月七",
+      "zh-TW": "三月七",
+      "ja": "三月なのか",
+      "ko": "Mar. 7th",
+      "ru": "Март 7",
+      "vi": "March 7th",
+      "id": "March 7th",
+      "es": "Siete de Marzo",
+      "fr": "March 7th",
+      "de": "7. März",
+      "pt": "7 de Março"
     },
     "path": "Hunt",
     "element": "Imaginary",
@@ -678,13 +948,19 @@ export const AVATAR_METADATA = {
   },
   "1225": {
     "names": {
+      "th": "ผู้จากจรลืมหวน",
       "en": "Fugue",
-      "th": "ฟิวก์",
       "zh-CN": "忘归人",
       "zh-TW": "忘歸人",
-      "ja": "忘帰人",
+      "ja": "帰忘の流離人",
       "ko": "망귀인",
-      "ru": "Фуга"
+      "ru": "Фуга",
+      "vi": "Fugue",
+      "id": "Fugue",
+      "es": "Fugue",
+      "fr": "Pérégrine",
+      "de": "Fugue",
+      "pt": "Fugue"
     },
     "path": "Nihility",
     "element": "Fire",
@@ -693,13 +969,19 @@ export const AVATAR_METADATA = {
   },
   "1301": {
     "names": {
+      "th": "Gallagher",
       "en": "Gallagher",
-      "th": "กัลลาเกอร์",
       "zh-CN": "加拉赫",
       "zh-TW": "加拉赫",
       "ja": "ギャラガー",
       "ko": "갤러거",
-      "ru": "Галлахер"
+      "ru": "Галлахер",
+      "vi": "Gallagher",
+      "id": "Gallagher",
+      "es": "Gallagher",
+      "fr": "Gallagher",
+      "de": "Gallagher",
+      "pt": "Gallagher"
     },
     "path": "Abundance",
     "element": "Fire",
@@ -708,13 +990,19 @@ export const AVATAR_METADATA = {
   },
   "1302": {
     "names": {
+      "th": "Argenti",
       "en": "Argenti",
-      "th": "อาร์เจนติ",
       "zh-CN": "银枝",
       "zh-TW": "銀枝",
       "ja": "アルジェンティ",
       "ko": "아젠티",
-      "ru": "Аргенти"
+      "ru": "Аргенти",
+      "vi": "Argenti",
+      "id": "Argenti",
+      "es": "Argenti",
+      "fr": "Argenti",
+      "de": "Argenti",
+      "pt": "Argenti"
     },
     "path": "Erudition",
     "element": "Physical",
@@ -723,13 +1011,19 @@ export const AVATAR_METADATA = {
   },
   "1303": {
     "names": {
+      "th": "Ruan Mei",
       "en": "Ruan Mei",
-      "th": "รวน เหมย",
-      "zh-CN": "阮·梅",
-      "zh-TW": "阮·梅",
+      "zh-CN": "阮•梅",
+      "zh-TW": "阮•梅",
       "ja": "ルアン・メェイ",
-      "ko": "완·매",
-      "ru": "Жуань Мэй"
+      "ko": "완•매",
+      "ru": "Жуань Мэй",
+      "vi": "Ruan Mei",
+      "id": "Ruan Mei",
+      "es": "Ruan Mei",
+      "fr": "Ruan Mei",
+      "de": "Ruan Mei",
+      "pt": "Ruan Mei"
     },
     "path": "Harmony",
     "element": "Ice",
@@ -738,13 +1032,19 @@ export const AVATAR_METADATA = {
   },
   "1304": {
     "names": {
+      "th": "Aventurine",
       "en": "Aventurine",
-      "th": "อเวนทูรีน",
       "zh-CN": "砂金",
       "zh-TW": "砂金",
       "ja": "アベンチュリン",
       "ko": "어벤츄린",
-      "ru": "Авантюрин"
+      "ru": "Авантюрин",
+      "vi": "Aventurine",
+      "id": "Aventurine",
+      "es": "Aventurino",
+      "fr": "Aventurine",
+      "de": "Aventurin",
+      "pt": "Aventurine"
     },
     "path": "Preservation",
     "element": "Imaginary",
@@ -753,13 +1053,19 @@ export const AVATAR_METADATA = {
   },
   "1305": {
     "names": {
+      "th": "Dr. Ratio",
       "en": "Dr. Ratio",
-      "th": "ดร. เรโช",
       "zh-CN": "真理医生",
       "zh-TW": "真理醫生",
       "ja": "Dr.レイシオ",
       "ko": "Dr. 레이시오",
-      "ru": "Д-р Рацио"
+      "ru": "Доктор Рацио",
+      "vi": "Dr. Ratio",
+      "id": "Dr. Ratio",
+      "es": "Dr. Ratio",
+      "fr": "Dr Ratio",
+      "de": "Dr. Wahrheit",
+      "pt": "Dr. Ratio"
     },
     "path": "Hunt",
     "element": "Imaginary",
@@ -768,13 +1074,19 @@ export const AVATAR_METADATA = {
   },
   "1306": {
     "names": {
+      "th": "Sparkle",
       "en": "Sparkle",
-      "th": "สปาร์กเคิล",
       "zh-CN": "花火",
       "zh-TW": "花火",
       "ja": "花火",
       "ko": "스파클",
-      "ru": "Искорка"
+      "ru": "Искорка",
+      "vi": "Sparkle",
+      "id": "Sparkle",
+      "es": "Sparkle",
+      "fr": "Sparkle",
+      "de": "Sparkle",
+      "pt": "Sparkle"
     },
     "path": "Harmony",
     "element": "Quantum",
@@ -783,13 +1095,19 @@ export const AVATAR_METADATA = {
   },
   "1307": {
     "names": {
+      "th": "Black Swan",
       "en": "Black Swan",
-      "th": "แบล็กสวอน",
       "zh-CN": "黑天鹅",
       "zh-TW": "黑天鵝",
       "ja": "ブラックスワン",
       "ko": "블랙 스완",
-      "ru": "Черный Лебедь"
+      "ru": "Чёрный Лебедь",
+      "vi": "Black Swan",
+      "id": "Black Swan",
+      "es": "Cisne Negro",
+      "fr": "Cygne noir",
+      "de": "Schwarzer Schwan",
+      "pt": "Cisne Negro"
     },
     "path": "Nihility",
     "element": "Wind",
@@ -798,13 +1116,19 @@ export const AVATAR_METADATA = {
   },
   "1308": {
     "names": {
+      "th": "Acheron",
       "en": "Acheron",
-      "th": "อาเคอรอน",
       "zh-CN": "黄泉",
       "zh-TW": "黃泉",
       "ja": "黄泉",
       "ko": "아케론",
-      "ru": "Ахерон"
+      "ru": "Ахерон",
+      "vi": "Acheron",
+      "id": "Acheron",
+      "es": "Acheron",
+      "fr": "Achéron",
+      "de": "Acheron",
+      "pt": "Acheron"
     },
     "path": "Nihility",
     "element": "Lightning",
@@ -813,13 +1137,19 @@ export const AVATAR_METADATA = {
   },
   "1309": {
     "names": {
+      "th": "Robin",
       "en": "Robin",
-      "th": "โรบิน",
       "zh-CN": "知更鸟",
       "zh-TW": "知更鳥",
       "ja": "ロビン",
       "ko": "로빈",
-      "ru": "Зарянка"
+      "ru": "Зарянка",
+      "vi": "Robin",
+      "id": "Robin",
+      "es": "Robin",
+      "fr": "Robin",
+      "de": "Robin",
+      "pt": "Robin"
     },
     "path": "Harmony",
     "element": "Physical",
@@ -828,13 +1158,19 @@ export const AVATAR_METADATA = {
   },
   "1310": {
     "names": {
+      "th": "Firefly",
       "en": "Firefly",
-      "th": "ไฟร์ฟลาย",
       "zh-CN": "流萤",
       "zh-TW": "流螢",
       "ja": "ホタル",
       "ko": "반디",
-      "ru": "Светлячок"
+      "ru": "Светлячок",
+      "vi": "Firefly",
+      "id": "Firefly",
+      "es": "Luciérnaga",
+      "fr": "Luciole",
+      "de": "Glühwürmchen",
+      "pt": "Vaga-lume"
     },
     "path": "Destruction",
     "element": "Fire",
@@ -843,13 +1179,19 @@ export const AVATAR_METADATA = {
   },
   "1312": {
     "names": {
+      "th": "Misha",
       "en": "Misha",
-      "th": "มิชา",
       "zh-CN": "米沙",
       "zh-TW": "米沙",
       "ja": "ミーシャ",
       "ko": "미샤",
-      "ru": "Миша"
+      "ru": "Миша",
+      "vi": "Misha",
+      "id": "Misha",
+      "es": "Misha",
+      "fr": "Micha",
+      "de": "Misha",
+      "pt": "Misha"
     },
     "path": "Destruction",
     "element": "Ice",
@@ -858,13 +1200,19 @@ export const AVATAR_METADATA = {
   },
   "1313": {
     "names": {
+      "th": "Sunday",
       "en": "Sunday",
-      "th": "ซันเดย์",
       "zh-CN": "星期日",
       "zh-TW": "星期日",
       "ja": "サンデー",
       "ko": "선데이",
-      "ru": "Воскресенье"
+      "ru": "Воскресенье",
+      "vi": "Sunday",
+      "id": "Sunday",
+      "es": "Sunday",
+      "fr": "Sunday",
+      "de": "Sonntag",
+      "pt": "Sunday"
     },
     "path": "Harmony",
     "element": "Imaginary",
@@ -873,13 +1221,19 @@ export const AVATAR_METADATA = {
   },
   "1314": {
     "names": {
+      "th": "Jade",
       "en": "Jade",
-      "th": "เจด",
       "zh-CN": "翡翠",
       "zh-TW": "翡翠",
       "ja": "ジェイド",
-      "ko": "ジェイド",
-      "ru": "Яшма"
+      "ko": "제이드",
+      "ru": "Яшма",
+      "vi": "Jade",
+      "id": "Jade",
+      "es": "Jade",
+      "fr": "Jade",
+      "de": "Jade",
+      "pt": "Jade"
     },
     "path": "Erudition",
     "element": "Quantum",
@@ -888,13 +1242,19 @@ export const AVATAR_METADATA = {
   },
   "1315": {
     "names": {
+      "th": "Boothill",
       "en": "Boothill",
-      "th": "บูทฮิลล์",
       "zh-CN": "波提欧",
       "zh-TW": "波提歐",
       "ja": "ブートヒル",
       "ko": "부트힐",
-      "ru": "Бутхилл"
+      "ru": "Бутхилл",
+      "vi": "Boothill",
+      "id": "Boothill",
+      "es": "Boothill",
+      "fr": "Le Fossoyeur",
+      "de": "Boothill",
+      "pt": "Boothill"
     },
     "path": "Hunt",
     "element": "Physical",
@@ -903,13 +1263,19 @@ export const AVATAR_METADATA = {
   },
   "1317": {
     "names": {
+      "th": "Rappa",
       "en": "Rappa",
-      "th": "แรปปา",
       "zh-CN": "乱破",
       "zh-TW": "亂破",
       "ja": "乱破",
       "ko": "라파",
-      "ru": "Раппа"
+      "ru": "Раппа",
+      "vi": "Rappa",
+      "id": "Rappa",
+      "es": "Rappa",
+      "fr": "Rappa",
+      "de": "Rappa",
+      "pt": "Rappa"
     },
     "path": "Erudition",
     "element": "Imaginary",
@@ -918,13 +1284,19 @@ export const AVATAR_METADATA = {
   },
   "1321": {
     "names": {
-      "en": "Dahlia",
-      "th": "ดาเลีย",
-      "zh-CN": "达莉亚",
-      "zh-TW": "達莉亞",
+      "th": "ดอกดาห์เลีย",
+      "en": "The Dahlia",
+      "zh-CN": "大丽花",
+      "zh-TW": "大理花",
       "ja": "ダリア",
       "ko": "달리아",
-      "ru": "Далия"
+      "ru": "Георгина",
+      "vi": "Dahlia",
+      "id": "The Dahlia",
+      "es": "La Dalia",
+      "fr": "Le Dahlia",
+      "de": "Die Dahlie",
+      "pt": "A Dália"
     },
     "path": "Nihility",
     "element": "Fire",
@@ -933,13 +1305,19 @@ export const AVATAR_METADATA = {
   },
   "1401": {
     "names": {
+      "th": "ท่าน Herta",
       "en": "The Herta",
-      "th": "เดอะ เฮอร์ต้า",
       "zh-CN": "大黑塔",
       "zh-TW": "大黑塔",
-      "ja": "ザ・ヘルタ",
+      "ja": "マダム・ヘルタ",
       "ko": "더 헤르타",
-      "ru": "Великая Герта"
+      "ru": "Великая Герта",
+      "vi": "Đại Herta",
+      "id": "The Herta",
+      "es": "Sra. Herta",
+      "fr": "La Grande Herta",
+      "de": "Große Herta",
+      "pt": "A Herta"
     },
     "path": "Erudition",
     "element": "Ice",
@@ -948,13 +1326,19 @@ export const AVATAR_METADATA = {
   },
   "1402": {
     "names": {
+      "th": "Aglaea",
       "en": "Aglaea",
-      "th": "อักเลีย",
       "zh-CN": "阿格莱雅",
       "zh-TW": "阿格萊雅",
-      "ja": "アグラエア",
+      "ja": "アグライア",
       "ko": "아글라이아",
-      "ru": "Аглая"
+      "ru": "Аглая",
+      "vi": "Aglaea",
+      "id": "Aglaea",
+      "es": "Aglaea",
+      "fr": "Aglaé",
+      "de": "Aglaea",
+      "pt": "Aglaea"
     },
     "path": "Remembrance",
     "element": "Lightning",
@@ -963,13 +1347,19 @@ export const AVATAR_METADATA = {
   },
   "1403": {
     "names": {
+      "th": "Tribbie",
       "en": "Tribbie",
-      "th": "ทริบบี้",
-      "zh-CN": "提比",
-      "zh-TW": "提比",
+      "zh-CN": "缇宝",
+      "zh-TW": "緹寶",
       "ja": "トリビー",
       "ko": "트리비",
-      "ru": "Трибби"
+      "ru": "Трибби",
+      "vi": "Tribbie",
+      "id": "Tribbie",
+      "es": "Tribbie",
+      "fr": "Tribbie",
+      "de": "Tribbie",
+      "pt": "Tribbie"
     },
     "path": "Harmony",
     "element": "Quantum",
@@ -978,13 +1368,19 @@ export const AVATAR_METADATA = {
   },
   "1404": {
     "names": {
+      "th": "Mydei",
       "en": "Mydei",
-      "th": "ไมเดย์",
-      "zh-CN": "麦狄",
-      "zh-TW": "麥狄",
-      "ja": "マイディ",
+      "zh-CN": "万敌",
+      "zh-TW": "萬敵",
+      "ja": "モーディス",
       "ko": "마이데이",
-      "ru": "Мидей"
+      "ru": "Мидей",
+      "vi": "Mydei",
+      "id": "Mydei",
+      "es": "Midei",
+      "fr": "Mydei",
+      "de": "Mydei",
+      "pt": "Mydei"
     },
     "path": "Destruction",
     "element": "Imaginary",
@@ -993,13 +1389,19 @@ export const AVATAR_METADATA = {
   },
   "1405": {
     "names": {
+      "th": "Anaxa",
       "en": "Anaxa",
-      "th": "อนากซา",
-      "zh-CN": "阿那克萨",
-      "zh-TW": "阿那克薩",
-      "ja": "アナクサ",
+      "zh-CN": "那刻夏",
+      "zh-TW": "那刻夏",
+      "ja": "アナイクス",
       "ko": "아낙사",
-      "ru": "Анакса"
+      "ru": "Анакса",
+      "vi": "Anaxa",
+      "id": "Anaxa",
+      "es": "Anaxa",
+      "fr": "Anaxa",
+      "de": "Anaxa",
+      "pt": "Anaxa"
     },
     "path": "Erudition",
     "element": "Wind",
@@ -1008,13 +1410,19 @@ export const AVATAR_METADATA = {
   },
   "1406": {
     "names": {
+      "th": "Cipher",
       "en": "Cipher",
-      "th": "ไซเฟอร์",
-      "zh-CN": "赛弗",
-      "zh-TW": "賽弗",
-      "ja": "サイファー",
+      "zh-CN": "赛飞儿",
+      "zh-TW": "賽飛兒",
+      "ja": "サフェル",
       "ko": "사이퍼",
-      "ru": "Сайфер"
+      "ru": "Цифер",
+      "vi": "Cipher",
+      "id": "Cipher",
+      "es": "Cífer",
+      "fr": "Cipher",
+      "de": "Cipher",
+      "pt": "Cipher"
     },
     "path": "Nihility",
     "element": "Quantum",
@@ -1023,13 +1431,19 @@ export const AVATAR_METADATA = {
   },
   "1407": {
     "names": {
+      "th": "Castorice",
       "en": "Castorice",
-      "th": "แคสโตริซ",
       "zh-CN": "遐蝶",
       "zh-TW": "遐蝶",
-      "ja": "カストリセ",
-      "ko": "카스토리체",
-      "ru": "Касторисе"
+      "ja": "キャストリス",
+      "ko": "카스토리스",
+      "ru": "Кастория",
+      "vi": "Castorice",
+      "id": "Castorice",
+      "es": "Castorice",
+      "fr": "Castorice",
+      "de": "Castorice",
+      "pt": "Castorice"
     },
     "path": "Remembrance",
     "element": "Quantum",
@@ -1038,13 +1452,19 @@ export const AVATAR_METADATA = {
   },
   "1408": {
     "names": {
+      "th": "Phainon",
       "en": "Phainon",
-      "th": "ไฟนอน",
-      "zh-CN": "法埃农",
-      "zh-TW": "法埃農",
+      "zh-CN": "白厄",
+      "zh-TW": "白厄",
       "ja": "ファイノン",
       "ko": "파이논",
-      "ru": "Файнон"
+      "ru": "Фаенон",
+      "vi": "Phainon",
+      "id": "Phainon",
+      "es": "Fainón",
+      "fr": "Phaénon",
+      "de": "Phainon",
+      "pt": "Phainon"
     },
     "path": "Destruction",
     "element": "Physical",
@@ -1053,13 +1473,19 @@ export const AVATAR_METADATA = {
   },
   "1409": {
     "names": {
+      "th": "Hyacine",
       "en": "Hyacine",
-      "th": "ไฮยาซีน",
-      "zh-CN": "风信子",
-      "zh-TW": "風信子",
-      "ja": "ヒヤシンス",
-      "ko": "히아신스",
-      "ru": "Гиацинт"
+      "zh-CN": "风堇",
+      "zh-TW": "風堇",
+      "ja": "ヒアンシー",
+      "ko": "히아킨",
+      "ru": "Гиацина",
+      "vi": "Hyacine",
+      "id": "Hyacine",
+      "es": "Hyacine",
+      "fr": "Hyacine",
+      "de": "Hyacine",
+      "pt": "Hyacine"
     },
     "path": "Remembrance",
     "element": "Wind",
@@ -1068,13 +1494,19 @@ export const AVATAR_METADATA = {
   },
   "1410": {
     "names": {
+      "th": "Hysilens",
       "en": "Hysilens",
-      "th": "ไฮซิเลนส์",
-      "zh-CN": "海西伦斯",
-      "zh-TW": "海西倫斯",
-      "ja": "ヒシレンス",
+      "zh-CN": "海瑟音",
+      "zh-TW": "海瑟音",
+      "ja": "セイレンス",
       "ko": "히실렌스",
-      "ru": "Гисиленс"
+      "ru": "Гисиленса",
+      "vi": "Hysilens",
+      "id": "Hysilens",
+      "es": "Hysilens",
+      "fr": "Hysilens",
+      "de": "Hysilens",
+      "pt": "Hysilens"
     },
     "path": "Nihility",
     "element": "Physical",
@@ -1083,13 +1515,19 @@ export const AVATAR_METADATA = {
   },
   "1412": {
     "names": {
+      "th": "Cerydra",
       "en": "Cerydra",
-      "th": "เซอรีดรา",
-      "zh-CN": "塞利德拉",
-      "zh-TW": "塞利德拉",
-      "ja": "セリドラ",
-      "ko": "세리드라",
-      "ru": "Серидра"
+      "zh-CN": "刻律德菈",
+      "zh-TW": "刻律德菈",
+      "ja": "ケリュドラ",
+      "ko": "케리드라",
+      "ru": "Керидра",
+      "vi": "Cerydra",
+      "id": "Cerydra",
+      "es": "Céridra",
+      "fr": "Cérydra",
+      "de": "Cerydra",
+      "pt": "Cerydra"
     },
     "path": "Harmony",
     "element": "Wind",
@@ -1098,13 +1536,19 @@ export const AVATAR_METADATA = {
   },
   "1413": {
     "names": {
+      "th": "Evernight",
       "en": "Evernight",
-      "th": "เอเวอร์ไนท์",
-      "zh-CN": "永夜",
-      "zh-TW": "永夜",
-      "ja": "エバーナイト",
+      "zh-CN": "长夜月",
+      "zh-TW": "長夜月",
+      "ja": "長夜月",
       "ko": "에버나이트",
-      "ru": "Эвернайт"
+      "ru": "Темень",
+      "vi": "Evernight",
+      "id": "Evernight",
+      "es": "Larganoche",
+      "fr": "Nocterna",
+      "de": "Evernight",
+      "pt": "Noite Eterna"
     },
     "path": "Remembrance",
     "element": "Ice",
@@ -1113,13 +1557,19 @@ export const AVATAR_METADATA = {
   },
   "1414": {
     "names": {
-      "en": "Dan Heng • Permeating Thunder",
-      "th": "ดันเฮงร่างใหม่",
-      "zh-CN": "丹恒·行者",
-      "zh-TW": "丹恆·行者",
-      "ja": "丹恒・行者",
-      "ko": "단항·행자",
-      "ru": "Дань Хэн • Странник"
+      "th": "Dan Heng - จ้าวทระนงคงปฐพี",
+      "en": "Dan Heng • Permansor Terrae",
+      "zh-CN": "丹恒•腾荒",
+      "zh-TW": "丹恆•騰荒",
+      "ja": "丹恒・騰荒",
+      "ko": "단항•등황",
+      "ru": "Дань Хэн: Освободитель Пустошей",
+      "vi": "Dan Heng - Permansor Terrae",
+      "id": "Dan Heng • Permansor Terrae",
+      "es": "Dan Heng - Permansor Terrae",
+      "fr": "Dan Heng • Permansor Terrae",
+      "de": "Dan Heng – Permansor Terrae",
+      "pt": "Dan Heng - Permansor Terrae"
     },
     "path": "Preservation",
     "element": "Physical",
@@ -1128,13 +1578,19 @@ export const AVATAR_METADATA = {
   },
   "1415": {
     "names": {
+      "th": "Cyrene",
       "en": "Cyrene",
-      "th": "ไซรีน",
-      "zh-CN": "赛琳",
-      "zh-TW": "賽琳",
-      "ja": "サイリーン",
+      "zh-CN": "昔涟",
+      "zh-TW": "昔漣",
+      "ja": "キュレネ",
       "ko": "키레네",
-      "ru": "Кирена"
+      "ru": "Кирена",
+      "vi": "Cyrene",
+      "id": "Cyrene",
+      "es": "Cirene",
+      "fr": "Cyrène",
+      "de": "Cyrene",
+      "pt": "Cyrene"
     },
     "path": "Remembrance",
     "element": "Ice",
@@ -1143,13 +1599,19 @@ export const AVATAR_METADATA = {
   },
   "1501": {
     "names": {
+      "th": "Sparxie",
       "en": "Sparxie",
-      "th": "สปาร์กซี่",
-      "zh-CN": "斯帕克茜",
-      "zh-TW": "斯帕克茜",
-      "ja": "スパーキー",
-      "ko": "스팍시",
-      "ru": "Спаркси"
+      "zh-CN": "火花",
+      "zh-TW": "火花",
+      "ja": "火花",
+      "ko": "스파키",
+      "ru": "Искра",
+      "vi": "Sparxie",
+      "id": "Sparxie",
+      "es": "Chispa",
+      "fr": "Sparxie",
+      "de": "Sparxie",
+      "pt": "Sparxie"
     },
     "path": "Elation",
     "element": "Fire",
@@ -1158,13 +1620,19 @@ export const AVATAR_METADATA = {
   },
   "1502": {
     "names": {
-      "en": "Yaoguang",
-      "th": "เย่ากวง",
-      "zh-CN": "瑶光",
-      "zh-TW": "瑤光",
-      "ja": "瑤光",
-      "ko": "요광",
-      "ru": "Яогуан"
+      "th": "Yao Guang",
+      "en": "Yao Guang",
+      "zh-CN": "爻光",
+      "zh-TW": "爻光",
+      "ja": "爻光",
+      "ko": "효광",
+      "ru": "Яо Гуан",
+      "vi": "Yao Guang",
+      "id": "Yao Guang",
+      "es": "Yao Guang",
+      "fr": "Yao Guang",
+      "de": "Yao Guang",
+      "pt": "Yao Guang"
     },
     "path": "Elation",
     "element": "Physical",
@@ -1173,13 +1641,19 @@ export const AVATAR_METADATA = {
   },
   "1503": {
     "names": {
+      "th": "Pearl",
       "en": "Pearl",
-      "th": "เพิร์ล",
-      "zh-CN": "佩尔 (Pearl)",
-      "zh-TW": "佩爾",
+      "zh-CN": "真珠",
+      "zh-TW": "真珠",
       "ja": "パール",
       "ko": "펄",
-      "ru": "Перл"
+      "ru": "Жемчуг",
+      "vi": "Pearl",
+      "id": "Pearl",
+      "es": "Perla",
+      "fr": "Perle",
+      "de": "Pearl",
+      "pt": "Pearl"
     },
     "path": "Elation",
     "element": "Ice",
@@ -1188,13 +1662,19 @@ export const AVATAR_METADATA = {
   },
   "1504": {
     "names": {
+      "th": "Ashveil",
       "en": "Ashveil",
-      "th": "แอชเวล",
-      "zh-CN": "灰纱",
-      "zh-TW": "灰紗",
-      "ja": "アッシュヴェイル",
+      "zh-CN": "不死途",
+      "zh-TW": "不死途",
+      "ja": "不死途",
       "ko": "애쉬베일",
-      "ru": "Эшвейл"
+      "ru": "Эшвейл",
+      "vi": "Ashveil",
+      "id": "Ashveil",
+      "es": "Ashveil",
+      "fr": "Ashveil",
+      "de": "Ashveil",
+      "pt": "Ashveil"
     },
     "path": "Hunt",
     "element": "Lightning",
@@ -1203,13 +1683,19 @@ export const AVATAR_METADATA = {
   },
   "1505": {
     "names": {
+      "th": "Evanescia",
       "en": "Evanescia",
-      "th": "เอวาเนสเซีย",
-      "zh-CN": "埃瓦内西亚",
-      "zh-TW": "埃瓦內西亞",
-      "ja": "エヴァネシア",
+      "zh-CN": "绯英",
+      "zh-TW": "緋英",
+      "ja": "緋英",
       "ko": "에바네시아",
-      "ru": "Эванесия"
+      "ru": "Эванесса",
+      "vi": "Evanescia",
+      "id": "Evanescia",
+      "es": "Evanescia",
+      "fr": "Evanescia",
+      "de": "Evanescia",
+      "pt": "Evanescia"
     },
     "path": "Elation",
     "element": "Physical",
@@ -1218,13 +1704,19 @@ export const AVATAR_METADATA = {
   },
   "1506": {
     "names": {
-      "en": "Silver Wolf Lv.999",
-      "th": "ซิลเวอร์วูล์ฟ Lv.999",
-      "zh-CN": "银狼 Lv.999",
-      "zh-TW": "銀狼 Lv.999",
-      "ja": "銀狼 Lv.999",
-      "ko": "은랑 Lv.999",
-      "ru": "Серебряный Волк Lv.999"
+      "th": "Silver Wolf LV.999",
+      "en": "Silver Wolf LV.999",
+      "zh-CN": "银狼LV.999",
+      "zh-TW": "銀狼LV.999",
+      "ja": "銀狼LV.999",
+      "ko": "은랑 LV.999",
+      "ru": "Серебряный Волк ур. 999",
+      "vi": "Sói Bạc LV.999",
+      "id": "Silver Wolf LV.999",
+      "es": "Silver Wolf Niv. 999",
+      "fr": "Louve d'argent Niv. 999",
+      "de": "Silberwolf St. 999",
+      "pt": "Loba Prateada Nv. 999"
     },
     "path": "Elation",
     "element": "Imaginary",
@@ -1233,13 +1725,19 @@ export const AVATAR_METADATA = {
   },
   "1507": {
     "names": {
+      "th": "ผู้ฝ่าบ่วงมฤตยู Blade",
       "en": "Mortenax Blade",
-      "th": "มอร์เทแนกซ์ เบลด",
-      "zh-CN": "摩天之刃",
-      "zh-TW": "摩天之刃",
-      "ja": "摩天の刃",
-      "ko": "모르테낙스 블레이드",
-      "ru": "Мортенакс Блейд"
+      "zh-CN": "千冶•刃",
+      "zh-TW": "千冶•刃",
+      "ja": "千冶・刃",
+      "ko": "천야•블레이드",
+      "ru": "Мортенакс Блэйд",
+      "vi": "Mortenax Blade",
+      "id": "Mortenax Blade",
+      "es": "Mortenax Blade",
+      "fr": "Blade Mortenax",
+      "de": "Mortenax Blade",
+      "pt": "Mortenax Blade"
     },
     "path": "Nihility",
     "element": "Fire",
@@ -1248,13 +1746,19 @@ export const AVATAR_METADATA = {
   },
   "1508": {
     "names": {
-      "en": "Tohsaka Rin",
-      "th": "โทซากะ ริน",
+      "th": "Rin Tohsaka",
+      "en": "Rin Tohsaka",
       "zh-CN": "远坂凛",
       "zh-TW": "遠坂凜",
       "ja": "遠坂凛",
       "ko": "토오사카 린",
-      "ru": "Рин Тосака"
+      "ru": "Рин Тосака",
+      "vi": "Rin Tohsaka",
+      "id": "Rin Tohsaka",
+      "es": "Rin Tohsaka",
+      "fr": "Rin Tohsaka",
+      "de": "Rin Tohsaka",
+      "pt": "Rin Tohsaka"
     },
     "path": "Erudition",
     "element": "Quantum",
@@ -1263,13 +1767,19 @@ export const AVATAR_METADATA = {
   },
   "1509": {
     "names": {
+      "th": "Gilgamesh",
       "en": "Gilgamesh",
-      "th": "กิลกาเมช",
-      "zh-CN": "吉尔伽美什 (金闪闪)",
+      "zh-CN": "吉尔伽美什",
       "zh-TW": "吉爾伽美什",
       "ja": "ギルガメッシュ",
       "ko": "길가메시",
-      "ru": "Гильгамеш"
+      "ru": "Гильгамеш",
+      "vi": "Gilgamesh",
+      "id": "Gilgamesh",
+      "es": "Gilgamesh",
+      "fr": "Gilgamesh",
+      "de": "Gilgamesh",
+      "pt": "Gilgamesh"
     },
     "path": "Destruction",
     "element": "Lightning",
@@ -1278,43 +1788,40 @@ export const AVATAR_METADATA = {
   },
   "1510": {
     "names": {
-      "en": "Himeko Nova",
-      "th": "ฮิเมโกะ โนวา",
-      "zh-CN": "姬子·新星",
-      "zh-TW": "姬子·新星",
-      "ja": "姫子・ノヴァ",
-      "ko": "히메코 노바",
-      "ru": "Химеко Нова"
+      "th": "Himeko - นวดารา",
+      "en": "Himeko • Nova",
+      "zh-CN": "姬子•启行",
+      "zh-TW": "姬子•啟行",
+      "ja": "姫子・旅立ち",
+      "ko": "히메코•노바",
+      "ru": "Химеко: Нова",
+      "vi": "Himeko - Nova",
+      "id": "Himeko • Nova",
+      "es": "Himeko Nova",
+      "fr": "Himeko • Nova",
+      "de": "Himeko – Nova",
+      "pt": "Himeko - Nova"
     },
     "path": "Erudition",
     "element": "Fire",
     "rarity": 5,
     "hasExRank": false
   },
-  "1511": {
-    "names": {
-      "en": "Nihilux",
-      "th": "นิฮิลักซ์",
-      "zh-CN": "虚无之神·尼希卢克斯",
-      "zh-TW": "虛無之神·尼希盧克斯",
-      "ja": "ニヒラックス",
-      "ko": "니힐룩스",
-      "ru": "Нихилюкс"
-    },
-    "path": "Elation",
-    "element": "Quantum",
-    "rarity": 5,
-    "hasExRank": false
-  },
   "1512": {
     "names": {
+      "th": "Robin - คีตะคิมหันต์",
       "en": "Robin • Summeretto",
-      "th": "โรบิน ซัมเมอร์",
-      "zh-CN": "知更鸟·夏日",
-      "zh-TW": "知更鳥·夏日",
-      "ja": "ロビン・サマー",
-      "ko": "로빈·서머",
-      "ru": "Зарянка • Лето"
+      "zh-CN": "知更鸟•晴歌",
+      "zh-TW": "知更鳥•晴歌",
+      "ja": "ロビン・夏空の歌",
+      "ko": "로빈•서머레토",
+      "ru": "Зарянка: Яснопея",
+      "vi": "Robin - Summeretto",
+      "id": "Robin • Summeretto",
+      "es": "Robin Estival",
+      "fr": "Robin • Estivaria",
+      "de": "Robin – Summeretto",
+      "pt": "Robin - Summeretto"
     },
     "path": "Remembrance",
     "element": "Wind",
@@ -1323,13 +1830,19 @@ export const AVATAR_METADATA = {
   },
   "1513": {
     "names": {
+      "th": "Aventurine - คลื่นสำราญ",
       "en": "Aventurine • Waveflair",
-      "th": "อเวนทูรีน คลื่นทะเล",
-      "zh-CN": "砂金·夏日浪潮",
-      "zh-TW": "砂金·夏日浪潮",
-      "ja": "アベンチュリン・サマー",
-      "ko": "어벤츄린·웨이브",
-      "ru": "Авантюрин • Волна"
+      "zh-CN": "砂金•戏浪",
+      "zh-TW": "砂金•戲浪",
+      "ja": "アベンチュリン・波と戯れる夏",
+      "ko": "어벤츄린•웨이브",
+      "ru": "Авантюрин: Прибой",
+      "vi": "Aventurine - Waveflair",
+      "id": "Aventurine • Waveflair",
+      "es": "Aventurino Oleaje",
+      "fr": "Aventurine • Croisette",
+      "de": "Aventurin – Wellenflair",
+      "pt": "Aventurine - Veraneio"
     },
     "path": "Elation",
     "element": "Quantum",
@@ -1338,13 +1851,19 @@ export const AVATAR_METADATA = {
   },
   "8001": {
     "names": {
-      "en": "Trailblazer (Physical ♂)",
       "th": "ผู้บุกเบิก (กายภาพ ♂)",
-      "zh-CN": "开拓者 (物理 ♂)",
-      "zh-TW": "開拓者 (物理 ♂)",
-      "ja": "開拓者 (物理 ♂)",
-      "ko": "개척자 (물리 ♂)",
-      "ru": "Первопроходец (Физ. ♂)"
+      "en": "Trailblazer (Physical ♂)",
+      "zh-CN": "开拓者 (物理 男)",
+      "zh-TW": "開拓者 (物理 男)",
+      "ja": "開拓者 (物理 男)",
+      "ko": "개척자 (물리 남)",
+      "ru": "Первопроходец (Физический ♂)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Destruction",
     "element": "Physical",
@@ -1353,13 +1872,19 @@ export const AVATAR_METADATA = {
   },
   "8002": {
     "names": {
-      "en": "Trailblazer (Physical ♀)",
       "th": "ผู้บุกเบิก (กายภาพ ♀)",
-      "zh-CN": "开拓者 (物理 ♀)",
-      "zh-TW": "開拓者 (物理 ♀)",
-      "ja": "開拓者 (物理 ♀)",
-      "ko": "개척자 (물리 ♀)",
-      "ru": "Первопроходец (Физ. ♀)"
+      "en": "Trailblazer (Physical ♀)",
+      "zh-CN": "开拓者 (物理 女)",
+      "zh-TW": "開拓者 (物理 女)",
+      "ja": "開拓者 (物理 女)",
+      "ko": "개척자 (물리 여)",
+      "ru": "Первопроходец (Физический ♀)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Destruction",
     "element": "Physical",
@@ -1368,13 +1893,19 @@ export const AVATAR_METADATA = {
   },
   "8003": {
     "names": {
-      "en": "Trailblazer (Fire ♂)",
       "th": "ผู้บุกเบิก (ไฟ ♂)",
-      "zh-CN": "开拓者 (火 ♂)",
-      "zh-TW": "開拓者 (火 ♂)",
-      "ja": "開拓者 (炎 ♂)",
-      "ko": "개척자 (화염 ♂)",
-      "ru": "Первопроходец (Огонь ♂)"
+      "en": "Trailblazer (Fire ♂)",
+      "zh-CN": "开拓者 (火 男)",
+      "zh-TW": "開拓者 (火 男)",
+      "ja": "開拓者 (炎 男)",
+      "ko": "개척자 (화염 남)",
+      "ru": "Первопроходец (Огненный ♂)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Preservation",
     "element": "Fire",
@@ -1383,13 +1914,19 @@ export const AVATAR_METADATA = {
   },
   "8004": {
     "names": {
-      "en": "Trailblazer (Fire ♀)",
       "th": "ผู้บุกเบิก (ไฟ ♀)",
-      "zh-CN": "开拓者 (火 ♀)",
-      "zh-TW": "開拓者 (火 ♀)",
-      "ja": "開拓者 (炎 ♀)",
-      "ko": "개척자 (화염 ♀)",
-      "ru": "Первопроходец (Огонь ♀)"
+      "en": "Trailblazer (Fire ♀)",
+      "zh-CN": "开拓者 (火 女)",
+      "zh-TW": "開拓者 (火 女)",
+      "ja": "開拓者 (炎 女)",
+      "ko": "개척자 (화염 여)",
+      "ru": "Первопроходец (Огненный ♀)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Preservation",
     "element": "Fire",
@@ -1398,13 +1935,19 @@ export const AVATAR_METADATA = {
   },
   "8005": {
     "names": {
-      "en": "Trailblazer (Harmony ♂)",
       "th": "ผู้บุกเบิก (ประสาน ♂)",
-      "zh-CN": "开拓者 (同谐 ♂)",
-      "zh-TW": "開拓者 (同諧 ♂)",
-      "ja": "開拓者 (調和 ♂)",
-      "ko": "개척자 (화합 ♂)",
-      "ru": "Первопроходец (Гармония ♂)"
+      "en": "Trailblazer (Harmony ♂)",
+      "zh-CN": "开拓者 (同谐 男)",
+      "zh-TW": "開拓者 (同諧 男)",
+      "ja": "開拓者 (調和 男)",
+      "ko": "개척자 (화합 남)",
+      "ru": "Первопроходец (Гармония ♂)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Harmony",
     "element": "Imaginary",
@@ -1413,13 +1956,19 @@ export const AVATAR_METADATA = {
   },
   "8006": {
     "names": {
-      "en": "Trailblazer (Harmony ♀)",
       "th": "ผู้บุกเบิก (ประสาน ♀)",
-      "zh-CN": "开拓者 (同谐 ♀)",
-      "zh-TW": "開拓者 (同諧 ♀)",
-      "ja": "開拓者 (調和 ♀)",
-      "ko": "개척자 (화합 ♀)",
-      "ru": "Первопроходец (Гармония ♀)"
+      "en": "Trailblazer (Harmony ♀)",
+      "zh-CN": "开拓者 (同谐 女)",
+      "zh-TW": "開拓者 (同諧 女)",
+      "ja": "開拓者 (調和 女)",
+      "ko": "개척자 (화합 여)",
+      "ru": "Первопроходец (Гармония ♀)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Harmony",
     "element": "Imaginary",
@@ -1428,13 +1977,19 @@ export const AVATAR_METADATA = {
   },
   "8007": {
     "names": {
-      "en": "Trailblazer (Remembrance ♂)",
       "th": "ผู้บุกเบิก (ความทรงจำ ♂)",
-      "zh-CN": "开拓者 (记忆 ♂)",
-      "zh-TW": "開拓者 (記憶 ♂)",
-      "ja": "開拓者 (記憶 ♂)",
-      "ko": "개척자 (기억 ♂)",
-      "ru": "Первопроходец (Память ♂)"
+      "en": "Trailblazer (Remembrance ♂)",
+      "zh-CN": "开拓者 (记忆 男)",
+      "zh-TW": "開拓者 (記憶 男)",
+      "ja": "開拓者 (記憶 男)",
+      "ko": "개척자 (기억 남)",
+      "ru": "Первопроходец (Память ♂)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Remembrance",
     "element": "Ice",
@@ -1443,13 +1998,19 @@ export const AVATAR_METADATA = {
   },
   "8008": {
     "names": {
-      "en": "Trailblazer (Remembrance ♀)",
       "th": "ผู้บุกเบิก (ความทรงจำ ♀)",
-      "zh-CN": "开拓者 (记忆 ♀)",
-      "zh-TW": "開拓者 (記憶 ♀)",
-      "ja": "開拓者 (記憶 ♀)",
-      "ko": "개척자 (기억 ♀)",
-      "ru": "Первопроходец (Память ♀)"
+      "en": "Trailblazer (Remembrance ♀)",
+      "zh-CN": "开拓者 (记忆 女)",
+      "zh-TW": "開拓者 (记忆 女)",
+      "ja": "開拓者 (記憶 女)",
+      "ko": "개척자 (기억 여)",
+      "ru": "Первопроходец (Память ♀)",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Remembrance",
     "element": "Ice",
@@ -1458,13 +2019,19 @@ export const AVATAR_METADATA = {
   },
   "8009": {
     "names": {
-      "en": "Trailblazer (Elation ♂)",
-      "th": "ผู้บุกเบิก (ปีติ ♂)",
-      "zh-CN": "开拓者 (欢愉 ♂)",
-      "zh-TW": "開拓者 (歡愉 ♂)",
-      "ja": "開拓者 (愉悦 ♂)",
-      "ko": "개척자 (환락 ♂)",
-      "ru": "Первопроходец (Радость ♂)"
+      "th": "{NICKNAME}",
+      "en": "{NICKNAME}",
+      "zh-CN": "{NICKNAME}",
+      "zh-TW": "{NICKNAME}",
+      "ja": "{NICKNAME}",
+      "ko": "{NICKNAME}",
+      "ru": "{NICKNAME}",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Elation",
     "element": "Lightning",
@@ -1473,13 +2040,19 @@ export const AVATAR_METADATA = {
   },
   "8010": {
     "names": {
-      "en": "Trailblazer (Elation ♀)",
-      "th": "ผู้บุกเบิก (ปีติ ♀)",
-      "zh-CN": "开拓者 (欢愉 ♀)",
-      "zh-TW": "開拓者 (歡愉 ♀)",
-      "ja": "開拓者 (愉悦 ♀)",
-      "ko": "개척자 (환락 ♀)",
-      "ru": "Первопроходец (Радость ♀)"
+      "th": "{NICKNAME}",
+      "en": "{NICKNAME}",
+      "zh-CN": "{NICKNAME}",
+      "zh-TW": "{NICKNAME}",
+      "ja": "{NICKNAME}",
+      "ko": "{NICKNAME}",
+      "ru": "{NICKNAME}",
+      "vi": "{NICKNAME}",
+      "id": "{NICKNAME}",
+      "es": "{NICKNAME}",
+      "fr": "{NICKNAME}",
+      "de": "{NICKNAME}",
+      "pt": "{NICKNAME}"
     },
     "path": "Elation",
     "element": "Lightning",

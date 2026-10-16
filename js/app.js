@@ -1,5 +1,6 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { SUPPORTED_LANGUAGES, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
+import { getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
 
 // Application State
 const state = {
@@ -143,6 +144,7 @@ const el = {
   valCharEnergy: document.getElementById('val-char-energy'),
 
   modalLcId: document.getElementById('modal-lc-id'),
+  modalLcPreview: document.getElementById('modal-lc-preview'),
   modalLcLevel: document.getElementById('modal-lc-level'),
   btnModalMaxLc: document.getElementById('btn-modal-max-lc'),
   modalLcRankBtns: document.getElementById('modal-lc-rank-btns'),
@@ -271,17 +273,77 @@ function getPathIconHtml(path, size = 20) {
   </span>`;
 }
 
+// Update filter dropdown options to current language
+function updateFilterDropdownTranslations() {
+  if (el.avatarFilterElement) {
+    const selected = el.avatarFilterElement.value;
+    const elements = ['Fire', 'Ice', 'Lightning', 'Wind', 'Physical', 'Quantum', 'Imaginary'];
+    if (el.avatarFilterElement.options[0]) {
+      el.avatarFilterElement.options[0].textContent = t('filterAllElements') || 'ทุกธาตุ';
+    }
+    elements.forEach((elemKey, idx) => {
+      if (el.avatarFilterElement.options[idx + 1]) {
+        el.avatarFilterElement.options[idx + 1].textContent = translateElement(elemKey);
+      }
+    });
+    el.avatarFilterElement.value = selected;
+  }
+
+  if (el.avatarFilterPath) {
+    const selected = el.avatarFilterPath.value;
+    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance', 'Elation'];
+    if (el.avatarFilterPath.options[0]) {
+      el.avatarFilterPath.options[0].textContent = t('filterAllPaths') || 'ทุกประเภท';
+    }
+    paths.forEach((pathKey, idx) => {
+      if (el.avatarFilterPath.options[idx + 1]) {
+        el.avatarFilterPath.options[idx + 1].textContent = translatePath(pathKey);
+      }
+    });
+    el.avatarFilterPath.value = selected;
+  }
+
+  const dict = TRANSLATIONS[getCurrentLanguage()] || TRANSLATIONS.en || TRANSLATIONS.th;
+  if (el.persistentMcSelect && dict.tbOptions) {
+    const curVal = el.persistentMcSelect.value;
+    Array.from(el.persistentMcSelect.options).forEach(opt => {
+      if (dict.tbOptions[opt.value]) {
+        opt.textContent = dict.tbOptions[opt.value];
+      }
+    });
+    el.persistentMcSelect.value = curVal;
+  }
+
+  if (el.persistentMarchSelect && dict.marchOptions) {
+    const curVal = el.persistentMarchSelect.value;
+    Array.from(el.persistentMarchSelect.options).forEach(opt => {
+      if (dict.marchOptions[opt.value]) {
+        opt.textContent = dict.marchOptions[opt.value];
+      }
+    });
+    el.persistentMarchSelect.value = curVal;
+  }
+}
+
 // Apply multi-language translations across UI
 function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
-    elem.textContent = t(key);
+    const val = t(key);
+    if (val) elem.textContent = val;
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
     const key = elem.getAttribute('data-i18n-placeholder');
-    elem.placeholder = t(key);
+    const val = t(key);
+    if (val) elem.placeholder = val;
   });
+
+  // Update dynamic filter dropdown options
+  updateFilterDropdownTranslations();
+
+  // Update connection status text with new language
+  setConnectionStatus(state.isConnected);
 
   renderLineup(state.statusData?.lineups);
   if (state.statusData?.ex_ranks) {
@@ -290,6 +352,7 @@ function applyTranslations() {
   if (state.avatarsList.length > 0) {
     renderAvatarsGrid();
   }
+  loadEquipment();
 }
 
 // Setup Language Selector
@@ -350,7 +413,7 @@ function setupServerModes() {
   if (el.serverModeSelect) {
     el.serverModeSelect.addEventListener('change', (e) => {
       updateModeDisplay(e.target.value);
-      showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value}`, 'info');
+      showToast(t('toastServerSwitched', { mode: el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value }), 'info');
       refreshStatus();
     });
   }
@@ -358,7 +421,7 @@ function setupServerModes() {
   if (el.settingServerMode) {
     el.settingServerMode.addEventListener('change', (e) => {
       updateModeDisplay(e.target.value);
-      showToast(`สลับโหมดเซิร์ฟเวอร์เป็น: ${el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value}`, 'info');
+      showToast(t('toastServerSwitched', { mode: el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value }), 'info');
       refreshStatus();
     });
   }
@@ -456,13 +519,13 @@ function renderLineup(lineups) {
     const avatarId = currentLineup[slot] || currentLineup[String(slot)] || 0;
     const slotCard = document.createElement('div');
     slotCard.className = `lineup-slot-card ${avatarId ? 'filled' : ''}`;
-    slotCard.title = 'คลิกเพื่อเลือกตัวละครลงตำแหน่งนี้';
+    slotCard.title = t('slotTooltip');
 
     if (avatarId === 0) {
       slotCard.innerHTML = `
         <div class="lineup-slot-num">Slot ${slot + 1}</div>
         <div style="font-size: 2.2rem; color: var(--text-muted); opacity: 0.5;">➕</div>
-        <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">ว่าง (คลิกเพื่อเพิ่ม)</div>
+        <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">${t('slotEmpty')}</div>
       `;
     } else {
       const info = getAvatarInfo(avatarId);
@@ -491,7 +554,7 @@ function renderLineup(lineups) {
 // Lineup Picker Modal
 function openLineupPicker(slotIndex) {
   state.selectedLineupSlot = slotIndex;
-  el.modalPickerTitle.textContent = `เลือกตัวละครเข้าสู่ Slot ${slotIndex + 1}`;
+  el.modalPickerTitle.textContent = `${t('pickerTitle')} - Slot ${slotIndex + 1}`;
   el.pickerSearch.value = '';
   renderPickerGrid();
   el.modalLineupPicker.classList.add('active');
@@ -509,7 +572,7 @@ function renderPickerGrid() {
   removeCard.style.cursor = 'pointer';
   removeCard.innerHTML = `
     <div style="font-size: 1.5rem; color: var(--accent-red);">❌</div>
-    <div style="font-size: 0.85rem; font-weight: bold; margin-top: 0.35rem; color: var(--accent-red);">นำออกจากทีม</div>
+    <div style="font-size: 0.85rem; font-weight: bold; margin-top: 0.35rem; color: var(--accent-red);">${t('removeFromTeam')}</div>
   `;
   removeCard.addEventListener('click', async () => {
     await assignAvatarToLineup(state.selectedLineupSlot, 0);
@@ -575,10 +638,10 @@ async function assignAvatarToLineup(slot, avatarId) {
     }
 
     renderLineup(lineups);
-    const name = avatarId ? getAvatarInfo(avatarId).name : 'ว่าง';
-    showToast(`อัปเดตทีม Slot ${slot + 1} เป็น: ${name}`, 'success');
+    const name = avatarId ? getAvatarInfo(avatarId).name : t('slotEmpty');
+    showToast(t('toastSlotUpdated', { slot: slot + 1, name }), 'success');
   } catch (err) {
-    showToast(`เกิดข้อผิดพลาดในการเปลี่ยนทีม: ${err.message}`, 'error');
+    showToast(err.message, 'error');
   }
 }
 
@@ -621,7 +684,7 @@ function renderAvatarsGrid() {
   });
 
   if (filtered.length === 0) {
-    el.avatarsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบตัวละครที่ตรงกับเงื่อนไข</div>';
+    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">${t('noAvatarsFound')}</div>`;
     return;
   }
 
@@ -703,12 +766,12 @@ async function maxSingleAvatar(avatarId) {
       } else {
         await saveFreesrChangesToServer();
       }
-      showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 เรียบร้อย`, 'success');
+      showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'success');
     } catch (err) {
-      showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 (บันทึกในเครื่อง)`, 'info');
+      showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'info');
     }
   } else {
-    showToast(`⭐ ปรับ ${getAvatarInfo(avatarId).name} เป็น Lv. 80 E6 (บันทึกในเครื่อง)`, 'info');
+    showToast(t('toastCharMaxed', { name: getAvatarInfo(avatarId).name }), 'info');
   }
 }
 
@@ -748,13 +811,27 @@ function updateLcRankPips(rank) {
   });
 }
 
+function updateModalLcPreview(lcId) {
+  if (!el.modalLcPreview) return;
+  const id = parseInt(lcId, 10);
+  if (!id) {
+    el.modalLcPreview.innerHTML = '';
+    return;
+  }
+  const info = getLightconeInfo(id);
+  el.modalLcPreview.innerHTML = `
+    <span style="color: var(--accent-cyan); font-weight: 700;">${info.name}</span>
+    <span class="avatar-badge-rarity rarity-${info.rarity}" style="position: static; font-size: 0.7rem; padding: 0.1rem 0.4rem; margin-left: 0.4rem;">★ ${info.rarity}</span>
+  `;
+}
+
 // Character Detail / Build Modal (Inspired by srtools.punklorde.org/skills-info)
 function openAvatarDetailModal(avatarItem) {
   state.selectedAvatarDetail = avatarItem;
   const aid = avatarItem.avatar_id;
   const meta = getAvatarInfo(aid);
 
-  el.modalCharTitle.textContent = `ปรับแต่งตัวละคร: ${meta.name} (ID: ${aid})`;
+  el.modalCharTitle.textContent = `${t('modalTitleCharEdit')}: ${meta.name} (ID: ${aid})`;
   el.modalCharImg.src = `./assets/avatars/${aid}.png`;
   el.modalCharImg.onerror = function() {
     this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${aid}.png`;
@@ -850,10 +927,12 @@ function openAvatarDetailModal(avatarItem) {
     if (el.modalLcId) el.modalLcId.value = equippedLc.item_id || '';
     if (el.modalLcLevel) el.modalLcLevel.value = equippedLc.level || 80;
     selectedLcRank = equippedLc.rank || 5;
+    updateModalLcPreview(equippedLc.item_id);
   } else {
     if (el.modalLcId) el.modalLcId.value = '';
     if (el.modalLcLevel) el.modalLcLevel.value = 80;
     selectedLcRank = 5;
+    updateModalLcPreview(null);
   }
   updateLcRankPips(selectedLcRank);
 
@@ -935,7 +1014,7 @@ function maxSkillsForAvatar() {
   if (el.checkTraceA6) el.checkTraceA6.checked = true;
   if (el.checkTraceStats) el.checkTraceStats.checked = true;
 
-  showToast('⭐ ปรับสกิลและร่องรอยเต็มทั้งหมดแล้ว', 'info');
+  showToast(t('toastAllSkillsMaxed'), 'info');
 }
 
 // Max All Build For Current Avatar (Lv.80, Prom 6, E6, Max Skills, Max Traces, 100% Energy, LC Lv.80 S5)
@@ -1105,12 +1184,12 @@ async function saveAvatarDetails() {
       } else {
         await saveFreesrChangesToServer();
       }
-      showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย`, 'success');
+      showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
     } catch (err) {
-      showToast(`บันทึกในเครื่องแล้ว (ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message})`, 'warning');
+      showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'info');
     }
   } else {
-    showToast(`บันทึกตัวละคร ${getAvatarInfo(aid).name} เรียบร้อย`, 'success');
+    showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
   }
 }
 
@@ -1186,13 +1265,13 @@ async function loadEquipment() {
       }
     }
 
-    el.badgeTotalLc.textContent = `${lcs.length} ชิ้น`;
-    el.badgeTotalRelics.textContent = `${relics.length} ชิ้น`;
+    el.badgeTotalLc.textContent = t('itemCount', { n: lcs.length });
+    el.badgeTotalRelics.textContent = t('itemCount', { n: relics.length });
 
     // Render Lightcones
     el.lightconesList.innerHTML = '';
     if (lcs.length === 0) {
-      el.lightconesList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">ยังไม่มีข้อมูลกรวยแสง (สามารถอัปโหลด freesr-data.json ในแท็บ JSON เพื่อดูได้)</div>';
+      el.lightconesList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">${t('noLcData')}</div>`;
     } else {
       lcs.slice(0, 100).forEach(lc => {
         const item = document.createElement('div');
@@ -1202,12 +1281,17 @@ async function loadEquipment() {
         item.style.justifyContent = 'space-between';
         item.style.alignItems = 'center';
 
-        const equipped = lc.equip_avatar ? getAvatarInfo(lc.equip_avatar).name : 'ไม่ได้สวมใส่';
+        const lcInfo = getLightconeInfo(lc.item_id);
+        const equipped = lc.equip_avatar ? getAvatarInfo(lc.equip_avatar).name : t('notEquipped');
         item.innerHTML = `
           <div>
-            <div style="font-weight: 700; font-size: 0.95rem;">Lightcone ID: ${lc.item_id} (UID: ${lc.internal_uid})</div>
+            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <span>${lcInfo.name}</span>
+              <span class="avatar-badge-rarity rarity-${lcInfo.rarity}" style="position: static; font-size: 0.7rem; padding: 0.1rem 0.4rem;">★ ${lcInfo.rarity}</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">(ID: ${lc.item_id})</span>
+            </div>
             <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-              Lv. ${lc.level} • ขัดเกลา S${lc.rank} • สวมใส่โดย: <strong style="color: var(--accent-cyan);">${equipped}</strong>
+              Lv. ${lc.level} • S${lc.rank} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
             </div>
           </div>
         `;
@@ -1218,7 +1302,7 @@ async function loadEquipment() {
     // Render Relics
     el.relicsList.innerHTML = '';
     if (relics.length === 0) {
-      el.relicsList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">ยังไม่มีข้อมูลรีลิกส์ (สามารถอัปโหลด freesr-data.json ในแท็บ JSON เพื่อดูได้)</div>';
+      el.relicsList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 1.5rem;">${t('noRelicData')}</div>`;
     } else {
       relics.slice(0, 100).forEach(r => {
         const item = document.createElement('div');
@@ -1228,12 +1312,17 @@ async function loadEquipment() {
         item.style.justifyContent = 'space-between';
         item.style.alignItems = 'center';
 
-        const equipped = r.equip_avatar ? getAvatarInfo(r.equip_avatar).name : 'ไม่ได้สวมใส่';
+        const setId = r.relic_set_id || r.relic_id || r.item_id;
+        const relicInfo = getRelicSetInfo(setId);
+        const equipped = r.equip_avatar ? getAvatarInfo(r.equip_avatar).name : t('notEquipped');
         item.innerHTML = `
           <div>
-            <div style="font-weight: 700; font-size: 0.95rem;">Relic ID: ${r.item_id} (UID: ${r.internal_uid})</div>
+            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <span>${relicInfo.name}</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">(ID: ${r.relic_id || setId})</span>
+            </div>
             <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
-              Lv. ${r.level} • สวมใส่โดย: <strong style="color: var(--accent-cyan);">${equipped}</strong>
+              Lv. ${r.level} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
             </div>
           </div>
         `;
@@ -1539,7 +1628,11 @@ function setupEvents() {
   el.btnModalMaxLc?.addEventListener('click', () => {
     if (el.modalLcLevel) el.modalLcLevel.value = 80;
     updateLcRankPips(5);
-    showToast('ปรับกรวยแสงเป็นเลเวล 80 ขัดเกลา 5 เรียบร้อย', 'info');
+    showToast(t('modalBtnMaxLc'), 'info');
+  });
+
+  el.modalLcId?.addEventListener('input', (e) => {
+    updateModalLcPreview(e.target.value);
   });
 
   // Quick Preset Buttons for Character Modal
