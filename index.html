@@ -187,9 +187,12 @@
       <div class="grid-2">
         <!-- Lightcones Card -->
         <div class="card">
-          <div class="card-title">
-            <span data-i18n="eqLcTitle">🗡️ กรวยแสงในคลัง</span>
-            <span class="btn-sm btn-secondary" id="badge-total-lc">0 ชิ้น</span>
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span data-i18n="eqLcTitle">🗡️ กรวยแสงในคลัง</span>
+              <span class="btn-sm btn-secondary" id="badge-total-lc">0 ชิ้น</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="btn-open-add-lc" data-i18n="btnAddLc">+ เพิ่ม LC</button>
           </div>
           <p class="card-subtitle" data-i18n="eqLcSubtitle">รายการกรวยแสงทั้งหมดจาก freesr-data.json</p>
           <div id="lightcones-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
@@ -199,9 +202,12 @@
 
         <!-- Relics Card -->
         <div class="card">
-          <div class="card-title">
-            <span data-i18n="eqRelicTitle">🛡️ รีลิกส์ในคลัง</span>
-            <span class="btn-sm btn-secondary" id="badge-total-relics">0 ชิ้น</span>
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span data-i18n="eqRelicTitle">🛡️ รีลิกส์ในคลัง</span>
+              <span class="btn-sm btn-secondary" id="badge-total-relics">0 ชิ้น</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" id="btn-open-add-relic" data-i18n="btnAddRelic">+ เพิ่มรีลิกส์</button>
           </div>
           <p class="card-subtitle" data-i18n="eqRelicSubtitle">รายการรีลิกส์ทั้งหมดจาก freesr-data.json</p>
           <div id="relics-list" style="max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem;">
@@ -278,6 +284,17 @@
               </div>
               <label class="switch">
                 <input type="checkbox" id="toggle-castorice-global">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="ex-switch-card">
+              <div>
+                <div style="font-weight: 700;">Aeon ★ Aha Global Feature</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="ahaGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ Aeon ★ Aha ทั่วทั้งเซิร์ฟเวอร์</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-aha-global">
                 <span class="slider"></span>
               </label>
             </div>
@@ -650,6 +667,101 @@
           <button class="btn btn-primary" id="btn-modal-save" data-i18n="btnSaveTest">บันทึก & ทดสอบ</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Add Light Cone Modal -->
+  <div class="modal-overlay" id="modal-add-lc">
+    <div class="modal-content" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 style="font-weight: 800;" data-i18n="modalAddLcTitle">🗡️ เพิ่มกรวยแสงลง FreeSR</h3>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-close-add-lc-modal">✕</button>
+      </div>
+      <form id="form-add-lc">
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblSelectLc">เลือกกรวยแสง</label>
+          <select id="add-lc-select" class="form-select" required style="max-height: 200px;">
+            <!-- Injected by JS -->
+          </select>
+        </div>
+        <div class="grid-3" style="gap: 0.75rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" data-i18n="modalColLevel">เลเวล (1-80)</label>
+            <input type="number" id="add-lc-level" class="form-input" min="1" max="80" value="80" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" data-i18n="lblPromotion">ขัดเกลา (0-6)</label>
+            <input type="number" id="add-lc-promotion" class="form-input" min="0" max="6" value="6" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Superimpose (1-5)</label>
+            <input type="number" id="add-lc-rank" class="form-input" min="1" max="5" value="5" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblEquipAvatar">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
+          <select id="add-lc-avatar" class="form-select">
+            <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
+            <!-- Injected by JS -->
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-add-lc" data-i18n="btnCancel">ยกเลิก</button>
+          <button type="submit" class="btn btn-success" data-i18n="btnAddLcSubmit">💾 เพิ่มลง FreeSR</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Relic Modal -->
+  <div class="modal-overlay" id="modal-add-relic">
+    <div class="modal-content" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 style="font-weight: 800;" data-i18n="modalAddRelicTitle">🛡️ เพิ่มรีลิกส์ลง FreeSR</h3>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-close-add-relic-modal">✕</button>
+      </div>
+      <form id="form-add-relic">
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblSelectRelicSet">เลือกเซ็ตรีลิกส์</label>
+          <select id="add-relic-set" class="form-select" required>
+            <!-- Injected by JS -->
+          </select>
+        </div>
+        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" data-i18n="lblRelicSlot">ชิ้นส่วน (Slot)</label>
+            <select id="add-relic-slot" class="form-select" required>
+              <option value="1">1: ส่วนหัว (Head / HP)</option>
+              <option value="2">2: ส่วนมือ (Hands / ATK)</option>
+              <option value="3">3: ลำตัว (Body)</option>
+              <option value="4">4: รองเท้า (Feet)</option>
+              <option value="5">5: ลูกแก้ว (Planar Sphere)</option>
+              <option value="6">6: สร้อยเชื่อมต่อ (Link Rope)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" data-i18n="modalColLevel">เลเวล (0-15)</label>
+            <input type="number" id="add-relic-level" class="form-input" min="0" max="15" value="15" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblMainAffix">สเตตัสหลัก (Main Affix)</label>
+          <select id="add-relic-main-affix" class="form-select" required>
+            <!-- Dynamic according to selected slot -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="lblEquipAvatar">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
+          <select id="add-relic-avatar" class="form-select">
+            <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
+            <!-- Injected by JS -->
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-add-relic" data-i18n="btnCancel">ยกเลิก</button>
+          <button type="submit" class="btn btn-success" data-i18n="btnAddRelicSubmit">💾 เพิ่มลง FreeSR</button>
+        </div>
+      </form>
     </div>
   </div>
 

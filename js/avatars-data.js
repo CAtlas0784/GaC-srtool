@@ -2102,6 +2102,8 @@ export function getAvatarInfo(avatarId, langOverride = null) {
     name: localizedName,
     path: translatePath(meta.path),
     element: translateElement(meta.element),
+    rawPath: meta.path,
+    rawElement: meta.element,
     rarity: meta.rarity,
     hasExRank: !!meta.hasExRank
   };

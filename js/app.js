@@ -1,5 +1,5 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
 
 // Application State
@@ -60,6 +60,26 @@ const el = {
   relicsList: document.getElementById('relics-list'),
   badgeTotalLc: document.getElementById('badge-total-lc'),
   badgeTotalRelics: document.getElementById('badge-total-relics'),
+  btnOpenAddLc: document.getElementById('btn-open-add-lc'),
+  modalAddLc: document.getElementById('modal-add-lc'),
+  btnCloseAddLcModal: document.getElementById('btn-close-add-lc-modal'),
+  btnCancelAddLc: document.getElementById('btn-cancel-add-lc'),
+  formAddLc: document.getElementById('form-add-lc'),
+  addLcSelect: document.getElementById('add-lc-select'),
+  addLcLevel: document.getElementById('add-lc-level'),
+  addLcPromotion: document.getElementById('add-lc-promotion'),
+  addLcRank: document.getElementById('add-lc-rank'),
+  addLcAvatar: document.getElementById('add-lc-avatar'),
+  btnOpenAddRelic: document.getElementById('btn-open-add-relic'),
+  modalAddRelic: document.getElementById('modal-add-relic'),
+  btnCloseAddRelicModal: document.getElementById('btn-close-add-relic-modal'),
+  btnCancelAddRelic: document.getElementById('btn-cancel-add-relic'),
+  formAddRelic: document.getElementById('form-add-relic'),
+  addRelicSet: document.getElementById('add-relic-set'),
+  addRelicSlot: document.getElementById('add-relic-slot'),
+  addRelicLevel: document.getElementById('add-relic-level'),
+  addRelicMainAffix: document.getElementById('add-relic-main-affix'),
+  addRelicAvatar: document.getElementById('add-relic-avatar'),
 
   // Persistent Tab
   tabBtnPersistent: document.getElementById('tab-btn-persistent'),
@@ -68,6 +88,7 @@ const el = {
   persistentMarchSelect: document.getElementById('persistent-march-select'),
   toggleSwGlobal: document.getElementById('toggle-sw-global'),
   toggleCastoriceGlobal: document.getElementById('toggle-castorice-global'),
+  toggleAhaGlobal: document.getElementById('toggle-aha-global'),
   btnSavePersistentToggles: document.getElementById('btn-save-persistent-toggles'),
 
   // Ex-Rank
@@ -236,7 +257,45 @@ function setConnectionStatus(connected, extraText = '') {
 }
 
 // Helper to get element CSS class
+// Canonical element & path maps (handles English and all 13 supported languages)
+const CANONICAL_ELEMENTS = {
+  physical: 'Physical', fire: 'Fire', ice: 'Ice', lightning: 'Lightning',
+  wind: 'Wind', quantum: 'Quantum', imaginary: 'Imaginary', thunder: 'Lightning'
+};
+
+const CANONICAL_PATHS = {
+  destruction: 'Destruction', hunt: 'Hunt', 'the hunt': 'Hunt', erudition: 'Erudition',
+  harmony: 'Harmony', nihility: 'Nihility', preservation: 'Preservation',
+  abundance: 'Abundance', remembrance: 'Remembrance', elation: 'Elation'
+};
+
+// Dynamically index all translated element and path strings across languages
+for (const langKey in TRANSLATIONS) {
+  const tr = TRANSLATIONS[langKey];
+  if (tr.elements) {
+    for (const [enKey, locVal] of Object.entries(tr.elements)) {
+      if (locVal) CANONICAL_ELEMENTS[String(locVal).trim().toLowerCase()] = enKey;
+    }
+  }
+  if (tr.paths) {
+    for (const [enKey, locVal] of Object.entries(tr.paths)) {
+      if (locVal) CANONICAL_PATHS[String(locVal).trim().toLowerCase()] = (enKey === 'The Hunt' ? 'Hunt' : enKey);
+    }
+  }
+}
+
+function normalizeElement(elem) {
+  if (!elem) return 'Physical';
+  return CANONICAL_ELEMENTS[String(elem).trim().toLowerCase()] || elem;
+}
+
+function normalizePath(p) {
+  if (!p) return 'Destruction';
+  return CANONICAL_PATHS[String(p).trim().toLowerCase()] || (p === 'The Hunt' ? 'Hunt' : p);
+}
+
 function getElementClass(elem) {
+  const canonical = normalizeElement(elem);
   const map = {
     Fire: 'elem-fire',
     Ice: 'elem-ice',
@@ -246,30 +305,31 @@ function getElementClass(elem) {
     Quantum: 'elem-quantum',
     Imaginary: 'elem-imaginary'
   };
-  return map[elem] || 'elem-physical';
+  return map[canonical] || 'elem-physical';
 }
 
 // Render Element Icon HTML (Official Star Rail Game Icon)
 function getElementIconHtml(element, size = 20) {
   if (!element) return '';
-  const elemClass = getElementClass(element);
+  const canonical = normalizeElement(element);
+  const elemClass = getElementClass(canonical);
   return `<span class="icon-badge element-icon-badge ${elemClass}" title="${element}">
-    <img src="assets/elements/${element}.png"
+    <img src="assets/elements/${canonical}.png"
          alt="${element}"
          style="width: ${size}px; height: ${size}px;"
-         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/element/${element === 'Lightning' ? 'Thunder' : element}.png';}">
+         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/element/${canonical === 'Lightning' ? 'Thunder' : canonical}.png';}">
   </span>`;
 }
 
 // Render Path Icon HTML (Official Star Rail Game Icon)
 function getPathIconHtml(path, size = 20) {
   if (!path) return '';
-  const safePath = path === 'The Hunt' ? 'Hunt' : path;
+  const canonical = normalizePath(path);
   return `<span class="icon-badge path-icon-badge" title="${path}">
-    <img src="assets/paths/${path}.png"
+    <img src="assets/paths/${canonical}.png"
          alt="${path}"
          style="width: ${size}px; height: ${size}px;"
-         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/path/${safePath}.png';}">
+         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/path/${canonical}.png';}">
   </span>`;
 }
 
@@ -442,6 +502,7 @@ function initAvatarsList() {
       rank: 6
     });
   }
+  list.sort((a, b) => b.avatar_id - a.avatar_id);
   state.avatarsList = list;
 }
 
@@ -580,8 +641,9 @@ function renderPickerGrid() {
   });
   el.pickerAvatarsGrid.appendChild(removeCard);
 
-  // Available avatars
-  state.avatarsList.forEach(item => {
+  // Available avatars (sorted descending by avatar_id)
+  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sortedAvatars.forEach(item => {
     const meta = getAvatarInfo(item.avatar_id);
     if (search && !meta.name.toLowerCase().includes(search) && !String(item.avatar_id).includes(search)) {
       return;
@@ -665,6 +727,7 @@ async function loadAvatars() {
       console.warn('Live avatar list fetch failed, using local list:', err);
     }
   }
+  state.avatarsList.sort((a, b) => b.avatar_id - a.avatar_id);
   renderAvatarsGrid();
 }
 
@@ -678,10 +741,14 @@ function renderAvatarsGrid() {
     const meta = getAvatarInfo(item.avatar_id);
     const matchesSearch = meta.name.toLowerCase().includes(searchTerm) || String(item.avatar_id).includes(searchTerm);
     const matchesRarity = rarityFilter === 'all' || String(meta.rarity) === rarityFilter;
-    const matchesElement = elementFilter === 'all' || meta.element === elementFilter;
-    const matchesPath = pathFilter === 'all' || meta.path === pathFilter || (pathFilter === 'Hunt' && (meta.path === 'Hunt' || meta.path === 'The Hunt'));
+    const elemCanonical = normalizeElement(meta.rawElement || meta.element);
+    const matchesElement = elementFilter === 'all' || elemCanonical === normalizeElement(elementFilter);
+    const pathCanonical = normalizePath(meta.rawPath || meta.path);
+    const matchesPath = pathFilter === 'all' || pathCanonical === normalizePath(pathFilter);
     return matchesSearch && matchesRarity && matchesElement && matchesPath;
   });
+
+  filtered.sort((a, b) => b.avatar_id - a.avatar_id);
 
   if (filtered.length === 0) {
     el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">${t('noAvatarsFound')}</div>`;
@@ -1294,8 +1361,24 @@ async function loadEquipment() {
               Lv. ${lc.level} • S${lc.rank} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
             </div>
           </div>
+          <div>
+            <button type="button" class="btn btn-sm btn-danger btn-delete-lc" data-uid="${lc.internal_uid}" title="${t('deleteItem')}">🗑️</button>
+          </div>
         `;
         el.lightconesList.appendChild(item);
+      });
+
+      // Bind delete LC buttons
+      el.lightconesList.querySelectorAll('.btn-delete-lc').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const uid = parseInt(e.currentTarget.getAttribute('data-uid'), 10);
+          if (state.fullFreesrData?.lightcones) {
+            state.fullFreesrData.lightcones = state.fullFreesrData.lightcones.filter(l => l.internal_uid !== uid);
+            await saveFreesrChangesToServer();
+            loadEquipment();
+            showToast(t('toastItemDeleted'), 'info');
+          }
+        });
       });
     }
 
@@ -1325,13 +1408,212 @@ async function loadEquipment() {
               Lv. ${r.level} • ${t('equippedBy')}: <strong style="color: var(--accent-cyan);">${equipped}</strong>
             </div>
           </div>
+          <div>
+            <button type="button" class="btn btn-sm btn-danger btn-delete-relic" data-uid="${r.internal_uid}" title="${t('deleteItem')}">🗑️</button>
+          </div>
         `;
         el.relicsList.appendChild(item);
+      });
+
+      // Bind delete Relic buttons
+      el.relicsList.querySelectorAll('.btn-delete-relic').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const uid = parseInt(e.currentTarget.getAttribute('data-uid'), 10);
+          if (state.fullFreesrData?.relics) {
+            state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.internal_uid !== uid);
+            await saveFreesrChangesToServer();
+            loadEquipment();
+            showToast(t('toastItemDeleted'), 'info');
+          }
+        });
       });
     }
   } catch (err) {
     console.warn('Equipment loading error:', err);
   }
+}
+
+// Open Add Light Cone Modal
+function openAddLcModal() {
+  if (!el.modalAddLc) return;
+  el.addLcSelect.innerHTML = '';
+  const lcIds = Object.keys(LIGHTCONE_METADATA).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
+  lcIds.forEach(id => {
+    const meta = getLightconeInfo(id);
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = `★${meta.rarity} [${meta.path || 'LC'}] ${meta.name} (ID: ${id})`;
+    el.addLcSelect.appendChild(opt);
+  });
+
+  el.addLcAvatar.innerHTML = `<option value="0">${t('unassigned')}</option>`;
+  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sortedAvatars.forEach(av => {
+    const info = getAvatarInfo(av.avatar_id);
+    const opt = document.createElement('option');
+    opt.value = av.avatar_id;
+    opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
+    el.addLcAvatar.appendChild(opt);
+  });
+
+  el.addLcLevel.value = 80;
+  el.addLcPromotion.value = 6;
+  el.addLcRank.value = 5;
+
+  el.modalAddLc.classList.add('active');
+}
+
+// Open Add Relic Modal
+function openAddRelicModal() {
+  if (!el.modalAddRelic) return;
+  el.addRelicSet.innerHTML = '';
+  const setIds = Object.keys(RELIC_SET_METADATA).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
+  setIds.forEach(setId => {
+    const meta = getRelicSetInfo(setId);
+    const opt = document.createElement('option');
+    opt.value = setId;
+    opt.textContent = `${meta.name} (Set ID: ${setId})`;
+    el.addRelicSet.appendChild(opt);
+  });
+
+  el.addRelicAvatar.innerHTML = `<option value="0">${t('unassigned')}</option>`;
+  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+  sortedAvatars.forEach(av => {
+    const info = getAvatarInfo(av.avatar_id);
+    const opt = document.createElement('option');
+    opt.value = av.avatar_id;
+    opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
+    el.addRelicAvatar.appendChild(opt);
+  });
+
+  el.addRelicSlot.value = "1";
+  el.addRelicLevel.value = 15;
+  updateRelicMainAffixes("1");
+
+  el.modalAddRelic.classList.add('active');
+}
+
+function updateRelicMainAffixes(slot) {
+  if (!el.addRelicMainAffix) return;
+  el.addRelicMainAffix.innerHTML = '';
+
+  const affixesBySlot = {
+    "1": [{ id: 1, name: "HP (Flat)" }],
+    "2": [{ id: 1, name: "ATK (Flat)" }],
+    "3": [
+      { id: 1, name: "HP%" }, { id: 2, name: "ATK%" }, { id: 3, name: "DEF%" },
+      { id: 4, name: "CRIT Rate%" }, { id: 5, name: "CRIT DMG%" },
+      { id: 6, name: "Outgoing Healing Boost%" }, { id: 7, name: "Effect Hit Rate%" }
+    ],
+    "4": [
+      { id: 1, name: "HP%" }, { id: 2, name: "ATK%" }, { id: 3, name: "DEF%" },
+      { id: 4, name: "SPD" }
+    ],
+    "5": [
+      { id: 1, name: "HP%" }, { id: 2, name: "ATK%" }, { id: 3, name: "DEF%" },
+      { id: 4, name: "Physical DMG Boost%" }, { id: 5, name: "Fire DMG Boost%" },
+      { id: 6, name: "Ice DMG Boost%" }, { id: 7, name: "Lightning DMG Boost%" },
+      { id: 8, name: "Wind DMG Boost%" }, { id: 9, name: "Quantum DMG Boost%" },
+      { id: 10, name: "Imaginary DMG Boost%" }
+    ],
+    "6": [
+      { id: 1, name: "Break Effect%" }, { id: 2, name: "Energy Regeneration Rate%" },
+      { id: 3, name: "HP%" }, { id: 4, name: "ATK%" }, { id: 5, name: "DEF%" }
+    ]
+  };
+
+  const list = affixesBySlot[slot] || [{ id: 1, name: "Main Stat" }];
+  list.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = a.name;
+    el.addRelicMainAffix.appendChild(opt);
+  });
+}
+
+async function handleAddLcSubmit(e) {
+  e.preventDefault();
+  const itemId = parseInt(el.addLcSelect.value, 10);
+  const level = parseInt(el.addLcLevel.value, 10) || 80;
+  const promotion = parseInt(el.addLcPromotion.value, 10) || 6;
+  const rank = parseInt(el.addLcRank.value, 10) || 5;
+  const equipAvatar = parseInt(el.addLcAvatar.value, 10) || 0;
+
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { lightcones: [], relics: [], avatars: {} };
+  }
+  if (!state.fullFreesrData.lightcones) {
+    state.fullFreesrData.lightcones = [];
+  }
+
+  if (equipAvatar !== 0) {
+    state.fullFreesrData.lightcones.forEach(lc => {
+      if (lc.equip_avatar === equipAvatar) lc.equip_avatar = 0;
+    });
+  }
+
+  const maxUid = state.fullFreesrData.lightcones.reduce((m, lc) => Math.max(m, lc.internal_uid || 0), 0);
+  const newLc = {
+    level,
+    item_id: itemId,
+    equip_avatar: equipAvatar,
+    rank,
+    promotion,
+    internal_uid: maxUid + 1
+  };
+
+  state.fullFreesrData.lightcones.unshift(newLc);
+  await saveFreesrChangesToServer();
+  loadEquipment();
+  el.modalAddLc.classList.remove('active');
+  showToast(t('toastLcAdded'), 'success');
+}
+
+async function handleAddRelicSubmit(e) {
+  e.preventDefault();
+  const setId = parseInt(el.addRelicSet.value, 10);
+  const slot = parseInt(el.addRelicSlot.value, 10) || 1;
+  const level = parseInt(el.addRelicLevel.value, 10) || 15;
+  const mainAffixId = parseInt(el.addRelicMainAffix.value, 10) || 1;
+  const equipAvatar = parseInt(el.addRelicAvatar.value, 10) || 0;
+
+  const relicId = 60000 + (setId * 10) + slot;
+
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { lightcones: [], relics: [], avatars: {} };
+  }
+  if (!state.fullFreesrData.relics) {
+    state.fullFreesrData.relics = [];
+  }
+
+  if (equipAvatar !== 0) {
+    state.fullFreesrData.relics.forEach(r => {
+      if (r.equip_avatar === equipAvatar && (r.relic_id % 10 === slot)) {
+        r.equip_avatar = 0;
+      }
+    });
+  }
+
+  const maxUid = state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0);
+  const newRelic = {
+    level,
+    relic_id: relicId,
+    main_affix_id: mainAffixId,
+    sub_affixes: [
+      { sub_affix_id: 1, cnt: 2, step: 1 },
+      { sub_affix_id: 2, cnt: 2, step: 1 },
+      { sub_affix_id: 3, cnt: 3, step: 2 },
+      { sub_affix_id: 4, cnt: 4, step: 2 }
+    ],
+    internal_uid: maxUid + 1,
+    equip_avatar: equipAvatar
+  };
+
+  state.fullFreesrData.relics.unshift(newRelic);
+  await saveFreesrChangesToServer();
+  loadEquipment();
+  el.modalAddRelic.classList.remove('active');
+  showToast(t('toastRelicAdded'), 'success');
 }
 
 // Load Persistent Save Settings (Exclusive to GaC-hkrpg-go)
@@ -1351,6 +1633,7 @@ async function loadPersistentSettings() {
 
     el.toggleSwGlobal.checked = res.data.enable_sw_global !== false;
     el.toggleCastoriceGlobal.checked = res.data.enable_castorice_global !== false;
+    if (el.toggleAhaGlobal) el.toggleAhaGlobal.checked = res.data.enable_aha_global !== false;
   } catch (err) {
     console.warn('Persistent settings loading error:', err);
   }
@@ -1704,17 +1987,49 @@ function setupEvents() {
   el.btnSavePersistentToggles.addEventListener('click', async () => {
     const sw = el.toggleSwGlobal.checked;
     const castorice = el.toggleCastoriceGlobal.checked;
+    const aha = el.toggleAhaGlobal ? el.toggleAhaGlobal.checked : true;
     try {
       await apiCall('/api/persistent', 'POST', {
         enable_sw_global: sw,
-        enable_castorice_global: castorice
+        enable_castorice_global: castorice,
+        enable_aha_global: aha
       });
-      showToast('บันทึกสวิตช์ Global เรียบร้อย!', 'success');
+      showToast(t('btnSaveGlobalSwitch') || 'บันทึกสวิตช์ Global เรียบร้อย!', 'success');
       refreshStatus();
     } catch (err) {
       showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
     }
   });
+
+  // Equipment Add Modal Controls
+  if (el.btnOpenAddLc) {
+    el.btnOpenAddLc.addEventListener('click', openAddLcModal);
+  }
+  if (el.btnCloseAddLcModal) {
+    el.btnCloseAddLcModal.addEventListener('click', () => el.modalAddLc.classList.remove('active'));
+  }
+  if (el.btnCancelAddLc) {
+    el.btnCancelAddLc.addEventListener('click', () => el.modalAddLc.classList.remove('active'));
+  }
+  if (el.formAddLc) {
+    el.formAddLc.addEventListener('submit', handleAddLcSubmit);
+  }
+
+  if (el.btnOpenAddRelic) {
+    el.btnOpenAddRelic.addEventListener('click', openAddRelicModal);
+  }
+  if (el.btnCloseAddRelicModal) {
+    el.btnCloseAddRelicModal.addEventListener('click', () => el.modalAddRelic.classList.remove('active'));
+  }
+  if (el.btnCancelAddRelic) {
+    el.btnCancelAddRelic.addEventListener('click', () => el.modalAddRelic.classList.remove('active'));
+  }
+  if (el.addRelicSlot) {
+    el.addRelicSlot.addEventListener('change', (e) => updateRelicMainAffixes(e.target.value));
+  }
+  if (el.formAddRelic) {
+    el.formAddRelic.addEventListener('submit', handleAddRelicSubmit);
+  }
 
   // Avatar Search & Filters
   el.avatarSearch.addEventListener('input', renderAvatarsGrid);
