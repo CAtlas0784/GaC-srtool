@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaC-Srtool — Ultimate Star Rail Server & Build Manager</title>
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌌</text></svg>">
+  <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
 
   <!-- App Header -->
   <header class="app-header">
     <div class="brand">
-      <div class="brand-icon">✦</div>
+      <img src="assets/logo.png" alt="GaC Logo" class="brand-logo-img">
       <div>
         <div class="brand-title">GaC-Srtool</div>
         <div class="brand-subtitle">Star Rail FreeSR & Server Controller</div>
@@ -140,14 +140,14 @@
     <!-- 2. Avatars Tab (Build & Eidolon Editor) -->
     <section id="tab-avatars" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
-        <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 520px;">
-          <input type="text" id="avatar-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร...">
-          <select id="avatar-filter-rarity" class="form-select" style="max-width: 140px;">
+        <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 680px; flex-wrap: wrap;">
+          <input type="text" id="avatar-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร..." style="min-width: 180px; flex: 1;">
+          <select id="avatar-filter-rarity" class="form-select" style="max-width: 130px;">
             <option value="all">ทุกระดับดาว</option>
             <option value="5">5 ดาว</option>
             <option value="4">4 ดาว</option>
           </select>
-          <select id="avatar-filter-element" class="form-select" style="max-width: 140px;">
+          <select id="avatar-filter-element" class="form-select" style="max-width: 130px;">
             <option value="all">ทุกธาตุ</option>
             <option value="Fire">ไฟ</option>
             <option value="Ice">น้ำแข็ง</option>
@@ -156,6 +156,18 @@
             <option value="Physical">กายภาพ</option>
             <option value="Quantum">ควอนตัม</option>
             <option value="Imaginary">จินตภาพ</option>
+          </select>
+          <select id="avatar-filter-path" class="form-select" style="max-width: 130px;">
+            <option value="all">ทุกประเภท</option>
+            <option value="Destruction">ทำลายล้าง</option>
+            <option value="Hunt">ล่าสังหาร</option>
+            <option value="Erudition">ปัญญา</option>
+            <option value="Harmony">ประสาน</option>
+            <option value="Nihility">ลบล้าง</option>
+            <option value="Preservation">อนุรักษ์</option>
+            <option value="Abundance">เฟื่องฟู</option>
+            <option value="Remembrance">ความทรงจำ</option>
+            <option value="Elation">ปีติ</option>
           </select>
         </div>
         <div style="display: flex; gap: 0.5rem;">

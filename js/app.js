@@ -50,6 +50,7 @@ const el = {
   avatarSearch: document.getElementById('avatar-search'),
   avatarFilterRarity: document.getElementById('avatar-filter-rarity'),
   avatarFilterElement: document.getElementById('avatar-filter-element'),
+  avatarFilterPath: document.getElementById('avatar-filter-path'),
   btnMaxAllAvatars: document.getElementById('btn-max-all-avatars'),
   btnReloadAvatars: document.getElementById('btn-reload-avatars'),
 
@@ -203,6 +204,30 @@ function getElementClass(elem) {
     Imaginary: 'elem-imaginary'
   };
   return map[elem] || 'elem-physical';
+}
+
+// Render Element Icon HTML (Official Star Rail Game Icon)
+function getElementIconHtml(element, size = 20) {
+  if (!element) return '';
+  const elemClass = getElementClass(element);
+  return `<span class="icon-badge element-icon-badge ${elemClass}" title="${element}">
+    <img src="assets/elements/${element}.png"
+         alt="${element}"
+         style="width: ${size}px; height: ${size}px;"
+         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/element/${element === 'Lightning' ? 'Thunder' : element}.png';}">
+  </span>`;
+}
+
+// Render Path Icon HTML (Official Star Rail Game Icon)
+function getPathIconHtml(path, size = 20) {
+  if (!path) return '';
+  const safePath = path === 'The Hunt' ? 'Hunt' : path;
+  return `<span class="icon-badge path-icon-badge" title="${path}">
+    <img src="assets/paths/${path}.png"
+         alt="${path}"
+         style="width: ${size}px; height: ${size}px;"
+         onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/path/${safePath}.png';}">
+  </span>`;
 }
 
 // Apply multi-language translations across UI
@@ -400,7 +425,6 @@ function renderLineup(lineups) {
       `;
     } else {
       const info = getAvatarInfo(avatarId);
-      const elemClass = getElementClass(info.element);
       slotCard.innerHTML = `
         <div class="lineup-slot-num">Slot ${slot + 1}</div>
         <img class="lineup-slot-img"
@@ -408,9 +432,9 @@ function renderLineup(lineups) {
              onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';}"
              alt="${info.name}">
         <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem;">${info.name}</div>
-        <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
-          <span class="element-badge ${elemClass}">${info.element}</span>
-          <span class="path-badge">${info.path}</span>
+        <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem; justify-content: center; align-items: center;">
+          ${getElementIconHtml(info.element, 20)}
+          ${getPathIconHtml(info.path, 20)}
         </div>
       `;
     }
@@ -459,7 +483,6 @@ function renderPickerGrid() {
       return;
     }
 
-    const elemClass = getElementClass(meta.element);
     const card = document.createElement('div');
     card.className = `card avatar-card card-rarity-${meta.rarity}`;
     card.style.minHeight = 'auto';
@@ -476,9 +499,10 @@ function renderPickerGrid() {
         </div>
         <div>
           <div style="font-weight: 700; font-size: 0.9rem;">${meta.name}</div>
-          <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.15rem;">
-            <span class="element-badge ${elemClass}" style="font-size: 0.65rem; padding: 0.05rem 0.3rem;">${meta.element}</span>
-            <span>Lv. ${item.level} • E${item.rank}</span>
+          <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
+            ${getElementIconHtml(meta.element, 16)}
+            ${getPathIconHtml(meta.path, 16)}
+            <span style="margin-left: 0.25rem;">Lv. ${item.level} • E${item.rank}</span>
           </div>
         </div>
       </div>
@@ -544,13 +568,15 @@ function renderAvatarsGrid() {
   const searchTerm = el.avatarSearch.value.trim().toLowerCase();
   const rarityFilter = el.avatarFilterRarity.value;
   const elementFilter = el.avatarFilterElement.value;
+  const pathFilter = el.avatarFilterPath ? el.avatarFilterPath.value : 'all';
 
   const filtered = state.avatarsList.filter(item => {
     const meta = getAvatarInfo(item.avatar_id);
     const matchesSearch = meta.name.toLowerCase().includes(searchTerm) || String(item.avatar_id).includes(searchTerm);
     const matchesRarity = rarityFilter === 'all' || String(meta.rarity) === rarityFilter;
     const matchesElement = elementFilter === 'all' || meta.element === elementFilter;
-    return matchesSearch && matchesRarity && matchesElement;
+    const matchesPath = pathFilter === 'all' || meta.path === pathFilter || (pathFilter === 'Hunt' && (meta.path === 'Hunt' || meta.path === 'The Hunt'));
+    return matchesSearch && matchesRarity && matchesElement && matchesPath;
   });
 
   if (filtered.length === 0) {
@@ -561,7 +587,6 @@ function renderAvatarsGrid() {
   el.avatarsGrid.innerHTML = '';
   filtered.forEach(item => {
     const meta = getAvatarInfo(item.avatar_id);
-    const elemClass = getElementClass(meta.element);
     const card = document.createElement('div');
     card.className = `card avatar-card card-rarity-${meta.rarity}`;
 
@@ -578,8 +603,8 @@ function renderAvatarsGrid() {
         <div class="avatar-meta-details">
           <div class="avatar-name" title="${meta.name}">${meta.name}</div>
           <div class="avatar-subinfo">
-            <span class="element-badge ${elemClass}">${translateElement(meta.element)}</span>
-            <span class="path-badge">${translatePath(meta.path)}</span>
+            ${getElementIconHtml(meta.element, 20)}
+            ${getPathIconHtml(meta.path, 20)}
           </div>
         </div>
       </div>
@@ -650,7 +675,6 @@ async function maxSingleAvatar(avatarId) {
 function openAvatarDetailModal(avatarItem) {
   state.selectedAvatarDetail = avatarItem;
   const meta = getAvatarInfo(avatarItem.avatar_id);
-  const elemClass = getElementClass(meta.element);
 
   el.modalCharTitle.textContent = `ปรับแต่งตัวละคร: ${meta.name} (ID: ${avatarItem.avatar_id})`;
   el.modalCharImg.src = `./assets/avatars/${avatarItem.avatar_id}.png`;
@@ -659,9 +683,9 @@ function openAvatarDetailModal(avatarItem) {
   };
   el.modalCharName.textContent = meta.name;
   el.modalCharMeta.innerHTML = `
-    <span class="element-badge ${elemClass}">${meta.element}</span>
-    <span class="path-badge">${meta.path}</span>
-    <span class="avatar-badge-rarity rarity-${meta.rarity}">★ ${meta.rarity}</span>
+    ${getElementIconHtml(meta.element, 24)}
+    ${getPathIconHtml(meta.path, 24)}
+    <span class="avatar-badge-rarity rarity-${meta.rarity}" style="position: static;">★ ${meta.rarity}</span>
   `;
 
   el.modalCharLevel.value = avatarItem.level || 80;
@@ -963,7 +987,6 @@ function renderExRanks(exList) {
     item.style.gap = '1rem';
 
     const info = getAvatarInfo(ex.avatar_id);
-    const elemClass = getElementClass(info.element);
 
     item.innerHTML = `
       <div style="display: flex; align-items: center; gap: 1rem;">
@@ -975,10 +998,10 @@ function renderExRanks(exList) {
         </div>
         <div>
           <div style="font-weight: 800; font-size: 1.05rem;">${info.name}</div>
-          <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
-            <span class="element-badge ${elemClass}">${info.element}</span>
-            <span class="path-badge">${info.path}</span>
-            <span style="font-size: 0.775rem; color: var(--text-muted);">Ex-Rank ID: ${ex.ex_rank_id}</span>
+          <div style="display: flex; gap: 0.4rem; margin-top: 0.35rem; align-items: center;">
+            ${getElementIconHtml(info.element, 20)}
+            ${getPathIconHtml(info.path, 20)}
+            <span style="font-size: 0.775rem; color: var(--text-muted); margin-left: 0.25rem;">Ex-Rank ID: ${ex.ex_rank_id}</span>
           </div>
         </div>
       </div>
@@ -986,7 +1009,7 @@ function renderExRanks(exList) {
         <button class="btn btn-sm ${ex.unlocked ? 'btn-success' : 'btn-secondary'} btn-toggle-ex"
                 data-avatar="${ex.avatar_id}"
                 data-unlocked="${ex.unlocked}">
-          ${ex.unlocked ? '⚡ ปลดล็อคแล้ว (Active)' : '🔒 ปิดการใช้งาน (Locked)'}
+          ${ex.unlocked ? '⚡ เปิดใช้งานแล้ว' : '🔒 ปิดการใช้งาน'}
         </button>
       </div>
     `;
@@ -1259,6 +1282,7 @@ function setupEvents() {
   el.avatarSearch.addEventListener('input', renderAvatarsGrid);
   el.avatarFilterRarity.addEventListener('change', renderAvatarsGrid);
   el.avatarFilterElement.addEventListener('change', renderAvatarsGrid);
+  el.avatarFilterPath?.addEventListener('change', renderAvatarsGrid);
   el.btnReloadAvatars.addEventListener('click', loadAvatars);
 
   // Ex-Rank All Controls
