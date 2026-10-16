@@ -419,38 +419,143 @@
 
     <!-- 8. Settings -->
     <section id="tab-settings" class="tab-content">
-      <div style="max-width: 620px; margin: 0 auto;">
-        <!-- Endpoint config -->
-        <div class="card">
-          <div class="card-title" data-i18n="apiSettingsTitle">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
-          <p class="card-subtitle" data-i18n="apiSettingsSubtitle">ปรับเปลี่ยนพอร์ตหรือ IP ได้ตามเซิร์ฟเวอร์ที่คุณใช้</p>
+      <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem;">
+        
+        <div class="grid-2">
+          <!-- Card 1: Server & Gateway Connection -->
+          <div class="card">
+            <div class="card-title" data-i18n="settingsConnTitle">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
+            <p class="card-subtitle" data-i18n="settingsConnSubtitle">กำหนด Endpoint และโหมดของเซิร์ฟเวอร์ที่ต้องการสั่งการ</p>
 
-          <form id="form-settings">
-            <div class="form-group">
-              <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
-              <select id="setting-server-mode" class="form-select">
-                <option value="gac">GaC-hkrpg-go</option>
-                <option value="firefly">FireflyGo</option>
-                <option value="robin">RobinSR</option>
-              </select>
+            <form id="form-settings">
+              <div class="form-group">
+                <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
+                <select id="setting-server-mode" class="form-select">
+                  <option value="gac">GaC-hkrpg-go (Official GaC Server)</option>
+                  <option value="firefly">FireflyGo (CBT / FreeSR)</option>
+                  <option value="robin">RobinSR (Proxy Gateway)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" data-i18n="lblApiGatewayUrl">REST API Gateway URL</label>
+                <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
+                <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://localhost:21000">localhost:21000</button>
+                  <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://127.0.0.1:21000">127.0.0.1:21000</button>
+                  <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://localhost:8080">localhost:8080</button>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                <button type="button" class="btn btn-secondary" id="btn-test-connection" style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span data-i18n="btnTestPing">⚡ ทดสอบการเชื่อมต่อ</span>
+                  <span id="ping-latency-badge" class="badge-super-tag" style="display: none; padding: 0.1rem 0.45rem; font-size: 0.75rem;">-</span>
+                </button>
+                <button type="submit" class="btn btn-success" style="flex: 1;" data-i18n="btnSaveSettings">💾 บันทึกการตั้งค่า</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Card 2: Battle & Gameplay Preferences -->
+          <div class="card">
+            <div class="card-title" data-i18n="settingsBattleTitle">🎮 ค่าเริ่มต้นการต่อสู้ & FreeSR</div>
+            <p class="card-subtitle" data-i18n="settingsBattleSubtitle">ปรับแต่งพฤติกรรมเริ่มต้นของระบบในเกมและการจัดทีม</p>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              <!-- Default Energy -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" data-i18n="lblDefaultEnergy">พลังงานเริ่มต้นของทีม (Battle Starting Energy)</label>
+                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.35rem;">
+                  <button type="button" class="btn btn-sm btn-primary btn-setting-energy active" data-energy="50">⚡ 50% (มาตรฐานเกม)</button>
+                  <button type="button" class="btn btn-sm btn-secondary btn-setting-energy" data-energy="100">🔥 100% (อัลติพร้อมใช้)</button>
+                  <button type="button" class="btn btn-sm btn-secondary btn-setting-energy" data-energy="0">❄️ 0% (ท้าทาย)</button>
+                </div>
+              </div>
+
+              <!-- Auto-Sync Toggle -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;" data-i18n="lblAutoSync">ซิงค์ไปยังเซิร์ฟเวอร์อัตโนมัติ (Auto-Sync)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="descAutoSync">ส่งการเปลี่ยนแปลงไปยังเซิร์ฟเวอร์ทันทีเมื่อแก้ไขตัวละครหรือไอเทม</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-auto-sync" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Creative Mode Default -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;" data-i18n="lblDefaultCreative">เปิดโหมดสร้างสรรค์เมื่อเริ่มต้น (Creative Mode)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="descDefaultCreative">อนุญาตให้ใส่ตัวละครซ้ำหรือจัดทีมได้มากกว่า 4 ช่องตลอดเวลา</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-default-creative">
+                  <span class="slider"></span>
+                </label>
+              </div>
             </div>
-            <div class="form-group">
-              <label class="form-label" data-i18n="lblApiGatewayUrl">REST API Gateway URL</label>
-              <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
-              <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
-                * พอร์ตเริ่มต้น 21000 สำหรับ SDK server
-              </small>
-            </div>
-            <div class="form-group">
-              <label class="form-label" data-i18n="lblPingInterval">ความถี่ในการตรวจสอบสถานะ (วินาที)</label>
-              <input type="number" id="setting-ping-interval" class="form-input" min="3" max="60" value="10">
-            </div>
-            <div style="display: flex; gap: 0.75rem;">
-              <button type="submit" class="btn btn-success" style="flex: 1;" data-i18n="btnSaveSettings">💾 บันทึกการตั้งค่า</button>
-              <button type="button" class="btn btn-secondary" id="btn-reset-settings" data-i18n="btnResetDefault">คืนค่าเริ่มต้น</button>
-            </div>
-          </form>
+          </div>
         </div>
+
+        <div class="grid-2">
+          <!-- Card 3: Showcase Card Display Settings -->
+          <div class="card">
+            <div class="card-title" data-i18n="settingsShowcaseTitle">🖼️ การแสดงผลการ์ด Showcase</div>
+            <p class="card-subtitle" data-i18n="settingsShowcaseSubtitle">ปรับแต่งความสวยงามและรายละเอียดในหน้าการ์ดแสดงผล Build</p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <!-- Show Roll Counts on Relics -->
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;" data-i18n="lblShowRolls">แสดงจำนวน Roll ของซับสเตตัสรีลิกส์</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="descShowRolls">แสดงแท็กจำนวนครั้งที่สุ่มลงสเตตัสย่อย (Sub-stat Roll Counts)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-showcase-rolls" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Dynamic Element Aura Glow -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;" data-i18n="lblElementAura">เอฟเฟกต์แสงเรืองตามธาตุ (Element Aura Glow)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="descElementAura">เปลี่ยนสีพื้นหลังและการเรืองแสงของการ์ดตามธาตุของตัวละครนั้นๆ</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="setting-showcase-aura" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Diagnostics & Cache Reset -->
+          <div class="card">
+            <div class="card-title" data-i18n="settingsCacheTitle">🧹 จัดการข้อมูลแคช & รีเซ็ตระบบ</div>
+            <p class="card-subtitle" data-i18n="settingsCacheSubtitle">ล้างข้อมูลชั่วคราวในเบราว์เซอร์หรือคืนค่าเครื่องมือเป็นค่าเริ่มต้น</p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                <span style="color: var(--text-muted);" data-i18n="lblCacheSize">สถานะหน่วยความจำ LocalStorage:</span>
+                <strong id="lbl-cache-usage" style="color: var(--accent-cyan); font-family: monospace;">ตรวจวัด...</strong>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary" id="btn-clear-browser-cache" style="flex: 1; min-width: 140px;" data-i18n="btnClearCache">
+                  🧹 ล้างแคชเบราว์เซอร์
+                </button>
+                <button type="button" class="btn btn-danger" id="btn-reset-settings" style="flex: 1; min-width: 140px;" data-i18n="btnFactoryReset">
+                  🔄 คืนค่าเริ่มต้นทั้งหมด
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 

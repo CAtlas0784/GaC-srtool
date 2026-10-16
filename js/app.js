@@ -6,7 +6,7 @@ import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, 
 const state = {
   serverMode: localStorage.getItem('gac_srtool_mode') || 'gac', // 'gac' | 'firefly' | 'robin'
   apiUrl: localStorage.getItem('gac_srtool_api_url') || 'http://localhost:21000',
-  pingIntervalSec: parseInt(localStorage.getItem('gac_srtool_ping_interval') || '10', 10),
+  pingIntervalSec: 10,
   isConnected: false,
   statusData: null,
   avatarsList: [],
@@ -16,7 +16,12 @@ const state = {
   activeTab: 'tab-dashboard',
   selectedLineupSlot: null,
   selectedAvatarDetail: null,
-  creativeMode: localStorage.getItem('gac_srtool_creative_mode') === 'true'
+  creativeMode: localStorage.getItem('gac_srtool_creative_mode') === 'true' || localStorage.getItem('gac_srtool_default_creative') === 'true',
+  defaultEnergy: parseInt(localStorage.getItem('gac_srtool_default_energy') || '50', 10),
+  autoSync: localStorage.getItem('gac_srtool_auto_sync') !== 'false',
+  defaultCreative: localStorage.getItem('gac_srtool_default_creative') === 'true',
+  showcaseRolls: localStorage.getItem('gac_srtool_showcase_rolls') !== 'false',
+  showcaseAura: localStorage.getItem('gac_srtool_showcase_aura') !== 'false'
 };
 
 // UI Elements Map
@@ -117,7 +122,14 @@ const el = {
   // Settings
   formSettings: document.getElementById('form-settings'),
   settingApiUrl: document.getElementById('setting-api-url'),
-  settingPingInterval: document.getElementById('setting-ping-interval'),
+  btnTestConnection: document.getElementById('btn-test-connection'),
+  pingLatencyBadge: document.getElementById('ping-latency-badge'),
+  settingAutoSync: document.getElementById('setting-auto-sync'),
+  settingDefaultCreative: document.getElementById('setting-default-creative'),
+  settingShowcaseRolls: document.getElementById('setting-showcase-rolls'),
+  settingShowcaseAura: document.getElementById('setting-showcase-aura'),
+  lblCacheUsage: document.getElementById('lbl-cache-usage'),
+  btnClearBrowserCache: document.getElementById('btn-clear-browser-cache'),
   btnResetSettings: document.getElementById('btn-reset-settings'),
 
   // Character Detail Modal
@@ -1830,6 +1842,10 @@ function renderShowcaseCard(avatarId) {
     6: { name: "สร้อย", stat: meta.path === 'Preservation' || meta.path === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
   };
 
+  const showRolls = localStorage.getItem('gac_srtool_showcase_rolls') !== 'false';
+  const showAura = localStorage.getItem('gac_srtool_showcase_aura') !== 'false';
+  const rollBadge = (rolls) => showRolls ? `<span style="display:inline-block; font-size:0.65rem; color:var(--accent-gold); font-weight:800; background:rgba(234,179,8,0.18); border-radius:3px; padding:0 3px; margin-left:3px;">+${rolls}</span>` : '';
+
   let relicsHtml = '';
   for (let slot = 1; slot <= 6; slot++) {
     const equipped = avatarRelics.find(r => (r.relic_id % 10 === slot));
@@ -1850,10 +1866,10 @@ function renderShowcaseCard(avatarId) {
             <span style="color: var(--accent-cyan); font-weight: 800;">${slotInfo.stat}</span>
           </div>
           <div class="showcase-relic-subs">
-            <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%</span>
-            <span>CRIT DMG +${(5.8 + slot * 2.1).toFixed(1)}%</span>
-            <span>ATK +${(3.8 + slot * 0.8).toFixed(1)}%</span>
-            <span>DEF +${(4.8 + slot * 1.2).toFixed(1)}%</span>
+            <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%${rollBadge(slot % 2 === 0 ? 3 : 2)}</span>
+            <span>CRIT DMG +${(5.8 + slot * 2.1).toFixed(1)}%${rollBadge(slot % 3 === 0 ? 4 : 2)}</span>
+            <span>ATK +${(3.8 + slot * 0.8).toFixed(1)}%${rollBadge(1)}</span>
+            <span>DEF +${(4.8 + slot * 1.2).toFixed(1)}%${rollBadge(1)}</span>
           </div>
         </div>
       </div>
@@ -1929,6 +1945,36 @@ function renderShowcaseCard(avatarId) {
       ${relicsHtml}
     </div>
   `;
+
+  // Apply Element Aura Glow
+  const auraGlows = {
+    Physical: 'linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Fire: 'linear-gradient(135deg, rgba(79, 15, 15, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Ice: 'linear-gradient(135deg, rgba(12, 74, 96, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Lightning: 'linear-gradient(135deg, rgba(68, 15, 110, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Wind: 'linear-gradient(135deg, rgba(6, 78, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Quantum: 'linear-gradient(135deg, rgba(49, 46, 129, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)',
+    Imaginary: 'linear-gradient(135deg, rgba(88, 40, 5, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)'
+  };
+  const auraBorders = {
+    Physical: 'rgba(203, 213, 225, 0.35)',
+    Fire: 'rgba(239, 68, 68, 0.45)',
+    Ice: 'rgba(56, 189, 248, 0.45)',
+    Lightning: 'rgba(168, 85, 247, 0.45)',
+    Wind: 'rgba(52, 211, 153, 0.45)',
+    Quantum: 'rgba(129, 140, 248, 0.45)',
+    Imaginary: 'rgba(251, 191, 36, 0.45)'
+  };
+
+  if (showAura && auraGlows[meta.element]) {
+    el.showcaseCardContainer.style.background = auraGlows[meta.element];
+    el.showcaseCardContainer.style.borderColor = auraBorders[meta.element] || 'var(--border-color)';
+    el.showcaseCardContainer.style.boxShadow = `0 10px 40px -10px ${auraBorders[meta.element] || 'rgba(0,0,0,0.5)'}`;
+  } else {
+    el.showcaseCardContainer.style.background = 'linear-gradient(135deg, #0d121f 0%, #171f30 100%)';
+    el.showcaseCardContainer.style.borderColor = 'var(--border-color)';
+    el.showcaseCardContainer.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+  }
 }
 
 // Auto-equip recommended 6-piece relics for avatar
@@ -2843,6 +2889,24 @@ async function saveJsonData() {
   }
 }
 
+// Cache Usage Status for Diagnostics
+function updateCacheUsageDisplay() {
+  if (!el.lblCacheUsage) return;
+  try {
+    let totalBytes = 0;
+    for (let key in localStorage) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+        totalBytes += (localStorage[key].length + key.length) * 2;
+      }
+    }
+    const kb = (totalBytes / 1024).toFixed(1);
+    const count = Object.keys(localStorage).length;
+    el.lblCacheUsage.textContent = `${kb} KB (${count} keys)`;
+  } catch (err) {
+    el.lblCacheUsage.textContent = 'ไม่สามารถตรวจสอบได้';
+  }
+}
+
 // Tab Switching
 function setupTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
@@ -2867,6 +2931,8 @@ function setupTabs() {
           loadPersistentSettings();
         } else if (targetId === 'tab-json') {
           loadJsonData(state.currentJsonMode);
+        } else if (targetId === 'tab-settings') {
+          updateCacheUsageDisplay();
         }
       }
     });
@@ -3222,32 +3288,182 @@ function setupEvents() {
     reader.readAsText(file);
   });
 
-  // Settings Form
-  el.settingApiUrl.value = state.apiUrl;
-  el.settingPingInterval.value = state.pingIntervalSec;
-
-  el.formSettings.addEventListener('submit', (e) => {
-    e.preventDefault();
-    state.apiUrl = el.settingApiUrl.value.trim();
-    state.pingIntervalSec = parseInt(el.settingPingInterval.value, 10) || 10;
-    
-    localStorage.setItem('gac_srtool_api_url', state.apiUrl);
-    localStorage.setItem('gac_srtool_ping_interval', state.pingIntervalSec);
-
-    showToast(t('settingsSaved'), 'success');
-    refreshStatus();
-  });
-
-  el.btnResetSettings.addEventListener('click', () => {
-    state.apiUrl = 'http://localhost:21000';
-    state.pingIntervalSec = 10;
+  // -------------------------------------------------------------
+  // Settings Tab Controls & Diagnostics
+  // -------------------------------------------------------------
+  if (el.settingApiUrl) {
     el.settingApiUrl.value = state.apiUrl;
-    el.settingPingInterval.value = state.pingIntervalSec;
-    localStorage.removeItem('gac_srtool_api_url');
-    localStorage.removeItem('gac_srtool_ping_interval');
-    showToast(t('settingsReset'), 'info');
-    refreshStatus();
+  }
+
+  // Quick URL Preset Chips
+  document.querySelectorAll('.btn-quick-url').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (el.settingApiUrl) {
+        el.settingApiUrl.value = btn.dataset.url;
+        showToast(`เลือก Endpoint: ${btn.dataset.url}`, 'info');
+      }
+    });
   });
+
+  // Ping Latency Test
+  if (el.btnTestConnection) {
+    el.btnTestConnection.addEventListener('click', async () => {
+      const targetUrl = (el.settingApiUrl?.value || state.apiUrl).trim().replace(/\/+$/, '');
+      if (el.pingLatencyBadge) {
+        el.pingLatencyBadge.style.display = 'inline-block';
+        el.pingLatencyBadge.textContent = '⏳ ...';
+        el.pingLatencyBadge.style.backgroundColor = 'var(--bg-card)';
+        el.pingLatencyBadge.style.color = 'var(--text-muted)';
+      }
+      const t0 = performance.now();
+      try {
+        const res = await fetch(`${targetUrl}/api/status`, { signal: AbortSignal.timeout(3500) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const latency = Math.round(performance.now() - t0);
+        if (el.pingLatencyBadge) {
+          el.pingLatencyBadge.textContent = `${latency} ms`;
+          el.pingLatencyBadge.style.backgroundColor = latency < 80 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)';
+          el.pingLatencyBadge.style.color = latency < 80 ? 'var(--accent-green)' : 'var(--accent-gold)';
+        }
+        showToast(t('toastPingSuccess', { ms: latency }), 'success');
+        setConnectionStatus(true);
+      } catch (err) {
+        if (el.pingLatencyBadge) {
+          el.pingLatencyBadge.textContent = 'ERR';
+          el.pingLatencyBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+          el.pingLatencyBadge.style.color = '#ef4444';
+        }
+        showToast(t('toastPingFailed'), 'error');
+        setConnectionStatus(false);
+      }
+    });
+  }
+
+  // Save Connection Settings
+  if (el.formSettings) {
+    el.formSettings.addEventListener('submit', (e) => {
+      e.preventDefault();
+      state.apiUrl = el.settingApiUrl.value.trim().replace(/\/+$/, '') || 'http://localhost:21000';
+      localStorage.setItem('gac_srtool_api_url', state.apiUrl);
+      showToast(t('settingsSaved'), 'success');
+      refreshStatus();
+    });
+  }
+
+  // Battle Starting Energy Presets
+  const curEnergy = localStorage.getItem('gac_srtool_default_energy') || '50';
+  document.querySelectorAll('.btn-setting-energy').forEach(btn => {
+    if (btn.dataset.energy === curEnergy) {
+      btn.classList.add('active', 'btn-primary');
+      btn.classList.remove('btn-secondary');
+    } else {
+      btn.classList.remove('active', 'btn-primary');
+      btn.classList.add('btn-secondary');
+    }
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-setting-energy').forEach(b => {
+        b.classList.remove('active', 'btn-primary');
+        b.classList.add('btn-secondary');
+      });
+      btn.classList.add('active', 'btn-primary');
+      btn.classList.remove('btn-secondary');
+      localStorage.setItem('gac_srtool_default_energy', btn.dataset.energy);
+      state.defaultEnergy = parseInt(btn.dataset.energy, 10);
+      showToast(`ตั้งค่าพลังงานเริ่มต้น: ${btn.dataset.energy}%`, 'info');
+    });
+  });
+
+  // Auto-Sync Toggle
+  if (el.settingAutoSync) {
+    el.settingAutoSync.checked = localStorage.getItem('gac_srtool_auto_sync') !== 'false';
+    el.settingAutoSync.addEventListener('change', (e) => {
+      localStorage.setItem('gac_srtool_auto_sync', e.target.checked);
+      state.autoSync = e.target.checked;
+    });
+  }
+
+  // Creative Mode by Default Toggle
+  if (el.settingDefaultCreative) {
+    el.settingDefaultCreative.checked = localStorage.getItem('gac_srtool_default_creative') === 'true';
+    el.settingDefaultCreative.addEventListener('change', (e) => {
+      const val = e.target.checked;
+      localStorage.setItem('gac_srtool_default_creative', val);
+      state.defaultCreative = val;
+      if (val && !state.creativeMode) {
+        state.creativeMode = true;
+        localStorage.setItem('gac_srtool_creative_mode', 'true');
+        if (el.toggleCreativeMode) el.toggleCreativeMode.checked = true;
+        if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'inline-flex';
+        renderLineup(state.statusData?.lineups);
+      }
+    });
+  }
+
+  // Showcase Sub-stat Rolls Toggle
+  if (el.settingShowcaseRolls) {
+    el.settingShowcaseRolls.checked = localStorage.getItem('gac_srtool_showcase_rolls') !== 'false';
+    el.settingShowcaseRolls.addEventListener('change', (e) => {
+      localStorage.setItem('gac_srtool_showcase_rolls', e.target.checked);
+      state.showcaseRolls = e.target.checked;
+      if (state.selectedAvatarDetail?.avatar_id) {
+        renderShowcaseCard(state.selectedAvatarDetail.avatar_id);
+      }
+    });
+  }
+
+  // Showcase Element Aura Glow Toggle
+  if (el.settingShowcaseAura) {
+    el.settingShowcaseAura.checked = localStorage.getItem('gac_srtool_showcase_aura') !== 'false';
+    el.settingShowcaseAura.addEventListener('change', (e) => {
+      localStorage.setItem('gac_srtool_showcase_aura', e.target.checked);
+      state.showcaseAura = e.target.checked;
+      if (state.selectedAvatarDetail?.avatar_id) {
+        renderShowcaseCard(state.selectedAvatarDetail.avatar_id);
+      }
+    });
+  }
+
+  // Clear Browser Cache Button
+  if (el.btnClearBrowserCache) {
+    el.btnClearBrowserCache.addEventListener('click', () => {
+      const keepUrl = localStorage.getItem('gac_srtool_api_url');
+      const keepMode = localStorage.getItem('gac_srtool_mode');
+      const keepLang = localStorage.getItem('gac_srtool_lang');
+      localStorage.clear();
+      if (keepUrl) localStorage.setItem('gac_srtool_api_url', keepUrl);
+      if (keepMode) localStorage.setItem('gac_srtool_mode', keepMode);
+      if (keepLang) localStorage.setItem('gac_srtool_lang', keepLang);
+      updateCacheUsageDisplay();
+      showToast(t('toastCacheCleared'), 'success');
+    });
+  }
+
+  // Factory Reset Button
+  if (el.btnResetSettings) {
+    el.btnResetSettings.addEventListener('click', () => {
+      localStorage.clear();
+      state.apiUrl = 'http://localhost:21000';
+      state.serverMode = 'gac';
+      state.creativeMode = false;
+      state.defaultEnergy = 50;
+      state.autoSync = true;
+      state.showcaseRolls = true;
+      state.showcaseAura = true;
+      if (el.settingApiUrl) el.settingApiUrl.value = state.apiUrl;
+      if (el.settingServerMode) el.settingServerMode.value = 'gac';
+      if (el.settingAutoSync) el.settingAutoSync.checked = true;
+      if (el.settingDefaultCreative) el.settingDefaultCreative.checked = false;
+      if (el.settingShowcaseRolls) el.settingShowcaseRolls.checked = true;
+      if (el.settingShowcaseAura) el.settingShowcaseAura.checked = true;
+      if (el.toggleCreativeMode) el.toggleCreativeMode.checked = false;
+      if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'none';
+      updateCacheUsageDisplay();
+      showToast(t('settingsReset'), 'info');
+      refreshStatus();
+    });
+  }
+
+  updateCacheUsageDisplay();
 
   // Modal Backdrop Click to close
   [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings].forEach(modal => {
