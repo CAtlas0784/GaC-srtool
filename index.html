@@ -1141,40 +1141,90 @@
 
   <!-- Add Light Cone Modal -->
   <div class="modal-overlay" id="modal-add-lc">
-    <div class="modal-content" style="max-width: 540px;">
-      <div class="modal-header">
-        <h3 style="font-weight: 800;" data-i18n="modalAddLcTitle">🗡️ เพิ่มกรวยแสงลง FreeSR</h3>
+    <div class="modal-content" style="max-width: 760px; max-height: 88vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); margin-bottom: 0.75rem;">
+        <h3 style="font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;" data-i18n="modalAddLcTitle">
+          🗡️ เพิ่มกรวยแสงลง FreeSR
+        </h3>
         <button type="button" class="btn btn-sm btn-secondary" id="btn-close-add-lc-modal">✕</button>
       </div>
-      <form id="form-add-lc">
-        <div class="form-group">
-          <label class="form-label" data-i18n="lblSelectLc">เลือกกรวยแสง</label>
-          <select id="add-lc-select" class="form-select" required style="max-height: 200px;">
-            <!-- Injected by JS -->
+
+      <form id="form-add-lc" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+        <!-- 1. Selected Lightcone Preview Strip -->
+        <div id="add-lc-preview-banner" style="display: flex; gap: 0.85rem; align-items: center; background: rgba(251, 191, 36, 0.08); border: 1.5px solid var(--accent-gold); border-radius: var(--radius-sm); padding: 0.6rem 0.85rem; margin-bottom: 0.75rem;">
+          <img id="add-lc-preview-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--accent-gold); background: #0b0d14; flex-shrink: 0;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">
+              ✓ กรวยแสงที่เลือก (Selected)
+            </div>
+            <div id="add-lc-preview-name" style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+            <div id="add-lc-preview-meta" style="display: flex; gap: 0.65rem; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; align-items: center; flex-wrap: wrap;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+          <input type="hidden" id="add-lc-selected-id" value="23001">
+          <input type="hidden" id="add-lc-select" value="23001">
+        </div>
+
+        <!-- 2. Search & Filter Bar -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
+          <input type="text" id="add-lc-search" class="form-input" placeholder="🔍 ค้นหากรวยแสง (ชื่อหรือ ID)..." style="flex: 1; min-width: 160px;">
+          <select id="add-lc-filter-path" class="form-select" style="max-width: 140px;">
+            <option value="all">ทุกสาย (All)</option>
+            <option value="Destruction">ทำลายล้าง</option>
+            <option value="Hunt">ล่าสังหาร</option>
+            <option value="Erudition">ปัญญา</option>
+            <option value="Harmony">ประสาน</option>
+            <option value="Nihility">ลบล้าง</option>
+            <option value="Preservation">อนุรักษ์</option>
+            <option value="Abundance">เฟื่องฟู</option>
+            <option value="Remembrance">ความทรงจำ</option>
+            <option value="Elation">ปีติ</option>
+          </select>
+          <select id="add-lc-filter-rarity" class="form-select" style="max-width: 110px;">
+            <option value="all">ทุกระดับดาว</option>
+            <option value="5" selected>★5 ดาว</option>
+            <option value="4">★4 ดาว</option>
+            <option value="3">★3 ดาว</option>
           </select>
         </div>
-        <div class="grid-3" style="gap: 0.75rem; margin-bottom: 1rem;">
+
+        <!-- 3. Visual Grid Container -->
+        <div id="add-lc-visual-grid" class="add-lc-grid-container" style="flex: 1; min-height: 180px; max-height: 280px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; padding: 0.35rem; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
+          <!-- Dynamically populated by JS -->
+        </div>
+
+        <!-- 4. Level, Promotion, Superimpose, and Equip Avatar -->
+        <div class="grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem; align-items: end;">
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" data-i18n="modalColLevel">เลเวล (1-80)</label>
+            <label class="form-label" data-i18n="modalColLevel" style="font-size: 0.75rem;">เลเวล (1-80)</label>
             <input type="number" id="add-lc-level" class="form-input" min="1" max="80" value="80" required>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" data-i18n="lblPromotion">ขัดเกลา (0-6)</label>
+            <label class="form-label" data-i18n="lblPromotion" style="font-size: 0.75rem;">เลื่อนขั้น (0-6)</label>
             <input type="number" id="add-lc-promotion" class="form-input" min="0" max="6" value="6" required>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label">Superimpose (1-5)</label>
-            <input type="number" id="add-lc-rank" class="form-input" min="1" max="5" value="5" required>
+            <label class="form-label" style="font-size: 0.75rem;">Superimpose (ขัดเกลา)</label>
+            <select id="add-lc-rank" class="form-select" required>
+              <option value="5" selected>S5 (ขัดเกลา 5)</option>
+              <option value="4">S4 (ขัดเกลา 4)</option>
+              <option value="3">S3 (ขัดเกลา 3)</option>
+              <option value="2">S2 (ขัดเกลา 2)</option>
+              <option value="1">S1 (ขัดเกลา 1)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" data-i18n="lblEquipAvatar" style="font-size: 0.75rem;">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
+            <select id="add-lc-avatar" class="form-select">
+              <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
+              <!-- Injected by JS -->
+            </select>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" data-i18n="lblEquipAvatar">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
-          <select id="add-lc-avatar" class="form-select">
-            <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
-            <!-- Injected by JS -->
-          </select>
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+
+        <!-- 5. Footer Buttons -->
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.6rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
           <button type="button" class="btn btn-secondary" id="btn-cancel-add-lc" data-i18n="btnCancel">ยกเลิก</button>
           <button type="submit" class="btn btn-success" data-i18n="btnAddLcSubmit">💾 เพิ่มลง FreeSR</button>
         </div>
@@ -1232,6 +1282,8 @@
         </div>
       </form>
     </div>
+  </div>
+
   <!-- Modal: Select Relic for Specific Slot -->
   <div class="modal-overlay" id="modal-select-relic-slot">
     <div class="modal-content" style="max-width: 620px;">

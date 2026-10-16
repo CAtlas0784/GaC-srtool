@@ -2209,6 +2209,99 @@ input:checked + .slider:before {
   border: 1px solid var(--border-color);
 }
 
+/* Add Lightcone Visual Grid & Cards */
+.add-lc-card {
+  background: rgba(18, 24, 38, 0.75);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  user-select: none;
+}
+
+.add-lc-card:hover {
+  background: rgba(28, 38, 60, 0.95);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.add-lc-card.selected {
+  border-color: var(--accent-gold) !important;
+  background: rgba(251, 191, 36, 0.14) !important;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
+}
+
+.add-lc-card.rarity-5 {
+  border-left: 3.5px solid #eab308;
+}
+
+.add-lc-card.rarity-4 {
+  border-left: 3.5px solid #a855f7;
+}
+
+.add-lc-card.rarity-3 {
+  border-left: 3.5px solid #38bdf8;
+}
+
+.add-lc-card-thumb {
+  width: 42px;
+  height: 58px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0b0d14;
+}
+
+.add-lc-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.add-lc-card-name {
+  font-weight: 700;
+  font-size: 0.825rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.add-lc-card-stars {
+  font-size: 0.68rem;
+  color: var(--accent-gold);
+  line-height: 1;
+}
+
+.add-lc-card-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.add-lc-card-path {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-cyan);
+}
+
+.add-lc-card-id {
+  font-family: monospace;
+  opacity: 0.7;
+}
+
 /* Rich Skills & Traces */
 .skill-row-icon {
   width: 38px;

@@ -86,6 +86,14 @@ const el = {
   btnCancelAddLc: document.getElementById('btn-cancel-add-lc'),
   formAddLc: document.getElementById('form-add-lc'),
   addLcSelect: document.getElementById('add-lc-select'),
+  addLcSearch: document.getElementById('add-lc-search'),
+  addLcFilterPath: document.getElementById('add-lc-filter-path'),
+  addLcFilterRarity: document.getElementById('add-lc-filter-rarity'),
+  addLcVisualGrid: document.getElementById('add-lc-visual-grid'),
+  addLcSelectedId: document.getElementById('add-lc-selected-id'),
+  addLcPreviewThumb: document.getElementById('add-lc-preview-thumb'),
+  addLcPreviewName: document.getElementById('add-lc-preview-name'),
+  addLcPreviewMeta: document.getElementById('add-lc-preview-meta'),
   addLcLevel: document.getElementById('add-lc-level'),
   addLcPromotion: document.getElementById('add-lc-promotion'),
   addLcRank: document.getElementById('add-lc-rank'),
@@ -4124,31 +4132,150 @@ function showRelicInspector(relic) {
 // Open Add Light Cone Modal
 function openAddLcModal() {
   if (!el.modalAddLc) return;
-  el.addLcSelect.innerHTML = '';
-  const lcIds = Object.keys(LIGHTCONE_METADATA).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
-  lcIds.forEach(id => {
-    const meta = getLightconeInfo(id);
-    const opt = document.createElement('option');
-    opt.value = id;
-    opt.textContent = `★${meta.rarity} [${meta.path || 'LC'}] ${meta.name} (ID: ${id})`;
-    el.addLcSelect.appendChild(opt);
-  });
 
-  el.addLcAvatar.innerHTML = `<option value="0">${t('unassigned')}</option>`;
-  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
-  sortedAvatars.forEach(av => {
-    const info = getAvatarInfo(av.avatar_id);
-    const opt = document.createElement('option');
-    opt.value = av.avatar_id;
-    opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
-    el.addLcAvatar.appendChild(opt);
-  });
+  // Reset filters
+  const searchInput = document.getElementById('add-lc-search');
+  if (searchInput) searchInput.value = '';
+  const filterPath = document.getElementById('add-lc-filter-path');
+  if (filterPath) filterPath.value = 'all';
+  const filterRarity = document.getElementById('add-lc-filter-rarity');
+  if (filterRarity) filterRarity.value = 'all';
 
-  el.addLcLevel.value = 80;
-  el.addLcPromotion.value = 6;
-  el.addLcRank.value = 5;
+  // Avatars dropdown
+  if (el.addLcAvatar) {
+    el.addLcAvatar.innerHTML = `<option value="0">${t('unassigned') || '-- ยังไม่สวมใส่ (เก็บในคลัง) --'}</option>`;
+    const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
+    sortedAvatars.forEach(av => {
+      const info = getAvatarInfo(av.avatar_id);
+      const opt = document.createElement('option');
+      opt.value = av.avatar_id;
+      opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
+      el.addLcAvatar.appendChild(opt);
+    });
+  }
+
+  if (el.addLcLevel) el.addLcLevel.value = 80;
+  if (el.addLcPromotion) el.addLcPromotion.value = 6;
+  if (el.addLcRank) el.addLcRank.value = 5;
+
+  const defaultId = LIGHTCONE_METADATA[23065] ? 23065 : 23001;
+  updateAddLcPreview(defaultId);
+  renderAddLcVisualGrid();
 
   el.modalAddLc.classList.add('active');
+}
+
+// Update Add LC Selected Preview Banner
+function updateAddLcPreview(lcId) {
+  const id = parseInt(lcId, 10);
+  const info = getLightconeInfo(id);
+  const meta = LIGHTCONE_METADATA[id] || { path: 'Unknown', rarity: 5 };
+
+  const hiddenId = document.getElementById('add-lc-selected-id');
+  if (hiddenId) hiddenId.value = id;
+
+  const legacySelect = document.getElementById('add-lc-select');
+  if (legacySelect) legacySelect.value = id;
+
+  const previewThumb = document.getElementById('add-lc-preview-thumb');
+  if (previewThumb) {
+    previewThumb.src = getLightconeArtSrc(id);
+    previewThumb.onerror = function() { this.src = getLightconeArtFallback(id); };
+  }
+
+  const previewName = document.getElementById('add-lc-preview-name');
+  if (previewName) {
+    previewName.textContent = info.name || `Light Cone ${id}`;
+  }
+
+  const previewMeta = document.getElementById('add-lc-preview-meta');
+  if (previewMeta) {
+    previewMeta.innerHTML = `
+      <span style="color: var(--accent-gold); font-weight: 800;">${'★'.repeat(info.rarity || 5)}</span>
+      <span style="color: var(--accent-cyan); display: inline-flex; align-items: center; gap: 0.25rem;">
+        ${getPathIconHtml(meta.path, 13)} ${info.path}
+      </span>
+      <span style="font-family: monospace; opacity: 0.8;">ID: ${id}</span>
+    `;
+  }
+}
+
+// Render Add LC Visual Grid with Live Search & Filtering
+function renderAddLcVisualGrid() {
+  const grid = document.getElementById('add-lc-visual-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const search = (document.getElementById('add-lc-search')?.value || '').trim().toLowerCase();
+  const pathFilter = document.getElementById('add-lc-filter-path')?.value || 'all';
+  const rarityFilter = document.getElementById('add-lc-filter-rarity')?.value || 'all';
+
+  const selectedIdInput = document.getElementById('add-lc-selected-id');
+  const selectedId = parseInt(selectedIdInput?.value || '23001', 10);
+
+  const allIds = Object.keys(LIGHTCONE_METADATA)
+    .map(id => parseInt(id, 10))
+    .sort((a, b) => {
+      const metaA = LIGHTCONE_METADATA[a];
+      const metaB = LIGHTCONE_METADATA[b];
+      if (metaB.rarity !== metaA.rarity) return metaB.rarity - metaA.rarity;
+      return b - a;
+    });
+
+  const filtered = allIds.filter(id => {
+    const meta = LIGHTCONE_METADATA[id];
+    const info = getLightconeInfo(id);
+
+    // Path filter
+    if (pathFilter !== 'all' && meta.path !== pathFilter) return false;
+
+    // Rarity filter
+    if (rarityFilter !== 'all' && String(meta.rarity) !== String(rarityFilter)) return false;
+
+    // Search filter
+    if (search) {
+      const matchName = (info.name || '').toLowerCase().includes(search);
+      const matchId = String(id).includes(search);
+      const matchPath = (info.path || '').toLowerCase().includes(search);
+      if (!matchName && !matchId && !matchPath) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบกรวยแสงตามเงื่อนไขที่ค้นหา</div>`;
+    return;
+  }
+
+  filtered.forEach(id => {
+    const meta = LIGHTCONE_METADATA[id];
+    const info = getLightconeInfo(id);
+    const isSelected = id === selectedId;
+
+    const card = document.createElement('div');
+    card.className = `add-lc-card rarity-${info.rarity || 5} ${isSelected ? 'selected' : ''}`;
+    card.dataset.lcId = id;
+
+    card.innerHTML = `
+      <img class="add-lc-card-thumb" src="${getLightconeArtSrc(id)}" onerror="this.src='${getLightconeArtFallback(id)}'" alt="${info.name}" loading="lazy">
+      <div class="add-lc-card-body">
+        <div class="add-lc-card-name" title="${info.name}">${info.name}</div>
+        <div class="add-lc-card-stars">${'★'.repeat(info.rarity || 5)}</div>
+        <div class="add-lc-card-sub">
+          <span class="add-lc-card-path">${getPathIconHtml(meta.path, 13)} ${info.path}</span>
+          <span class="add-lc-card-id">#${id}</span>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.add-lc-card.selected').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      updateAddLcPreview(id);
+    });
+
+    grid.appendChild(card);
+  });
 }
 
 // Open Add Relic Modal
@@ -4221,11 +4348,12 @@ function updateRelicMainAffixes(slot) {
 
 async function handleAddLcSubmit(e) {
   e.preventDefault();
-  const itemId = parseInt(el.addLcSelect.value, 10);
-  const level = parseInt(el.addLcLevel.value, 10) || 80;
-  const promotion = parseInt(el.addLcPromotion.value, 10) || 6;
-  const rank = parseInt(el.addLcRank.value, 10) || 5;
-  const equipAvatar = parseInt(el.addLcAvatar.value, 10) || 0;
+  const selectedIdInput = document.getElementById('add-lc-selected-id');
+  const itemId = parseInt(selectedIdInput?.value || el.addLcSelect?.value || '23001', 10);
+  const level = parseInt(el.addLcLevel?.value || '80', 10) || 80;
+  const promotion = parseInt(el.addLcPromotion?.value || '6', 10) || 6;
+  const rank = parseInt(el.addLcRank?.value || '5', 10) || 5;
+  const equipAvatar = parseInt(el.addLcAvatar?.value || '0', 10) || 0;
 
   if (!state.fullFreesrData) {
     state.fullFreesrData = { lightcones: [], relics: [], avatars: {} };
@@ -4240,21 +4368,26 @@ async function handleAddLcSubmit(e) {
     });
   }
 
-  const maxUid = state.fullFreesrData.lightcones.reduce((m, lc) => Math.max(m, lc.internal_uid || 0), 0);
+  let maxUniqueId = 1000;
+  state.fullFreesrData.lightcones.forEach(l => {
+    if ((l.unique_id || 0) >= maxUniqueId) maxUniqueId = (l.unique_id || 0) + 1;
+  });
+  const maxInternalUid = state.fullFreesrData.lightcones.reduce((m, lc) => Math.max(m, lc.internal_uid || 0), 0);
   const newLc = {
-    level,
+    unique_id: maxUniqueId,
+    internal_uid: maxInternalUid + 1,
     item_id: itemId,
-    equip_avatar: equipAvatar,
-    rank,
+    level,
     promotion,
-    internal_uid: maxUid + 1
+    rank,
+    equip_avatar: equipAvatar
   };
 
   state.fullFreesrData.lightcones.unshift(newLc);
   await saveFreesrChangesToServer();
   loadEquipment();
   el.modalAddLc.classList.remove('active');
-  showToast(t('toastLcAdded'), 'success');
+  showToast(t('toastLcAdded') || 'เพิ่มกรวยแสงลง FreeSR เรียบร้อยแล้ว', 'success');
 }
 
 async function handleAddRelicSubmit(e) {
@@ -4908,6 +5041,9 @@ function setupEvents() {
   if (el.formAddLc) {
     el.formAddLc.addEventListener('submit', handleAddLcSubmit);
   }
+  document.getElementById('add-lc-search')?.addEventListener('input', () => renderAddLcVisualGrid());
+  document.getElementById('add-lc-filter-path')?.addEventListener('change', () => renderAddLcVisualGrid());
+  document.getElementById('add-lc-filter-rarity')?.addEventListener('change', () => renderAddLcVisualGrid());
 
   if (el.btnOpenAddRelic) {
     el.btnOpenAddRelic.addEventListener('click', openAddRelicModal);
