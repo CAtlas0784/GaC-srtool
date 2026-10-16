@@ -46,8 +46,12 @@ const el = {
   lineupContainer: document.getElementById('lineup-container'),
   toggleCreativeMode: document.getElementById('toggle-creative-mode'),
   badgeCreativeMode: document.getElementById('badge-creative-mode'),
-  btnQuickMaxAll: document.getElementById('btn-quick-max-all'),
-  btnQuickSyncPersistent: document.getElementById('btn-quick-sync-persistent'),
+  btnQuickEnergy50: document.getElementById('btn-quick-energy-50'),
+  btnQuickEnergy100: document.getElementById('btn-quick-energy-100'),
+  btnQuickUnlockAllAvatars: document.getElementById('btn-quick-unlock-all-avatars'),
+  btnQuickAddAllLcs: document.getElementById('btn-quick-add-all-lcs'),
+  btnQuickTeleportTrain: document.getElementById('btn-quick-teleport-train'),
+  btnQuickClearLineup: document.getElementById('btn-quick-clear-lineup'),
 
   // Avatars
   avatarsGrid: document.getElementById('avatars-grid'),
@@ -1112,9 +1116,10 @@ function openAvatarDetailModal(avatarItem) {
     el.checkTraceStats.checked = (anchorSkills['9'] ?? skills[`${aid}201`] ?? 1) > 0;
   }
 
-  // Ultimate Energy
+  // Ultimate Energy (Default 50% as standard in Star Rail)
   const maxSp = av?.sp_max ?? 140;
-  const currentSp = av?.sp_value ?? maxSp;
+  const defaultStartingSp = Math.floor(maxSp * 0.5);
+  const currentSp = (av?.sp_value !== undefined && av?.sp_value !== null) ? av.sp_value : defaultStartingSp;
   if (el.rangeCharEnergy && el.valCharEnergy) {
     el.rangeCharEnergy.max = maxSp;
     el.rangeCharEnergy.value = currentSp;
@@ -1233,10 +1238,11 @@ async function maxAllBuildForCurrentAvatar() {
   // Skills & Traces
   maxSkillsForAvatar();
 
-  // Energy 100%
+  // Energy (Default 50% standard starting energy)
   if (el.rangeCharEnergy && el.valCharEnergy) {
-    el.rangeCharEnergy.value = el.rangeCharEnergy.max;
-    el.valCharEnergy.textContent = `${el.rangeCharEnergy.max}/${el.rangeCharEnergy.max}`;
+    const half = Math.floor(parseInt(el.rangeCharEnergy.max, 10) * 0.5);
+    el.rangeCharEnergy.value = half;
+    el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
   }
 
   // Lightcone
@@ -1266,6 +1272,10 @@ async function saveAvatarDetails() {
     target.rank = rank;
   }
 
+  const maxSp = parseInt(el.rangeCharEnergy?.max, 10) || 140;
+  const defaultSp = Math.floor(maxSp * 0.5);
+  const currentSp = el.rangeCharEnergy ? parseInt(el.rangeCharEnergy.value, 10) : defaultSp;
+
   if (!state.fullFreesrData) {
     state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
   }
@@ -1279,8 +1289,8 @@ async function saveAvatarDetails() {
       level,
       promotion,
       techniques: [],
-      sp_value: parseInt(el.rangeCharEnergy?.value, 10) || 140,
-      sp_max: parseInt(el.rangeCharEnergy?.max, 10) || 140,
+      sp_value: currentSp,
+      sp_max: maxSp,
       data: {
         rank,
         skills: {},
@@ -1294,9 +1304,8 @@ async function saveAvatarDetails() {
   av.promotion = promotion;
   av.data = av.data || {};
   av.data.rank = rank;
-  if (el.rangeCharEnergy) {
-    av.sp_value = parseInt(el.rangeCharEnergy.value, 10) || av.sp_max || 140;
-  }
+  av.sp_max = maxSp;
+  av.sp_value = currentSp;
 
   // Extract skills values
   const basicVal = parseInt(el.rangeSkillBasic?.value, 10) || 6;
@@ -1390,6 +1399,262 @@ async function saveAvatarDetails() {
     }
   } else {
     showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
+  }
+}
+
+// ============================================================================
+// Quick Action Functions
+// ============================================================================
+
+// 1. Quick Set Team Energy (50% or 100%)
+async function quickSetTeamEnergy(ratio = 0.5) {
+  try {
+    state.statusData = state.statusData || {};
+    const lineups = state.statusData.lineups || DEFAULT_LINEUP;
+    if (!state.fullFreesrData) {
+      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    }
+    state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+
+    const lineupIds = Object.values(lineups).filter(id => id && id > 0);
+    if (lineupIds.length === 0) {
+      showToast(t('slotEmpty') || 'ไม่มีตัวละครในทีม', 'warning');
+      return;
+    }
+
+    lineupIds.forEach(aid => {
+      if (!state.fullFreesrData.avatars[aid]) {
+        state.fullFreesrData.avatars[aid] = {
+          owner_uid: 0,
+          avatar_id: aid,
+          level: 80,
+          promotion: 6,
+          techniques: [],
+          sp_max: 140,
+          sp_value: 70,
+          data: { rank: 6, skills: {} }
+        };
+      }
+      const av = state.fullFreesrData.avatars[aid];
+      const maxSp = av.sp_max || 140;
+      av.sp_max = maxSp;
+      av.sp_value = Math.floor(maxSp * ratio);
+    });
+
+    if (state.isConnected) {
+      await saveFreesrChangesToServer();
+    }
+
+    if (ratio === 0.5) {
+      showToast(t('toastEnergy50') || 'ตั้งค่าพลังงานทีม 50% (มาตรฐานเกม) เรียบร้อยแล้ว', 'success');
+    } else {
+      showToast(t('toastEnergy100') || 'ตั้งค่าพลังงานทีม 100% (อัลติพร้อมใช้) เรียบร้อยแล้ว', 'success');
+    }
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// 2. Quick Unlock All 70+ Avatars
+async function quickUnlockAllAvatars() {
+  try {
+    if (!state.fullFreesrData) {
+      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    }
+    state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+
+    const allIds = Object.keys(AVATAR_METADATA).map(id => parseInt(id, 10));
+    allIds.forEach(aid => {
+      if (!state.fullFreesrData.avatars[aid]) {
+        state.fullFreesrData.avatars[aid] = {
+          owner_uid: 0,
+          avatar_id: aid,
+          level: 80,
+          promotion: 6,
+          techniques: [],
+          sp_max: 140,
+          sp_value: 70, // 50% standard starting energy
+          data: {
+            rank: 6,
+            skills: {
+              [`${aid}001`]: 6,
+              [`${aid}002`]: 10,
+              [`${aid}003`]: 10,
+              [`${aid}004`]: 10,
+              [`${aid}007`]: 1,
+              [`${aid}101`]: 1,
+              [`${aid}102`]: 1,
+              [`${aid}103`]: 1,
+              [`${aid}201`]: 1
+            },
+            skills_by_anchor_type: {
+              "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
+            }
+          }
+        };
+      } else {
+        const av = state.fullFreesrData.avatars[aid];
+        av.level = 80;
+        av.promotion = 6;
+        av.data = av.data || {};
+        av.data.rank = 6;
+        if (!av.sp_value) av.sp_value = 70;
+      }
+    });
+
+    initAvatarsList();
+    state.avatarsList.forEach(a => {
+      a.level = 80;
+      a.promotion = 6;
+      a.rank = 6;
+    });
+
+    if (state.isConnected) {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/avatar/max_all', 'POST', {}).catch(() => {});
+        await saveFreesrChangesToServer().catch(() => {});
+      } else {
+        await saveFreesrChangesToServer();
+      }
+    }
+
+    renderAvatarsGrid();
+    if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
+    showToast(t('toastUnlockedAll') || 'ปลดล็อกตัวละครครบทุกตัว (70+ ตัว E6) เรียบร้อยแล้ว', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// 3. Quick Add All 5-Star Signature Light Cones
+async function quickAddAll5StarLightcones() {
+  try {
+    if (!state.fullFreesrData) {
+      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    }
+    state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+
+    const existingLcIds = new Set(state.fullFreesrData.lightcones.map(lc => lc.item_id));
+    let nextUniqueId = 1000;
+    state.fullFreesrData.lightcones.forEach(lc => {
+      if (lc.unique_id >= nextUniqueId) nextUniqueId = lc.unique_id + 1;
+    });
+
+    let addedCount = 0;
+    for (const idStr in LIGHTCONE_METADATA) {
+      const meta = LIGHTCONE_METADATA[idStr];
+      const itemId = parseInt(idStr, 10);
+      if (meta.rarity === 5 && !existingLcIds.has(itemId)) {
+        state.fullFreesrData.lightcones.push({
+          unique_id: nextUniqueId++,
+          item_id: itemId,
+          level: 80,
+          promotion: 6,
+          rank: 5,
+          equip_avatar: 0
+        });
+        existingLcIds.add(itemId);
+        addedCount++;
+      }
+    }
+
+    if (state.isConnected) {
+      await saveFreesrChangesToServer();
+    }
+    loadEquipment();
+    showToast(t('toastAddedAllLcs') || `เพิ่มกรวยแสง 5 ดาวทั้งหมด (${addedCount} ชิ้น) เข้าคลังแล้ว`, 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// 4. Quick Teleport to Astral Express Parlor Car
+async function quickTeleportAstralExpress() {
+  const trainLoc = {
+    plane_id: 20001,
+    floor_id: 20001001,
+    entry_id: 2000101,
+    x: 0,
+    y: 0,
+    z: 0,
+    rot_y: 0
+  };
+  try {
+    if (state.fullFreesrData) {
+      state.fullFreesrData.scene = {
+        plane_id: trainLoc.plane_id,
+        floor_id: trainLoc.floor_id,
+        entry_id: trainLoc.entry_id
+      };
+      state.fullFreesrData.position = {
+        x: trainLoc.x,
+        y: trainLoc.y,
+        z: trainLoc.z,
+        rot_y: trainLoc.rot_y
+      };
+    }
+
+    if (state.isConnected) {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/teleport', 'POST', trainLoc).catch(async () => {
+          await apiCall('/api/persistent', 'POST', {
+            scene: { plane_id: trainLoc.plane_id, floor_id: trainLoc.floor_id, entry_id: trainLoc.entry_id },
+            position: { x: trainLoc.x, y: trainLoc.y, z: trainLoc.z, rot_y: trainLoc.rot_y }
+          });
+        });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+    }
+
+    if (el.lblPlaneId) el.lblPlaneId.textContent = trainLoc.plane_id;
+    if (el.lblFloorId) el.lblFloorId.textContent = trainLoc.floor_id;
+    if (el.lblCoordinates) el.lblCoordinates.textContent = `X: ${trainLoc.x}, Y: ${trainLoc.y}, Z: ${trainLoc.z}`;
+    showToast(t('toastTeleportedTrain') || 'วาร์ปกลับสู่ Astral Express Parlor Car เรียบร้อยแล้ว', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// 5. Quick Clear Lineup Slots
+async function quickClearLineup() {
+  try {
+    state.statusData = state.statusData || {};
+    let currentLineup = state.statusData.lineups || DEFAULT_LINEUP;
+    if (Array.isArray(currentLineup)) {
+      const mapped = {};
+      currentLineup.forEach((id, idx) => { mapped[idx] = id; });
+      currentLineup = mapped;
+    }
+
+    const cleared = {};
+    Object.keys(currentLineup).forEach(k => {
+      cleared[k] = 0;
+    });
+    if (!state.creativeMode) {
+      cleared[0] = 0; cleared[1] = 0; cleared[2] = 0; cleared[3] = 0;
+    }
+
+    state.statusData.lineups = cleared;
+    if (state.fullFreesrData) {
+      state.fullFreesrData.lineups = cleared;
+      if (state.fullFreesrData.battle_config) {
+        state.fullFreesrData.battle_config.custom_battle_lineup = cleared;
+      }
+    }
+
+    if (state.isConnected) {
+      if (state.serverMode === 'gac') {
+        await apiCall('/api/persistent', 'POST', { lineups: cleared });
+      } else {
+        await saveFreesrChangesToServer();
+      }
+    }
+
+    renderLineup(cleared);
+    showToast(t('toastLineupCleared') || 'ล้างตัวละครในทีมเรียบร้อยแล้ว', 'info');
+  } catch (err) {
+    showToast(err.message, 'error');
   }
 }
 
@@ -2101,18 +2366,13 @@ function setupEvents() {
   }
 
   // Quick Action Buttons on Dashboard
-  el.btnQuickMaxAll.addEventListener('click', maxAllAvatars);
-  el.btnMaxAllAvatars.addEventListener('click', maxAllAvatars);
-
-  el.btnQuickSyncPersistent.addEventListener('click', async () => {
-    try {
-      await apiCall('/api/persistent');
-      showToast('ซิงค์ข้อมูล Persistent เรียบร้อย', 'success');
-      refreshStatus();
-    } catch (err) {
-      showToast(`Sync failed: ${err.message}`, 'error');
-    }
-  });
+  el.btnQuickEnergy50?.addEventListener('click', () => quickSetTeamEnergy(0.5));
+  el.btnQuickEnergy100?.addEventListener('click', () => quickSetTeamEnergy(1.0));
+  el.btnQuickUnlockAllAvatars?.addEventListener('click', quickUnlockAllAvatars);
+  el.btnQuickAddAllLcs?.addEventListener('click', quickAddAll5StarLightcones);
+  el.btnQuickTeleportTrain?.addEventListener('click', quickTeleportAstralExpress);
+  el.btnQuickClearLineup?.addEventListener('click', quickClearLineup);
+  el.btnMaxAllAvatars?.addEventListener('click', maxAllAvatars);
 
   // Persistent Form Submit
   el.formPersistentChars.addEventListener('submit', async (e) => {
