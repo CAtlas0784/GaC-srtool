@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GaC-Srtool — FreeSR & Game Management Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌌</text></svg>">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div>
+        <div class="brand-title">GaC-Srtool</div>
+        <div class="brand-subtitle">Star Rail FreeSR & Server Controller</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="connection-pill" id="btn-open-settings" title="คลิกเพื่อตั้งค่าการเชื่อมต่อ API">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="connection-status-text">กำลังตรวจสอบ...</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="ทดสอบการเชื่อมต่อใหม่">
+        🔄 รีเฟรช
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="tab-dashboard">📊 แดชบอร์ด (Overview)</button>
+    <button class="tab-btn" data-tab="tab-avatars">👥 ตัวละคร (Avatars)</button>
+    <button class="tab-btn" data-tab="tab-exrank">⚡ Ex-Rank (สกิลพิเศษ)</button>
+    <button class="tab-btn" data-tab="tab-teleport">🚀 วาร์ปฉาก (Teleport)</button>
+    <button class="tab-btn" data-tab="tab-json">📝 จัดการไฟล์ JSON</button>
+    <button class="tab-btn" data-tab="tab-settings">⚙️ ตั้งค่า & คู่มือ Host</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- 1. Dashboard Tab -->
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="grid-3" style="margin-bottom: 1.5rem;">
+        <div class="card stat-box">
+          <div class="stat-number" id="stat-avatars">0</div>
+          <div class="stat-label">ตัวละครที่ครอบครอง (Avatars)</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-number" id="stat-lightcones">0</div>
+          <div class="stat-label">กรวยแสง (Lightcones)</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-number" id="stat-relics">0</div>
+          <div class="stat-label">รีลิกส์ (Relics)</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Server & Map Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>📍 สถานะเซิร์ฟเวอร์ & ตำแหน่งปัจจุบัน</span>
+            <span class="btn-sm btn-secondary" id="badge-version">API Live</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div>
+              <span class="form-label">API Gateway Endpoint</span>
+              <code id="lbl-api-url" style="color: var(--accent-cyan); font-size: 0.9rem;">-</code>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+              <div>
+                <span class="form-label">Plane ID</span>
+                <span id="lbl-plane-id" style="font-weight: bold;">-</span>
+              </div>
+              <div>
+                <span class="form-label">Floor ID</span>
+                <span id="lbl-floor-id" style="font-weight: bold;">-</span>
+              </div>
+            </div>
+            <div>
+              <span class="form-label">พิกัดตัวละคร (X, Y, Z)</span>
+              <span id="lbl-coordinates" style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card">
+          <div class="card-title">⚡ ดำเนินการด่วน (Quick Actions)</div>
+          <p class="card-subtitle">สั่งการส่งไปยัง REST API Gateway ทันที</p>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <button class="btn btn-gold" id="btn-quick-max-all">
+              ⭐ ปรับเลเวล 80 & ปลด E6 ตัวละครทั้งหมด (Max All)
+            </button>
+            <button class="btn btn-primary" id="btn-quick-warp-express">
+              🚂 วาร์ปกลับรถไฟ Astral Express ทันที
+            </button>
+            <button class="btn btn-secondary" id="btn-quick-sync-persistent">
+              💾 ซิงค์ข้อมูล Persistent ล่าสุด
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Lineup -->
+      <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-title">🎮 ทีมปัจจุบัน (Current Lineup)</div>
+        <div id="lineup-container" class="grid-4" style="margin-top: 0.5rem;">
+          <div class="card" style="text-align: center; color: var(--text-muted);">กำลังโหลดข้อมูลทีม...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Avatars Tab -->
+    <section id="tab-avatars" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; gap: 0.75rem; flex: 1; max-width: 480px;">
+          <input type="text" id="avatar-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร...">
+          <select id="avatar-filter-rarity" class="form-select" style="max-width: 140px;">
+            <option value="all">ทุกระดับดาว</option>
+            <option value="5">5 ดาว (SSR)</option>
+            <option value="4">4 ดาว (SR)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-gold" id="btn-max-all-avatars">⭐ ปรับ Max E6 ทุกตัว</button>
+          <button class="btn btn-secondary" id="btn-reload-avatars">🔄 รีโหลด</button>
+        </div>
+      </div>
+
+      <div id="avatars-grid" class="grid-4">
+        <div style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;">
+          กำลังดึงข้อมูลตัวละครจากเซิร์ฟเวอร์...
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Ex-Rank Tab -->
+    <section id="tab-exrank" class="tab-content">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-title">
+          <span>⚡ ระบบปลดล็อค Ex-Rank Skill</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-success btn-sm" id="btn-exrank-enable-all">เปิด Ex-Rank ทั้งหมด</button>
+            <button class="btn btn-secondary btn-sm" id="btn-exrank-disable-all">ปิด Ex-Rank ทั้งหมด</button>
+          </div>
+        </div>
+        <p class="card-subtitle">
+          เปิดใช้งานพรสวรรค์และกลไกพิเศษ Ex-Rank สำหรับตัวละครเฉพาะใน FreeSR (เช่น Jing Yuan โดน CC ไม่หยุดชะงัก, Dan Heng IL, Acheron)
+        </p>
+      </div>
+
+      <div id="exrank-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="color: var(--text-muted); text-align: center; padding: 2rem;">
+          กำลังโหลดข้อมูล Ex-Rank...
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Teleport Tab -->
+    <section id="tab-teleport" class="tab-content">
+      <div class="grid-2">
+        <!-- Presets -->
+        <div class="card">
+          <div class="card-title">📍 จุดวาร์ปปลอดภัยยอดนิยม (Safe Presets)</div>
+          <p class="card-subtitle">คลิกจุดวาร์ปเพื่อย้ายฉากของผู้เล่นในไฟล์เซฟได้ทันที</p>
+          <div id="teleport-presets-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Custom Coordinate Warp -->
+        <div class="card">
+          <div class="card-title">🎯 กำหนดพิกัดวาร์ปเอง (Custom Teleport)</div>
+          <p class="card-subtitle">ใส่ PlaneID, FloorID และ EntryID ตามต้องการ</p>
+          
+          <form id="form-custom-teleport">
+            <div class="grid-2" style="gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">Plane ID</label>
+                <input type="number" id="tp-plane" class="form-input" required placeholder="เช่น 20001">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Floor ID</label>
+                <input type="number" id="tp-floor" class="form-input" required placeholder="เช่น 20001001">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Entry ID</label>
+              <input type="number" id="tp-entry" class="form-input" required placeholder="เช่น 2000101">
+            </div>
+
+            <div class="grid-3" style="gap: 0.75rem;">
+              <div class="form-group">
+                <label class="form-label">X</label>
+                <input type="number" id="tp-x" class="form-input" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Y</label>
+                <input type="number" id="tp-y" class="form-input" placeholder="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Z</label>
+                <input type="number" id="tp-z" class="form-input" placeholder="0">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+              🚀 ยืนยันการวาร์ป (Execute Teleport)
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. JSON Management Tab -->
+    <section id="tab-json" class="tab-content">
+      <div class="card">
+        <div class="card-title" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-sm btn-primary active" id="btn-select-freesr">📄 freesr-data.json</button>
+            <button class="btn btn-sm btn-secondary" id="btn-select-persistent">💾 persistent (Save)</button>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-sm btn-secondary" id="btn-json-beautify">✨ จัดรูปแบบ JSON</button>
+            <button class="btn btn-sm btn-secondary" id="btn-json-download">📥 ดาวน์โหลด Backup</button>
+            <label class="btn btn-sm btn-secondary" style="cursor: pointer; margin: 0;">
+              📤 อัปโหลดไฟล์ <input type="file" id="json-file-input" accept=".json,text/plain" style="display: none;">
+            </label>
+            <button class="btn btn-sm btn-success" id="btn-json-save">💾 บันทึกไปยังเซิร์ฟเวอร์</button>
+          </div>
+        </div>
+
+        <div class="json-editor-wrapper">
+          <textarea id="json-editor" class="json-textarea" spellcheck="false" placeholder="กำลังโหลดข้อมูล JSON..."></textarea>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+            <span id="json-status-info">พร้อมใช้งาน</span>
+            <span>Tip: สามารถแก้ไขค่าดิบแล้วกด 'บันทึกไปยังเซิร์ฟเวอร์' ได้ทันที</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Settings & GitHub Hosting Guide -->
+    <section id="tab-settings" class="tab-content">
+      <div class="grid-2">
+        <!-- Endpoint config -->
+        <div class="card">
+          <div class="card-title">⚙️ ตั้งค่าการเชื่อมต่อ API Gateway</div>
+          <p class="card-subtitle">ปรับเปลี่ยนพอร์ตหรือ IP ได้ตามไฟล์ server.json ของคุณ</p>
+
+          <form id="form-settings">
+            <div class="form-group">
+              <label class="form-label">REST API Gateway URL</label>
+              <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
+              <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
+                * ค่าเริ่มต้นของ GaC-hkrpg-go คือพอร์ต 21000 (SDK server)
+              </small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">ความถี่ในการตรวจสอบสถานะ (วินาที)</label>
+              <input type="number" id="setting-ping-interval" class="form-input" min="3" max="60" value="10">
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button type="submit" class="btn btn-success" style="flex: 1;">💾 บันทึกการตั้งค่า</button>
+              <button type="button" class="btn btn-secondary" id="btn-reset-settings">คืนค่าเริ่มต้น</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- GitHub Pages Hosting Guide -->
+        <div class="card">
+          <div class="card-title">🌐 วิธีนำขึ้นโฮสต์ GitHub Pages (ฟรี 100%)</div>
+          <p class="card-subtitle">สามารถเปิดใช้งานเว็บนี้บนอินเทอร์เน็ตได้โดยไม่ต้องเสียค่าโฮสต์ใดๆ</p>
+
+          <ol style="margin-left: 1.25rem; font-size: 0.875rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.65rem;">
+            <li>
+              <strong style="color: var(--text-main);">1. สร้าง Repository บน GitHub:</strong><br>
+              สร้าง GitHub Repo ใหม่ (Public หรือ Private ก็ได้) เช่นชื่อ <code>GaC-srtool</code>
+            </li>
+            <li>
+              <strong style="color: var(--text-main);">2. Push โฟลเดอร์นี้ขึ้น GitHub:</strong><br>
+              <code>git remote add origin https://github.com/&lt;user&gt;/GaC-srtool.git</code><br>
+              <code>git add . && git commit -m "Init GaC-srtool" && git push -u origin main</code>
+            </li>
+            <li>
+              <strong style="color: var(--text-main);">3. เปิดใช้งาน GitHub Pages:</strong><br>
+              เข้าไปที่ Repo บน GitHub &gt; <strong>Settings</strong> &gt; <strong>Pages</strong><br>
+              ใต้หัวข้อ <em>Build and deployment</em> เลือก Source เป็น <strong>Deploy from a branch</strong> &gt; เลือก Branch: <strong>main</strong>, Folder: <strong>/ (root)</strong> &gt; กด <strong>Save</strong>
+            </li>
+            <li>
+              <strong style="color: var(--text-main);">4. ใช้งานได้ทันที:</strong><br>
+              เว็บจะออนไลน์ที่ <code>https://&lt;user&gt;.github.io/GaC-srtool/</code> ไม่เสียค่าใช้จ่ายตลอดชีพ!
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="modal-settings">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-weight: 700;">⚙️ ตั้งค่าการเชื่อมต่อ API Server</h3>
+        <button class="btn btn-sm btn-secondary" id="btn-close-modal">✕</button>
+      </div>
+      <div>
+        <div class="form-group">
+          <label class="form-label">Server REST API URL</label>
+          <input type="text" id="modal-api-url" class="form-input">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button class="btn btn-secondary" id="btn-modal-cancel">ยกเลิก</button>
+          <button class="btn btn-primary" id="btn-modal-save">บันทึก & ทดสอบ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Script Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

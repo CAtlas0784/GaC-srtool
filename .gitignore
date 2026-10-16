@@ -1,0 +1,24 @@
+# Dependencies & Package Managers
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+.cache/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local custom configs (environment / machine specific)
+config.local.json
+config.local.js
+.env
+.env.local
