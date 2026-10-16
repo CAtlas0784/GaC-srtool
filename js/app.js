@@ -171,11 +171,30 @@ const el = {
   rangeCharEnergy: document.getElementById('range-char-energy'),
   valCharEnergy: document.getElementById('val-char-energy'),
 
-  modalLcId: document.getElementById('modal-lc-id'),
-  modalLcPreview: document.getElementById('modal-lc-preview'),
+  btnModalE6S5: document.getElementById('btn-modal-e6s5'),
+  btnModalE0S1: document.getElementById('btn-modal-e0s1'),
+
+  // Light Cone View in Modal
+  modalLcArtWrapper: document.getElementById('modal-lc-art-wrapper'),
+  modalLcFullImg: document.getElementById('modal-lc-full-img'),
+  modalLcNoArt: document.getElementById('modal-lc-no-art'),
+  modalLcNameDisplay: document.getElementById('modal-lc-name-display'),
+  modalLcMetaDisplay: document.getElementById('modal-lc-meta-display'),
+  modalLcRankBadge: document.getElementById('modal-lc-rank-badge'),
+  rangeLcLevel: document.getElementById('range-lc-level'),
+  modalLcLvlVal: document.getElementById('modal-lc-lvl-val'),
   modalLcLevel: document.getElementById('modal-lc-level'),
-  btnModalMaxLc: document.getElementById('btn-modal-max-lc'),
   modalLcRankBtns: document.getElementById('modal-lc-rank-btns'),
+  modalLcPassiveDesc: document.getElementById('modal-lc-passive-desc'),
+  selectModalChangeLc: document.getElementById('select-modal-change-lc'),
+  btnModalApplyChangeLc: document.getElementById('btn-modal-apply-change-lc'),
+  modalLcId: document.getElementById('modal-lc-id'),
+
+  // Showcase View in Modal
+  showcaseCardContainer: document.getElementById('showcase-card-container'),
+  btnShowcaseCopyText: document.getElementById('btn-showcase-copy-text'),
+  btnShowcaseExportImg: document.getElementById('btn-showcase-export-img'),
+  btnShowcaseAutoRelics: document.getElementById('btn-showcase-auto-relics'),
 
   // Lineup Picker Modal
   modalLineupPicker: document.getElementById('modal-lineup-picker'),
@@ -922,9 +941,21 @@ function renderAvatarsGrid() {
           <span class="avatar-lvl">Lv. ${item.level}</span>
           <span class="avatar-eidolon ${item.rank === 6 ? 'e6' : ''}">E${item.rank}</span>
         </div>
-        <button type="button" class="btn btn-sm btn-gold btn-card-quick-max" title="ปรับ Max E6 ทันที">⭐ MAX</button>
+        <div style="display: flex; gap: 0.35rem;">
+          <button type="button" class="btn btn-sm btn-secondary btn-card-showcase" title="ดูการ์ดแสดงผล Build">🖼️</button>
+          <button type="button" class="btn btn-sm btn-gold btn-card-quick-max" title="ปรับ Max E6 ทันที">⭐ MAX</button>
+        </div>
       </div>
     `;
+
+    // Quick Showcase Card Button
+    const btnShowcase = card.querySelector('.btn-card-showcase');
+    btnShowcase?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openAvatarDetailModal(item);
+      const showcaseTabBtn = document.querySelector('.modal-subtab-btn[data-modaltab="modaltab-showcase"]');
+      if (showcaseTabBtn) showcaseTabBtn.click();
+    });
 
     // Quick Max Button
     const btnQuickMax = card.querySelector('.btn-card-quick-max');
@@ -983,6 +1014,98 @@ async function maxSingleAvatar(avatarId) {
 let selectedLcRank = 5;
 
 // Modal Sub-tabs Handler
+// Signature Light Cones dictionary for all characters
+const SIGNATURE_LIGHTCONES = {
+  1001: 21001, // March 7th -> Day One of My New Life
+  1002: 21000, // Dan Heng -> Only Silence Remains
+  1003: 23000, // Himeko -> Night on the Milky Way
+  1004: 23004, // Welt -> In the Name of the World
+  1005: 23006, // Kafka -> Patience Is All You Need
+  1006: 23007, // Silver Wolf -> Incessant Rain
+  1008: 21007, // Arlan -> A Secret Vow
+  1009: 21008, // Asta -> Planetary Rendezvous
+  1013: 21006, // Herta -> The Birth of the Self
+  1101: 23003, // Bronya -> But the Battle Isn't Over
+  1102: 23001, // Seele -> In the Night
+  1103: 21009, // Serval -> Make the World Clamor
+  1104: 23005, // Gepard -> Moment of Victory
+  1105: 21010, // Natasha -> Post-Op Conversation
+  1106: 21003, // Pela -> Good Night and Sleep Well
+  1107: 23002, // Clara -> Something Irreplaceable
+  1108: 21011, // Sampo -> Eyes of the Prey
+  1109: 21012, // Hook -> The Moles Welcome You
+  1110: 21013, // Lynx -> Warmth Shortens Cold Nights
+  1111: 21014, // Luka -> Resolution Shines As Pearls of Sweat
+  1112: 23012, // Topaz -> Worrisome, Blissful
+  1201: 21015, // Qingque -> Today Is Another Peaceful Day
+  1202: 21016, // Tingyun -> Memories of the Past
+  1203: 23008, // Luocha -> Echoes of the Coffin
+  1204: 23010, // Jing Yuan -> Before Dawn
+  1205: 23009, // Blade -> The Unreachable Side
+  1206: 21017, // Sushang -> Swordplay
+  1207: 21018, // Yukong -> Past and Future
+  1208: 23011, // Fu Xuan -> She Already Shut Her Eyes
+  1209: 23013, // Yanqing -> Sleep Like the Dead
+  1210: 21019, // Guinaifen -> Fermata
+  1211: 23016, // Bailu -> Time Waits for No One
+  1212: 23014, // Jingliu -> I Shall Be My Own Sword
+  1213: 23015, // Dan Heng IL -> Brighter Than the Sun
+  1214: 21020, // Xueyi -> Under the Blue Sky
+  1215: 21021, // Hanya -> Dance! Dance! Dance!
+  1217: 23017, // Huohuo -> Night of Fright
+  1218: 23027, // Jiaoqiu -> Those Many Springs
+  1220: 23030, // Feixiao -> I Venture Forth to Hunt
+  1221: 23028, // Yunli -> Dance at Sunset
+  1222: 23031, // Lingsha -> Scent Alone Stays True
+  1223: 21038, // Moze -> Shadowed by Night
+  1224: 23033, // Fugue -> Long Road Leads Home
+  1301: 21022, // Gallagher -> What Is Real?
+  1302: 23018, // Argenti -> An Instant Before A Gaze
+  1303: 23019, // Ruan Mei -> Past Self in Mirror
+  1304: 23022, // Aventurine -> Inherently Unjust Destiny
+  1305: 23020, // Dr. Ratio -> Baptism of Pure Thought
+  1306: 23021, // Sparkle -> Earthly Escort
+  1307: 23023, // Black Swan -> Reforged Remembrance
+  1308: 23024, // Acheron -> Along the Passing Shore
+  1309: 23026, // Robin -> Flowing Nightglow
+  1310: 23025, // Firefly -> Whereabouts Should Dreams Rest
+  1312: 21035, // Misha -> Indelible Promise
+  1313: 23032, // Sunday -> A Grounded Ascent
+  1314: 23029, // Jade -> Yet Hope Is Priceless
+  1315: 23028, // Boothill -> Sailing Towards A Second Life
+  1317: 23030, // Rappa -> Ninjutsu Inscription: Dazzling Evilbreaker
+  1401: 23034, // The Herta -> Into the Unreachable Veil
+  1402: 23035, // Aglaea -> Time Woven into Gold
+  1403: 23036, // Castorice -> Make Farewells More Beautiful
+  1404: 23037, // Anaxa -> If Time Were a Flower
+  1405: 23038, // Tribbie
+  1406: 23039, // Mydei
+  8001: 24001, // Trailblazer Male Destruction -> On the Fall of an Aeon
+  8002: 24001, // Trailblazer Female Destruction
+  8003: 24002, // Trailblazer Male Preservation -> Texture of Memories
+  8004: 24002, // Trailblazer Female Preservation
+  8005: 21008, // Trailblazer Male Harmony -> Memories of the Past
+  8006: 21008, // Trailblazer Female Harmony
+  8007: 21040, // Trailblazer Remembrance
+  8008: 21040
+};
+
+// Recommended Relic Builds by Path
+const RECOMMENDED_RELIC_BUILDS = {
+  Preservation: { cavern: 103, planar: 304, name: "Knight of Purity (4) + Belobog (2)" },
+  Abundance: { cavern: 101, planar: 302, name: "Passerby (4) + Fleet (2)" },
+  Harmony: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" },
+  Nihility: { cavern: 116, planar: 311, name: "Prisoner (4) + Glamoth (2)" },
+  Hunt: { cavern: 120, planar: 309, name: "Valorous (4) + Rutilant Arena (2)" },
+  Destruction: { cavern: 119, planar: 315, name: "Iron Cavalry (4) + Kalpagni (2)" },
+  Erudition: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" },
+  Remembrance: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" }
+};
+
+// Active Lightcone Superimposition Rank in Modal (1 - 5)
+let selectedLcRank = 5;
+
+// Modal Sub-tabs Handler
 function setupModalSubtabs() {
   const tabBtns = document.querySelectorAll('.modal-subtab-btn');
   tabBtns.forEach(btn => {
@@ -998,6 +1121,9 @@ function setupModalSubtabs() {
       if (targetContent) {
         targetContent.style.display = 'block';
         targetContent.classList.add('active');
+        if (targetId === 'modaltab-showcase' && state.selectedAvatarDetail) {
+          renderShowcaseCard(state.selectedAvatarDetail.avatar_id);
+        }
       }
     });
   });
@@ -1015,21 +1141,144 @@ function updateLcRankPips(rank) {
   });
 }
 
-function updateModalLcPreview(lcId) {
-  if (!el.modalLcPreview) return;
+// Lightcone Passive Skill Descriptions with dynamic rank values
+function getLightconePassiveDesc(lcId, rank = 5) {
   const id = parseInt(lcId, 10);
-  if (!id) {
-    el.modalLcPreview.innerHTML = '';
-    return;
-  }
-  const info = getLightconeInfo(id);
-  el.modalLcPreview.innerHTML = `
-    <span style="color: var(--accent-cyan); font-weight: 700;">${info.name}</span>
-    <span class="avatar-badge-rarity rarity-${info.rarity}" style="position: static; font-size: 0.7rem; padding: 0.1rem 0.4rem; margin-left: 0.4rem;">★ ${info.rarity}</span>
-  `;
+  const r = Math.max(1, Math.min(5, rank));
+
+  const passives = {
+    21001: `ทำให้ DEF ของผู้สวมใส่เพิ่มขึ้น <strong>${16 + (r - 1) * 2}%</strong> หลังจากเข้าสู่การต่อสู้ จะทำให้ความต้านทานทุกประเภทของตัวละครฝ่ายเราทั้งหมดเพิ่มขึ้น <strong>${8 + (r - 1)}%</strong> โดยสกิลชนิดเดียวกันจะไม่สามารถซ้อนทับได้`,
+    23024: `ทำให้ CRIT DMG ของผู้สวมใส่เพิ่มขึ้น <strong>${36 + (r - 1) * 6}%</strong> เมื่อโจมตีโดนเป้าหมาย จะติดสถานะ Mirage Fizzle ทำให้ได้รับความเสียหายเพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong> และความเสียหายท่าไม้ตายเพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong>`,
+    23025: `ทำให้ Break Effect ของผู้สวมใส่เพิ่มขึ้น <strong>${60 + (r - 1) * 10}%</strong> เมื่อสร้าง Break DMG จะทำให้เป้าหมายติดสถานะ Routed ได้รับ Break DMG เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong> และลด SPD ลง 20%`,
+    23001: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${18 + (r - 1) * 3}%</strong> ระหว่างการต่อสู้ ทุกๆ 10 หน่วยของ SPD ที่เกิน 100 จะเพิ่ม DMG การโจมตีปกติและสกิล <strong>${6 + (r - 1)}%</strong> และเพิ่ม CRIT DMG ท่าไม้ตาย <strong>${12 + (r - 1) * 2}%</strong>`,
+    23010: `ทำให้ CRIT DMG ของผู้สวมใส่เพิ่มขึ้น <strong>${36 + (r - 1) * 6}%</strong> เพิ่ม DMG สกิลและท่าไม้ตาย <strong>${18 + (r - 1) * 3}%</strong> และเสริม Somnus Corpus เพิ่ม DMG โจมตีต่อเนื่อง <strong>${48 + (r - 1) * 8}%</strong>`,
+    23019: `ทำให้ Break Effect ของผู้สวมใส่เพิ่มขึ้น <strong>${60 + (r - 1) * 10}%</strong> หลังจากผู้สวมใส่ปล่อยท่าไม้ตาย ทีมสร้าง DMG เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong> 3 เทิร์น และฟื้นฟูแต้มสกิล 1 แต้ม`,
+    23022: `ทำให้ DEF ของผู้สวมใส่เพิ่มขึ้น <strong>${40 + (r - 1) * 5}%</strong> เมื่อมอบโล่ให้เพื่อนร่วมทีม จะเพิ่ม CRIT DMG <strong>${40 + (r - 1) * 5}%</strong> 2 เทิร์น และทำให้ศัตรูได้รับ DMG เพิ่มขึ้น <strong>${10 + (r - 1) * 2}%</strong>`,
+    23026: `เมื่อเพื่อนร่วมทีมโจมตี ผู้สวมใส่จะได้รับ Cantillation 1 ชั้น แต่ละชั้นเพิ่ม Energy Regeneration Rate <strong>${3 + (r - 1) * 0.5}%</strong> สูงสุด 5 ชั้น และเพิ่ม ATK ของทั้งทีม <strong>${48 + (r - 1) * 8}%</strong>`,
+    23006: `ทำให้ DMG ของผู้สวมใส่เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong> หลังการโจมตีแต่ละครั้ง SPD เพิ่มขึ้น <strong>${4.8 + (r - 1) * 0.8}%</strong> สูงสุด 3 ชั้น และทำให้เป้าหมายติดสถานะ Erode เกิด DoT สายฟ้า <strong>${60 + (r - 1) * 10}%</strong>`,
+    23030: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${15 + (r - 1) * 2.5}%</strong> เมื่อโจมตีต่อเนื่อง ได้รับ Luminflux ซ้อนทับ 2 ชั้น แต่ละชั้นทำให้ท่าไม้ตายเมิน DEF ศัตรู <strong>${27 + (r - 1) * 4.5}%</strong>`,
+    23014: `ทำให้ CRIT DMG ของผู้สวมใส่เพิ่มขึ้น <strong>${20 + (r - 1) * 3}%</strong> เมื่อเพื่อนร่วมทีมเสีย HP จะได้รับ Eclipse ซ้อนทับ 3 ชั้น ทำให้การโจมตีถัดไปสร้าง DMG เพิ่มขึ้น <strong>${14 + (r - 1) * 2.5}%</strong> และเมิน DEF <strong>${12 + (r - 1) * 2}%</strong>`,
+    23015: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${18 + (r - 1) * 3}%</strong> เมื่อปล่อย Basic ATK จะได้รับ Dragons Call เพิ่ม ATK <strong>${18 + (r - 1) * 3}%</strong> และ Energy Regeneration Rate <strong>${6 + (r - 1)}%</strong>`,
+    23033: `ทำให้ Break Effect ของผู้สวมใส่เพิ่มขึ้น <strong>${60 + (r - 1) * 10}%</strong> เมื่อสร้าง Break DMG จะทำให้ศัตรูติดสถานะ Vulnerability ได้รับ DMG เพิ่มขึ้น <strong>${18 + (r - 1) * 3}%</strong>`,
+    23032: `ทำให้ Energy Regeneration Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยสกิลต่อสู้หรือท่าไม้ตาย จะเพิ่ม CRIT DMG ของพันธมิตร <strong>${48 + (r - 1) * 8}%</strong>`,
+    23034: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยท่าไม้ตาย จะสร้าง DMG น้ำแข็งเพิ่มเติม <strong>${60 + (r - 1) * 10}%</strong> ของ ATK แก่ศัตรูทั้งหมด`,
+    23036: `ทำให้ HP สูงสุดของผู้สวมใส่เพิ่มขึ้น <strong>${30 + (r - 1) * 5}%</strong> และเมื่ออยู่ในสนามรบ สมาชิกทีมทุกคนสร้าง DMG เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong>`,
+    24001: `เมื่อผู้สวมใส่โจมตี จะเพิ่ม ATK <strong>${8 + (r - 1) * 2}%</strong> สูงสุด 4 ชั้น และเมื่อทำลายจุดอ่อนศัตรู จะเพิ่ม DMG <strong>${12 + (r - 1) * 3}%</strong> เป็นเวลา 2 เทิร์น`
+  };
+
+  if (passives[id]) return passives[id];
+
+  const meta = LIGHTCONE_METADATA[id];
+  const pathName = meta ? translatePath(meta.path) : "สายต่อสู้";
+  return `เพิ่มค่าสถานะพื้นฐานตามสาย <strong>${pathName}</strong> และเพิ่มประสิทธิภาพความเสียหายและการสนับสนุน <strong>${12 + (r - 1) * 3}%</strong> เมื่อเข้าสู่การต่อสู้`;
 }
 
-// Character Detail / Build Modal (Inspired by srtools.punklorde.org/skills-info)
+// Update Modal Lightcone Full Artwork and Details (Matching srtools / Firefly)
+function updateModalLcFullView(lcId, rank = 5, level = 80) {
+  const id = parseInt(lcId, 10);
+  if (!id || !LIGHTCONE_METADATA[id]) {
+    if (el.modalLcFullImg) el.modalLcFullImg.style.display = 'none';
+    if (el.modalLcNoArt) el.modalLcNoArt.style.display = 'block';
+    if (el.modalLcNameDisplay) el.modalLcNameDisplay.textContent = 'ยังไม่ได้สวมใส่ Light Cone';
+    if (el.modalLcMetaDisplay) el.modalLcMetaDisplay.innerHTML = '';
+    if (el.modalLcRankBadge) el.modalLcRankBadge.textContent = '-';
+    if (el.modalLcPassiveDesc) el.modalLcPassiveDesc.innerHTML = 'กรุณาเลือก Light Cone ที่ต้องการสวมใส่';
+    return;
+  }
+
+  const meta = LIGHTCONE_METADATA[id];
+  const info = getLightconeInfo(id);
+
+  if (el.modalLcId) el.modalLcId.value = id;
+  if (el.modalLcLevel) el.modalLcLevel.value = level;
+  if (el.rangeLcLevel) el.rangeLcLevel.value = level;
+  if (el.modalLcLvlVal) el.modalLcLvlVal.textContent = `${level} / 80`;
+
+  // Full artwork image
+  if (el.modalLcFullImg) {
+    el.modalLcFullImg.style.display = 'block';
+    if (el.modalLcNoArt) el.modalLcNoArt.style.display = 'none';
+    const primarySrc = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+    const fallbackSrc = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${id}.png`;
+    el.modalLcFullImg.src = primarySrc;
+    el.modalLcFullImg.onerror = function() {
+      if (this.src !== fallbackSrc) {
+        this.src = fallbackSrc;
+      }
+    };
+  }
+
+  if (el.modalLcArtWrapper) {
+    el.modalLcArtWrapper.className = `lc-art-wrapper rarity-${info.rarity}`;
+  }
+
+  if (el.modalLcNameDisplay) {
+    el.modalLcNameDisplay.textContent = info.name;
+  }
+
+  if (el.modalLcMetaDisplay) {
+    el.modalLcMetaDisplay.innerHTML = `
+      ${getPathIconHtml(meta.path, 22)}
+      <span class="path-badge" style="font-size: 0.75rem;">${info.path}</span>
+      <span class="avatar-badge-rarity rarity-${info.rarity}" style="position: static; font-size: 0.75rem; padding: 0.15rem 0.5rem;">★ ${info.rarity}</span>
+      <span style="font-size: 0.75rem; color: var(--text-muted);">(ID: ${id})</span>
+    `;
+  }
+
+  if (el.modalLcRankBadge) {
+    el.modalLcRankBadge.textContent = `S${rank} • Lv.${level}`;
+  }
+
+  updateLcRankPips(rank);
+
+  if (el.modalLcPassiveDesc) {
+    el.modalLcPassiveDesc.innerHTML = getLightconePassiveDesc(id, rank);
+  }
+
+  if (el.selectModalChangeLc) {
+    el.selectModalChangeLc.value = id;
+  }
+}
+
+// Populate Modal Change Lightcone Dropdown
+function populateModalChangeLcDropdown(avatarPath) {
+  if (!el.selectModalChangeLc) return;
+  el.selectModalChangeLc.innerHTML = '';
+
+  const allIds = Object.keys(LIGHTCONE_METADATA).sort((a, b) => {
+    const metaA = LIGHTCONE_METADATA[a];
+    const metaB = LIGHTCONE_METADATA[b];
+    if (metaB.rarity !== metaA.rarity) return metaB.rarity - metaA.rarity;
+    return parseInt(b, 10) - parseInt(a, 10);
+  });
+
+  const samePathGroup = document.createElement('optgroup');
+  samePathGroup.label = `⭐ Light Cones สาย ${avatarPath}`;
+
+  const otherPathGroup = document.createElement('optgroup');
+  otherPathGroup.label = `🗡️ Light Cones สายอื่นๆ`;
+
+  allIds.forEach(id => {
+    const meta = LIGHTCONE_METADATA[id];
+    const info = getLightconeInfo(id);
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = `★${info.rarity} [${info.path}] ${info.name} (ID: ${id})`;
+
+    if (meta.path === avatarPath) {
+      samePathGroup.appendChild(opt);
+    } else {
+      otherPathGroup.appendChild(opt);
+    }
+  });
+
+  if (samePathGroup.children.length > 0) {
+    el.selectModalChangeLc.appendChild(samePathGroup);
+  }
+  el.selectModalChangeLc.appendChild(otherPathGroup);
+}
+
+// Character Detail / Build Modal (srtools style)
 function openAvatarDetailModal(avatarItem) {
   state.selectedAvatarDetail = avatarItem;
   const aid = avatarItem.avatar_id;
@@ -1126,20 +1375,18 @@ function openAvatarDetailModal(avatarItem) {
     el.valCharEnergy.textContent = `${currentSp}/${maxSp}`;
   }
 
-  // Lightcone
+  // Lightcone initialization & full preview
+  populateModalChangeLcDropdown(meta.path);
   const equippedLc = (state.fullFreesrData?.lightcones || []).find(lc => lc.equip_avatar === aid);
-  if (equippedLc) {
-    if (el.modalLcId) el.modalLcId.value = equippedLc.item_id || '';
-    if (el.modalLcLevel) el.modalLcLevel.value = equippedLc.level || 80;
-    selectedLcRank = equippedLc.rank || 5;
-    updateModalLcPreview(equippedLc.item_id);
-  } else {
-    if (el.modalLcId) el.modalLcId.value = '';
-    if (el.modalLcLevel) el.modalLcLevel.value = 80;
-    selectedLcRank = 5;
-    updateModalLcPreview(null);
-  }
-  updateLcRankPips(selectedLcRank);
+  const activeLcId = equippedLc?.item_id || SIGNATURE_LIGHTCONES[aid] || 21001;
+  const activeLcRank = equippedLc?.rank || 5;
+  const activeLcLevel = equippedLc?.level || 80;
+
+  selectedLcRank = activeLcRank;
+  updateModalLcFullView(activeLcId, activeLcRank, activeLcLevel);
+
+  // Pre-render showcase card
+  renderShowcaseCard(aid);
 
   el.modalAvatarDetail.classList.add('active');
 }
@@ -1383,7 +1630,9 @@ async function saveAvatarDetails() {
 
   renderAvatarsGrid();
   loadEquipment();
-  el.modalAvatarDetail.classList.remove('active');
+  if (closeModal) {
+    el.modalAvatarDetail.classList.remove('active');
+  }
 
   if (state.isConnected) {
     try {
@@ -1400,6 +1649,409 @@ async function saveAvatarDetails() {
   } else {
     showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
   }
+}
+
+// Apply E6S5 Build (Lv.80, Prom 6, E6, Max Skills/Traces, 50% Energy, S5 Light Cone)
+async function applyE6S5Build() {
+  if (!state.selectedAvatarDetail) return;
+  const aid = state.selectedAvatarDetail.avatar_id;
+
+  // Level & Eidolon
+  el.modalCharLevel.value = 80;
+  el.modalCharPromotion.value = 6;
+  state.selectedAvatarDetail.level = 80;
+  state.selectedAvatarDetail.promotion = 6;
+  state.selectedAvatarDetail.rank = 6;
+  renderModalEidolonPips(6);
+
+  // Skills & Traces
+  maxSkillsForAvatar();
+
+  // Energy: 50% standard
+  if (el.rangeCharEnergy && el.valCharEnergy) {
+    const half = Math.floor(parseInt(el.rangeCharEnergy.max, 10) * 0.5);
+    el.rangeCharEnergy.value = half;
+    el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
+  }
+
+  // Light Cone: Lv 80, S5
+  let curLcId = parseInt(el.modalLcId?.value, 10);
+  if (!curLcId || curLcId === 0) {
+    curLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+    if (el.modalLcId) el.modalLcId.value = curLcId;
+  }
+  selectedLcRank = 5;
+  updateModalLcFullView(curLcId, 5, 80);
+
+  // Auto equip recommended relics if none equipped
+  const hasRelics = (state.fullFreesrData?.relics || []).some(r => r.equip_avatar === aid);
+  if (!hasRelics) {
+    await autoEquipRecommendedRelics(aid, false);
+  }
+
+  await saveAvatarDetails(false);
+  renderShowcaseCard(aid);
+  showToast(t('toastE6S5Applied'), 'success');
+}
+
+// Apply E0S1 Build (Lv.80, Prom 6, E0, Max Skills/Traces, 50% Energy, S1 Light Cone)
+async function applyE0S1Build() {
+  if (!state.selectedAvatarDetail) return;
+  const aid = state.selectedAvatarDetail.avatar_id;
+
+  // Level & Eidolon
+  el.modalCharLevel.value = 80;
+  el.modalCharPromotion.value = 6;
+  state.selectedAvatarDetail.level = 80;
+  state.selectedAvatarDetail.promotion = 6;
+  state.selectedAvatarDetail.rank = 0;
+  renderModalEidolonPips(0);
+
+  // Skills & Traces
+  maxSkillsForAvatar();
+
+  // Energy: 50% standard
+  if (el.rangeCharEnergy && el.valCharEnergy) {
+    const half = Math.floor(parseInt(el.rangeCharEnergy.max, 10) * 0.5);
+    el.rangeCharEnergy.value = half;
+    el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
+  }
+
+  // Light Cone: Lv 80, S1
+  let curLcId = parseInt(el.modalLcId?.value, 10);
+  if (!curLcId || curLcId === 0) {
+    curLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+    if (el.modalLcId) el.modalLcId.value = curLcId;
+  }
+  selectedLcRank = 1;
+  updateModalLcFullView(curLcId, 1, 80);
+
+  // Auto equip recommended relics if none equipped
+  const hasRelics = (state.fullFreesrData?.relics || []).some(r => r.equip_avatar === aid);
+  if (!hasRelics) {
+    await autoEquipRecommendedRelics(aid, false);
+  }
+
+  await saveAvatarDetails(false);
+  renderShowcaseCard(aid);
+  showToast(t('toastE0S1Applied'), 'info');
+}
+
+// Render Showcase Card (Matching srtools.punklorde.org/showcase-card)
+function renderShowcaseCard(avatarId) {
+  if (!el.showcaseCardContainer) return;
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const av = state.fullFreesrData?.avatars?.[aid];
+  const level = av?.level || state.selectedAvatarDetail?.level || 80;
+  const rank = av?.data?.rank ?? state.selectedAvatarDetail?.rank ?? 6;
+
+  // 1. Equipped Light Cone
+  const equippedLc = (state.fullFreesrData?.lightcones || []).find(lc => lc.equip_avatar === aid);
+  const lcId = equippedLc?.item_id || SIGNATURE_LIGHTCONES[aid] || 21001;
+  const lcMeta = LIGHTCONE_METADATA[lcId] || {};
+  const lcInfo = getLightconeInfo(lcId);
+  const lcLevel = equippedLc?.level || 80;
+  const lcRank = equippedLc?.rank || selectedLcRank || 5;
+
+  const baseHp = meta.rarity === 5 ? 1200 : 1058;
+  const baseAtk = meta.rarity === 5 ? 640 : 511;
+  const baseDef = meta.rarity === 5 ? 600 : 573;
+  const baseSpd = 100;
+
+  const lcHp = lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846);
+  const lcAtk = lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317);
+  const lcDef = lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264);
+
+  // 2. Relics & Set Bonuses
+  const avatarRelics = (state.fullFreesrData?.relics || []).filter(r => r.equip_avatar === aid);
+  const setCounts = {};
+  avatarRelics.forEach(r => {
+    const setId = Math.floor((r.relic_id % 10000) / 10);
+    setCounts[setId] = (setCounts[setId] || 0) + 1;
+  });
+
+  const activeSetBadges = [];
+  for (const sId in setCounts) {
+    const count = setCounts[sId];
+    const sInfo = getRelicSetInfo(sId);
+    if (count >= 4) {
+      activeSetBadges.push({ name: sInfo.name, count: 4 });
+    } else if (count >= 2) {
+      activeSetBadges.push({ name: sInfo.name, count: 2 });
+    }
+  }
+
+  if (activeSetBadges.length === 0) {
+    const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    activeSetBadges.push({ name: getRelicSetInfo(rec.cavern).name, count: 4 });
+    activeSetBadges.push({ name: getRelicSetInfo(rec.planar).name, count: 2 });
+  }
+
+  // Combat Stats
+  const totalHp = Math.round((baseHp + lcHp) * 1.45 + 706);
+  const totalAtk = Math.round((baseAtk + lcAtk) * 1.35 + 353);
+  const totalDef = Math.round((baseDef + lcDef) * 1.85 + (meta.path === 'Preservation' ? 1200 : 0));
+  const totalSpd = (baseSpd + 25 + 10.5).toFixed(1);
+  const critRate = (5.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 65.4 : 18.8)).toFixed(1);
+  const critDmg = (50.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 132.5 : 26.5)).toFixed(1);
+  const breakEffect = (meta.path === 'Harmony' || meta.path === 'Nihility' ? 142.0 : 10.4).toFixed(1);
+  const effectRes = (10.0).toFixed(1);
+  const err = (19.4).toFixed(1);
+  const ehr = (meta.path === 'Nihility' ? 67.2 : 19.4).toFixed(1);
+  const healing = (meta.path === 'Abundance' ? 34.5 : 0.0).toFixed(1);
+  const elemDmg = (38.8).toFixed(1);
+
+  // Eidolon strip
+  let eidolonStripHtml = '';
+  for (let e = 1; e <= 6; e++) {
+    const isAct = rank >= e;
+    eidolonStripHtml += `<div class="showcase-eidolon-dot ${isAct ? 'active' : ''}">E${e}</div>`;
+  }
+
+  // Sets HTML
+  let setsHtml = '';
+  activeSetBadges.forEach(sb => {
+    setsHtml += `
+      <div class="showcase-set-item">
+        <span style="color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">${sb.name}</span>
+        <span class="showcase-set-badge">${sb.count}-PC</span>
+      </div>
+    `;
+  });
+
+  // Relic cards (Slots 1 to 6)
+  const slotNames = {
+    1: { name: "ส่วนหัว", stat: "HP 706" },
+    2: { name: "ส่วนมือ", stat: "ATK 353" },
+    3: { name: "ลำตัว", stat: meta.path === 'Preservation' ? "DEF 54.0%" : (meta.path === 'Hunt' ? "CRIT Rate 32.4%" : "HP 43.2%") },
+    4: { name: "รองเท้า", stat: "SPD 25.0" },
+    5: { name: "ลูกแก้ว", stat: `${meta.element} 38.8%` },
+    6: { name: "สร้อย", stat: meta.path === 'Preservation' || meta.path === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
+  };
+
+  let relicsHtml = '';
+  for (let slot = 1; slot <= 6; slot++) {
+    const equipped = avatarRelics.find(r => (r.relic_id % 10 === slot));
+    const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    const setId = equipped ? Math.floor((equipped.relic_id % 10000) / 10) : (slot <= 4 ? rec.cavern : rec.planar);
+    const rInfo = getRelicSetInfo(setId);
+    const slotInfo = slotNames[slot];
+
+    relicsHtml += `
+      <div class="showcase-relic-card">
+        <div class="showcase-relic-icon-wrap">
+          <img class="showcase-relic-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="Relic">
+          <span class="showcase-relic-lvl-tag">+15</span>
+        </div>
+        <div class="showcase-relic-info">
+          <div class="showcase-relic-main-stat">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${rInfo.name}</span>
+            <span style="color: var(--accent-cyan); font-weight: 800;">${slotInfo.stat}</span>
+          </div>
+          <div class="showcase-relic-subs">
+            <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%</span>
+            <span>CRIT DMG +${(5.8 + slot * 2.1).toFixed(1)}%</span>
+            <span>ATK +${(3.8 + slot * 0.8).toFixed(1)}%</span>
+            <span>DEF +${(4.8 + slot * 1.2).toFixed(1)}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const primaryPortrait = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${aid}.png`;
+  const fallbackPortrait = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${aid}.png`;
+  const lcArtThumb = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${lcId}.png`;
+  const fallbackLcThumb = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${lcId}.png`;
+
+  el.showcaseCardContainer.innerHTML = `
+    <!-- 1. Left Splash Art Column -->
+    <div class="showcase-splash-col">
+      <img class="showcase-splash-img" src="${primaryPortrait}" onerror="if(this.src!=='${fallbackPortrait}')this.src='${fallbackPortrait}';else this.src='./assets/avatars/${aid}.png';" alt="${meta.name}">
+      <div class="showcase-splash-overlay">
+        <div class="showcase-char-name">${meta.name}</div>
+        <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+          ${getElementIconHtml(meta.element, 22)}
+          ${getPathIconHtml(meta.path, 22)}
+          <span style="font-weight: 800; font-family: monospace; color: var(--accent-cyan); font-size: 0.95rem;">Lv. ${level}/80</span>
+        </div>
+        <div class="showcase-eidolon-strip">
+          ${eidolonStripHtml}
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Center Column: LC, Set Bonuses, Combat Stats -->
+    <div class="showcase-center-col">
+      <!-- Lightcone Box -->
+      <div class="showcase-lc-box">
+        <img class="showcase-lc-thumb" src="${lcArtThumb}" onerror="if(this.src!=='${fallbackLcThumb}')this.src='${fallbackLcThumb}';else this.src='./assets/logo.png';" alt="${lcInfo.name}">
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lcInfo.name}</div>
+          <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
+            <span style="color: var(--accent-gold); font-weight: 800;">S${lcRank}</span> • Lv. ${lcLevel}/80
+          </div>
+          <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.3rem; display: flex; gap: 0.6rem;">
+            <span>❤️ ${lcHp}</span>
+            <span>⚔️ ${lcAtk}</span>
+            <span>🛡️ ${lcDef}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Set Bonuses -->
+      <div class="showcase-sets-box">
+        <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px;">Active Set Bonuses</div>
+        ${setsHtml}
+      </div>
+
+      <!-- Combat Stats List -->
+      <div class="showcase-stats-list">
+        <div class="showcase-stat-row"><span class="showcase-stat-label">❤️ HP</span><span class="showcase-stat-val">${totalHp}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">⚔️ ATK</span><span class="showcase-stat-val">${totalAtk}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">🛡️ DEF</span><span class="showcase-stat-val">${totalDef}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">👟 SPD</span><span class="showcase-stat-val">${totalSpd}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">🎯 CRIT Rate</span><span class="showcase-stat-val">${critRate}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">💥 CRIT DMG</span><span class="showcase-stat-val">${critDmg}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">⚡ Break Eff</span><span class="showcase-stat-val">${breakEffect}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">🛡️ Eff RES</span><span class="showcase-stat-val">${effectRes}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">🌀 ERR</span><span class="showcase-stat-val">${err}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">🎯 Eff Hit</span><span class="showcase-stat-val">${ehr}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">💚 Healing</span><span class="showcase-stat-val">${healing}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">✨ ${meta.element}</span><span class="showcase-stat-val">${elemDmg}%</span></div>
+      </div>
+    </div>
+
+    <!-- 3. Right Column: 6 Equipped Relics -->
+    <div class="showcase-relics-col">
+      <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: -0.2rem;">Equipped Relics (+15)</div>
+      ${relicsHtml}
+    </div>
+  `;
+}
+
+// Auto-equip recommended 6-piece relics for avatar
+async function autoEquipRecommendedRelics(avatarId, notify = true) {
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+  state.fullFreesrData.relics = state.fullFreesrData.relics || [];
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+
+  // Clear existing relics on this character
+  state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.equip_avatar !== aid);
+
+  let nextUid = (state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
+
+  for (let slot = 1; slot <= 6; slot++) {
+    const setId = slot <= 4 ? rec.cavern : rec.planar;
+    const relicId = 60000 + (setId * 10) + slot;
+    state.fullFreesrData.relics.push({
+      internal_uid: nextUid++,
+      relic_id: relicId,
+      level: 15,
+      equip_avatar: aid,
+      main_affix_id: 1,
+      sub_affixes: [
+        { sub_affix_id: 1, cnt: 2, step: 2 },
+        { sub_affix_id: 2, cnt: 3, step: 2 },
+        { sub_affix_id: 3, cnt: 2, step: 2 },
+        { sub_affix_id: 4, cnt: 2, step: 2 }
+      ]
+    });
+  }
+
+  if (state.isConnected) {
+    await saveFreesrChangesToServer();
+  }
+  loadEquipment();
+  renderShowcaseCard(aid);
+  if (notify) {
+    showToast(t('toastRelicsEquipped', { name: meta.name }), 'success');
+  }
+}
+
+// Copy Showcase Card build text to clipboard
+function copyShowcaseText(avatarId) {
+  const meta = getAvatarInfo(avatarId);
+  const av = state.fullFreesrData?.avatars?.[avatarId];
+  const rank = av?.data?.rank ?? state.selectedAvatarDetail?.rank ?? 6;
+  const lc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === avatarId);
+  const lcInfo = lc ? getLightconeInfo(lc.item_id) : { name: "None", rarity: 0 };
+  const text = `✦ Honkai: Star Rail Character Build ✦
+Name: ${meta.name} (ID: ${avatarId})
+Path: ${meta.path} | Element: ${meta.element}
+Level: 80 | Eidolon: E${rank}
+Light Cone: ${lcInfo.name} (Lv. ${lc?.level || 80} / S${lc?.rank || 1})
+Generated via GaC-Srtool`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(t('toastShowcaseCopied'), 'success');
+  }).catch(() => {
+    showToast('Failed to copy to clipboard', 'warning');
+  });
+}
+
+// Export Showcase Card as printable / image view
+function exportShowcaseImage(avatarId) {
+  const meta = getAvatarInfo(avatarId);
+  const showcaseEl = document.getElementById('showcase-card-container');
+  if (!showcaseEl) return;
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    showToast('กรุณาอนุญาต Pop-up เพื่อพิมพ์หรือบันทึกรูปภาพการ์ด', 'warning');
+    return;
+  }
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${meta.name} - Star Rail Build Showcase</title>
+      <link rel="stylesheet" href="css/styles.css">
+      <style>
+        body {
+          background: #0b0f19;
+          color: #f8fafc;
+          padding: 2rem;
+          font-family: 'Inter', -apple-system, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .print-btn-bar {
+          margin-bottom: 1.5rem;
+          display: flex;
+          gap: 1rem;
+        }
+        button {
+          background: #38bdf8;
+          color: #000;
+          font-weight: 700;
+          border: none;
+          padding: 0.6rem 1.25rem;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="print-btn-bar">
+        <button onclick="window.print()">🖨️ พิมพ์ / บันทึกเป็น PDF หรือรูปภาพ</button>
+        <button onclick="window.close()" style="background: #334155; color: #fff;">✕ ปิดหน้าต่าง</button>
+      </div>
+      <div style="max-width: 960px; width: 100%;">
+        ${showcaseEl.outerHTML}
+      </div>
+    </body>
+    </html>
+  `);
+  win.document.close();
+  showToast(t('showcaseExport') || 'เปิดหน้าต่างสำหรับบันทึกการ์ดเรียบร้อย', 'info');
 }
 
 // ============================================================================
@@ -2252,9 +2904,12 @@ function setupEvents() {
   // Character Detail Modal Controls
   el.btnCloseAvatarModal.addEventListener('click', () => el.modalAvatarDetail.classList.remove('active'));
   document.getElementById('btn-modal-cancel-avatar')?.addEventListener('click', () => el.modalAvatarDetail.classList.remove('active'));
-  el.btnModalSaveAvatar.addEventListener('click', saveAvatarDetails);
+  el.btnModalSaveAvatar.addEventListener('click', () => saveAvatarDetails(true));
   el.btnModalMaxSkills.addEventListener('click', maxSkillsForAvatar);
-  document.getElementById('btn-modal-max-all-char')?.addEventListener('click', maxAllBuildForCurrentAvatar);
+
+  // E6S5 and E0S1 Preset Buttons
+  el.btnModalE6S5?.addEventListener('click', applyE6S5Build);
+  el.btnModalE0S1?.addEventListener('click', applyE0S1Build);
 
   // Steppers for 4 Skills (Basic, Skill, Ultra, Talent)
   const setupSkillStepper = (rangeEl, valEl, decBtn, incBtn, maxBtn, maxVal) => {
@@ -2304,16 +2959,51 @@ function setupEvents() {
     btn.addEventListener('click', () => {
       const r = parseInt(btn.getAttribute('data-rank'), 10);
       updateLcRankPips(r);
+      const curLcId = parseInt(el.modalLcId?.value, 10);
+      const curLvl = parseInt(el.modalLcLevel?.value, 10) || 80;
+      if (curLcId) updateModalLcFullView(curLcId, r, curLvl);
     });
   });
-  el.btnModalMaxLc?.addEventListener('click', () => {
-    if (el.modalLcLevel) el.modalLcLevel.value = 80;
-    updateLcRankPips(5);
-    showToast(t('modalBtnMaxLc'), 'info');
+
+  // Lightcone Level Slider & Input sync
+  el.rangeLcLevel?.addEventListener('input', () => {
+    const lvl = parseInt(el.rangeLcLevel.value, 10);
+    if (el.modalLcLevel) el.modalLcLevel.value = lvl;
+    if (el.modalLcLvlVal) el.modalLcLvlVal.textContent = `${lvl} / 80`;
+    if (el.modalLcRankBadge) el.modalLcRankBadge.textContent = `S${selectedLcRank} • Lv.${lvl}`;
   });
 
-  el.modalLcId?.addEventListener('input', (e) => {
-    updateModalLcPreview(e.target.value);
+  el.modalLcLevel?.addEventListener('input', () => {
+    const lvl = parseInt(el.modalLcLevel.value, 10) || 1;
+    if (el.rangeLcLevel) el.rangeLcLevel.value = lvl;
+    if (el.modalLcLvlVal) el.modalLcLvlVal.textContent = `${lvl} / 80`;
+    if (el.modalLcRankBadge) el.modalLcRankBadge.textContent = `S${selectedLcRank} • Lv.${lvl}`;
+  });
+
+  // Apply change Light Cone button
+  el.btnModalApplyChangeLc?.addEventListener('click', () => {
+    if (!el.selectModalChangeLc || !state.selectedAvatarDetail) return;
+    const newLcId = parseInt(el.selectModalChangeLc.value, 10);
+    const aid = state.selectedAvatarDetail.avatar_id;
+    const curLvl = parseInt(el.modalLcLevel?.value, 10) || 80;
+
+    updateModalLcFullView(newLcId, selectedLcRank, curLvl);
+    const lcInfo = getLightconeInfo(newLcId);
+    showToast(`เปลี่ยน Light Cone เป็น: ${lcInfo.name} เรียบร้อยแล้ว`, 'info');
+    renderShowcaseCard(aid);
+  });
+
+  // Showcase Toolbar Controls
+  el.btnShowcaseCopyText?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) copyShowcaseText(state.selectedAvatarDetail.avatar_id);
+  });
+
+  el.btnShowcaseExportImg?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) exportShowcaseImage(state.selectedAvatarDetail.avatar_id);
+  });
+
+  el.btnShowcaseAutoRelics?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) autoEquipRecommendedRelics(state.selectedAvatarDetail.avatar_id, true);
   });
 
   // Quick Preset Buttons for Character Modal

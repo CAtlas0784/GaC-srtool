@@ -476,9 +476,14 @@
           <div id="modal-char-name" style="font-size: 1.25rem; font-weight: 800;"></div>
           <div id="modal-char-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;"></div>
         </div>
-        <button type="button" class="btn btn-gold" id="btn-modal-max-all-char" style="padding: 0.5rem 1rem; font-weight: 800;" data-i18n="modalBtnMaxAllChar">
-          ⭐ ปรับเต็มทั้งหมด
-        </button>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-gold" id="btn-modal-e6s5" style="padding: 0.5rem 0.95rem; font-weight: 800;" data-i18n="btnE6S5" title="Lv.80, E6, Max Skills, S5">
+            ⭐ E6S5
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-modal-e0s1" style="padding: 0.5rem 0.95rem; font-weight: 800;" data-i18n="btnE0S1" title="Lv.80, E0, Max Skills, S1">
+            ⚡ E0S1
+          </button>
+        </div>
       </div>
 
       <!-- Sub Tabs Navigation (srtools style) -->
@@ -491,6 +496,9 @@
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone" data-i18n="modalTabLightcone">
           🗡️ กรวยแสง
+        </button>
+        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-showcase" data-i18n="modalTabShowcase">
+          🖼️ การ์ดแสดงผล
         </button>
       </div>
 
@@ -655,26 +663,43 @@
         </div>
       </div>
 
-      <!-- Sub Tab 3: Lightcone Equipment -->
+      <!-- Sub Tab 3: Lightcone Equipment (Full artwork matching srtools) -->
       <div id="modaltab-lightcone" class="modal-subtab-content" style="display: none;">
-        <div class="card" style="padding: 1.25rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="font-weight: 800; font-size: 1rem; color: var(--text-highlight);" data-i18n="modalLcTitle">กรวยแสงที่สวมใส่</span>
-            <button type="button" class="btn btn-sm btn-gold" id="btn-modal-max-lc" data-i18n="modalBtnMaxLc">⭐ ปรับกรวยแสงเต็มขั้น</button>
-          </div>
-          <div class="form-group">
-            <label class="form-label" data-i18n="lblLcId">ID กรวยแสง</label>
-            <input type="number" id="modal-lc-id" class="form-input" data-i18n-placeholder="modalLcIdPlaceholder" placeholder="เช่น 21002 หรือ 24001">
-            <div id="modal-lc-preview" style="margin-top: 0.35rem; font-size: 0.875rem; font-weight: 700; color: var(--accent-cyan);"></div>
-          </div>
-          <div class="grid-2" style="gap: 1rem;">
-            <div class="form-group">
-              <label class="form-label" data-i18n="lblLcLevel">เลเวลกรวยแสง (1-80)</label>
-              <input type="number" id="modal-lc-level" class="form-input" min="1" max="80" value="80">
+        <div class="lc-preview-container">
+          <!-- Left: Full vertical artwork card -->
+          <div class="lc-art-wrapper" id="modal-lc-art-wrapper">
+            <img id="modal-lc-full-img" class="lc-full-img" src="" alt="Light Cone Artwork">
+            <div id="modal-lc-no-art" class="lc-placeholder-text" style="display: none;">
+              🗡️ ไม่มีรูปตัวอย่าง
             </div>
+          </div>
+
+          <!-- Right: Details, Superimposition, Stats & Selector -->
+          <div class="lc-details-col">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap;">
+              <div>
+                <h3 id="modal-lc-name-display" style="font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0 0 0.35rem 0;">-</h3>
+                <div id="modal-lc-meta-display" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;"></div>
+              </div>
+              <div id="modal-lc-rank-badge" class="badge-super-tag">S5 • Lv.80</div>
+            </div>
+
+            <!-- Level Row with Slider -->
+            <div class="form-group" style="margin-top: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label class="form-label" style="margin: 0;" data-i18n="lblLcLevel">เลเวล (1-80)</label>
+                <span id="modal-lc-lvl-val" style="font-weight: 800; font-family: monospace; color: var(--accent-cyan);">80 / 80</span>
+              </div>
+              <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <input type="range" id="range-lc-level" min="1" max="80" value="80" class="skill-range" style="flex: 1;">
+                <input type="number" id="modal-lc-level" class="form-input" min="1" max="80" value="80" style="width: 70px; text-align: center;">
+              </div>
+            </div>
+
+            <!-- Superimposition Row S1 - S5 -->
             <div class="form-group">
-              <label class="form-label" data-i18n="lblLcRank">ระดับการขัดเกลา</label>
-              <div class="eidolon-buttons" id="modal-lc-rank-btns" style="margin-top: 0.25rem;">
+              <label class="form-label" style="margin-bottom: 0.4rem;" data-i18n="lblLcRank">ระดับการขัดเกลา</label>
+              <div class="eidolon-buttons" id="modal-lc-rank-btns" style="gap: 0.5rem;">
                 <button type="button" class="eidolon-pip lc-super-pip" data-rank="1">S1</button>
                 <button type="button" class="eidolon-pip lc-super-pip" data-rank="2">S2</button>
                 <button type="button" class="eidolon-pip lc-super-pip" data-rank="3">S3</button>
@@ -682,7 +707,52 @@
                 <button type="button" class="eidolon-pip lc-super-pip active" data-rank="5">S5</button>
               </div>
             </div>
+
+            <!-- Passive Ability Description Card -->
+            <div class="lc-passive-card">
+              <div class="lc-passive-title" data-i18n="lcPassiveTitle">เอฟเฟกต์สกิลพิเศษ</div>
+              <div id="modal-lc-passive-desc" class="lc-passive-body">...</div>
+            </div>
+
+            <!-- Change Lightcone Section -->
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem; align-items: flex-end; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 220px;">
+                <label class="form-label" data-i18n="lblSelectLc">เลือกเปลี่ยน Light Cone</label>
+                <select id="select-modal-change-lc" class="form-select"></select>
+              </div>
+              <button type="button" class="btn btn-primary" id="btn-modal-apply-change-lc" style="padding: 0.65rem 1.25rem; font-weight: 700;" data-i18n="btnChangeLc">
+                เปลี่ยน Light Cone
+              </button>
+            </div>
+            <input type="hidden" id="modal-lc-id" value="">
           </div>
+        </div>
+      </div>
+
+      <!-- Sub Tab 4: Showcase Card (Matching srtools.punklorde.org/showcase-card) -->
+      <div id="modaltab-showcase" class="modal-subtab-content" style="display: none;">
+        <!-- Action Toolbar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.5rem;">
+            <span data-i18n="modalTabShowcase">🖼️ การ์ดแสดงผล</span>
+            <span class="btn-sm btn-secondary" id="showcase-build-tag">Build Overview</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm btn-gold" id="btn-showcase-auto-relics" data-i18n="showcaseAutoRelics">
+              ⚡ ติดตั้งรีลิกส์แนะนำ
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-showcase-copy-text" data-i18n="showcaseCopy">
+              📋 คัดลอกข้อความ
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" id="btn-showcase-export-img" data-i18n="showcaseExport">
+              🖼️ ส่งออกรูปภาพ
+            </button>
+          </div>
+        </div>
+
+        <!-- The Showcase Card UI Container -->
+        <div id="showcase-card-container" class="showcase-card-layout">
+          <!-- Rendered dynamically by JS -->
         </div>
       </div>
 
