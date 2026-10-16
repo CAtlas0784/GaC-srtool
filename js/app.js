@@ -546,7 +546,7 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     const val = t(key);
-    if (val) elem.textContent = val;
+    if (val && val !== key) elem.textContent = val;
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
@@ -1129,36 +1129,8 @@ function renderAvatarsGrid() {
           <span class="avatar-lvl">Lv. ${item.level}</span>
           <span class="avatar-eidolon ${item.rank === 6 ? 'e6' : ''}">E${item.rank}</span>
         </div>
-        <div style="display: flex; gap: 0.3rem; align-items: center;">
-          <button type="button" class="btn btn-sm btn-card-e0s1" title="ตั้งค่า E0S1 ทันที">⚡ E0S1</button>
-          <button type="button" class="btn btn-sm btn-card-e6s5" title="ตั้งค่า E6S5 เต็มพลัง">⭐ E6S5</button>
-          <button type="button" class="btn btn-sm btn-secondary btn-card-showcase" title="ดูการ์ดแสดงผล Build">🖼️</button>
-        </div>
       </div>
     `;
-
-    // Quick Showcase Card Button
-    const btnShowcase = card.querySelector('.btn-card-showcase');
-    btnShowcase?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openAvatarDetailModal(item);
-      const showcaseTabBtn = document.querySelector('.modal-subtab-btn[data-modaltab="modaltab-showcase"]');
-      if (showcaseTabBtn) showcaseTabBtn.click();
-    });
-
-    // Quick E0S1 Button on Card Outside
-    const btnE0S1 = card.querySelector('.btn-card-e0s1');
-    btnE0S1?.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      await setAvatarE0S1(item.avatar_id);
-    });
-
-    // Quick E6S5 Button on Card Outside
-    const btnE6S5 = card.querySelector('.btn-card-e6s5');
-    btnE6S5?.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      await setAvatarE6S5(item.avatar_id);
-    });
 
     // Clicking card opens full character build modal
     card.addEventListener('click', () => {
@@ -1899,13 +1871,52 @@ function renderModalOverviewTab(avatarId) {
   }
 }
 
-// Render Relics 6 Slots Tab
+// Render Relics & Gear Tab (6 Slots + Equipped Lightcone)
 function renderModalRelicsTab(avatarId) {
   const aid = parseInt(avatarId, 10);
   const meta = getAvatarInfo(aid);
   if (!el.modalRelicsSlotsGrid) return;
   el.modalRelicsSlotsGrid.innerHTML = '';
 
+  // 1. Equipped Lightcone in Relics Tab
+  const lc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === aid);
+  const lcId = lc?.item_id || SIGNATURE_LIGHTCONES[aid] || 21001;
+  const lcInfo = getLightconeInfo(lcId);
+  const lcRank = lc?.rank || 5;
+  const lcLevel = lc?.level || 80;
+  const lcMeta = LIGHTCONE_METADATA[lcId] || {};
+
+  const lcThumbEl = document.getElementById('relics-tab-lc-thumb');
+  const lcNameEl = document.getElementById('relics-tab-lc-name');
+  const lcStarsEl = document.getElementById('relics-tab-lc-stars');
+  const lcRankEl = document.getElementById('relics-tab-lc-rank');
+  const lcLvlEl = document.getElementById('relics-tab-lc-level');
+  const lcStatsEl = document.getElementById('relics-tab-lc-stats');
+  const lcBox = document.getElementById('relics-equipped-lc-box');
+
+  if (lcThumbEl) {
+    lcThumbEl.src = getLightconeArtSrc(lcId);
+    lcThumbEl.onerror = function() {
+      const fb = getLightconeArtFallback(lcId);
+      if (this.src !== fb) this.src = fb;
+      else this.src = './assets/logo.png';
+    };
+  }
+  if (lcNameEl) lcNameEl.textContent = lcInfo.name || `Light Cone ${lcId}`;
+  if (lcStarsEl) lcStarsEl.textContent = '★'.repeat(lcInfo.rarity || 5);
+  if (lcRankEl) lcRankEl.textContent = `S${lcRank}`;
+  if (lcLvlEl) lcLvlEl.textContent = `Lv. ${lcLevel} / 80`;
+  if (lcStatsEl) {
+    const hp = lcMeta.hp || (lcMeta.rarity === 5 ? 1164 : (lcMeta.rarity === 4 ? 953 : 846));
+    const atk = lcMeta.atk || (lcMeta.rarity === 5 ? 582 : (lcMeta.rarity === 4 ? 423 : 317));
+    const def = lcMeta.def || (lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264));
+    lcStatsEl.textContent = `HP ${hp} / ATK ${atk} / DEF ${def}`;
+  }
+  if (lcBox) {
+    lcBox.onclick = () => openLightconePicker(aid);
+  }
+
+  // 2. Relic Slots
   const allRelics = state.fullFreesrData?.relics || [];
   const equippedRelics = allRelics.filter(r => r.equip_avatar === aid);
 
@@ -1920,34 +1931,36 @@ function renderModalRelicsTab(avatarId) {
     const equipped = equippedRelics.find(r => (r.relic_id % 10) === slot);
 
     const box = document.createElement('div');
-    box.className = 'relic-slot-box';
 
     if (equipped) {
       const setId = Math.floor((equipped.relic_id % 10000) / 10);
       const rInfo = getRelicSetInfo(setId);
       const mainAffixName = getRelicMainAffixName(slot, equipped.main_affix_id);
 
+      box.className = 'relic-slot-box equipped';
       box.innerHTML = `
         <div class="relic-slot-icon-wrap">
           <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
                onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
-          <span class="relic-slot-badge">Slot ${slot}</span>
+          <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.name.split(' ')[0]}</span>
         </div>
         <div class="relic-slot-content">
-          <div class="relic-slot-title" title="${rInfo.name}">${slotInfo.icon} ${rInfo.name}</div>
-          <div class="relic-slot-main">✦ ${mainAffixName} (+${equipped.level})</div>
-          <div class="relic-slot-subs">${equipped.sub_affixes?.length || 4} ออปชั่นรอง (Max Level 15)</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5rem;">
+            <span class="relic-slot-title" title="${rInfo.name}">${rInfo.name}</span>
+            <span class="relic-slot-lvl">+15</span>
+          </div>
+          <div class="relic-slot-main">✦ ${mainAffixName}</div>
+          <div class="relic-slot-subs">${equipped.sub_affixes?.length || 4} ออปชั่นรอง (คลิกเพื่อเลือกเปลี่ยน)</div>
         </div>
-        <div class="relic-slot-actions">
-          <button type="button" class="btn btn-sm btn-primary btn-slot-change" style="font-size: 0.725rem; padding: 0.25rem 0.5rem;">🔄 เปลี่ยน</button>
-          <button type="button" class="btn btn-sm btn-secondary btn-slot-unequip" style="font-size: 0.725rem; padding: 0.25rem 0.5rem; color: var(--accent-red);">✕ ถอด</button>
-        </div>
+        <button type="button" class="btn-slot-unequip-corner" title="ถอดชิ้นนี้">✕</button>
       `;
 
-      box.querySelector('.btn-slot-change').addEventListener('click', () => {
+      box.addEventListener('click', () => {
         openSlotPicker(aid, slot);
       });
-      box.querySelector('.btn-slot-unequip').addEventListener('click', async () => {
+
+      box.querySelector('.btn-slot-unequip-corner')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
         equipped.equip_avatar = 0;
         if (state.isConnected) await saveFreesrChangesToServer();
         renderModalRelicsTab(aid);
@@ -1956,20 +1969,20 @@ function renderModalRelicsTab(avatarId) {
         showToast(`ถอดรีลิกส์ ${slotInfo.name} เรียบร้อย`, 'info');
       });
     } else {
+      box.className = 'relic-slot-box empty';
       box.innerHTML = `
-        <div class="relic-slot-icon-wrap" style="opacity: 0.5;">
+        <div class="relic-slot-icon-wrap" style="opacity: 0.4;">
           <span style="font-size: 1.5rem;">${slotInfo.icon}</span>
-          <span class="relic-slot-badge">Slot ${slot}</span>
+          <span class="relic-slot-badge">${slotInfo.name.split(' ')[0]}</span>
         </div>
         <div class="relic-slot-content">
           <div class="relic-slot-title" style="color: var(--text-muted);">${slotInfo.name}</div>
-          <div class="relic-slot-subs" style="color: var(--text-muted);">ยังไม่ได้ติดตั้ง (แนะนำ: ${slotInfo.defaultStat})</div>
-        </div>
-        <div class="relic-slot-actions">
-          <button type="button" class="btn btn-sm btn-primary btn-slot-equip" style="font-size: 0.725rem; padding: 0.25rem 0.5rem;">➕ สวมใส่</button>
+          <div class="relic-slot-main" style="color: var(--text-muted); font-size: 0.775rem;">ยังไม่ได้สวมใส่</div>
+          <div class="relic-slot-subs" style="color: var(--accent-cyan); font-size: 0.725rem;">+ คลิกเพื่อเลือกหรือสร้าง (แนะนำ: ${slotInfo.defaultStat})</div>
         </div>
       `;
-      box.querySelector('.btn-slot-equip').addEventListener('click', () => {
+
+      box.addEventListener('click', () => {
         openSlotPicker(aid, slot);
       });
     }
@@ -2135,6 +2148,305 @@ async function quickGenSlotRelic(avatarId, slotNum) {
   loadEquipment();
   el.modalSelectRelicSlot?.classList.remove('active');
   showToast(`สร้างและติดตั้งรีลิกส์แนะนำช่อง ${slotNum} สำเร็จ!`, 'success');
+}
+
+// Open Lightcone Picker Modal
+function openLightconePicker(avatarId) {
+  state.lcPickerAvatarId = parseInt(avatarId, 10);
+  const aid = state.lcPickerAvatarId;
+  const meta = getAvatarInfo(aid);
+  const modal = document.getElementById('modal-select-lightcone');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('modal-lc-picker-title');
+  if (titleEl) {
+    titleEl.textContent = `🗡️ เลือกสวมใส่กรวยแสง: ${meta.name}`;
+  }
+
+  const sigLcId = SIGNATURE_LIGHTCONES[aid];
+  const sigBox = document.getElementById('lc-picker-signature-box');
+  const sigThumb = document.getElementById('lc-picker-sig-thumb');
+  const sigName = document.getElementById('lc-picker-sig-name');
+  const btnQuickSig = document.getElementById('btn-lc-picker-quick-sig');
+
+  if (sigLcId && LIGHTCONE_METADATA[sigLcId]) {
+    const sInfo = getLightconeInfo(sigLcId);
+    if (sigBox) sigBox.style.display = 'flex';
+    if (sigThumb) {
+      sigThumb.src = getLightconeArtSrc(sigLcId);
+      sigThumb.onerror = function() { this.src = getLightconeArtFallback(sigLcId); };
+    }
+    if (sigName) sigName.textContent = `${sInfo.name} (★${sInfo.rarity} ${sInfo.path})`;
+    if (btnQuickSig) {
+      btnQuickSig.onclick = async () => {
+        const rank = parseInt(document.getElementById('lc-picker-rank')?.value || '5', 10);
+        await equipLightconeToAvatar(aid, sigLcId, rank, 80);
+        modal.classList.remove('active');
+      };
+    }
+  } else if (sigBox) {
+    sigBox.style.display = 'none';
+  }
+
+  const pathSelect = document.getElementById('lc-picker-filter-path');
+  if (pathSelect) pathSelect.value = 'same';
+
+  const searchInput = document.getElementById('lc-picker-search');
+  if (searchInput) searchInput.value = '';
+
+  renderLightconePickerGrid();
+  modal.classList.add('active');
+}
+
+// Render Lightcone Picker Grid
+function renderLightconePickerGrid() {
+  const listEl = document.getElementById('lc-picker-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  const aid = state.lcPickerAvatarId;
+  const avatarMeta = getAvatarInfo(aid);
+  const search = document.getElementById('lc-picker-search')?.value.trim().toLowerCase() || '';
+  const pathFilter = document.getElementById('lc-picker-filter-path')?.value || 'same';
+  const rank = parseInt(document.getElementById('lc-picker-rank')?.value || '5', 10);
+
+  const currentLc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === aid);
+
+  const allIds = Object.keys(LIGHTCONE_METADATA).map(id => parseInt(id, 10)).sort((a, b) => {
+    const metaA = LIGHTCONE_METADATA[a];
+    const metaB = LIGHTCONE_METADATA[b];
+    if (metaB.rarity !== metaA.rarity) return metaB.rarity - metaA.rarity;
+    return b - a;
+  });
+
+  const filtered = allIds.filter(id => {
+    const meta = LIGHTCONE_METADATA[id];
+    const info = getLightconeInfo(id);
+
+    // Path match
+    if (pathFilter === 'same' && meta.path !== avatarMeta.path) return false;
+    if (pathFilter !== 'all' && pathFilter !== 'same' && meta.path !== pathFilter) return false;
+
+    // Search match
+    if (search) {
+      const matchName = info.name.toLowerCase().includes(search);
+      const matchId = String(id).includes(search);
+      if (!matchName && !matchId) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบกรวยแสงตามเงื่อนไขที่ค้นหา</div>`;
+    return;
+  }
+
+  filtered.forEach(id => {
+    const meta = LIGHTCONE_METADATA[id];
+    const info = getLightconeInfo(id);
+    const isCurrent = currentLc?.item_id === id;
+    const isSig = SIGNATURE_LIGHTCONES[aid] === id;
+
+    const card = document.createElement('div');
+    card.className = `lc-picker-card rarity-${info.rarity} ${isCurrent ? 'active-equipped' : ''}`;
+
+    let badgeHtml = '';
+    if (isCurrent) {
+      badgeHtml = `<span style="font-size: 0.65rem; background: var(--accent-gold); color: #000; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">สวมใส่อยู่</span>`;
+    } else if (isSig) {
+      badgeHtml = `<span style="font-size: 0.65rem; background: rgba(251, 191, 36, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">ประจำตัว</span>`;
+    }
+
+    card.innerHTML = `
+      <img class="lc-picker-thumb" src="${getLightconeArtSrc(id)}" onerror="this.src='${getLightconeArtFallback(id)}'" alt="${info.name}">
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.35rem;">
+          <span style="font-weight: 800; font-size: 0.85rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${info.name}">${info.name}</span>
+          ${badgeHtml}
+        </div>
+        <div style="font-size: 0.725rem; color: var(--accent-gold); margin-top: 0.2rem;">${'★'.repeat(info.rarity || 5)}</div>
+        <div style="font-size: 0.7rem; color: var(--accent-cyan); margin-top: 0.15rem;">
+          ${getPathIconHtml(meta.path, 14)} ${info.path}
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', async () => {
+      await equipLightconeToAvatar(aid, id, rank, 80);
+      document.getElementById('modal-select-lightcone')?.classList.remove('active');
+    });
+
+    listEl.appendChild(card);
+  });
+}
+
+// Equip Lightcone directly to Avatar
+async function equipLightconeToAvatar(avatarId, lcId, rank = 5, level = 80) {
+  const aid = parseInt(avatarId, 10);
+  const id = parseInt(lcId, 10);
+  const meta = getAvatarInfo(aid);
+  const lcInfo = getLightconeInfo(id);
+
+  if (!state.fullFreesrData) state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+
+  // 1. Unassign other lightcones from this avatar
+  state.fullFreesrData.lightcones.forEach(lc => {
+    if (lc.equip_avatar === aid) lc.equip_avatar = 0;
+  });
+
+  // 2. Find or create lightcone entry
+  let targetLc = state.fullFreesrData.lightcones.find(lc => lc.item_id === id && (!lc.equip_avatar || lc.equip_avatar === 0));
+  if (!targetLc) {
+    targetLc = state.fullFreesrData.lightcones.find(lc => lc.item_id === id);
+    if (targetLc) {
+      targetLc.equip_avatar = aid;
+      targetLc.rank = rank;
+      targetLc.level = level;
+      targetLc.promotion = 6;
+    } else {
+      let maxUid = 1000;
+      state.fullFreesrData.lightcones.forEach(l => {
+        if (l.unique_id >= maxUid) maxUid = l.unique_id + 1;
+      });
+      targetLc = {
+        unique_id: maxUid,
+        internal_uid: state.fullFreesrData.lightcones.length,
+        item_id: id,
+        level: level,
+        rank: rank,
+        promotion: 6,
+        equip_avatar: aid
+      };
+      state.fullFreesrData.lightcones.push(targetLc);
+    }
+  } else {
+    targetLc.equip_avatar = aid;
+    targetLc.rank = rank;
+    targetLc.level = level;
+    targetLc.promotion = 6;
+  }
+
+  if (state.isConnected) {
+    await saveFreesrChangesToServer().catch(() => {});
+  }
+
+  renderModalOverviewTab(aid);
+  renderModalRelicsTab(aid);
+  renderShowcaseCard(aid);
+  renderLightconesGrid();
+
+  showToast(`🗡️ สวมใส่ ${lcInfo.name} (S${rank}) ให้กับ ${meta.name} เรียบร้อย!`, 'success');
+}
+
+// Unequip Lightcone from Avatar
+async function unequipLightconeFromAvatar(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  if (state.fullFreesrData?.lightcones) {
+    state.fullFreesrData.lightcones.forEach(lc => {
+      if (lc.equip_avatar === aid) lc.equip_avatar = 0;
+    });
+    if (state.isConnected) await saveFreesrChangesToServer().catch(() => {});
+    renderModalOverviewTab(aid);
+    renderModalRelicsTab(aid);
+    renderShowcaseCard(aid);
+    renderLightconesGrid();
+    showToast(`ถอดกรวยแสงออกจาก ${meta.name} เรียบร้อย`, 'info');
+  }
+}
+
+// Quick Set All Avatars to E0S1 Standard (Lv.80, Prom 6, E0, S1 Signature LC)
+async function quickSetAllAvatarsE0S1() {
+  try {
+    if (!state.fullFreesrData) {
+      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    }
+    state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+    state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
+
+    const allAvatarIds = Object.keys(AVATARS_DATA).map(id => parseInt(id, 10));
+
+    let nextUniqueId = 1000;
+    state.fullFreesrData.lightcones.forEach(lc => {
+      if (lc.unique_id >= nextUniqueId) nextUniqueId = lc.unique_id + 1;
+    });
+
+    for (const aid of allAvatarIds) {
+      if (!state.fullFreesrData.avatars[aid]) {
+        state.fullFreesrData.avatars[aid] = {
+          owner_uid: 0,
+          avatar_id: aid,
+          level: 80,
+          promotion: 6,
+          techniques: [],
+          sp_max: 140,
+          sp_value: 70,
+          data: {
+            rank: 0,
+            skills: {
+              [`${aid}001`]: 6,
+              [`${aid}002`]: 10,
+              [`${aid}003`]: 10,
+              [`${aid}004`]: 10,
+              [`${aid}007`]: 1,
+              [`${aid}101`]: 1,
+              [`${aid}102`]: 1,
+              [`${aid}103`]: 1,
+              [`${aid}201`]: 1
+            },
+            skills_by_anchor_type: {
+              "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
+            }
+          }
+        };
+      } else {
+        const av = state.fullFreesrData.avatars[aid];
+        av.level = 80;
+        av.promotion = 6;
+        av.data = av.data || {};
+        av.data.rank = 0;
+        if (!av.sp_value) av.sp_value = 70;
+      }
+
+      // Equip S1 Signature Lightcone
+      const sigLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+      let existingLc = state.fullFreesrData.lightcones.find(l => l.equip_avatar === aid);
+      if (existingLc) {
+        existingLc.item_id = sigLcId;
+        existingLc.rank = 1;
+        existingLc.level = 80;
+        existingLc.promotion = 6;
+      } else {
+        state.fullFreesrData.lightcones.push({
+          unique_id: nextUniqueId++,
+          internal_uid: state.fullFreesrData.lightcones.length,
+          item_id: sigLcId,
+          level: 80,
+          promotion: 6,
+          rank: 1,
+          equip_avatar: aid
+        });
+      }
+    }
+
+    initAvatarsList();
+    state.avatarsList.forEach(a => {
+      a.level = 80;
+      a.promotion = 6;
+      a.rank = 0;
+    });
+
+    if (state.isConnected) {
+      await saveFreesrChangesToServer().catch(() => {});
+    }
+
+    renderAvatarsGrid();
+    if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
+    showToast('⚡ ปรับตัวละครทุกตัวเป็น E0S1 พร้อมกรวยแสงประจำตัวเรียบร้อยแล้ว!', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
 }
 
 // Render Skills Tab with real StarRailRes descriptions & icons
@@ -2733,7 +3045,7 @@ function renderShowcaseCard(avatarId) {
   activeSetBadges.forEach(sb => {
     setsHtml += `
       <div class="showcase-set-item">
-        <span style="color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">${sb.name}</span>
+        <span style="color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${sb.name}">${sb.name}</span>
         <span class="showcase-set-badge">${sb.count}-PC</span>
       </div>
     `;
@@ -2769,8 +3081,8 @@ function renderShowcaseCard(avatarId) {
         </div>
         <div class="showcase-relic-info">
           <div class="showcase-relic-main-stat">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${rInfo.name}</span>
-            <span style="color: var(--accent-cyan); font-weight: 800;">${slotInfo.stat}</span>
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${rInfo.name}">${rInfo.name}</span>
+            <span style="color: var(--accent-cyan); font-weight: 800; flex-shrink: 0;">${slotInfo.stat}</span>
           </div>
           <div class="showcase-relic-subs">
             <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%${rollBadge(slot % 2 === 0 ? 3 : 2)}</span>
@@ -2989,12 +3301,22 @@ async function exportShowcaseImage(avatarId) {
 
   if (typeof html2canvas !== 'undefined') {
     try {
+      const origWidth = showcaseEl.style.width;
+      const origMinWidth = showcaseEl.style.minWidth;
+      showcaseEl.style.width = '1050px';
+      showcaseEl.style.minWidth = '1050px';
+
       const canvas = await html2canvas(showcaseEl, {
         useCORS: true,
         allowTaint: true,
         scale: 2,
-        backgroundColor: '#0c1222'
+        backgroundColor: '#0c1222',
+        windowWidth: 1280
       });
+
+      showcaseEl.style.width = origWidth;
+      showcaseEl.style.minWidth = origMinWidth;
+
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
@@ -4344,8 +4666,36 @@ function setupEvents() {
   setupSkillStepper(el.rangeSkillTalent, el.valSkillTalent, el.btnStepDecTalent, el.btnStepIncTalent, el.btnSkillMaxTalent, 10);
 
   // Overview Tab Quick Navigation Cards
-  el.overviewLcCard?.addEventListener('click', () => switchModalSubtab('modaltab-lightcone'));
+  el.overviewLcCard?.addEventListener('click', () => {
+    if (state.selectedAvatarDetail) openLightconePicker(state.selectedAvatarDetail.avatar_id);
+  });
   el.overviewRelicsCard?.addEventListener('click', () => switchModalSubtab('modaltab-relics'));
+
+  // Lightcone Picker Modal Controls
+  document.getElementById('btn-close-lc-picker')?.addEventListener('click', () => {
+    document.getElementById('modal-select-lightcone')?.classList.remove('active');
+  });
+  document.getElementById('btn-lc-picker-close')?.addEventListener('click', () => {
+    document.getElementById('modal-select-lightcone')?.classList.remove('active');
+  });
+  document.getElementById('lc-picker-search')?.addEventListener('input', () => {
+    renderLightconePickerGrid();
+  });
+  document.getElementById('lc-picker-filter-path')?.addEventListener('change', () => {
+    renderLightconePickerGrid();
+  });
+  document.getElementById('lc-picker-rank')?.addEventListener('change', () => {
+    renderLightconePickerGrid();
+  });
+  document.getElementById('btn-lc-picker-unequip')?.addEventListener('click', async () => {
+    if (state.lcPickerAvatarId) {
+      await unequipLightconeFromAvatar(state.lcPickerAvatarId);
+    }
+    document.getElementById('modal-select-lightcone')?.classList.remove('active');
+  });
+
+  // Top Bar Characters Tab Quick Actions
+  document.getElementById('btn-all-avatars-e0s1')?.addEventListener('click', quickSetAllAvatarsE0S1);
 
   // Relic Tab Controls in Modal
   el.btnModalRelicsAuto?.addEventListener('click', async () => {

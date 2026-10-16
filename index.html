@@ -232,7 +232,8 @@
             <option value="Elation">ปีติ</option>
           </select>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-all-avatars-e0s1" data-i18n="btnAllE0S1" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8;">⚡ ปรับ E0S1 ทุกตัว</button>
           <button class="btn btn-gold" id="btn-max-all-avatars" data-i18n="btnMaxAll">⭐ ปรับ Max E6 ทุกตัว</button>
           <button class="btn btn-secondary" id="btn-reload-avatars" data-i18n="btnReload">🔄 รีโหลด</button>
         </div>
@@ -633,10 +634,7 @@
           📋 ข้อมูลภาพรวม
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-relics" data-i18n="modalTabRelics">
-          🛡️ รีลิกส์
-        </button>
-        <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-lightcone" data-i18n="modalTabLightcone">
-          🗡️ กรวยแสง
+          🛡️ รีลิกส์ & อุปกรณ์
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-skills" data-i18n="modalTabSkills">
           ⚡ สกิลและร่องรอย
@@ -645,7 +643,7 @@
           ⚙️ เลเวล & Eidolon
         </button>
         <button type="button" class="modal-subtab-btn" data-modaltab="modaltab-showcase" data-i18n="modalTabShowcase">
-          🖼️ การ์ดแสดงผล
+          🖼️ การ์ดสรุปบิลด์
         </button>
       </div>
 
@@ -728,6 +726,31 @@
             <button type="button" class="btn btn-sm btn-danger" id="btn-modal-relics-clear" data-i18n="btnClearAllRelics">
               🧹 ถอดทั้งหมด
             </button>
+          </div>
+        </div>
+
+        <!-- Equipped Lightcone Slot in Equipment Tab -->
+        <div class="card" id="relics-equipped-lc-box" style="background: rgba(18, 24, 38, 0.75); border: 1px solid var(--border-color); padding: 0.85rem 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อเลือกเปลี่ยน Light Cone">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--accent-cyan); font-weight: 800;">🗡️ กรวยแสงที่สวมใส่ (คลิกเพื่อเลือกเปลี่ยน)</span>
+            <span style="color: var(--accent-gold); font-size: 0.75rem; font-weight: 700;">เปลี่ยนกรวยแสง ➔</span>
+          </div>
+          <div style="display: flex; gap: 0.85rem; align-items: center;">
+            <img id="relics-tab-lc-thumb" src="" alt="" style="width: 46px; height: 64px; border-radius: 6px; object-fit: cover; border: 1px solid var(--accent-gold);">
+            <div style="min-width: 0; flex: 1;">
+              <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <span id="relics-tab-lc-name" style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</span>
+                <span id="relics-tab-lc-stars" style="color: var(--accent-gold); font-size: 0.8rem; letter-spacing: 1px;">★★★★★</span>
+              </div>
+              <div style="display: flex; gap: 0.6rem; align-items: center; margin-top: 0.25rem; font-size: 0.775rem; color: var(--text-muted); flex-wrap: wrap;">
+                <span id="relics-tab-lc-rank" style="color: var(--accent-gold); font-weight: 800;">S5</span>
+                <span>•</span>
+                <span id="relics-tab-lc-level" style="font-weight: 700; color: #fff;">Lv. 80 / 80</span>
+                <span>•</span>
+                <span id="relics-tab-lc-stats" style="color: var(--accent-cyan); font-family: monospace;">HP 952 / ATK 582 / DEF 529</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" style="pointer-events: none;">เลือกเปลี่ยน</button>
           </div>
         </div>
 
@@ -1062,9 +1085,11 @@
           </div>
         </div>
 
-        <!-- The Showcase Card UI Container -->
-        <div id="showcase-card-container" class="showcase-card-layout">
-          <!-- Rendered dynamically by JS -->
+        <!-- The Showcase Card UI Container with horizontal scroll wrapper -->
+        <div class="showcase-scroll-wrapper" style="overflow-x: auto; padding-bottom: 0.5rem; max-width: 100%;">
+          <div id="showcase-card-container" class="showcase-card-layout">
+            <!-- Rendered dynamically by JS -->
+          </div>
         </div>
       </div>
 
@@ -1231,6 +1256,66 @@
       </div>
       <div id="slot-picker-inventory-list" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.35rem;">
         <!-- Injected list of matching slot relics -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Select Lightcone for Avatar -->
+  <div class="modal-overlay" id="modal-select-lightcone">
+    <div class="modal-content" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <h3 id="modal-lc-picker-title" style="font-weight: 800;">
+          🗡️ เลือกสวมใส่กรวยแสง (Light Cone)
+        </h3>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-close-lc-picker">✕</button>
+      </div>
+
+      <!-- Search & Filters -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+        <input type="text" id="lc-picker-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID กรวยแสง..." style="flex: 1; min-width: 160px;">
+        <select id="lc-picker-filter-path" class="form-select" style="max-width: 140px;">
+          <option value="all">ทุกสาย</option>
+          <option value="same" selected>ตรงสายตัวละคร</option>
+          <option value="Destruction">ทำลายล้าง</option>
+          <option value="Hunt">ล่าสังหาร</option>
+          <option value="Erudition">ปัญญา</option>
+          <option value="Harmony">ประสาน</option>
+          <option value="Nihility">ลบล้าง</option>
+          <option value="Preservation">อนุรักษ์</option>
+          <option value="Abundance">เฟื่องฟู</option>
+          <option value="Remembrance">ความทรงจำ</option>
+          <option value="Elation">ปีติ</option>
+        </select>
+        <select id="lc-picker-rank" class="form-select" style="max-width: 110px;" title="ระดับการขัดเกลาเมื่อสวมใส่">
+          <option value="5" selected>ขัดเกลา S5</option>
+          <option value="4">ขัดเกลา S4</option>
+          <option value="3">ขัดเกลา S3</option>
+          <option value="2">ขัดเกลา S2</option>
+          <option value="1">ขัดเกลา S1</option>
+        </select>
+      </div>
+
+      <!-- Signature Recommendation Box -->
+      <div id="lc-picker-signature-box" style="display: none; background: rgba(251, 191, 36, 0.1); border: 1px dashed rgba(251, 191, 36, 0.5); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; margin-bottom: 0.75rem; align-items: center; justify-content: space-between; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.6rem; align-items: center; min-width: 0;">
+          <img id="lc-picker-sig-thumb" src="" alt="" style="width: 38px; height: 52px; border-radius: 4px; object-fit: cover; border: 1px solid var(--accent-gold);">
+          <div style="min-width: 0;">
+            <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800;">⭐ กรวยแสงประจำตัวแนะนำ (Signature)</div>
+            <div id="lc-picker-sig-name" style="font-weight: 700; font-size: 0.875rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-gold" id="btn-lc-picker-quick-sig">⚡ สวมใส่ชิ้นนี้</button>
+      </div>
+
+      <!-- Lightcones List Grid -->
+      <div id="lc-picker-list" style="flex: 1; min-height: 0; max-height: 380px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.5rem; padding-right: 0.35rem;">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Footer Actions -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-unequip" style="color: var(--accent-red);">✕ ถอดกรวยแสงออก</button>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-close">ปิด</button>
       </div>
     </div>
   </div>
