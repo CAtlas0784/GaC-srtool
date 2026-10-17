@@ -2555,10 +2555,18 @@ input:checked + .slider:before {
   max-width: 100%;
 }
 
-.synergy-metrics-grid {
+.synergy-metrics-grid,
+.mini-battle-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .synergy-metrics-grid,
+  .mini-battle-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .synergy-metric-box {

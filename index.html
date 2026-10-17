@@ -145,31 +145,60 @@
             </div>
           </div>
 
-          <!-- 2. Team Combat Synergy & Weakness Break Analysis -->
-          <div class="card" id="card-team-synergy">
+          <!-- 2. Mini Battle Summary & Team Stats -->
+          <div class="card" id="card-battle-summary">
             <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <span style="display: flex; align-items: center; gap: 0.5rem;">
-                <span>⚔️</span>
-                <span data-i18n="synergyTitle">วิเคราะห์ Synergy ทีม & จุดอ่อน</span>
+                <span>💥</span>
+                <span data-i18n="miniBattleTitle">สรุปการต่อสู้ล่าสุด & ดาเมจทีม</span>
               </span>
-              <span class="badge-super-tag" id="badge-synergy-coverage" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-weight: 800;">ครอบคลุม 0/7 ธาตุ</span>
-            </div>
-            <p class="card-subtitle" style="margin-bottom: 0.85rem;" data-i18n="synergySubtitle">วิเคราะห์การครอบคลุม Weakness Break และความพร้อมของอุปกรณ์ในทีม</p>
-
-            <!-- A. Weakness Break Coverage 7 Elements -->
-            <div style="margin-bottom: 1rem;">
-              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyBreakCoverage">
-                🎯 การทำลายจุดอ่อน (Weakness Break Coverage)
-              </div>
-              <div class="synergy-elements-grid" id="synergy-elements-container">
-                <!-- Rendered dynamically by JS: Physical, Fire, Ice, Lightning, Wind, Quantum, Imaginary -->
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span class="badge-super-tag" id="badge-mini-battle-status" style="background: rgba(156, 163, 175, 0.12); color: var(--text-muted); font-weight: 800; border: 1px solid rgba(156, 163, 175, 0.25);">
+                  ยังไม่มีข้อมูลการต่อสู้
+                </span>
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-mini-view-full-analyst" style="font-size: 0.725rem; padding: 0.2rem 0.55rem; color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.35); font-weight: 700;" title="เปิดหน้า Damage Analyst ตัวเต็ม" data-i18n="miniViewFullAnalyst">
+                  Damage Analyst →
+                </button>
               </div>
             </div>
+            <p class="card-subtitle" style="margin-bottom: 0.75rem;" data-i18n="miniBattleSubtitle">
+              สถิติดาเมจ, DPS และสัดส่วนการทำดาเมจของตัวละครในทีมจากการต่อสู้จริงล่าสุด
+            </p>
 
-            <!-- B. Equipment Readiness & Stats Overview -->
+            <!-- A. Key Battle Metric Boxes (4 Boxes) -->
+            <div class="mini-battle-metrics-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.85rem;">
+              <div class="mini-battle-box" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: var(--radius-sm); padding: 0.5rem 0.4rem; text-align: center;">
+                <div class="mini-battle-val" id="mini-total-dmg" style="font-size: 1.15rem; font-weight: 800; color: #f87171; font-family: monospace;">-</div>
+                <div class="mini-battle-lbl" style="font-size: 0.675rem; color: var(--text-muted); margin-top: 0.15rem;" data-i18n="miniTotalDmg">ดาเมจรวม</div>
+              </div>
+              <div class="mini-battle-box" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: var(--radius-sm); padding: 0.5rem 0.4rem; text-align: center;">
+                <div class="mini-battle-val" id="mini-team-dps" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-gold); font-family: monospace;">-</div>
+                <div class="mini-battle-lbl" style="font-size: 0.675rem; color: var(--text-muted); margin-top: 0.15rem;" data-i18n="miniTeamDps">DPS รวม</div>
+              </div>
+              <div class="mini-battle-box" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: var(--radius-sm); padding: 0.5rem 0.4rem; text-align: center;">
+                <div class="mini-battle-val" id="mini-break-dmg" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-cyan); font-family: monospace;">-</div>
+                <div class="mini-battle-lbl" style="font-size: 0.675rem; color: var(--text-muted); margin-top: 0.15rem;" data-i18n="miniBreakDmg">Break / Super Break</div>
+              </div>
+              <div class="mini-battle-box" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: var(--radius-sm); padding: 0.5rem 0.4rem; text-align: center;">
+                <div class="mini-battle-val" id="mini-battle-turns" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-green); font-family: monospace;">-</div>
+                <div class="mini-battle-lbl" style="font-size: 0.675rem; color: var(--text-muted); margin-top: 0.15rem;" data-i18n="miniBattleTurns">เทิร์น / เวลา</div>
+              </div>
+            </div>
+
+            <!-- B. Mini Avatar Damage Breakdown (4 Avatars) -->
+            <div style="margin-bottom: 0.85rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="miniBreakdownTitle">
+                📊 สัดส่วนดาเมจสมาชิกในทีม (Damage Share)
+              </div>
+              <div id="mini-battle-avatars-list" style="display: flex; flex-direction: column; gap: 0.45rem;">
+                <!-- Rendered dynamically by JS -->
+              </div>
+            </div>
+
+            <!-- C. Equipment Readiness & Stats Overview -->
             <div>
               <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyEquipmentTitle">
-                📊 ความพร้อมของอุปกรณ์และเลเวลเฉลี่ย
+                🛡️ ความพร้อมของอุปกรณ์และเลเวลเฉลี่ย
               </div>
               <div class="synergy-metrics-grid">
                 <div class="synergy-metric-box">
@@ -189,18 +218,6 @@
                   <div class="synergy-metric-lbl" data-i18n="synergyRelicFull">รีลิกส์ครบชุด</div>
                 </div>
               </div>
-            </div>
-
-            <!-- C. Quick Damage Analyst Banner -->
-            <div id="synergy-damage-banner" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s ease;" title="คลิกเพื่อเปิดหน้า Damage Analyst">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span style="font-size: 1.4rem;">💥</span>
-                <div>
-                  <div style="font-size: 0.85rem; font-weight: 700; color: #f87171;" id="dashboard-battle-title">Damage Analyst (จับดาเมจจากในเกม)</div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);" id="dashboard-battle-summary">ยังไม่มีข้อมูลการต่อสู้ล่าสุด</div>
-                </div>
-              </div>
-              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; pointer-events: none;">ดูบทวิเคราะห์ →</button>
             </div>
           </div>
         </div>
