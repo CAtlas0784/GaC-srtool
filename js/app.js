@@ -2829,7 +2829,7 @@ function renderModalOverviewTab(avatarId) {
 
     // Sub Affixes
     (r.sub_affixes || []).forEach(sub => {
-      const rolls = sub.cnt || 1;
+      const rolls = sub.count || sub.cnt || 1;
       const sId = sub.sub_affix_id;
       if (sId === 1) flatHpBonus += Math.round(42 * rolls);
       else if (sId === 2) flatAtkBonus += Math.round(21 * rolls);
@@ -3588,6 +3588,7 @@ async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId) {
   const subAffixes = chosenSubs.map((sid, idx) => ({
     sub_affix_id: sid,
     cnt: rolls[idx] || 1,
+    count: rolls[idx] || 1,
     step: 2
   }));
 
@@ -4712,6 +4713,7 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
     const subAffixes = chosenSubs.map((sid, idx) => ({
       sub_affix_id: sid,
       cnt: rolls[idx] || 1,
+      count: rolls[idx] || 1,
       step: 2
     }));
 
@@ -5934,10 +5936,10 @@ async function handleAddRelicSubmit(e) {
     relic_id: relicId,
     main_affix_id: mainAffixId,
     sub_affixes: [
-      { sub_affix_id: 1, cnt: 2, step: 1 },
-      { sub_affix_id: 2, cnt: 2, step: 1 },
-      { sub_affix_id: 3, cnt: 3, step: 2 },
-      { sub_affix_id: 4, cnt: 4, step: 2 }
+      { sub_affix_id: 1, cnt: 2, count: 2, step: 1 },
+      { sub_affix_id: 2, cnt: 2, count: 2, step: 1 },
+      { sub_affix_id: 3, cnt: 3, count: 3, step: 2 },
+      { sub_affix_id: 4, cnt: 4, count: 4, step: 2 }
     ],
     internal_uid: maxUid + 1,
     equip_avatar: equipAvatar
