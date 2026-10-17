@@ -104,109 +104,162 @@
         </div>
       </div>
 
-      <div class="grid-2">
-        <!-- Server & Map Card -->
-        <div class="card">
-          <div class="card-title">
-            <span data-i18n="serverStatusTitle">📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
-            <span class="btn-sm btn-secondary" id="badge-version">API Live</span>
+      <div class="grid-2" style="align-items: start;">
+        <!-- Column 1: Server Status & Team Combat Synergy -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- 1. Server & Map Card -->
+          <div class="card">
+            <div class="card-title">
+              <span data-i18n="serverStatusTitle">📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
+              <span class="btn-sm btn-secondary" id="badge-version">API Live</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <div>
+                <span class="form-label" data-i18n="lblServerModeActive">โหมดเซิร์ฟเวอร์ที่ใช้งาน</span>
+                <strong id="lbl-active-mode" style="color: var(--accent-cyan);">GaC-hkrpg-go</strong>
+              </div>
+              <div>
+                <span class="form-label" data-i18n="lblApiEndpoint">API Gateway Endpoint</span>
+                <code id="lbl-api-url" style="color: var(--accent-cyan); font-size: 0.9rem;">-</code>
+              </div>
+              <div style="display: flex; gap: 1rem;">
+                <div>
+                  <span class="form-label" data-i18n="lblPlaneId">Plane ID</span>
+                  <span id="lbl-plane-id" style="font-weight: bold;">-</span>
+                </div>
+                <div>
+                  <span class="form-label" data-i18n="lblFloorId">Floor ID</span>
+                  <span id="lbl-floor-id" style="font-weight: bold;">-</span>
+                </div>
+              </div>
+              <div>
+                <span class="form-label" data-i18n="coords">พิกัดตัวละคร XYZ</span>
+                <span id="lbl-coordinates" style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+              </div>
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div>
-              <span class="form-label" data-i18n="lblServerModeActive">โหมดเซิร์ฟเวอร์ที่ใช้งาน</span>
-              <strong id="lbl-active-mode" style="color: var(--accent-cyan);">GaC-hkrpg-go</strong>
+
+          <!-- 2. Team Combat Synergy & Weakness Break Analysis -->
+          <div class="card" id="card-team-synergy">
+            <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <span style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>⚔️</span>
+                <span>วิเคราะห์ Synergy ทีม & จุดอ่อน</span>
+              </span>
+              <span class="badge-super-tag" id="badge-synergy-coverage" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-weight: 800;">ครอบคลุม 0/7 ธาตุ</span>
             </div>
-            <div>
-              <span class="form-label" data-i18n="lblApiEndpoint">API Gateway Endpoint</span>
-              <code id="lbl-api-url" style="color: var(--accent-cyan); font-size: 0.9rem;">-</code>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-              <div>
-                <span class="form-label" data-i18n="lblPlaneId">Plane ID</span>
-                <span id="lbl-plane-id" style="font-weight: bold;">-</span>
+            <p class="card-subtitle" style="margin-bottom: 0.85rem;">วิเคราะห์การครอบคลุม Weakness Break, ความสมดุลของบทบาท และความพร้อมของทีม</p>
+
+            <!-- A. Weakness Break Coverage 7 Elements -->
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+                🎯 การทำลายจุดอ่อน (Weakness Break Coverage)
               </div>
-              <div>
-                <span class="form-label" data-i18n="lblFloorId">Floor ID</span>
-                <span id="lbl-floor-id" style="font-weight: bold;">-</span>
+              <div class="synergy-elements-grid" id="synergy-elements-container">
+                <!-- Rendered dynamically by JS: Physical, Fire, Ice, Lightning, Wind, Quantum, Imaginary -->
               </div>
             </div>
+
+            <!-- B. Team Role Balance -->
+            <div style="margin-bottom: 1rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+                🛡️ การกระจายบทบาทในทีม (Team Composition & Roles)
+              </div>
+              <div id="synergy-roles-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                <!-- Role tags: DPS, Sub-DPS, Buffer/Debuffer, Sustain -->
+              </div>
+              <div id="synergy-advice-box" style="padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                <!-- Dynamic Advice -->
+              </div>
+            </div>
+
+            <!-- C. Equipment Readiness & Stats Overview -->
             <div>
-              <span class="form-label" data-i18n="coords">พิกัดตัวละคร XYZ</span>
-              <span id="lbl-coordinates" style="color: var(--text-muted); font-size: 0.85rem;">-</span>
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+                📊 ความพร้อมของอุปกรณ์และเลเวลเฉลี่ย
+              </div>
+              <div class="synergy-metrics-grid">
+                <div class="synergy-metric-box">
+                  <div class="synergy-metric-val" id="synergy-avg-level">-</div>
+                  <div class="synergy-metric-lbl">เลเวลเฉลี่ย</div>
+                </div>
+                <div class="synergy-metric-box">
+                  <div class="synergy-metric-val" id="synergy-avg-eidolon">-</div>
+                  <div class="synergy-metric-lbl">Eidolon เฉลี่ย</div>
+                </div>
+                <div class="synergy-metric-box">
+                  <div class="synergy-metric-val" id="synergy-lc-ready">-</div>
+                  <div class="synergy-metric-lbl">สวมกรวยแสง</div>
+                </div>
+                <div class="synergy-metric-box">
+                  <div class="synergy-metric-val" id="synergy-relic-ready">-</div>
+                  <div class="synergy-metric-lbl">รีลิกส์ครบชุด</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Actions Card -->
-        <div class="card">
-          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-            <span data-i18n="quickActionsTitle">⚡ ดำเนินการด่วน</span>
-            <span class="btn-sm btn-secondary" style="font-size: 0.75rem;" data-i18n="quickActionsBadge">คำสั่งด่วน</span>
+        <!-- Column 2: GM Command Dispatcher & Live Log Console -->
+        <div class="card" id="card-gm-console" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+              <span>💻</span>
+              <span>คอนโซลคำสั่ง GM & Log สด</span>
+            </span>
+            <div style="display: flex; gap: 0.35rem;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-copy-log" title="คัดลอก Log ทั้งหมด" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+                📋 คัดลอก
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-clear-log" title="ล้างหน้าจอ Terminal" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+                🗑️ ล้าง Log
+              </button>
+            </div>
           </div>
-          <p class="card-subtitle" data-i18n="quickActionsSubtitle">เครื่องมือจัดการทีมและเซิร์ฟเวอร์แบบทันที</p>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.75rem;">
-            <!-- 1. Set Team Lineup to E0S1 (Standard) -->
-            <button type="button" class="btn btn-primary" id="btn-quick-lineup-e0s1" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">⚡</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaLineupE0S1Title">ตั้งค่าทีมเป็น E0S1</div>
-                <div style="font-size: 0.725rem; opacity: 0.9;" data-i18n="qaLineupE0S1Desc">ปรับตัวละครในทีมเป็น Lv.80, E0, S1 สกิลเต็ม</div>
-              </div>
-            </button>
+          <p class="card-subtitle" style="margin-bottom: 0.25rem;">ส่งคำสั่ง GM / Server commands แบบเรียลไทม์ พร้อมติดตามสถานะและ Packet Log</p>
 
-            <!-- 2. Equip Recommended Relics for Team -->
-            <button type="button" class="btn btn-secondary" id="btn-quick-lineup-relics" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">🛡️</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaLineupRelicsTitle">ติดตั้งรีลิกส์แนะนำทั้งทีม</div>
-                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaLineupRelicsDesc">สวมใส่รีลิกส์และเครื่องประดับให้ทุกคนในทีม</div>
-              </div>
-            </button>
+          <!-- Quick GM Command Pills -->
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;">
+              ⚡ คำสั่งด่วนที่ใช้บ่อย (Quick Commands)
+            </div>
+            <div class="console-quick-pills">
+              <button type="button" class="console-pill-btn" data-cmd="/heal" title="ฟื้นฟู HP/Energy ทั้งทีม">💖 /heal</button>
+              <button type="button" class="console-pill-btn" data-cmd="/give 102 100000" title="รับ 100,000 Stellar Jades">💎 +100k Jades</button>
+              <button type="button" class="console-pill-btn" data-cmd="/give 2 10000000" title="รับ 10,000,000 Credits">💰 +10M Credits</button>
+              <button type="button" class="console-pill-btn" data-cmd="/max" title="อัปเต็มเลเวล 80 E6 ทุกตัว">⚡ /max</button>
+              <button type="button" class="console-pill-btn" data-cmd="/teleport 20001 1" title="วาร์ปไปรถไฟ Astral Express">🚂 รถไฟ Express</button>
+              <button type="button" class="console-pill-btn" data-cmd="/clear lineup" title="ล้างตัวละครในทีม">🧹 เคลียร์ทีม</button>
+              <button type="button" class="console-pill-btn" data-cmd="/help" title="ดูรายการคำสั่งทั้งหมด">❓ /help</button>
+            </div>
+          </div>
 
-            <!-- 3. Unlock All Avatars -->
-            <button type="button" class="btn btn-gold" id="btn-quick-unlock-all-avatars" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">👥</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaUnlockAllTitle">ปลดล็อกตัวละครครบทุกตัว</div>
-                <div style="font-size: 0.725rem; opacity: 0.85;" data-i18n="qaUnlockAllDesc">เพิ่มครบ 70+ ตัว E6 เต็มคลัง</div>
-              </div>
-            </button>
+          <!-- Interactive Terminal Screen -->
+          <div class="console-terminal-wrapper">
+            <div class="console-terminal-header">
+              <span class="terminal-dot dot-red"></span>
+              <span class="terminal-dot dot-yellow"></span>
+              <span class="terminal-dot dot-green"></span>
+              <span class="terminal-title">GaC-hkrpg-go Console Session (Interactive GM Dispatcher)</span>
+            </div>
+            <div class="console-terminal-log" id="console-terminal-log">
+              <!-- Logs rendered here -->
+            </div>
+          </div>
 
-            <!-- 4. Add All 5-Star Light Cones -->
-            <button type="button" class="btn btn-secondary" id="btn-quick-add-all-lcs" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">🗡️</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaAddLcsTitle">เพิ่มกรวยแสง 5★ ทั้งหมด</div>
-                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaAddLcsDesc">กรวยแสงประจำตัว S5 เข้าคลัง</div>
-              </div>
+          <!-- Command Input Bar -->
+          <form id="form-console-cmd" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+            <div class="console-input-wrap" style="flex: 1; display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 0 0.75rem;">
+              <span style="color: var(--accent-cyan); font-family: monospace; font-weight: 800; font-size: 1.1rem; margin-right: 0.5rem;">&gt;</span>
+              <input type="text" id="console-cmd-input" class="form-input" placeholder="พิมพ์คำสั่ง GM เช่น /heal, /max, /teleport 20411, /give 102 1000..." style="background: transparent; border: none; padding: 0.6rem 0; font-family: monospace; font-size: 0.85rem; box-shadow: none;" autocomplete="off">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-console-cmd-send" style="padding: 0.6rem 1.25rem; font-weight: 700; white-space: nowrap;">
+              ส่งคำสั่ง
             </button>
-
-            <!-- 5. Teleport to Astral Express -->
-            <button type="button" class="btn btn-secondary" id="btn-quick-teleport-train" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">🚂</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaTeleportTitle">วาร์ปกลับรถไฟ Astral Express</div>
-                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaTeleportDesc">กลับสู่ Parlor Car จุดปลอดภัย</div>
-              </div>
-            </button>
-
-            <!-- 6. Clear Lineup Slots -->
-            <button type="button" class="btn btn-danger" id="btn-quick-clear-lineup" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem;">
-              <span style="font-size: 1.35rem; line-height: 1;">🧹</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem;" data-i18n="qaClearLineupTitle">ล้างตัวละครในทีม</div>
-                <div style="font-size: 0.725rem; opacity: 0.85;" data-i18n="qaClearLineupDesc">เคลียร์ทุกช่องเพื่อจัดทีมใหม่</div>
-              </div>
-            </button>
-
-            <!-- 7. Gachabase Game Data & Asset Sync -->
-            <button type="button" class="btn btn-secondary" id="btn-quick-gachabase-sync" style="display: flex; align-items: center; justify-content: flex-start; gap: 0.6rem; text-align: left; padding: 0.75rem 0.9rem; border-color: rgba(245, 158, 11, 0.4);">
-              <span style="font-size: 1.35rem; line-height: 1;">🌐</span>
-              <div>
-                <div style="font-weight: 700; font-size: 0.875rem; color: #fbbf24;" data-i18n="qaGachabaseTitle">ซิงค์ข้อมูลเกม Gachabase</div>
-                <div style="font-size: 0.725rem; color: var(--text-muted);" data-i18n="qaGachabaseDesc">อัปเดตข้อมูล & รูปภาพเมื่อเกมมีแพตช์ใหม่</div>
-              </div>
-            </button>
+          </form>
+          <div style="font-size: 0.725rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+            <span>💡 รองรับกด <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↑</kbd> <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↓</kbd> เพื่อเลือกประวัติคำสั่งก่อนหน้า</span>
+            <span id="lbl-console-conn-status" style="color: var(--accent-green);">● เซิร์ฟเวอร์ออนไลน์</span>
           </div>
         </div>
       </div>

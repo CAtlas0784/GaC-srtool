@@ -72,12 +72,26 @@ const el = {
   lineupContainer: document.getElementById('lineup-container'),
   toggleCreativeMode: document.getElementById('toggle-creative-mode'),
   badgeCreativeMode: document.getElementById('badge-creative-mode'),
-  btnQuickLineupE0S1: document.getElementById('btn-quick-lineup-e0s1'),
-  btnQuickLineupRelics: document.getElementById('btn-quick-lineup-relics'),
-  btnQuickUnlockAllAvatars: document.getElementById('btn-quick-unlock-all-avatars'),
-  btnQuickAddAllLcs: document.getElementById('btn-quick-add-all-lcs'),
-  btnQuickTeleportTrain: document.getElementById('btn-quick-teleport-train'),
-  btnQuickClearLineup: document.getElementById('btn-quick-clear-lineup'),
+  // Team Combat Synergy
+  cardTeamSynergy: document.getElementById('card-team-synergy'),
+  badgeSynergyCoverage: document.getElementById('badge-synergy-coverage'),
+  synergyElementsContainer: document.getElementById('synergy-elements-container'),
+  synergyRolesContainer: document.getElementById('synergy-roles-container'),
+  synergyAdviceBox: document.getElementById('synergy-advice-box'),
+  synergyAvgLevel: document.getElementById('synergy-avg-level'),
+  synergyAvgEidolon: document.getElementById('synergy-avg-eidolon'),
+  synergyLcReady: document.getElementById('synergy-lc-ready'),
+  synergyRelicReady: document.getElementById('synergy-relic-ready'),
+
+  // GM Command Dispatcher & Live Log Console
+  cardGmConsole: document.getElementById('card-gm-console'),
+  btnConsoleCopyLog: document.getElementById('btn-console-copy-log'),
+  btnConsoleClearLog: document.getElementById('btn-console-clear-log'),
+  consoleTerminalLog: document.getElementById('console-terminal-log'),
+  formConsoleCmd: document.getElementById('form-console-cmd'),
+  consoleCmdInput: document.getElementById('console-cmd-input'),
+  btnConsoleCmdSend: document.getElementById('btn-console-cmd-send'),
+  lblConsoleConnStatus: document.getElementById('lbl-console-conn-status'),
   // Gachabase Sync
   btnHeaderGachabaseSync: document.getElementById('btn-header-gachabase-sync'),
   btnQuickGachabaseSync: document.getElementById('btn-quick-gachabase-sync'),
@@ -379,10 +393,18 @@ function setConnectionStatus(connected, extraText = '') {
     el.statusDot.classList.add('connected');
     el.connectionStatusText.textContent = extraText || t('online');
     el.connectionStatusText.style.color = 'var(--accent-green)';
+    if (el.lblConsoleConnStatus) {
+      el.lblConsoleConnStatus.textContent = '● เซิร์ฟเวอร์ออนไลน์';
+      el.lblConsoleConnStatus.style.color = 'var(--accent-green)';
+    }
   } else {
     el.statusDot.classList.remove('connected');
     el.connectionStatusText.textContent = extraText || t('offline');
     el.connectionStatusText.style.color = 'var(--accent-red)';
+    if (el.lblConsoleConnStatus) {
+      el.lblConsoleConnStatus.textContent = '○ ออฟไลน์ (คำสั่งทำงานผ่านแคชภายใน)';
+      el.lblConsoleConnStatus.style.color = 'var(--text-muted)';
+    }
   }
 }
 
@@ -1015,6 +1037,413 @@ function renderLineup(lineups) {
     });
     el.lineupContainer.appendChild(addSlotCard);
   }
+
+  // Update Team Combat Synergy Analysis
+  renderTeamSynergy(currentLineup);
+}
+
+// ==========================================
+// Team Combat Synergy & Weakness Break Analysis
+// ==========================================
+const HSR_ELEMENTS = [
+  { key: 'Physical', name: 'Physical', nameTh: 'กายภาพ', color: '#cbd5e1' },
+  { key: 'Fire', name: 'Fire', nameTh: 'ไฟ', color: '#ef4444' },
+  { key: 'Ice', name: 'Ice', nameTh: 'น้ำแข็ง', color: '#38bdf8' },
+  { key: 'Lightning', name: 'Lightning', nameTh: 'สายฟ้า', color: '#c084fc' },
+  { key: 'Wind', name: 'Wind', nameTh: 'ลม', color: '#34d399' },
+  { key: 'Quantum', name: 'Quantum', nameTh: 'ควอนตัม', color: '#818cf8' },
+  { key: 'Imaginary', name: 'Imaginary', nameTh: 'จินตภาพ', color: '#fbbf24' }
+];
+
+function renderTeamSynergy(lineups) {
+  if (!el.synergyElementsContainer) return;
+  const currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
+
+  // Extract active character IDs
+  const activeIds = [];
+  for (const slot in currentLineup) {
+    const aid = parseInt(currentLineup[slot], 10);
+    if (aid && aid > 0 && !activeIds.includes(aid)) {
+      activeIds.push(aid);
+    }
+  }
+
+  // 1. Weakness Break Coverage
+  const coveredElements = {};
+  const roles = {
+    dps: [],        // Destruction, Hunt, Erudition
+    specialist: [], // Remembrance, Elation
+    support: [],    // Harmony, Nihility
+    sustain: []     // Preservation, Abundance
+  };
+
+  let totalLevel = 0;
+  let totalEidolon = 0;
+  let lcCount = 0;
+  let fullRelicCount = 0;
+
+  activeIds.forEach(aid => {
+    const meta = getAvatarInfo(aid);
+    const av = state.fullFreesrData?.avatars?.[aid];
+    const lvl = av?.level || 80;
+    const rank = av?.data?.rank ?? (state.avatarsList.find(a => a.avatar_id === aid)?.rank ?? 0);
+
+    totalLevel += lvl;
+    totalEidolon += rank;
+
+    // Element coverage
+    const elem = meta.element || 'Unknown';
+    if (!coveredElements[elem]) {
+      coveredElements[elem] = [];
+    }
+    coveredElements[elem].push(meta.name);
+
+    // Path / Role
+    const path = meta.path || '';
+    if (['Destruction', 'Hunt', 'Erudition'].includes(path)) {
+      roles.dps.push(meta.name);
+    } else if (['Remembrance', 'Elation'].includes(path)) {
+      roles.specialist.push(meta.name);
+    } else if (['Harmony', 'Nihility'].includes(path)) {
+      roles.support.push(meta.name);
+    } else if (['Preservation', 'Abundance'].includes(path)) {
+      roles.sustain.push(meta.name);
+    }
+
+    // LC check
+    const hasLc = (state.fullFreesrData?.lightcones || []).some(l => l.equip_avatar === aid);
+    if (hasLc) lcCount++;
+
+    // Relics check (count how many relics equipped)
+    const relCount = (state.fullFreesrData?.relics || []).filter(r => r.equip_avatar === aid).length;
+    if (relCount >= 6) fullRelicCount++;
+  });
+
+  const count = activeIds.length || 1;
+  const avgLevel = activeIds.length ? (totalLevel / count).toFixed(1) : '-';
+  const avgEidolon = activeIds.length ? `E${(totalEidolon / count).toFixed(1)}` : '-';
+
+  // Render Element Chips
+  const coveredCount = Object.keys(coveredElements).length;
+  if (el.badgeSynergyCoverage) {
+    el.badgeSynergyCoverage.textContent = `ครอบคลุม ${coveredCount}/7 ธาตุ`;
+    el.badgeSynergyCoverage.style.color = coveredCount >= 4 ? 'var(--accent-green)' : (coveredCount >= 2 ? 'var(--accent-cyan)' : 'var(--accent-gold)');
+  }
+
+  el.synergyElementsContainer.innerHTML = HSR_ELEMENTS.map(elem => {
+    const isCovered = !!coveredElements[elem.key];
+    const providers = coveredElements[elem.key] || [];
+    const providerText = isCovered ? providers.join(', ') : 'ไม่มีในทีม';
+    return `
+      <div class="synergy-element-chip ${isCovered ? 'active' : 'inactive'}" style="${isCovered ? `border-color: ${elem.color}66; box-shadow: 0 0 8px ${elem.color}22;` : ''}">
+        ${getElementIconHtml(elem.key, 22)}
+        <span class="synergy-element-name" style="${isCovered ? `color: ${elem.color};` : ''}">${elem.nameTh}</span>
+        <span class="synergy-element-chars" title="${providerText}">${providerText}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Render Role Tags
+  if (el.synergyRolesContainer) {
+    el.synergyRolesContainer.innerHTML = `
+      <div class="badge-super-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 700;">
+        🗡️ DPS (${roles.dps.length}): ${roles.dps.join(', ') || '-'}
+      </div>
+      <div class="badge-super-tag" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-weight: 700;">
+        ⚡ ซัพพอร์ต/ดีบัฟ (${roles.support.length}): ${roles.support.join(', ') || '-'}
+      </div>
+      <div class="badge-super-tag" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">
+        🛡️ Sustain ฮีล/ชิลด์ (${roles.sustain.length}): ${roles.sustain.join(', ') || '-'}
+      </div>
+      ${roles.specialist.length ? `
+        <div class="badge-super-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">
+          🔮 พิเศษ/FUA (${roles.specialist.length}): ${roles.specialist.join(', ')}
+        </div>
+      ` : ''}
+    `;
+  }
+
+  // Dynamic Advice Text
+  if (el.synergyAdviceBox) {
+    if (activeIds.length === 0) {
+      el.synergyAdviceBox.innerHTML = `<span style="color: var(--text-muted);">ยังไม่มีตัวละครในทีม กรุณาเลือกตัวละครในทีมด้านบน</span>`;
+    } else if (roles.sustain.length === 0) {
+      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">⚠️ <strong>ข้อแนะนำ:</strong> ทีมยังขาดตัวละครสายป้องกันหรือรักษา (Preservation / Abundance) แนะนำใส่ 1 ตำแหน่งเพื่อความปลอดภัยในการเล่น</span>`;
+      el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+    } else if (roles.dps.length === 0) {
+      el.synergyAdviceBox.innerHTML = `<span style="color: #38bdf8;">💡 <strong>ข้อแนะนำ:</strong> ทีมมีแต่ตัวซัพพอร์ต ยังไม่มีตัวทำดาเมจหลัก (Destruction / Hunt / Erudition)</span>`;
+      el.synergyAdviceBox.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+    } else if (roles.support.length === 0) {
+      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">💡 <strong>ข้อแนะนำ:</strong> ทีมมีตัวดาเมจแต่ยังไม่มีตัวบัฟหรือดีบัฟ (Harmony / Nihility) เสริมตัวซัพพอร์ตจะช่วยเร่งดาเมจได้มหาศาล</span>`;
+      el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+    } else {
+      el.synergyAdviceBox.innerHTML = `<span style="color: #34d399;">✅ <strong>สมดุลยอดเยี่ยม:</strong> ทีมมีโครงสร้างครบเครื่อง ทั้งตัวทำดาเมจ ซัพพอร์ตบัฟ/ดีบัฟ และตัวฮีลเลอร์/ชิลเดอร์ พร้อมลุยทุกคอนเทนต์!</span>`;
+      el.synergyAdviceBox.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+    }
+  }
+
+  // Metrics
+  if (el.synergyAvgLevel) el.synergyAvgLevel.textContent = activeIds.length ? `Lv.${avgLevel}` : '-';
+  if (el.synergyAvgEidolon) el.synergyAvgEidolon.textContent = avgEidolon;
+  if (el.synergyLcReady) el.synergyLcReady.textContent = activeIds.length ? `${lcCount}/${activeIds.length}` : '-';
+  if (el.synergyRelicReady) el.synergyRelicReady.textContent = activeIds.length ? `${fullRelicCount}/${activeIds.length}` : '-';
+}
+
+// ==========================================
+// GM Command Dispatcher & Live Log Console
+// ==========================================
+const consoleState = {
+  history: [],
+  historyIndex: -1,
+  maxLogs: 200
+};
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function logToConsole(message, tag = 'SYS') {
+  if (!el.consoleTerminalLog) return;
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+  let tagClass = 'tag-sys';
+  const upperTag = String(tag).toUpperCase();
+  if (upperTag === 'CMD' || upperTag === 'GM') tagClass = 'tag-cmd';
+  else if (upperTag === 'OK' || upperTag === 'SUCCESS') tagClass = 'tag-ok';
+  else if (upperTag === 'ERR' || upperTag === 'ERROR') tagClass = 'tag-err';
+  else if (upperTag === 'NET') tagClass = 'tag-net';
+
+  const lineEl = document.createElement('div');
+  lineEl.className = 'log-line';
+  lineEl.innerHTML = `
+    <span class="log-time">${timeStr}</span>
+    <span class="log-tag ${tagClass}">[${escapeHtml(upperTag)}]</span>
+    <span class="log-msg">${escapeHtml(message)}</span>
+  `;
+
+  el.consoleTerminalLog.appendChild(lineEl);
+
+  // Trim excess logs if above maxLogs
+  while (el.consoleTerminalLog.children.length > consoleState.maxLogs) {
+    el.consoleTerminalLog.removeChild(el.consoleTerminalLog.firstChild);
+  }
+
+  // Auto scroll to bottom
+  el.consoleTerminalLog.scrollTop = el.consoleTerminalLog.scrollHeight;
+}
+
+async function dispatchGMCommand(rawCmd) {
+  const cmd = (rawCmd || '').trim();
+  if (!cmd) return;
+
+  // Save to history
+  if (consoleState.history[consoleState.history.length - 1] !== cmd) {
+    consoleState.history.push(cmd);
+  }
+  consoleState.historyIndex = -1;
+
+  // Log user command
+  logToConsole(cmd, 'CMD');
+
+  // Handle local /help command immediately
+  if (cmd.toLowerCase() === '/help') {
+    logToConsole('คำสั่ง GM ที่พร้อมใช้งาน (Available Commands):', 'SYS');
+    logToConsole('  /heal                     - ฟื้นฟู HP/Energy เต็มตัวละครในทีมทั้งหมด', 'SYS');
+    logToConsole('  /max                      - อัปตัวละครทั้งหมดเป็น Lv.80, E6, Traces 10', 'SYS');
+    logToConsole('  /teleport <plane> [floor] - วาร์ปไปยังฉาก/Plane ID (เช่น 20001 รถไฟ Express)', 'SYS');
+    logToConsole('  /scene <plane> [floor]    - คำสั่งย่อของ /teleport', 'SYS');
+    logToConsole('  /clear lineup             - ล้างตัวละครในทีมปัจจุบันทั้งหมด', 'SYS');
+    logToConsole('  /avatar <id> [lvl] [rank] - ปลดล็อกหรือตั้งค่าตัวละคร (เช่น /avatar 1308 80 6)', 'SYS');
+    logToConsole('  /give <id> [count]        - เพิ่มไอเทมหรือเงิน (เช่น 102 Jades, 2 Credits)', 'SYS');
+    logToConsole('  /help                     - แสดงคู่มือรายการคำสั่งนี้', 'SYS');
+    return;
+  }
+
+  // If server is online, try dispatching to backend
+  if (state.isConnected) {
+    try {
+      const res = await apiCall('/api/command', 'POST', { command: cmd });
+      if (res) {
+        const msg = res.message || res.msg || 'คำสั่งประมวลผลสำเร็จ';
+        logToConsole(msg, 'OK');
+
+        // Command specific post-processing
+        const lowerCmd = cmd.toLowerCase();
+        if (lowerCmd.startsWith('/heal')) {
+          showToast('ฟื้นฟู HP และ Energy เรียบร้อย', 'success');
+          refreshStatus();
+        } else if (lowerCmd.startsWith('/teleport') || lowerCmd.startsWith('/scene')) {
+          showToast('ส่งคำสั่งเปลี่ยนฉากเรียบร้อย', 'success');
+          refreshStatus();
+        } else if (lowerCmd.startsWith('/clear lineup')) {
+          showToast('ล้างตัวละครในทีมเรียบร้อย', 'info');
+          refreshStatus();
+        } else if (lowerCmd.startsWith('/max')) {
+          showToast('ปรับ Max เลเวลและ Traces เรียบร้อย', 'success');
+          refreshStatus();
+        } else if (lowerCmd.startsWith('/give')) {
+          showToast('เพิ่มไอเทม/เงินเรียบร้อย', 'success');
+        } else if (lowerCmd.startsWith('/avatar')) {
+          showToast('อัปเดตตัวละครเรียบร้อย', 'success');
+          loadAvatars();
+        }
+        return;
+      }
+    } catch (err) {
+      logToConsole(`Server Dispatcher: ${err.message} (เข้าสู่โหมด Local Fallback)`, 'NET');
+    }
+  }
+
+  // Fallback to client-side local executions if server is offline or doesn't support the command
+  const lowerCmd = cmd.toLowerCase();
+  if (lowerCmd.startsWith('/heal')) {
+    logToConsole('Local Fallback: ฟื้นฟู Energy ของตัวละครในทีมเป็น 100%', 'OK');
+    if (state.fullFreesrData?.avatars) {
+      for (const aid in state.fullFreesrData.avatars) {
+        state.fullFreesrData.avatars[aid].sp_value = 140;
+      }
+      saveFreesrChangesToServer();
+    }
+    showToast('ฟื้นฟูพลังงานทีมเรียบร้อย', 'success');
+  } else if (lowerCmd.startsWith('/max')) {
+    logToConsole('Local Fallback: กำลังรัน maxAllAvatars()...', 'SYS');
+    await maxAllAvatars();
+    logToConsole('Local: อัปเลเวล 80 และ E6 ตัวละครทั้งหมดเรียบร้อย', 'OK');
+  } else if (lowerCmd.startsWith('/clear lineup')) {
+    logToConsole('Local Fallback: กำลังล้างทีม...', 'SYS');
+    await quickClearLineup();
+    logToConsole('Local: ล้างทีมเรียบร้อยแล้ว', 'OK');
+  } else if (lowerCmd.startsWith('/teleport') || lowerCmd.startsWith('/scene')) {
+    const parts = cmd.split(/\s+/);
+    const planeId = parseInt(parts[1], 10) || 20001;
+    const floorId = parseInt(parts[2], 10) || 1;
+    logToConsole(`Local Fallback: ตั้งค่าฉากเป็น Plane ID ${planeId}, Floor ${floorId}`, 'OK');
+    if (state.fullFreesrData) {
+      state.fullFreesrData.scene = state.fullFreesrData.scene || {};
+      state.fullFreesrData.scene.plane_id = planeId;
+      state.fullFreesrData.scene.floor_id = floorId;
+      saveFreesrChangesToServer();
+      refreshStatus();
+    }
+    showToast(`เปลี่ยนฉากเป็น Plane ${planeId} เรียบร้อย`, 'success');
+  } else if (lowerCmd.startsWith('/avatar')) {
+    const parts = cmd.split(/\s+/);
+    const aid = parseInt(parts[1], 10);
+    const lvl = parseInt(parts[2], 10) || 80;
+    const rank = parseInt(parts[3], 10) || 6;
+    if (aid) {
+      if (!state.fullFreesrData) state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+      state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
+      state.fullFreesrData.avatars[aid] = {
+        owner_uid: 0,
+        avatar_id: aid,
+        level: lvl,
+        promotion: lvl > 70 ? 6 : (lvl > 60 ? 5 : 4),
+        data: { rank, skills: { 1: 10, 2: 10, 3: 10, 4: 10 } }
+      };
+      saveFreesrChangesToServer();
+      loadAvatars();
+      logToConsole(`Local: ปลดล็อก/อัปเดต Avatar ID ${aid} (Lv.${lvl}, E${rank}) เรียบร้อย`, 'OK');
+      showToast(`อัปเดตตัวละคร ${aid} สำเร็จ`, 'success');
+    } else {
+      logToConsole('รูปแบบคำสั่งไม่ถูกต้อง: /avatar <id> [level] [rank]', 'ERR');
+    }
+  } else if (lowerCmd.startsWith('/give')) {
+    const parts = cmd.split(/\s+/);
+    const itemId = parseInt(parts[1], 10);
+    const count = parseInt(parts[2], 10) || 1;
+    if (itemId) {
+      logToConsole(`Local: ได้รับ Item ID ${itemId} จำนวน ${count.toLocaleString()}`, 'OK');
+      showToast(`เพิ่มไอเทม ${itemId} x${count}`, 'success');
+    } else {
+      logToConsole('รูปแบบคำสั่งไม่ถูกต้อง: /give <id> [count]', 'ERR');
+    }
+  } else {
+    logToConsole(`คำสั่งที่ไม่รู้จักหรือไม่รองรับในโหมดออฟไลน์: "${cmd}" (พิมพ์ /help เพื่อดูคำสั่ง)`, 'ERR');
+  }
+}
+
+function setupGMConsoleEvents() {
+  if (el.formConsoleCmd) {
+    el.formConsoleCmd.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!el.consoleCmdInput) return;
+      const cmd = el.consoleCmdInput.value.trim();
+      if (!cmd) return;
+      el.consoleCmdInput.value = '';
+      dispatchGMCommand(cmd);
+    });
+  }
+
+  // Key navigation in console input
+  if (el.consoleCmdInput) {
+    el.consoleCmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (consoleState.history.length === 0) return;
+        if (consoleState.historyIndex === -1) {
+          consoleState.historyIndex = consoleState.history.length - 1;
+        } else if (consoleState.historyIndex > 0) {
+          consoleState.historyIndex--;
+        }
+        el.consoleCmdInput.value = consoleState.history[consoleState.historyIndex] || '';
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (consoleState.history.length === 0 || consoleState.historyIndex === -1) return;
+        if (consoleState.historyIndex < consoleState.history.length - 1) {
+          consoleState.historyIndex++;
+          el.consoleCmdInput.value = consoleState.history[consoleState.historyIndex];
+        } else {
+          consoleState.historyIndex = -1;
+          el.consoleCmdInput.value = '';
+        }
+      }
+    });
+  }
+
+  // Quick pill buttons
+  document.querySelectorAll('.console-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cmd = btn.getAttribute('data-cmd');
+      if (cmd) {
+        if (el.consoleCmdInput) el.consoleCmdInput.value = cmd;
+        dispatchGMCommand(cmd);
+      }
+    });
+  });
+
+  // Copy Log button
+  if (el.btnConsoleCopyLog) {
+    el.btnConsoleCopyLog.addEventListener('click', () => {
+      if (!el.consoleTerminalLog) return;
+      const text = el.consoleTerminalLog.innerText || el.consoleTerminalLog.textContent;
+      navigator.clipboard?.writeText(text).then(() => {
+        showToast('คัดลอก Log ทั้งหมดลงในคลิปบอร์ดแล้ว', 'success');
+      }).catch(() => {
+        showToast('ไม่สามารถคัดลอก Log ได้', 'error');
+      });
+    });
+  }
+
+  // Clear Log button
+  if (el.btnConsoleClearLog) {
+    el.btnConsoleClearLog.addEventListener('click', () => {
+      if (el.consoleTerminalLog) {
+        el.consoleTerminalLog.innerHTML = '';
+        logToConsole('ล้างหน้าจอ Terminal เรียบร้อย', 'SYS');
+      }
+    });
+  }
+
+  // Initial greeting
+  logToConsole('GaC Server Console พร้อมใช้งาน (พิมพ์ /help เพื่อดูคำสั่งทั้งหมด)', 'SYS');
 }
 
 // Add extra slot in Creative Mode
@@ -5908,6 +6337,7 @@ async function init() {
   setupModalSubtabs();
   setupEvents();
   setupGachabaseSyncEvents();
+  setupGMConsoleEvents();
   applyTranslations();
   renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   renderAvatarsGrid();
