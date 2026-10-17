@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GaC-Srtool — Ultimate Star Rail Server & Build Manager</title>
+  <title>[test-gay] GaC-Srtool — Ultimate Star Rail Server & Build Manager</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -15,7 +15,10 @@
     <div class="brand">
       <img src="assets/logo.png" alt="GaC Logo" class="brand-logo-img">
       <div>
-        <div class="brand-title">GaC-Srtool</div>
+        <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>GaC-Srtool</span>
+          <span class="badge-branch" id="header-branch-badge">test-gay</span>
+        </div>
         <div class="brand-subtitle" data-i18n="appSubtitle">Star Rail FreeSR & Server Controller</div>
       </div>
     </div>
@@ -60,6 +63,12 @@
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json" data-i18n="tabJson">📝 จัดการไฟล์ JSON</button>
     <button class="tab-btn" data-tab="tab-settings" data-i18n="tabSettings">⚙️ ตั้งค่า</button>
+    <div class="nav-branch-pill" id="nav-branch-pill" title="Git Branch ที่ใช้งานอยู่">
+      <svg class="branch-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
+        <path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path>
+      </svg>
+      <span id="nav-branch-name">test-gay</span>
+    </div>
   </nav>
 
   <!-- Main Container -->
