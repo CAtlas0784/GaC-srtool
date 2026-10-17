@@ -8,6 +8,7 @@ import {
   getLightconeArtUrl,
   getLightconeThumbUrl,
   handleAvatarImgError,
+  handleAvatarPortraitError,
   handleLcImgError,
   GACHABASE_IMAGE_CACHE,
   KNOWN_GACHABASE_ASSETS
@@ -15,6 +16,7 @@ import {
 
 // Expose image resolvers & error handlers to window for inline onclick/onerror attributes
 window.handleAvatarImgError = handleAvatarImgError;
+window.handleAvatarPortraitError = handleAvatarPortraitError;
 window.handleLcImgError = handleLcImgError;
 window.getAvatarIconUrl = getAvatarIconUrl;
 window.getLightconeArtUrl = getLightconeArtUrl;
@@ -2369,7 +2371,7 @@ function getAvatarSplashSrc(aid) {
   if (meta?.images?.fullArt) return meta.images.fullArt;
   if (GACHABASE_IMAGE_CACHE.avatarSplash[id]) return GACHABASE_IMAGE_CACHE.avatarSplash[id];
   if (KNOWN_GACHABASE_ASSETS.avatarSplash[id]) return KNOWN_GACHABASE_ASSETS.avatarSplash[id];
-  return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${id}.png`;
+  return `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${id}.png`;
 }
 
 
@@ -2685,9 +2687,12 @@ function renderModalOverviewTab(avatarId) {
 
   // Portrait Art
   if (el.overviewPortraitImg) {
+    el.overviewPortraitImg.removeAttribute('data-err-step');
+    el.overviewPortraitImg.style.display = 'block';
+    el.overviewPortraitImg.style.objectFit = 'cover';
     el.overviewPortraitImg.src = getAvatarSplashSrc(aid);
     el.overviewPortraitImg.onerror = function() {
-      handleAvatarImgError(this, aid);
+      handleAvatarPortraitError(this, aid);
     };
   }
 
@@ -4553,7 +4558,7 @@ function renderShowcaseCard(avatarId) {
   el.showcaseCardContainer.innerHTML = `
     <!-- 1. Left Splash Art Column -->
     <div class="showcase-splash-col">
-      <img class="showcase-splash-img" src="${primaryPortrait}" onerror="if(this.src!=='${fallbackPortrait}')this.src='${fallbackPortrait}';else handleAvatarImgError(this, ${aid});" alt="${meta.name}">
+      <img class="showcase-splash-img" src="${primaryPortrait}" onerror="handleAvatarPortraitError(this, ${aid})" alt="${meta.name}">
       <div class="showcase-splash-overlay">
         <div class="showcase-char-name">${meta.name}</div>
         <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
