@@ -17,8 +17,6 @@ export const KNOWN_GACHABASE_ASSETS = {
   },
   avatarSplash: {
     1511: 'https://cdn.gachabase.net/hsr/assets/f8b5630e85022ab8b2761e4e3f614b42.png', // Aha Splash Art (2048x1914)
-    1513: 'https://cdn.gachabase.net/hsr/assets/65b90212f8623ad92243d739ea1fc9ec.png', // Waveflair Splash
-    1505: 'https://cdn.gachabase.net/hsr/assets/71cbe3943310cb233e8dbe6ef69caeb1.png', // Evanescia Splash
     1502: 'https://cdn.gachabase.net/hsr/assets/8ca2530c42791593b72d54a850fce97e.png', // Yao Guang
     1501: 'https://cdn.gachabase.net/hsr/assets/09ee6e2618ac2a0dab2aec8d73b0bb01.png', // Sparxie
   },
@@ -384,7 +382,7 @@ export function getLightconeArtUrl(lcId) {
   if (id === 23065) {
     return './assets/lightcones/23065.png';
   }
-  return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+  return `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${id}.png`;
 }
 
 /**
@@ -402,8 +400,68 @@ export function getLightconeThumbUrl(lcId) {
 }
 
 /**
+ * Robust error handler for Avatar Full Portrait / Splash Art
+ * Falls back through:
+ *  0. jsDelivr StarRailRes character_portrait (2048x2048 splash)
+ *  1. jsDelivr StarRailRes character_drawing (transparent full body art)
+ *  2. Raw GitHub character_portrait
+ *  3. Raw GitHub character_drawing
+ *  4. Gachabase splash cache
+ *  5. jsDelivr avatar icon (visual fallback rather than blank)
+ */
+export function handleAvatarPortraitError(img, avatarId) {
+  if (!img) return;
+  const id = parseInt(avatarId, 10);
+  const step = parseInt(img.getAttribute('data-err-step') || '0', 10);
+
+  if (step === 0) {
+    img.setAttribute('data-err-step', '1');
+    const portraitUrl = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${id}.png`;
+    if (img.src !== portraitUrl) {
+      img.src = portraitUrl;
+      return;
+    }
+  }
+
+  if (step <= 1) {
+    img.setAttribute('data-err-step', '2');
+    const drawingUrl = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_drawing/${id}.png`;
+    if (img.src !== drawingUrl) {
+      img.src = drawingUrl;
+      return;
+    }
+  }
+
+  if (step <= 2) {
+    img.setAttribute('data-err-step', '3');
+    const rawPortrait = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${id}.png`;
+    if (img.src !== rawPortrait) {
+      img.src = rawPortrait;
+      return;
+    }
+  }
+
+  if (step <= 3) {
+    img.setAttribute('data-err-step', '4');
+    const gachaSplash = GACHABASE_IMAGE_CACHE.avatarSplash?.[id] || KNOWN_GACHABASE_ASSETS.avatarSplash?.[id];
+    if (gachaSplash && img.src !== gachaSplash) {
+      img.src = gachaSplash;
+      return;
+    }
+  }
+
+  // Step 4+: Visual fallback to avatar icon rather than ever leaving the portrait black/blank
+  img.setAttribute('data-err-step', '5');
+  const iconUrl = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${id}.png`;
+  if (img.src !== iconUrl) {
+    img.src = iconUrl;
+    img.style.objectFit = 'contain';
+  }
+}
+
+/**
  * Robust error handler for Avatar images
- * Falls back through: Local Asset -> StarRailRes -> Gachabase CDN -> Letter Placeholder
+ * Falls back through: jsDelivr StarRailRes -> Raw GitHub -> Gachabase CDN -> Letter Placeholder
  */
 export function handleAvatarImgError(img, avatarId) {
   if (!img) return;
@@ -412,9 +470,12 @@ export function handleAvatarImgError(img, avatarId) {
 
   if (step === 0) {
     img.setAttribute('data-err-step', '1');
-    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/avatar/${id}.png`;
+    img.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${id}.png`;
   } else if (step === 1) {
     img.setAttribute('data-err-step', '2');
+    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/avatar/${id}.png`;
+  } else if (step === 2) {
+    img.setAttribute('data-err-step', '3');
     const gachaUrl = GACHABASE_IMAGE_CACHE.avatars[id] || KNOWN_GACHABASE_ASSETS.avatars[id];
     if (gachaUrl && img.src !== gachaUrl) {
       img.src = gachaUrl;
@@ -434,7 +495,7 @@ export function handleAvatarImgError(img, avatarId) {
 
 /**
  * Robust error handler for Lightcone images
- * Falls back through: Local Asset -> StarRailRes -> Gachabase CDN -> Default Logo
+ * Falls back through: jsDelivr StarRailRes -> Raw GitHub -> Gachabase CDN -> Default Logo
  */
 export function handleLcImgError(img, lcId) {
   if (!img) return;
@@ -443,9 +504,12 @@ export function handleLcImgError(img, lcId) {
 
   if (step === 0) {
     img.setAttribute('data-err-step', '1');
-    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+    img.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/light_cone_preview/${id}.png`;
   } else if (step === 1) {
     img.setAttribute('data-err-step', '2');
+    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+  } else if (step === 2) {
+    img.setAttribute('data-err-step', '3');
     const gachaUrl = GACHABASE_IMAGE_CACHE.lightcones[id] || KNOWN_GACHABASE_ASSETS.lightcones[id] || GACHABASE_IMAGE_CACHE.lightconeThumbs[id] || KNOWN_GACHABASE_ASSETS.lightconeThumbs[id];
     if (gachaUrl && img.src !== gachaUrl) {
       img.src = gachaUrl;
