@@ -2609,6 +2609,52 @@ function getRelicSubAffixName(affixId) {
   return map[affixId] || `Sub Affix ${affixId}`;
 }
 
+export const RELIC_SUBSTATS_CONFIG = [
+  { id: 8, name: "CRIT Rate%", short: "CRIT Rate", icon: "🎯" },
+  { id: 9, name: "CRIT DMG%", short: "CRIT DMG", icon: "💥" },
+  { id: 7, name: "SPD", short: "SPD", icon: "⚡" },
+  { id: 5, name: "ATK%", short: "ATK%", icon: "⚔️" },
+  { id: 4, name: "HP%", short: "HP%", icon: "❤️" },
+  { id: 6, name: "DEF%", short: "DEF%", icon: "🛡️" },
+  { id: 12, name: "Break Effect%", short: "Break", icon: "🔨" },
+  { id: 10, name: "Effect Hit Rate%", short: "EHR", icon: "🎯" },
+  { id: 11, name: "Effect RES%", short: "RES", icon: "🔰" },
+  { id: 2, name: "ATK (Flat)", short: "ATK", icon: "🗡️" },
+  { id: 1, name: "HP (Flat)", short: "HP", icon: "🩸" },
+  { id: 3, name: "DEF (Flat)", short: "DEF", icon: "🧱" }
+];
+
+export function formatRelicSubstatValue(affixId, rolls = 1) {
+  const r = parseInt(rolls, 10) || 1;
+  switch (parseInt(affixId, 10)) {
+    case 1: return `${Math.round(42 * r)}`;
+    case 2: return `${Math.round(21 * r)}`;
+    case 3: return `${Math.round(21 * r)}`;
+    case 4: return `${(4.3 * r).toFixed(1)}%`;
+    case 5: return `${(4.3 * r).toFixed(1)}%`;
+    case 6: return `${(5.4 * r).toFixed(1)}%`;
+    case 7: return `${(2.6 * r).toFixed(1)}`;
+    case 8: return `${(3.2 * r).toFixed(1)}%`;
+    case 9: return `${(6.4 * r).toFixed(1)}%`;
+    case 10: return `${(4.3 * r).toFixed(1)}%`;
+    case 11: return `${(4.3 * r).toFixed(1)}%`;
+    case 12: return `${(6.4 * r).toFixed(1)}%`;
+    default: return `${r}`;
+  }
+}
+
+export function getConflictingSubstat(slot, mainAffixId) {
+  const map = {
+    1: { 1: 1 },
+    2: { 1: 2 },
+    3: { 1: 4, 2: 5, 3: 6, 4: 8, 5: 9, 7: 10 },
+    4: { 1: 4, 2: 5, 3: 6, 4: 7 },
+    5: { 1: 4, 2: 5, 3: 6 },
+    6: { 1: 12, 3: 4, 4: 5, 5: 6 }
+  };
+  return map[slot]?.[mainAffixId] || null;
+}
+
 const STAR_RAIL_RES_LANGS = {
   th: 'th', en: 'en', es: 'es', pt: 'pt', ru: 'ru', vi: 'vi',
   de: 'de', fr: 'fr', id: 'id', ja: 'jp', ko: 'kr', zh: 'cn', zh_tw: 'cht'
@@ -3093,10 +3139,18 @@ function renderModalRelicsTab(avatarId) {
       const rInfo = getRelicSetInfo(setId);
       const mainAffixName = getRelicMainAffixName(slot, equipped.main_affix_id);
 
+      const subsSnippetHtml = (equipped.sub_affixes && equipped.sub_affixes.length > 0)
+        ? equipped.sub_affixes.slice(0, 4).map(s => {
+            const sName = getRelicSubAffixName(s.sub_affix_id);
+            const rolls = s.count || s.cnt || 1;
+            return `${sName} (+${rolls})`;
+          }).join(' • ')
+        : '4 ออปชั่นรอง (คลิกเพื่อปรับแต่ง)';
+
       box.className = 'relic-slot-box equipped';
       box.innerHTML = `
         <div class="relic-slot-icon-wrap">
-          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
+          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png"
                onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
           <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.name.split(' ')[0]}</span>
         </div>
@@ -3106,7 +3160,9 @@ function renderModalRelicsTab(avatarId) {
             <span class="relic-slot-lvl">+15</span>
           </div>
           <div class="relic-slot-main">✦ ${mainAffixName}</div>
-          <div class="relic-slot-subs">${equipped.sub_affixes?.length || 4} ออปชั่นรอง (คลิกเพื่อเลือกเปลี่ยน)</div>
+          <div class="relic-slot-subs" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.72rem; color: var(--accent-cyan);" title="${subsSnippetHtml}">
+            ${subsSnippetHtml}
+          </div>
         </div>
         <button type="button" class="btn-slot-unequip-corner" title="ถอดชิ้นนี้">✕</button>
       `;
@@ -3167,13 +3223,31 @@ function renderModalRelicsTab(avatarId) {
   }
 }
 
-// Open Relic Slot Picker Modal (Spacious, Tabbed, Custom Set & Main Stat Builder + Inventory)
+// Open Relic Slot Picker Modal (Spacious, Tabbed, Custom Set & Main Stat Builder + Substats Customizer + Inventory)
 let slotPickerSelectedSetId = 101;
 let slotPickerSelectedMainAffix = 1;
+let slotPickerTargetRelic = null; // When non-null, editing an existing relic
+let slotPickerSubstats = [
+  { sub_affix_id: 8, count: 4, step: 2 },
+  { sub_affix_id: 9, count: 3, step: 2 },
+  { sub_affix_id: 7, count: 1, step: 2 },
+  { sub_affix_id: 5, count: 1, step: 2 }
+];
+let slotPickerInitialSubstats = [];
 
-function openSlotPicker(avatarId, slotNum) {
+export function openSlotPickerForRelic(relic) {
+  if (!relic) return;
+  const slotNum = (relic.relic_id % 10) || 1;
+  const aid = relic.equip_avatar || state.selectedAvatarDetail?.avatar_id || 1001;
+  openSlotPicker(aid, slotNum, relic);
+}
+window.openSlotPickerForRelic = openSlotPickerForRelic;
+
+function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
   state.slotPickerAvatarId = parseInt(avatarId, 10);
   state.slotPickerSlot = parseInt(slotNum, 10);
+  slotPickerTargetRelic = targetRelicToEdit || null;
+
   const aid = state.slotPickerAvatarId;
   const slot = state.slotPickerSlot;
   const meta = getAvatarInfo(aid);
@@ -3186,17 +3260,27 @@ function openSlotPicker(avatarId, slotNum) {
   // Title & Subtitle
   const titleEl = document.getElementById('modal-slot-picker-title');
   const subtitleEl = document.getElementById('modal-slot-picker-subtitle');
-  if (titleEl) {
-    titleEl.textContent = `${t('relicPickerTitle').replace('{slot}', slotInfo.name)} - ${meta.name}`;
-  }
-  if (subtitleEl) {
-    subtitleEl.textContent = t('quickGenRecDesc');
+  const editModeIndicator = document.getElementById('slot-picker-edit-mode-indicator');
+  const btnConfirmCustom = document.getElementById('btn-slot-picker-confirm-custom');
+
+  if (slotPickerTargetRelic) {
+    const curSetId = Math.floor((slotPickerTargetRelic.relic_id % 10000) / 10);
+    const curSetInfo = getRelicSetInfo(curSetId);
+    if (titleEl) titleEl.textContent = `🔧 แก้ไขรีลิกส์: ${curSetInfo.name} (${slotInfo.name}) - ${meta.name}`;
+    if (subtitleEl) subtitleEl.textContent = `ปรับแต่งเซ็ต สเตตัสหลัก และออฟรองของรีลิกส์ชิ้นนี้ (#${slotPickerTargetRelic.internal_uid})`;
+    if (editModeIndicator) editModeIndicator.innerHTML = `✏️ กำลังแก้ไขรีลิกส์ <strong>#${slotPickerTargetRelic.internal_uid}</strong>`;
+    if (btnConfirmCustom) btnConfirmCustom.textContent = `💾 บันทึกการแก้ไขออฟรองชิ้นนี้`;
+  } else {
+    if (titleEl) titleEl.textContent = `${t('relicPickerTitle').replace('{slot}', slotInfo.name)} - ${meta.name}`;
+    if (subtitleEl) subtitleEl.textContent = t('quickGenRecDesc');
+    if (editModeIndicator) editModeIndicator.textContent = '';
+    if (btnConfirmCustom) btnConfirmCustom.textContent = `⚡ สวมใส่ชิ้นนี้ทันที (+15 5★ ออฟที่เลือก)`;
   }
 
   // Current Equipped Relic Banner
   const currentBox = document.getElementById('slot-picker-current-box');
   const allRelics = state.fullFreesrData?.relics || [];
-  const currentRelic = allRelics.find(r => r.equip_avatar === aid && (r.relic_id % 10) === slot);
+  const currentRelic = slotPickerTargetRelic || allRelics.find(r => r.equip_avatar === aid && (r.relic_id % 10) === slot);
 
   if (currentBox) {
     if (currentRelic) {
@@ -3204,28 +3288,53 @@ function openSlotPicker(avatarId, slotNum) {
       const curSetInfo = getRelicSetInfo(curSetId);
       const curMainAffixName = getRelicMainAffixName(slot, currentRelic.main_affix_id);
 
+      const subsSnippet = (currentRelic.sub_affixes || []).map(s => {
+        const sName = getRelicSubAffixName(s.sub_affix_id);
+        const rolls = s.count || s.cnt || 1;
+        const val = formatRelicSubstatValue(s.sub_affix_id, rolls);
+        return `<span style="display: inline-block; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px; font-size: 0.725rem; color: #fff;">${sName} +${val} <strong style="color:var(--accent-gold);">(+${rolls})</strong></span>`;
+      }).join(' ');
+
       currentBox.className = 'slot-picker-current-banner';
       currentBox.innerHTML = `
-        <div style="display: flex; gap: 0.85rem; align-items: center; min-width: 0;">
-          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${curSetId}.png"
+        <div style="display: flex; gap: 0.85rem; align-items: center; min-width: 0; flex: 1;">
+          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${curSetId}.png"
                onerror="this.src='./assets/logo.png'" alt="Relic"
                style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
-          <div>
-            <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 700;">
-              ${t('currentEquipped')} (+${currentRelic.level})
+          <div style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <span style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 700;">
+                ${currentRelic.equip_avatar ? t('currentEquipped') : 'ชิ้นในคลัง'} (+${currentRelic.level || 15})
+              </span>
+              <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 800;">
+                ✦ ${curMainAffixName}
+              </span>
             </div>
-            <div style="font-size: 1rem; font-weight: 800; color: #fff;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: #fff; margin: 2px 0;">
               ${curSetInfo.name}
             </div>
-            <div style="font-size: 0.825rem; color: var(--accent-cyan); font-weight: 700;">
-              ✦ ${curMainAffixName}
+            <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 3px;">
+              ${subsSnippet}
             </div>
           </div>
         </div>
-        <button type="button" class="btn btn-sm btn-danger" id="btn-slot-picker-unequip" style="padding: 0.45rem 1rem; font-weight: 700;">
-          ${t('btnUnequip')}
-        </button>
+        <div style="display: flex; gap: 0.4rem; align-items: center;">
+          ${!slotPickerTargetRelic ? `
+            <button type="button" class="btn btn-sm btn-warning" id="btn-slot-picker-edit-curr" style="padding: 0.45rem 0.85rem; font-weight: 700;" title="โหลดข้อมูลชิ้นนี้ลงมาแก้ไขออฟรอง">
+              ✏️ แก้ไขออฟรองชิ้นนี้
+            </button>
+          ` : ''}
+          ${currentRelic.equip_avatar ? `
+            <button type="button" class="btn btn-sm btn-danger" id="btn-slot-picker-unequip" style="padding: 0.45rem 0.85rem; font-weight: 700;">
+              ${t('btnUnequip')}
+            </button>
+          ` : ''}
+        </div>
       `;
+
+      document.getElementById('btn-slot-picker-edit-curr')?.addEventListener('click', () => {
+        openSlotPicker(aid, slot, currentRelic);
+      });
 
       document.getElementById('btn-slot-picker-unequip')?.addEventListener('click', async () => {
         currentRelic.equip_avatar = 0;
@@ -3243,7 +3352,7 @@ function openSlotPicker(avatarId, slotNum) {
     }
   }
 
-  // Recommended Set & Main Stat for this slot
+  // Set & Main Stat defaults
   const recSetId = slot <= 4 ? rec.cavern : rec.planar;
   let recMainStat = 1;
   if (slot === 1 || slot === 2) recMainStat = 1;
@@ -3252,8 +3361,26 @@ function openSlotPicker(avatarId, slotNum) {
   else if (slot === 5) recMainStat = rec.sphere;
   else if (slot === 6) recMainStat = rec.rope;
 
-  slotPickerSelectedSetId = recSetId;
-  slotPickerSelectedMainAffix = recMainStat;
+  if (slotPickerTargetRelic) {
+    slotPickerSelectedSetId = Math.floor((slotPickerTargetRelic.relic_id % 10000) / 10);
+    slotPickerSelectedMainAffix = slotPickerTargetRelic.main_affix_id;
+    if (slotPickerTargetRelic.sub_affixes && slotPickerTargetRelic.sub_affixes.length > 0) {
+      slotPickerSubstats = slotPickerTargetRelic.sub_affixes.map(s => ({
+        sub_affix_id: s.sub_affix_id,
+        count: s.count || s.cnt || 1,
+        step: s.step ?? 2
+      }));
+    } else {
+      applySubstatPreset('god', slot, slotPickerSelectedMainAffix, aid);
+    }
+  } else {
+    slotPickerSelectedSetId = recSetId;
+    slotPickerSelectedMainAffix = recMainStat;
+    applySubstatPreset('god', slot, slotPickerSelectedMainAffix, aid);
+  }
+
+  // Clone initial substats for reset button
+  slotPickerInitialSubstats = JSON.parse(JSON.stringify(slotPickerSubstats));
 
   // Render Recommended Highlight Banner
   const recHighlight = document.getElementById('slot-picker-rec-highlight');
@@ -3263,7 +3390,7 @@ function openSlotPicker(avatarId, slotNum) {
 
     recHighlight.innerHTML = `
       <div style="display: flex; gap: 0.85rem; align-items: center;">
-        <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${recSetId}.png"
+        <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${recSetId}.png"
              onerror="this.src='./assets/logo.png'" alt="Relic"
              style="width: 52px; height: 52px; object-fit: contain;">
         <div>
@@ -3274,7 +3401,7 @@ function openSlotPicker(avatarId, slotNum) {
             ✦ ${recMainName}
           </div>
           <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-            ออฟรองแนะนำ 4 แถวเทพ ปรับสเต็ปการอัปเกรดระดับสูงครบถ้วน
+            ออฟรองแนะนำ 4 แถวเทพ ปรับแต่งได้ตามต้องการด้านล่าง
           </div>
         </div>
       </div>
@@ -3284,7 +3411,7 @@ function openSlotPicker(avatarId, slotNum) {
     `;
 
     document.getElementById('btn-slot-picker-quick-rec')?.addEventListener('click', async () => {
-      await equipCustomSlotRelic(aid, slot, recSetId, recMainStat);
+      await equipCustomSlotRelic(aid, slot, recSetId, recMainStat, slotPickerSubstats);
     });
   }
 
@@ -3293,6 +3420,26 @@ function openSlotPicker(avatarId, slotNum) {
 
   // Populate Main Stat Pills
   renderSlotPickerMainStatPills(slot, recMainStat);
+
+  // Populate Substats Customizer
+  renderSlotPickerSubstats(slot, slotPickerSelectedMainAffix);
+
+  // Preset buttons
+  document.querySelectorAll('.btn-substat-preset').forEach(btn => {
+    btn.onclick = () => {
+      const presetKey = btn.getAttribute('data-preset');
+      applySubstatPreset(presetKey, slot, slotPickerSelectedMainAffix, aid);
+    };
+  });
+
+  // Reset Substats button
+  const btnResetSubs = document.getElementById('btn-reset-substats');
+  if (btnResetSubs) {
+    btnResetSubs.onclick = () => {
+      slotPickerSubstats = JSON.parse(JSON.stringify(slotPickerInitialSubstats));
+      renderSlotPickerSubstats(slot, slotPickerSelectedMainAffix);
+    };
+  }
 
   // Tab 2: Inventory Grid
   renderSlotPickerInventoryGrid(aid, slot);
@@ -3327,18 +3474,203 @@ function openSlotPicker(avatarId, slotNum) {
   // Close Button
   const btnCloseSlot = document.getElementById('btn-close-slot-picker');
   if (btnCloseSlot) {
-    btnCloseSlot.onclick = () => modal.classList.remove('active');
+    btnCloseSlot.onclick = () => {
+      modal.classList.remove('active');
+      slotPickerTargetRelic = null;
+    };
   }
 
   // Confirm Custom Button
-  const btnConfirmCustom = document.getElementById('btn-slot-picker-confirm-custom');
   if (btnConfirmCustom) {
     btnConfirmCustom.onclick = async () => {
-      await equipCustomSlotRelic(aid, slot, slotPickerSelectedSetId, slotPickerSelectedMainAffix);
+      if (slotPickerTargetRelic) {
+        await saveEditedRelicSubstats(slotPickerTargetRelic, slotPickerSelectedSetId, slotPickerSelectedMainAffix, slotPickerSubstats);
+      } else {
+        await equipCustomSlotRelic(aid, slot, slotPickerSelectedSetId, slotPickerSelectedMainAffix, slotPickerSubstats);
+      }
     };
   }
 
   modal.classList.add('active');
+}
+
+// Render Substats Customizer Grid
+function renderSlotPickerSubstats(slot, mainAffixId) {
+  const grid = document.getElementById('slot-picker-substats-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const conflictSub = getConflictingSubstat(slot, mainAffixId);
+
+  // If any selected substat conflicts with main affix, swap it to a valid unused substat
+  slotPickerSubstats.forEach((sub, idx) => {
+    if (sub.sub_affix_id === conflictSub) {
+      const unused = RELIC_SUBSTATS_CONFIG.find(c =>
+        c.id !== conflictSub && !slotPickerSubstats.some((s, i) => i !== idx && s.sub_affix_id === c.id)
+      );
+      if (unused) sub.sub_affix_id = unused.id;
+    }
+  });
+
+  slotPickerSubstats.forEach((sub, idx) => {
+    const card = document.createElement('div');
+    card.className = 'substat-row-card';
+
+    const sVal = formatRelicSubstatValue(sub.sub_affix_id, sub.count);
+
+    let optsHtml = '';
+    RELIC_SUBSTATS_CONFIG.forEach(stat => {
+      const isConflict = stat.id === conflictSub;
+      const isChosenElsewhere = slotPickerSubstats.some((s, i) => i !== idx && s.sub_affix_id === stat.id);
+      const isSelected = stat.id === sub.sub_affix_id;
+      const disabledAttr = (isConflict || (isChosenElsewhere && !isSelected)) ? 'disabled' : '';
+      const conflictTag = isConflict ? ' (ตรงกับ Main Stat)' : (isChosenElsewhere && !isSelected ? ' (เลือกแล้ว)' : '');
+      optsHtml += `<option value="${stat.id}" ${isSelected ? 'selected' : ''} ${disabledAttr}>${stat.icon} ${stat.name}${conflictTag}</option>`;
+    });
+
+    card.innerHTML = `
+      <div class="substat-row-header">
+        <span class="substat-slot-label">ออฟรอง ${idx + 1}</span>
+        <span class="substat-preview-badge" id="substat-preview-${idx}">+${sVal} (${sub.count} โรล)</span>
+      </div>
+      <div class="substat-row-controls">
+        <select class="form-select substat-select" data-idx="${idx}">
+          ${optsHtml}
+        </select>
+        <div class="substat-stepper">
+          <button type="button" class="btn-substat-step minus" data-idx="${idx}" title="ลดโรล">−</button>
+          <input type="number" class="substat-count-input" data-idx="${idx}" min="1" max="25" value="${sub.count}">
+          <button type="button" class="btn-substat-step plus" data-idx="${idx}" title="เพิ่มโรล">+</button>
+        </div>
+      </div>
+    `;
+
+    // Dropdown change
+    card.querySelector('.substat-select')?.addEventListener('change', (e) => {
+      const newId = parseInt(e.target.value, 10);
+      slotPickerSubstats[idx].sub_affix_id = newId;
+      renderSlotPickerSubstats(slot, slotPickerSelectedMainAffix);
+    });
+
+    // Stepper buttons
+    card.querySelector('.btn-substat-step.minus')?.addEventListener('click', () => {
+      if (slotPickerSubstats[idx].count > 1) {
+        slotPickerSubstats[idx].count--;
+        updateSubstatCardPreview(idx);
+        updateTotalRollsCount();
+      }
+    });
+
+    card.querySelector('.btn-substat-step.plus')?.addEventListener('click', () => {
+      if (slotPickerSubstats[idx].count < 25) {
+        slotPickerSubstats[idx].count++;
+        updateSubstatCardPreview(idx);
+        updateTotalRollsCount();
+      }
+    });
+
+    card.querySelector('.substat-count-input')?.addEventListener('input', (e) => {
+      let val = parseInt(e.target.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      if (val > 30) val = 30;
+      slotPickerSubstats[idx].count = val;
+      updateSubstatCardPreview(idx);
+      updateTotalRollsCount();
+    });
+
+    grid.appendChild(card);
+  });
+
+  updateTotalRollsCount();
+}
+
+function updateSubstatCardPreview(idx) {
+  const sub = slotPickerSubstats[idx];
+  if (!sub) return;
+  const badge = document.getElementById(`substat-preview-${idx}`);
+  const input = document.querySelector(`.substat-count-input[data-idx="${idx}"]`);
+  if (badge) {
+    const sVal = formatRelicSubstatValue(sub.sub_affix_id, sub.count);
+    badge.textContent = `+${sVal} (${sub.count} โรล)`;
+  }
+  if (input) {
+    input.value = sub.count;
+  }
+}
+
+function updateTotalRollsCount() {
+  const lbl = document.getElementById('slot-picker-total-rolls');
+  if (!lbl) return;
+  const total = slotPickerSubstats.reduce((sum, s) => sum + (parseInt(s.count, 10) || 1), 0);
+  lbl.textContent = total;
+  if (total === 9) {
+    lbl.style.color = '#fbbf24';
+  } else if (total > 9) {
+    lbl.style.color = 'var(--accent-cyan)';
+  } else {
+    lbl.style.color = 'var(--text-muted)';
+  }
+}
+
+function applySubstatPreset(presetKey, slot, mainAffixId, avatarId) {
+  const conflict = getConflictingSubstat(slot, mainAffixId);
+  const aid = parseInt(avatarId, 10);
+  const rec = getOptimalBuildForAvatar(aid);
+
+  let targetIds = [];
+  let rolls = [4, 3, 1, 1];
+
+  if (presetKey === 'god') {
+    const pool = [...rec.substats, 7, 8, 9, 5, 12, 11, 4, 6];
+    for (const sid of pool) {
+      if (targetIds.length >= 4) break;
+      if (sid !== conflict && !targetIds.includes(sid)) targetIds.push(sid);
+    }
+    rolls = [4, 3, 1, 1];
+  } else if (presetKey === 'crit') {
+    const pool = [8, 9, 7, 5, 4, 12, 2];
+    for (const sid of pool) {
+      if (targetIds.length >= 4) break;
+      if (sid !== conflict && !targetIds.includes(sid)) targetIds.push(sid);
+    }
+    rolls = [4, 3, 1, 1];
+  } else if (presetKey === 'spd') {
+    const pool = [7, 8, 9, 5, 12, 4, 2];
+    for (const sid of pool) {
+      if (targetIds.length >= 4) break;
+      if (sid !== conflict && !targetIds.includes(sid)) targetIds.push(sid);
+    }
+    rolls = [5, 2, 1, 1];
+  } else if (presetKey === 'break') {
+    const pool = [12, 7, 5, 4, 11, 6, 2];
+    for (const sid of pool) {
+      if (targetIds.length >= 4) break;
+      if (sid !== conflict && !targetIds.includes(sid)) targetIds.push(sid);
+    }
+    rolls = [5, 2, 1, 1];
+  } else if (presetKey === 'tank') {
+    const pool = [4, 6, 11, 7, 1, 3, 5];
+    for (const sid of pool) {
+      if (targetIds.length >= 4) break;
+      if (sid !== conflict && !targetIds.includes(sid)) targetIds.push(sid);
+    }
+    rolls = [4, 3, 1, 1];
+  }
+
+  // Ensure 4 distinct items
+  while (targetIds.length < 4) {
+    const fallback = RELIC_SUBSTATS_CONFIG.find(c => c.id !== conflict && !targetIds.includes(c.id));
+    if (fallback) targetIds.push(fallback.id);
+    else break;
+  }
+
+  slotPickerSubstats = targetIds.slice(0, 4).map((sid, i) => ({
+    sub_affix_id: sid,
+    count: rolls[i] || 1,
+    step: 2
+  }));
+
+  renderSlotPickerSubstats(slot, mainAffixId);
 }
 
 // Render Set Grid for Slot
@@ -3366,7 +3698,7 @@ function renderSlotPickerSetGrid(slot, recSetId) {
     const isSelected = sId === slotPickerSelectedSetId;
     card.className = `slot-picker-set-card ${isSelected ? 'selected' : ''}`;
     card.innerHTML = `
-      <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${sId}.png"
+      <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${sId}.png"
            onerror="this.src='./assets/logo.png'" alt="${sInfo.name}">
       <span title="${sInfo.name}">${sInfo.name}</span>
       ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">⭐ ${t('recommendedBadge')}</span>` : ''}
@@ -3444,6 +3776,7 @@ function renderSlotPickerMainStatPills(slot, recMainStat) {
       slotPickerSelectedMainAffix = item.id;
       container.querySelectorAll('.slot-picker-pill').forEach(p => p.classList.remove('selected'));
       pill.classList.add('selected');
+      renderSlotPickerSubstats(slot, slotPickerSelectedMainAffix);
     });
 
     container.appendChild(pill);
@@ -3486,7 +3819,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
     card.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
         <div style="display: flex; gap: 0.65rem; align-items: center; min-width: 0;">
-          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
+          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png"
                onerror="this.src='./assets/logo.png'" alt="${rInfo.name}"
                style="width: 40px; height: 40px; object-fit: contain;">
           <div style="min-width: 0;">
@@ -3506,7 +3839,9 @@ function renderSlotPickerInventoryGrid(aid, slot) {
       <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; padding: 0.35rem 0.5rem; background: rgba(0,0,0,0.25); border-radius: 4px;">
         ${(r.sub_affixes || []).map(s => {
           const sName = getRelicSubAffixName(s.sub_affix_id);
-          return `<div>• ${sName} (+${s.cnt})</div>`;
+          const rolls = s.count || s.cnt || 1;
+          const val = formatRelicSubstatValue(s.sub_affix_id, rolls);
+          return `<div>• ${sName} +${val} (+${rolls})</div>`;
         }).join('')}
       </div>
 
@@ -3545,7 +3880,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
 }
 
 // Equip custom created relic for avatar slot
-async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId) {
+async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId, customSubAffixes = null) {
   const aid = parseInt(avatarId, 10);
   const rec = getOptimalBuildForAvatar(aid);
   const relicId = 60000 + (setId * 10) + slotNum;
@@ -3559,40 +3894,43 @@ async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId) {
     }
   });
 
-  const mainToSubConflict = {
-    3: { 1: 4, 2: 5, 3: 6, 4: 8, 5: 9, 7: 10 },
-    4: { 1: 4, 2: 5, 3: 6, 4: 7 },
-    5: { 1: 4, 2: 5, 3: 6 },
-    6: { 1: 12, 3: 4, 4: 5, 5: 6 }
-  };
-  const conflictingSub = mainToSubConflict[slotNum]?.[mainAffixId];
-
-  const pool = [...rec.substats, 7, 8, 9, 5, 12, 11, 4, 6];
-  const chosenSubs = [];
-  for (const sId of pool) {
-    if (chosenSubs.length >= 4) break;
-    if (sId !== conflictingSub && !chosenSubs.includes(sId)) {
-      chosenSubs.push(sId);
+  let subAffixes = [];
+  if (customSubAffixes && customSubAffixes.length > 0) {
+    subAffixes = customSubAffixes.map(s => ({
+      sub_affix_id: parseInt(s.sub_affix_id, 10),
+      cnt: parseInt(s.count || s.cnt || 1, 10),
+      count: parseInt(s.count || s.cnt || 1, 10),
+      step: 2
+    }));
+  } else {
+    const conflictingSub = getConflictingSubstat(slotNum, mainAffixId);
+    const pool = [...rec.substats, 7, 8, 9, 5, 12, 11, 4, 6];
+    const chosenSubs = [];
+    for (const sId of pool) {
+      if (chosenSubs.length >= 4) break;
+      if (sId !== conflictingSub && !chosenSubs.includes(sId)) {
+        chosenSubs.push(sId);
+      }
     }
+    const rolls = [4, 3, 1, 1];
+    subAffixes = chosenSubs.map((sid, idx) => ({
+      sub_affix_id: sid,
+      cnt: rolls[idx] || 1,
+      count: rolls[idx] || 1,
+      step: 2
+    }));
   }
 
-  const rolls = [4, 3, 1, 1];
-  const subAffixes = chosenSubs.map((sid, idx) => ({
-    sub_affix_id: sid,
-    cnt: rolls[idx] || 1,
-    count: rolls[idx] || 1,
-    step: 2
-  }));
-
   const nextUid = (state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
-  state.fullFreesrData.relics.push({
+  const newRelic = {
     internal_uid: nextUid,
     relic_id: relicId,
     level: 15,
     equip_avatar: aid,
     main_affix_id: mainAffixId,
     sub_affixes: subAffixes
-  });
+  };
+  state.fullFreesrData.relics.push(newRelic);
 
   if (state.isConnected) await saveFreesrChangesToServer();
   renderModalRelicsTab(aid);
@@ -3601,7 +3939,36 @@ async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId) {
   loadEquipment();
   document.getElementById('modal-select-relic-slot')?.classList.remove('active');
   const setInfo = getRelicSetInfo(setId);
-  showToast(`⚡ สวมใส่ ${setInfo.name} (+15 5★ ออฟเทพ) เรียบร้อยแล้ว!`, 'success');
+  showToast(`⚡ สวมใส่ ${setInfo.name} (+15 5★ ออฟที่เลือก) เรียบร้อยแล้ว!`, 'success');
+}
+
+// Save edits to existing relic (main stat & substats)
+async function saveEditedRelicSubstats(relic, newSetId, newMainAffixId, newSubAffixes) {
+  if (!relic) return;
+  const slotNum = (relic.relic_id % 10) || 1;
+  if (newSetId) {
+    relic.relic_id = 60000 + (newSetId * 10) + slotNum;
+  }
+  relic.main_affix_id = newMainAffixId;
+  relic.sub_affixes = newSubAffixes.map(s => ({
+    sub_affix_id: parseInt(s.sub_affix_id, 10),
+    cnt: parseInt(s.count || s.cnt || 1, 10),
+    count: parseInt(s.count || s.cnt || 1, 10),
+    step: 2
+  }));
+
+  if (state.isConnected) await saveFreesrChangesToServer();
+  if (relic.equip_avatar) {
+    renderModalRelicsTab(relic.equip_avatar);
+    renderModalOverviewTab(relic.equip_avatar);
+    renderShowcaseCard(relic.equip_avatar);
+  }
+  loadEquipment();
+  showRelicInspector(relic);
+  document.getElementById('modal-select-relic-slot')?.classList.remove('active');
+  slotPickerTargetRelic = null;
+  const rInfo = getRelicSetInfo(newSetId || Math.floor((relic.relic_id % 10000) / 10));
+  showToast(`💾 บันทึกการแก้ไขออฟรอง ${rInfo.name} เรียบร้อย!`, 'success');
 }
 
 async function quickGenSlotRelic(avatarId, slotNum) {
@@ -4529,22 +4896,41 @@ function renderShowcaseCard(avatarId) {
     const rInfo = getRelicSetInfo(setId);
     const slotInfo = slotNames[slot];
 
+    let mainStatDisplay = slotInfo.stat;
+    if (equipped && equipped.main_affix_id) {
+      mainStatDisplay = getRelicMainAffixName(slot, equipped.main_affix_id);
+    }
+
+    let subsDisplayHtml = '';
+    if (equipped && equipped.sub_affixes && equipped.sub_affixes.length > 0) {
+      subsDisplayHtml = equipped.sub_affixes.map(sub => {
+        const sName = getRelicSubAffixName(sub.sub_affix_id);
+        const rolls = sub.count || sub.cnt || 1;
+        const val = formatRelicSubstatValue(sub.sub_affix_id, rolls);
+        return `<span>${sName} +${val}${rollBadge(rolls)}</span>`;
+      }).join('');
+    } else {
+      subsDisplayHtml = `
+        <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%${rollBadge(slot % 2 === 0 ? 3 : 2)}</span>
+        <span>CRIT DMG +${(5.8 + slot * 2.1).toFixed(1)}%${rollBadge(slot % 3 === 0 ? 4 : 2)}</span>
+        <span>ATK +${(3.8 + slot * 0.8).toFixed(1)}%${rollBadge(1)}</span>
+        <span>DEF +${(4.8 + slot * 1.2).toFixed(1)}%${rollBadge(1)}</span>
+      `;
+    }
+
     relicsHtml += `
       <div class="showcase-relic-card">
         <div class="showcase-relic-icon-wrap">
-          <img class="showcase-relic-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="Relic">
+          <img class="showcase-relic-img" src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="Relic">
           <span class="showcase-relic-lvl-tag">+15</span>
         </div>
         <div class="showcase-relic-info">
           <div class="showcase-relic-main-stat">
             <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${rInfo.name}">${rInfo.name}</span>
-            <span style="color: var(--accent-cyan); font-weight: 800; flex-shrink: 0;">${slotInfo.stat}</span>
+            <span style="color: var(--accent-cyan); font-weight: 800; flex-shrink: 0;">✦ ${mainStatDisplay}</span>
           </div>
           <div class="showcase-relic-subs">
-            <span>CRIT Rate +${(3.2 + slot * 1.5).toFixed(1)}%${rollBadge(slot % 2 === 0 ? 3 : 2)}</span>
-            <span>CRIT DMG +${(5.8 + slot * 2.1).toFixed(1)}%${rollBadge(slot % 3 === 0 ? 4 : 2)}</span>
-            <span>ATK +${(3.8 + slot * 0.8).toFixed(1)}%${rollBadge(1)}</span>
-            <span>DEF +${(4.8 + slot * 1.2).toFixed(1)}%${rollBadge(1)}</span>
+            ${subsDisplayHtml}
           </div>
         </div>
       </div>
@@ -5543,11 +5929,13 @@ function showRelicInspector(relic) {
     avatarOpts += `<option value="${av.avatar_id}" ${sel}>${info.name} (ID: ${av.avatar_id})</option>`;
   });
 
+  const mainAffixName = getRelicMainAffixName(slotNum, relic.main_affix_id);
+
   el.eqInspectorCard.style.display = 'flex';
   el.eqInspectorCard.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div class="eq-inspector-hero">
-        <img class="eq-inspector-thumb" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
+        <img class="eq-inspector-thumb" src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${rInfo.name}</div>
           <div class="eq-inspector-stars">★★★★★</div>
@@ -5562,26 +5950,39 @@ function showRelicInspector(relic) {
       <button type="button" class="btn btn-sm btn-secondary" id="btn-close-eq-inspector" style="padding: 0.2rem 0.5rem; border-radius: 6px;">✕</button>
     </div>
 
-    <!-- Stats Box -->
+    <!-- Real Stats Box -->
     <div class="eq-inspector-stats">
-      <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">Main Stat</span>
-        <strong style="color: var(--accent-cyan); font-family: monospace;">+15 Max</strong>
+      <div class="eq-inspector-stat-row" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem; margin-bottom: 0.35rem;">
+        <span style="color: var(--text-highlight); font-weight: 700;">สเตตัสหลัก (Main Stat)</span>
+        <strong style="color: var(--accent-cyan); font-family: monospace;">✦ ${mainAffixName}</strong>
       </div>
-      <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">CRIT Rate / DMG</span>
-        <strong style="color: var(--accent-gold); font-family: monospace;">+3.2% / +6.4%</strong>
+      <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">
+        ออฟรอง (Substats):
       </div>
-      <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">SPD / ATK</span>
-        <strong style="color: #fff; font-family: monospace;">+4 / +4.3%</strong>
-      </div>
+      ${(relic.sub_affixes && relic.sub_affixes.length > 0) ? relic.sub_affixes.map(s => {
+        const sName = getRelicSubAffixName(s.sub_affix_id);
+        const rolls = s.count || s.cnt || 1;
+        const val = formatRelicSubstatValue(s.sub_affix_id, rolls);
+        return `
+          <div class="eq-inspector-stat-row">
+            <span>• ${sName}</span>
+            <strong style="color: var(--accent-gold); font-family: monospace;">
+              +${val} <span style="font-size: 0.65rem; background: rgba(234,179,8,0.2); color: #fbbf24; border-radius: 3px; padding: 1px 4px; font-weight: 800;">+${rolls}</span>
+            </strong>
+          </div>
+        `;
+      }).join('') : '<div style="color: var(--text-muted); font-size: 0.75rem;">ไม่มีข้อมูลออฟรอง</div>'}
     </div>
 
+    <!-- Edit Substats Action Button -->
+    <button type="button" class="btn btn-warning" id="btn-inspector-edit-subs" style="margin-top: 0.35rem; font-weight: 800; font-size: 0.825rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+      🔧 ปรับแต่งออฟรอง / สเตตัส (Edit Substats)
+    </button>
+
     <!-- Set Description -->
-    <div class="eq-inspector-ability">
+    <div class="eq-inspector-ability" style="margin-top: 0.4rem;">
       <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">Set Bonus (${rInfo.name})</div>
-      <div>2-Piece: เพิ่มประสิทธิภาพตามเซ็ตที่กำหนด<br>4-Piece: ปลดล็อกเอฟเฟกต์ต่อสู้ขั้นสูง</div>
+      <div>2-Piece: ${rInfo.desc2 || 'เพิ่มประสิทธิภาพตามเซ็ตที่กำหนด'}<br>4-Piece: ${rInfo.desc4 || 'ปลดล็อกเอฟเฟกต์ต่อสู้ขั้นสูง'}</div>
     </div>
 
     <!-- Wearer Form & Actions -->
@@ -5597,6 +5998,10 @@ function showRelicInspector(relic) {
       </div>
     </div>
   `;
+
+  document.getElementById('btn-inspector-edit-subs')?.addEventListener('click', () => {
+    openSlotPickerForRelic(relic);
+  });
 
   document.getElementById('btn-close-eq-inspector')?.addEventListener('click', () => {
     el.eqInspectorCard.style.display = 'none';
