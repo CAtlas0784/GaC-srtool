@@ -2,7 +2,7 @@ name: Deploy GaC-Srtool to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "test-gay"]
   workflow_dispatch:
 
 permissions:

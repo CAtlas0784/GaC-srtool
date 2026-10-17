@@ -185,6 +185,9 @@ body {
 
 /* Navigation Tabs */
 .nav-tabs {
+  position: sticky;
+  top: 65px;
+  z-index: 45;
   display: flex;
   gap: 0.35rem;
   background: var(--bg-secondary);

@@ -519,6 +519,29 @@ function updateFilterDropdownTranslations() {
     el.avatarFilterPath.value = selected;
   }
 
+  const addLcFilter = document.getElementById('add-lc-filter-path');
+  if (addLcFilter) {
+    const selected = addLcFilter.value;
+    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance', 'Elation'];
+    if (addLcFilter.options[0]) addLcFilter.options[0].textContent = `${t('filterAllPaths') || 'ทุกสาย'} (All)`;
+    paths.forEach((p, idx) => {
+      if (addLcFilter.options[idx + 1]) addLcFilter.options[idx + 1].textContent = translatePath(p);
+    });
+    addLcFilter.value = selected;
+  }
+
+  const lcPickerFilter = document.getElementById('lc-picker-filter-path');
+  if (lcPickerFilter) {
+    const selected = lcPickerFilter.value;
+    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance'];
+    if (lcPickerFilter.options[0]) lcPickerFilter.options[0].textContent = t('filterAllPaths') || 'ทุกสาย';
+    if (lcPickerFilter.options[1]) lcPickerFilter.options[1].textContent = t('filterSamePath') || 'สายเดียวกัน';
+    paths.forEach((p, idx) => {
+      if (lcPickerFilter.options[idx + 2]) lcPickerFilter.options[idx + 2].textContent = translatePath(p);
+    });
+    lcPickerFilter.value = selected;
+  }
+
   const dict = TRANSLATIONS[getCurrentLanguage()] || TRANSLATIONS.en || TRANSLATIONS.th;
   if (el.persistentMcSelect && dict.tbOptions) {
     const curVal = el.persistentMcSelect.value;
@@ -1276,21 +1299,21 @@ function renderTeamSynergy(lineups) {
     totalEidolon += rank;
 
     // Element coverage
-    const elem = meta.element || 'Unknown';
-    if (!coveredElements[elem]) {
-      coveredElements[elem] = [];
+    const rawElem = normalizeElement(meta.rawElement || meta.element);
+    if (!coveredElements[rawElem]) {
+      coveredElements[rawElem] = [];
     }
-    coveredElements[elem].push(meta.name);
+    coveredElements[rawElem].push(meta.name);
 
     // Path / Role
-    const path = meta.path || '';
-    if (['Destruction', 'Hunt', 'Erudition'].includes(path)) {
+    const rawPath = normalizePath(meta.rawPath || meta.path);
+    if (['Destruction', 'Hunt', 'Erudition'].includes(rawPath)) {
       roles.dps.push(meta.name);
-    } else if (['Remembrance', 'Elation'].includes(path)) {
+    } else if (['Remembrance', 'Elation'].includes(rawPath)) {
       roles.specialist.push(meta.name);
-    } else if (['Harmony', 'Nihility'].includes(path)) {
+    } else if (['Harmony', 'Nihility'].includes(rawPath)) {
       roles.support.push(meta.name);
-    } else if (['Preservation', 'Abundance'].includes(path)) {
+    } else if (['Preservation', 'Abundance'].includes(rawPath)) {
       roles.sustain.push(meta.name);
     }
 
@@ -1628,7 +1651,7 @@ function setupGMConsoleEvents() {
   }
 
   // Initial greeting
-  logToConsole('GaC Server Console พร้อมใช้งาน (พิมพ์ /help เพื่อดูคำสั่งทั้งหมด)', 'SYS');
+  logToConsole(t('consoleReady') || 'GaC Server Console is ready (type /help for available commands)', 'SYS');
 }
 
 // Add extra slot in Creative Mode
@@ -2269,8 +2292,8 @@ function getOptimalBuildForAvatar(avatarId) {
     return CHARACTER_OPTIMAL_BUILDS[aid];
   }
   const meta = getAvatarInfo(aid);
-  const elem = meta.rawElement || meta.element || 'Physical';
-  const path = meta.rawPath || meta.path || 'Destruction';
+  const elem = normalizeElement(meta.rawElement || meta.element);
+  const path = normalizePath(meta.rawPath || meta.path);
 
   const elemAffixMap = {
     Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Thunder: 7, Wind: 8, Quantum: 9, Imaginary: 10
@@ -2544,7 +2567,7 @@ function populateModalChangeLcDropdown(avatarPath) {
     opt.value = id;
     opt.textContent = `★${info.rarity} [${info.path}] ${info.name} (ID: ${id})`;
 
-    if (meta.path === avatarPath) {
+    if (normalizePath(meta.path) === normalizePath(avatarPath)) {
       samePathGroup.appendChild(opt);
     } else {
       otherPathGroup.appendChild(opt);
@@ -2859,9 +2882,9 @@ function renderModalOverviewTab(avatarId) {
     Quantum: 'QuantumAddedRatio',
     Imaginary: 'ImaginaryAddedRatio'
   };
-  const elemKey = meta.rawElement || meta.element || 'Physical';
+  const elemKey = normalizeElement(meta.rawElement || meta.element);
   const elemIcon = elemIconMap[elemKey] || 'PhysicalAddedRatio';
-  const elemName = meta.element || elemKey;
+  const elemName = translateElement(elemKey);
   const elemDmgLabel = t('statDmgBoost').replace('{element}', elemName);
   const cdn = 'https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/property';
 
@@ -3674,8 +3697,8 @@ function renderLightconePickerGrid() {
     const info = getLightconeInfo(id);
 
     // Path match
-    if (pathFilter === 'same' && meta.path !== avatarMeta.path) return false;
-    if (pathFilter !== 'all' && pathFilter !== 'same' && meta.path !== pathFilter) return false;
+    if (pathFilter === 'same' && normalizePath(meta.path) !== normalizePath(avatarMeta.path)) return false;
+    if (pathFilter !== 'all' && pathFilter !== 'same' && normalizePath(meta.path) !== normalizePath(pathFilter)) return false;
 
     // Search match
     if (search) {
@@ -4411,6 +4434,8 @@ function renderShowcaseCard(avatarId) {
   if (!el.showcaseCardContainer) return;
   const aid = parseInt(avatarId, 10);
   const meta = getAvatarInfo(aid);
+  const canonPath = normalizePath(meta.rawPath || meta.path);
+  const canonElem = normalizeElement(meta.rawElement || meta.element);
   const av = state.fullFreesrData?.avatars?.[aid];
   const level = av?.level || state.selectedAvatarDetail?.level || 80;
   const rank = av?.data?.rank ?? state.selectedAvatarDetail?.rank ?? 6;
@@ -4452,7 +4477,7 @@ function renderShowcaseCard(avatarId) {
   }
 
   if (activeSetBadges.length === 0) {
-    const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    const rec = RECOMMENDED_RELIC_BUILDS[canonPath] || RECOMMENDED_RELIC_BUILDS.Preservation;
     activeSetBadges.push({ name: getRelicSetInfo(rec.cavern).name, count: 4 });
     activeSetBadges.push({ name: getRelicSetInfo(rec.planar).name, count: 2 });
   }
@@ -4460,15 +4485,15 @@ function renderShowcaseCard(avatarId) {
   // Combat Stats
   const totalHp = Math.round((baseHp + lcHp) * 1.45 + 706);
   const totalAtk = Math.round((baseAtk + lcAtk) * 1.35 + 353);
-  const totalDef = Math.round((baseDef + lcDef) * 1.85 + (meta.path === 'Preservation' ? 1200 : 0));
+  const totalDef = Math.round((baseDef + lcDef) * 1.85 + (canonPath === 'Preservation' ? 1200 : 0));
   const totalSpd = (baseSpd + 25 + 10.5).toFixed(1);
-  const critRate = (5.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 65.4 : 18.8)).toFixed(1);
-  const critDmg = (50.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 132.5 : 26.5)).toFixed(1);
-  const breakEffect = (meta.path === 'Harmony' || meta.path === 'Nihility' ? 142.0 : 10.4).toFixed(1);
+  const critRate = (5.0 + (canonPath === 'Hunt' || canonPath === 'Destruction' ? 65.4 : 18.8)).toFixed(1);
+  const critDmg = (50.0 + (canonPath === 'Hunt' || canonPath === 'Destruction' ? 132.5 : 26.5)).toFixed(1);
+  const breakEffect = (canonPath === 'Harmony' || canonPath === 'Nihility' ? 142.0 : 10.4).toFixed(1);
   const effectRes = (10.0).toFixed(1);
   const err = (19.4).toFixed(1);
-  const ehr = (meta.path === 'Nihility' ? 67.2 : 19.4).toFixed(1);
-  const healing = (meta.path === 'Abundance' ? 34.5 : 0.0).toFixed(1);
+  const ehr = (canonPath === 'Nihility' ? 67.2 : 19.4).toFixed(1);
+  const healing = (canonPath === 'Abundance' ? 34.5 : 0.0).toFixed(1);
   const elemDmg = (38.8).toFixed(1);
 
   // Eidolon strip
@@ -4493,10 +4518,10 @@ function renderShowcaseCard(avatarId) {
   const slotNames = {
     1: { name: "ส่วนหัว", stat: "HP 706" },
     2: { name: "ส่วนมือ", stat: "ATK 353" },
-    3: { name: "ลำตัว", stat: meta.path === 'Preservation' ? "DEF 54.0%" : (meta.path === 'Hunt' ? "CRIT Rate 32.4%" : "HP 43.2%") },
+    3: { name: "ลำตัว", stat: canonPath === 'Preservation' ? "DEF 54.0%" : (canonPath === 'Hunt' ? "CRIT Rate 32.4%" : "HP 43.2%") },
     4: { name: "รองเท้า", stat: "SPD 25.0" },
-    5: { name: "ลูกแก้ว", stat: `${meta.element} 38.8%` },
-    6: { name: "สร้อย", stat: meta.path === 'Preservation' || meta.path === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
+    5: { name: "ลูกแก้ว", stat: `${translateElement(canonElem)} 38.8%` },
+    6: { name: "สร้อย", stat: canonPath === 'Preservation' || canonPath === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
   };
 
   const showRolls = localStorage.getItem('gac_srtool_showcase_rolls') !== 'false';
@@ -4506,7 +4531,7 @@ function renderShowcaseCard(avatarId) {
   let relicsHtml = '';
   for (let slot = 1; slot <= 6; slot++) {
     const equipped = avatarRelics.find(r => (r.relic_id % 10 === slot));
-    const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    const rec = RECOMMENDED_RELIC_BUILDS[canonPath] || RECOMMENDED_RELIC_BUILDS.Preservation;
     const setId = equipped ? Math.floor((equipped.relic_id % 10000) / 10) : (slot <= 4 ? rec.cavern : rec.planar);
     const rInfo = getRelicSetInfo(setId);
     const slotInfo = slotNames[slot];
@@ -4622,10 +4647,10 @@ function renderShowcaseCard(avatarId) {
     Imaginary: 'rgba(251, 191, 36, 0.45)'
   };
 
-  if (showAura && auraGlows[meta.element]) {
-    el.showcaseCardContainer.style.background = auraGlows[meta.element];
-    el.showcaseCardContainer.style.borderColor = auraBorders[meta.element] || 'var(--border-color)';
-    el.showcaseCardContainer.style.boxShadow = `0 10px 40px -10px ${auraBorders[meta.element] || 'rgba(0,0,0,0.5)'}`;
+  if (showAura && auraGlows[canonElem]) {
+    el.showcaseCardContainer.style.background = auraGlows[canonElem];
+    el.showcaseCardContainer.style.borderColor = auraBorders[canonElem] || 'var(--border-color)';
+    el.showcaseCardContainer.style.boxShadow = `0 10px 40px -10px ${auraBorders[canonElem] || 'rgba(0,0,0,0.5)'}`;
   } else {
     el.showcaseCardContainer.style.background = 'linear-gradient(135deg, #0d121f 0%, #171f30 100%)';
     el.showcaseCardContainer.style.borderColor = 'var(--border-color)';

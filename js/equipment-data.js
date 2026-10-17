@@ -4322,14 +4322,16 @@ export function getLightconeInfo(lcId, langOverride = null) {
     return {
       name: `Lightcone ${lcId}`,
       rarity: 4,
-      path: translatePath("Unknown")
+      path: translatePath("Unknown"),
+      rawPath: "Unknown"
     };
   }
   const localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Lightcone ${lcId}`;
   return {
     name: localizedName,
     rarity: meta.rarity,
-    path: translatePath(meta.path)
+    path: translatePath(meta.path),
+    rawPath: meta.path
   };
 }
 
