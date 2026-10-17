@@ -1958,7 +1958,6 @@ async function setAvatarE0S1(avatarId) {
     "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
   };
 
-  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
   const lcId = SIGNATURE_LIGHTCONES[aid] || 21001;
 
   let existingLc = state.fullFreesrData.lightcones.find(lc => lc.equip_avatar === aid);
@@ -1978,6 +1977,9 @@ async function setAvatarE0S1(avatarId) {
       equip_avatar: aid
     });
   }
+
+  // Equip optimal relics
+  await autoEquipRecommendedRelics(aid, false);
 
   renderAvatarsGrid();
   loadEquipment();
@@ -2068,6 +2070,9 @@ async function setAvatarE6S5(avatarId) {
     });
   }
 
+  // Equip optimal relics
+  await autoEquipRecommendedRelics(aid, false);
+
   renderAvatarsGrid();
   loadEquipment();
 
@@ -2099,7 +2104,7 @@ async function maxSingleAvatar(avatarId) {
 let selectedLcRank = 5;
 
 // Modal Sub-tabs Handler
-// Signature Light Cones dictionary for all characters
+// Authoritative Signature / Best-in-Slot Light Cones dictionary for all characters
 const SIGNATURE_LIGHTCONES = {
   1001: 21001, // March 7th -> Day One of My New Life
   1002: 21000, // Dan Heng -> Only Silence Remains
@@ -2108,84 +2113,202 @@ const SIGNATURE_LIGHTCONES = {
   1005: 23006, // Kafka -> Patience Is All You Need
   1006: 23007, // Silver Wolf -> Incessant Rain
   1008: 21007, // Arlan -> A Secret Vow
-  1009: 21008, // Asta -> Planetary Rendezvous
-  1013: 21006, // Herta -> The Birth of the Self
+  1009: 21021, // Asta -> Dance! Dance! Dance!
+  1013: 24004, // Herta -> Eternal Calculus
+  1014: 24000, // Saber -> On the Fall of an Aeon
+  1015: 24001, // Archer -> Cruising in the Stellar Sea
   1101: 23003, // Bronya -> But the Battle Isn't Over
   1102: 23001, // Seele -> In the Night
   1103: 21009, // Serval -> Make the World Clamor
   1104: 23005, // Gepard -> Moment of Victory
   1105: 21010, // Natasha -> Post-Op Conversation
-  1106: 21003, // Pela -> Good Night and Sleep Well
+  1106: 22000, // Pela -> Before the Tutorial Mission Starts (BiS standard)
   1107: 23002, // Clara -> Something Irreplaceable
   1108: 21011, // Sampo -> Eyes of the Prey
   1109: 21012, // Hook -> The Moles Welcome You
-  1110: 21013, // Lynx -> Warmth Shortens Cold Nights
+  1110: 21010, // Lynx -> Post-Op Conversation
   1111: 21014, // Luka -> Resolution Shines As Pearls of Sweat
-  1112: 23012, // Topaz -> Worrisome, Blissful
+  1112: 23016, // Topaz -> Worrisome, Blissful
   1201: 21015, // Qingque -> Today Is Another Peaceful Day
-  1202: 21016, // Tingyun -> Memories of the Past
+  1202: 21021, // Tingyun -> Dance! Dance! Dance!
   1203: 23008, // Luocha -> Echoes of the Coffin
   1204: 23010, // Jing Yuan -> Before Dawn
   1205: 23009, // Blade -> The Unreachable Side
   1206: 21017, // Sushang -> Swordplay
   1207: 21018, // Yukong -> Past and Future
   1208: 23011, // Fu Xuan -> She Already Shut Her Eyes
-  1209: 23013, // Yanqing -> Sleep Like the Dead
-  1210: 21019, // Guinaifen -> Fermata
-  1211: 23016, // Bailu -> Time Waits for No One
+  1209: 23012, // Yanqing -> Sleep Like the Dead
+  1210: 21011, // Guinaifen -> Eyes of the Prey
+  1211: 23013, // Bailu -> Time Waits for No One
   1212: 23014, // Jingliu -> I Shall Be My Own Sword
   1213: 23015, // Dan Heng IL -> Brighter Than the Sun
-  1214: 21020, // Xueyi -> Under the Blue Sky
+  1214: 21035, // Xueyi -> Indelible Promise
   1215: 21021, // Hanya -> Dance! Dance! Dance!
   1217: 23017, // Huohuo -> Night of Fright
-  1218: 23027, // Jiaoqiu -> Those Many Springs
-  1220: 23030, // Feixiao -> I Venture Forth to Hunt
-  1221: 23028, // Yunli -> Dance at Sunset
-  1222: 23031, // Lingsha -> Scent Alone Stays True
-  1223: 21038, // Moze -> Shadowed by Night
-  1224: 23033, // Fugue -> Long Road Leads Home
+  1218: 23029, // Jiaoqiu -> Those Many Springs
+  1220: 23031, // Feixiao -> I Venture Forth to Hunt
+  1221: 23030, // Yunli -> Dance at Sunset
+  1222: 23032, // Lingsha -> Scent Alone Stays True
+  1223: 21017, // Moze -> Swordplay
+  1224: 21017, // March 7th (Hunt) -> Swordplay
+  1225: 23035, // Fugue -> Long Road Leads Home
   1301: 21022, // Gallagher -> What Is Real?
   1302: 23018, // Argenti -> An Instant Before A Gaze
   1303: 23019, // Ruan Mei -> Past Self in Mirror
-  1304: 23022, // Aventurine -> Inherently Unjust Destiny
+  1304: 23023, // Aventurine -> Inherently Unjust Destiny
   1305: 23020, // Dr. Ratio -> Baptism of Pure Thought
-  1306: 23021, // Sparkle -> Earthly Escort
-  1307: 23023, // Black Swan -> Reforged Remembrance
+  1306: 23021, // Sparkle -> Earthly Escapade
+  1307: 23022, // Black Swan -> Reforged Remembrance
   1308: 23024, // Acheron -> Along the Passing Shore
   1309: 23026, // Robin -> Flowing Nightglow
   1310: 23025, // Firefly -> Whereabouts Should Dreams Rest
   1312: 21035, // Misha -> Indelible Promise
-  1313: 23032, // Sunday -> A Grounded Ascent
-  1314: 23029, // Jade -> Yet Hope Is Priceless
-  1315: 23028, // Boothill -> Sailing Towards A Second Life
-  1317: 23030, // Rappa -> Ninjutsu Inscription: Dazzling Evilbreaker
-  1401: 23034, // The Herta -> Into the Unreachable Veil
-  1402: 23035, // Aglaea -> Time Woven into Gold
-  1403: 23036, // Castorice -> Make Farewells More Beautiful
-  1404: 23037, // Anaxa -> If Time Were a Flower
-  1405: 23038, // Tribbie
-  1406: 23039, // Mydei
+  1313: 23034, // Sunday -> A Grounded Ascent
+  1314: 23028, // Jade -> Yet Hope Is Priceless
+  1315: 23027, // Boothill -> Sailing Towards a Second Life
+  1317: 23033, // Rappa -> Ninjutsu Inscription: Dazzling Evilbreaker
+  1321: 23022, // The Dahlia -> Reforged Remembrance
+  1401: 23037, // The Herta -> Into the Unreachable Veil
+  1402: 23036, // Aglaea -> Time Woven into Gold
+  1403: 23038, // Tribbie -> If Time Were a Flower
+  1404: 23039, // Mydei -> Flame of Blood, Blaze My Path
+  1405: 23041, // Anaxa -> Life Should Be Cast to Flames
+  1406: 23022, // Cipher
+  1407: 23040, // Castorice -> Make Farewells More Beautiful
+  1408: 23042, // Phainon
   1511: 23065, // Aeon ★ Aha -> Upon the First Echo of "Aha"
-  8001: 24001, // Trailblazer Male Destruction -> On the Fall of an Aeon
-  8002: 24001, // Trailblazer Female Destruction
+  8001: 24000, // Trailblazer Male Destruction -> On the Fall of an Aeon
+  8002: 24000, // Trailblazer Female Destruction
   8003: 24002, // Trailblazer Male Preservation -> Texture of Memories
   8004: 24002, // Trailblazer Female Preservation
-  8005: 21008, // Trailblazer Male Harmony -> Memories of the Past
-  8006: 21008, // Trailblazer Female Harmony
+  8005: 21016, // Trailblazer Male Harmony -> Memories of the Past
+  8006: 21016, // Trailblazer Female Harmony
   8007: 21040, // Trailblazer Remembrance
   8008: 21040
 };
 
-// Recommended Relic Builds by Path
+// Comprehensive Meta Optimal Relic Builds (Cavern, Planar, Main Affixes & Top Substats)
+// Substats ID reference:
+// 1: Flat HP, 2: Flat ATK, 3: Flat DEF, 4: HP%, 5: ATK%, 6: DEF%
+// 7: SPD, 8: CRIT Rate%, 9: CRIT DMG%, 10: EHR%, 11: Effect RES%, 12: Break Effect%
+const CHARACTER_OPTIMAL_BUILDS = {
+  1308: { cavern: 117, planar: 313, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Acheron
+  1310: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 2, rope: 1, substats: [12, 7, 5, 11] }, // Firefly
+  1220: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Feixiao
+  1315: { cavern: 119, planar: 305, body: 4, feet: 4, sphere: 4, rope: 1, substats: [12, 7, 8, 9] }, // Boothill
+  1221: { cavern: 120, planar: 314, body: 4, feet: 2, sphere: 4, rope: 4, substats: [8, 9, 5, 1] }, // Yunli
+  1313: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // Sunday
+  1401: { cavern: 122, planar: 317, body: 4, feet: 2, sphere: 6, rope: 4, substats: [8, 9, 5, 7] }, // The Herta
+  1106: { cavern: 110, planar: 312, body: 7, feet: 4, sphere: 1, rope: 2, substats: [7, 10, 11, 4] }, // Pela
+  1006: { cavern: 117, planar: 312, body: 7, feet: 4, sphere: 9, rope: 2, substats: [7, 10, 8, 9] }, // Silver Wolf
+  1303: { cavern: 118, planar: 307, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // Ruan Mei
+  1309: { cavern: 114, planar: 316, body: 2, feet: 2, sphere: 4, rope: 2, substats: [5, 7, 11, 4] }, // Robin
+  1306: { cavern: 114, planar: 310, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // Sparkle
+  1101: { cavern: 114, planar: 310, body: 5, feet: 4, sphere: 8, rope: 2, substats: [9, 7, 11, 6] }, // Bronya
+  1202: { cavern: 114, planar: 307, body: 2, feet: 4, sphere: 2, rope: 2, substats: [7, 5, 11, 4] }, // Tingyun
+  1304: { cavern: 103, planar: 314, body: 5, feet: 4, sphere: 10, rope: 5, substats: [6, 9, 8, 7] }, // Aventurine
+  1208: { cavern: 113, planar: 302, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 6, 11] }, // Fu Xuan
+  1217: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Huohuo
+  1222: { cavern: 119, planar: 315, body: 6, feet: 4, sphere: 2, rope: 2, substats: [12, 7, 5, 11] }, // Lingsha
+  1301: { cavern: 119, planar: 315, body: 6, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // Gallagher
+  1203: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 2, rope: 2, substats: [7, 5, 11, 4] }, // Luocha
+  1005: { cavern: 116, planar: 311, body: 2, feet: 4, sphere: 7, rope: 4, substats: [7, 5, 10, 12] }, // Kafka
+  1307: { cavern: 116, planar: 308, body: 7, feet: 4, sphere: 8, rope: 4, substats: [10, 7, 5, 12] }, // Black Swan
+  1218: { cavern: 116, planar: 308, body: 7, feet: 4, sphere: 5, rope: 2, substats: [10, 7, 11, 5] }, // Jiaoqiu
+  1212: { cavern: 104, planar: 309, body: 5, feet: 4, sphere: 6, rope: 4, substats: [9, 8, 7, 5] }, // Jingliu
+  1213: { cavern: 102, planar: 309, body: 4, feet: 2, sphere: 10, rope: 4, substats: [8, 9, 5, 7] }, // Dan Heng IL
+  1305: { cavern: 117, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // Dr. Ratio
+  1112: { cavern: 115, planar: 314, body: 4, feet: 4, sphere: 5, rope: 4, substats: [8, 9, 7, 5] }, // Topaz
+  1314: { cavern: 115, planar: 314, body: 4, feet: 2, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Jade
+  1317: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 10, rope: 1, substats: [12, 7, 5, 11] }, // Rappa
+  1225: { cavern: 119, planar: 315, body: 7, feet: 4, sphere: 5, rope: 1, substats: [12, 7, 10, 11] }, // Fugue
+  1402: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Aglaea
+  1407: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 7, 5] }, // Castorice
+  1405: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Anaxa
+  1403: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 9, rope: 2, substats: [8, 9, 7, 4] }, // Tribbie
+  1404: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // Mydei
+  1102: { cavern: 108, planar: 309, body: 4, feet: 2, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Seele
+  1204: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Jing Yuan
+  1205: { cavern: 113, planar: 306, body: 4, feet: 1, sphere: 8, rope: 3, substats: [8, 9, 4, 7] }, // Blade
+  1302: { cavern: 106, planar: 306, body: 5, feet: 4, sphere: 4, rope: 2, substats: [8, 9, 7, 5] }, // Argenti
+  1107: { cavern: 106, planar: 314, body: 4, feet: 2, sphere: 4, rope: 4, substats: [8, 9, 5, 1] }, // Clara
+  1003: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 5, rope: 4, substats: [8, 9, 5, 7] }, // Himeko
+  1004: { cavern: 117, planar: 308, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 10] }, // Welt
+  1104: { cavern: 103, planar: 304, body: 3, feet: 4, sphere: 3, rope: 2, substats: [6, 7, 11, 10] }, // Gepard
+  1211: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Bailu
+  1209: { cavern: 104, planar: 306, body: 5, feet: 4, sphere: 6, rope: 4, substats: [9, 8, 7, 5] }, // Yanqing
+  1013: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 6, rope: 4, substats: [8, 9, 5, 7] }, // Herta
+  1224: { cavern: 102, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // March 7th (Hunt)
+  8005: { cavern: 118, planar: 305, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // TB Harmony (M)
+  8006: { cavern: 118, planar: 305, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // TB Harmony (F)
+  8007: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // TB Remembrance
+  8008: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] },
+  1223: { cavern: 117, planar: 314, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Moze
+  1201: { cavern: 108, planar: 309, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Qingque
+  1214: { cavern: 119, planar: 305, body: 4, feet: 4, sphere: 9, rope: 1, substats: [12, 8, 9, 7] }, // Xueyi
+  1210: { cavern: 116, planar: 311, body: 2, feet: 4, sphere: 5, rope: 4, substats: [10, 7, 5, 12] }, // Guinaifen
+  1111: { cavern: 106, planar: 311, body: 2, feet: 4, sphere: 4, rope: 4, substats: [7, 5, 10, 12] }, // Luka
+  1108: { cavern: 116, planar: 308, body: 2, feet: 4, sphere: 8, rope: 4, substats: [10, 7, 5, 12] }, // Sampo
+  1103: { cavern: 112, planar: 306, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Serval
+  1002: { cavern: 110, planar: 309, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Dan Heng
+  1206: { cavern: 106, planar: 309, body: 4, feet: 4, sphere: 4, rope: 4, substats: [8, 9, 7, 12] }, // Sushang
+  1109: { cavern: 109, planar: 306, body: 4, feet: 2, sphere: 5, rope: 4, substats: [8, 9, 5, 7] }, // Hook
+  1008: { cavern: 113, planar: 306, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Arlan
+  1110: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Lynx
+  1105: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Natasha
+  1215: { cavern: 114, planar: 310, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Hanya
+  1207: { cavern: 114, planar: 310, body: 4, feet: 4, sphere: 10, rope: 2, substats: [7, 8, 9, 11] }, // Yukong
+  1009: { cavern: 114, planar: 302, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Asta
+  1312: { cavern: 104, planar: 306, body: 4, feet: 4, sphere: 6, rope: 4, substats: [8, 9, 7, 5] } // Misha
+};
+
+function getOptimalBuildForAvatar(avatarId) {
+  const aid = parseInt(avatarId, 10);
+  if (CHARACTER_OPTIMAL_BUILDS[aid]) {
+    return CHARACTER_OPTIMAL_BUILDS[aid];
+  }
+  const meta = getAvatarInfo(aid);
+  const elem = meta.rawElement || meta.element || 'Physical';
+  const path = meta.rawPath || meta.path || 'Destruction';
+
+  const elemAffixMap = {
+    Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Thunder: 7, Wind: 8, Quantum: 9, Imaginary: 10
+  };
+  const sphereAffix = elemAffixMap[elem] || 2;
+
+  if (path === 'Destruction') {
+    return { cavern: 119, planar: 314, body: 4, feet: 4, sphere: sphereAffix, rope: 4, substats: [8, 9, 7, 5] };
+  } else if (path === 'Hunt') {
+    return { cavern: 120, planar: 314, body: 4, feet: 4, sphere: sphereAffix, rope: 4, substats: [8, 9, 7, 5] };
+  } else if (path === 'Erudition') {
+    return { cavern: 115, planar: 306, body: 4, feet: 2, sphere: sphereAffix, rope: 4, substats: [8, 9, 5, 7] };
+  } else if (path === 'Harmony') {
+    return { cavern: 114, planar: 310, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 11, 4, 6] };
+  } else if (path === 'Nihility') {
+    if (['Fire', 'Wind'].includes(elem)) {
+      return { cavern: 116, planar: 311, body: 2, feet: 4, sphere: sphereAffix, rope: 4, substats: [7, 5, 10, 12] };
+    }
+    return { cavern: 110, planar: 312, body: 7, feet: 4, sphere: sphereAffix, rope: 2, substats: [7, 10, 11, 4] };
+  } else if (path === 'Preservation') {
+    return { cavern: 103, planar: 304, body: 3, feet: 4, sphere: 3, rope: 5, substats: [6, 7, 11, 4] };
+  } else if (path === 'Abundance') {
+    return { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] };
+  } else if (path === 'Remembrance') {
+    return { cavern: 121, planar: 316, body: 4, feet: 4, sphere: sphereAffix, rope: 2, substats: [8, 9, 7, 11] };
+  }
+  return { cavern: 120, planar: 314, body: 4, feet: 4, sphere: sphereAffix, rope: 4, substats: [8, 9, 7, 5] };
+}
+
+// Recommended Relic Builds by Path (Fallback summary)
 const RECOMMENDED_RELIC_BUILDS = {
   Preservation: { cavern: 103, planar: 304, name: "Knight of Purity (4) + Belobog (2)" },
   Abundance: { cavern: 101, planar: 302, name: "Passerby (4) + Fleet (2)" },
   Harmony: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" },
-  Nihility: { cavern: 116, planar: 311, name: "Prisoner (4) + Glamoth (2)" },
-  Hunt: { cavern: 120, planar: 309, name: "Valorous (4) + Rutilant Arena (2)" },
+  Nihility: { cavern: 110, planar: 312, name: "Eagle (4) + Penacony (2)" },
+  Hunt: { cavern: 120, planar: 314, name: "Valorous (4) + Duran (2)" },
   Destruction: { cavern: 119, planar: 315, name: "Iron Cavalry (4) + Kalpagni (2)" },
   Erudition: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" },
-  Remembrance: { cavern: 114, planar: 310, name: "Messenger (4) + Broken Keel (2)" },
+  Remembrance: { cavern: 121, planar: 316, name: "Sacerdos (4) + Lushaka (2)" },
   Elation: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" }
 };
 
@@ -2455,6 +2578,24 @@ function getRelicMainAffixName(slot, affixId) {
   return affixesBySlot[slot]?.[affixId] || `Main Affix ${affixId}`;
 }
 
+function getRelicSubAffixName(affixId) {
+  const map = {
+    1: "HP (Flat)",
+    2: "ATK (Flat)",
+    3: "DEF (Flat)",
+    4: "HP%",
+    5: "ATK%",
+    6: "DEF%",
+    7: "SPD",
+    8: "CRIT Rate%",
+    9: "CRIT DMG%",
+    10: "Effect Hit Rate%",
+    11: "Effect RES%",
+    12: "Break Effect%"
+  };
+  return map[affixId] || `Sub Affix ${affixId}`;
+}
+
 const STAR_RAIL_RES_LANGS = {
   th: 'th', en: 'en', es: 'es', pt: 'pt', ru: 'ru', vi: 'vi',
   de: 'de', fr: 'fr', id: 'id', ja: 'jp', ko: 'kr', zh: 'cn', zh_tw: 'cht'
@@ -2599,68 +2740,274 @@ function renderModalOverviewTab(avatarId) {
     }
   }
 
-  // Combat Stats
+  // Combat Stats (Authentic Honkai: Star Rail Character Attributes)
   const baseHp = meta.rarity === 5 ? 1241 : 1058;
   const baseAtk = meta.rarity === 5 ? 620 : 529;
   const baseDef = meta.rarity === 5 ? 530 : 441;
-  const baseSpd = meta.speed || (meta.path === 'Hunt' ? 110 : 100);
+  const baseSpd = meta.speed || (meta.rawPath === 'Hunt' ? 110 : 100);
 
   const lcHp = lcInfo.rarity === 5 ? 1058 : 846;
   const lcAtk = lcInfo.rarity === 5 ? 582 : 476;
   const lcDef = lcInfo.rarity === 5 ? 463 : 396;
 
-  let totalHp = Math.round((baseHp + lcHp) * 1.45 + (relics.length ? 706 : 0));
-  let totalAtk = Math.round((baseAtk + lcAtk) * 1.35 + (relics.length ? 353 : 0));
-  let totalDef = Math.round((baseDef + lcDef) * 1.85 + (meta.path === 'Preservation' ? 1200 : 0));
-  let totalSpd = (baseSpd + (relics.length ? 25 : 0)).toFixed(1);
-  let critRate = (5.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 65.4 : 18.8)).toFixed(1);
-  let critDmg = (50.0 + (meta.path === 'Hunt' || meta.path === 'Destruction' ? 132.5 : 26.5)).toFixed(1);
-  let breakEffect = (meta.path === 'Harmony' || meta.path === 'Nihility' ? 142.0 : 10.4).toFixed(1);
-  let err = (19.4).toFixed(1);
-  let ehr = (meta.path === 'Nihility' ? 67.2 : 19.4).toFixed(1);
-  let effectRes = (10.0).toFixed(1);
+  let hpPercentBonus = 0;
+  let flatHpBonus = 0;
+  let atkPercentBonus = 0;
+  let flatAtkBonus = 0;
+  let defPercentBonus = 0;
+  let flatDefBonus = 0;
+  let spdFlatBonus = 0;
+  let spdPercentBonus = 0;
+  let critRateBonus = 0;
+  let critDmgBonus = 0;
+  let breakEffectBonus = 0;
+  let healBoostBonus = 0;
+  let errBonus = 0;
+  let ehrBonus = 0;
+  let effectResBonus = 0;
+  let elemDmgBonus = 0;
+
+  relics.forEach(r => {
+    const slot = r.relic_id % 10;
+    const lvl = r.level || 15;
+    const ratio = lvl / 15;
+
+    // Main Affixes
+    if (slot === 1) {
+      flatHpBonus += Math.round(705.6 * ratio);
+    } else if (slot === 2) {
+      flatAtkBonus += Math.round(352.8 * ratio);
+    } else if (slot === 3) {
+      if (r.main_affix_id === 1) hpPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 2) atkPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 3) defPercentBonus += 54.0 * ratio;
+      else if (r.main_affix_id === 4) critRateBonus += 32.4 * ratio;
+      else if (r.main_affix_id === 5) critDmgBonus += 64.8 * ratio;
+      else if (r.main_affix_id === 6) healBoostBonus += 34.5 * ratio;
+      else if (r.main_affix_id === 7) ehrBonus += 43.2 * ratio;
+    } else if (slot === 4) {
+      if (r.main_affix_id === 1) hpPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 2) atkPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 3) defPercentBonus += 54.0 * ratio;
+      else if (r.main_affix_id === 4) spdFlatBonus += 25 * ratio;
+    } else if (slot === 5) {
+      if (r.main_affix_id === 1) hpPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 2) atkPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 3) defPercentBonus += 54.0 * ratio;
+      else if (r.main_affix_id >= 4) elemDmgBonus += 38.8 * ratio;
+    } else if (slot === 6) {
+      if (r.main_affix_id === 1) breakEffectBonus += 64.8 * ratio;
+      else if (r.main_affix_id === 2) errBonus += 19.4 * ratio;
+      else if (r.main_affix_id === 3) hpPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 4) atkPercentBonus += 43.2 * ratio;
+      else if (r.main_affix_id === 5) defPercentBonus += 54.0 * ratio;
+    }
+
+    // Sub Affixes
+    (r.sub_affixes || []).forEach(sub => {
+      const rolls = sub.cnt || 1;
+      const sId = sub.sub_affix_id;
+      if (sId === 1) flatHpBonus += Math.round(42 * rolls);
+      else if (sId === 2) flatAtkBonus += Math.round(21 * rolls);
+      else if (sId === 3) flatDefBonus += Math.round(21 * rolls);
+      else if (sId === 4) hpPercentBonus += 4.3 * rolls;
+      else if (sId === 5) atkPercentBonus += 4.3 * rolls;
+      else if (sId === 6) defPercentBonus += 5.4 * rolls;
+      else if (sId === 7) spdFlatBonus += 2.6 * rolls;
+      else if (sId === 8) critRateBonus += 3.2 * rolls;
+      else if (sId === 9) critDmgBonus += 6.4 * rolls;
+      else if (sId === 10) ehrBonus += 4.3 * rolls;
+      else if (sId === 11) effectResBonus += 4.3 * rolls;
+      else if (sId === 12) breakEffectBonus += 6.4 * rolls;
+    });
+  });
+
+  const finalBaseHp = baseHp + lcHp;
+  const extraHp = Math.round(finalBaseHp * (hpPercentBonus / 100) + flatHpBonus);
+  const totalHp = finalBaseHp + extraHp;
+
+  const finalBaseAtk = baseAtk + lcAtk;
+  const extraAtk = Math.round(finalBaseAtk * (atkPercentBonus / 100) + flatAtkBonus);
+  const totalAtk = finalBaseAtk + extraAtk;
+
+  const finalBaseDef = baseDef + lcDef;
+  const extraDef = Math.round(finalBaseDef * (defPercentBonus / 100) + flatDefBonus);
+  const totalDef = finalBaseDef + extraDef;
+
+  const finalBaseSpd = baseSpd;
+  const extraSpd = Math.round((spdFlatBonus + finalBaseSpd * (spdPercentBonus / 100)) * 10) / 10;
+  const totalSpd = (finalBaseSpd + extraSpd).toFixed(1);
+
+  const totalCritRate = (5.0 + critRateBonus).toFixed(1);
+  const totalCritDmg = (50.0 + critDmgBonus).toFixed(1);
+  const totalBreakEffect = breakEffectBonus.toFixed(1);
+  const totalHealBoost = healBoostBonus.toFixed(1);
+  const maxEnergy = 120;
+  const totalErr = (100.0 + errBonus).toFixed(1);
+  const totalEhr = ehrBonus.toFixed(1);
+  const totalRes = (10.0 + effectResBonus).toFixed(1);
+  const totalElemDmg = elemDmgBonus.toFixed(1);
+
+  const elemIconMap = {
+    Physical: 'PhysicalAddedRatio',
+    Fire: 'FireAddedRatio',
+    Ice: 'IceAddedRatio',
+    Lightning: 'ThunderAddedRatio',
+    Thunder: 'ThunderAddedRatio',
+    Wind: 'WindAddedRatio',
+    Quantum: 'QuantumAddedRatio',
+    Imaginary: 'ImaginaryAddedRatio'
+  };
+  const elemKey = meta.rawElement || meta.element || 'Physical';
+  const elemIcon = elemIconMap[elemKey] || 'PhysicalAddedRatio';
+  const elemName = meta.element || elemKey;
+  const elemDmgLabel = t('statDmgBoost').replace('{element}', elemName);
+  const cdn = 'https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/property';
 
   if (el.overviewStatsGrid) {
     el.overviewStatsGrid.innerHTML = `
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">❤️ HP สูงสุด</span>
-        <span class="overview-stat-val" style="color: #4ade80;">${totalHp.toLocaleString()}</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">⚔️ พลังโจมตี (ATK)</span>
-        <span class="overview-stat-val" style="color: #f87171;">${totalAtk.toLocaleString()}</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">🛡️ พลังป้องกัน (DEF)</span>
-        <span class="overview-stat-val" style="color: #60a5fa;">${totalDef.toLocaleString()}</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">👟 ความเร็ว (SPD)</span>
-        <span class="overview-stat-val" style="color: #38bdf8;">${totalSpd}</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">🎯 อัตราคริ (CRIT Rate)</span>
-        <span class="overview-stat-val" style="color: #fbbf24;">${critRate}%</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">💥 ดาเมจคริ (CRIT DMG)</span>
-        <span class="overview-stat-val" style="color: #f59e0b;">${critDmg}%</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">⚡ ทำลายจุดอ่อน (Break)</span>
-        <span class="overview-stat-val" style="color: #c084fc;">${breakEffect}%</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">🔋 ฟื้นฟูพลังงาน (ERR)</span>
-        <span class="overview-stat-val" style="color: #34d399;">${err}%</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">🔮 สร้างสถานะ (EHR)</span>
-        <span class="overview-stat-val" style="color: #818cf8;">${ehr}%</span>
-      </div>
-      <div class="overview-stat-card">
-        <span class="overview-stat-label">🔰 ต้านทานสถานะ (RES)</span>
-        <span class="overview-stat-val" style="color: #a78bfa;">${effectRes}%</span>
+      <div class="hsr-attributes-panel">
+        <!-- Section 1: Basic Attributes -->
+        <div class="hsr-attr-section">
+          <div class="hsr-attr-header">${t('attrBasic')}</div>
+          <div class="hsr-attr-list">
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconMaxHP.png" alt="HP">
+                <span class="hsr-attr-name">${t('statMaxHp')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalHp.toLocaleString()}</span>
+                ${extraHp > 0 ? `<span class="hsr-attr-breakdown"><span class="hsr-attr-base">${finalBaseHp.toLocaleString()}</span><span class="hsr-attr-extra">+${extraHp.toLocaleString()}</span></span>` : ''}
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconAttack.png" alt="ATK">
+                <span class="hsr-attr-name">${t('statAtk')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalAtk.toLocaleString()}</span>
+                ${extraAtk > 0 ? `<span class="hsr-attr-breakdown"><span class="hsr-attr-base">${finalBaseAtk.toLocaleString()}</span><span class="hsr-attr-extra">+${extraAtk.toLocaleString()}</span></span>` : ''}
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconDefence.png" alt="DEF">
+                <span class="hsr-attr-name">${t('statDef')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalDef.toLocaleString()}</span>
+                ${extraDef > 0 ? `<span class="hsr-attr-breakdown"><span class="hsr-attr-base">${finalBaseDef.toLocaleString()}</span><span class="hsr-attr-extra">+${extraDef.toLocaleString()}</span></span>` : ''}
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconSpeed.png" alt="SPD">
+                <span class="hsr-attr-name">${t('statSpd')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalSpd}</span>
+                ${extraSpd > 0 ? `<span class="hsr-attr-breakdown"><span class="hsr-attr-base">${finalBaseSpd}</span><span class="hsr-attr-extra">+${extraSpd}</span></span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Advanced Attributes -->
+        <div class="hsr-attr-section">
+          <div class="hsr-attr-header">${t('attrAdvanced')}</div>
+          <div class="hsr-attr-list">
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconCriticalChance.png" alt="CRIT Rate">
+                <span class="hsr-attr-name">${t('statCritRate')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalCritRate}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconCriticalDamage.png" alt="CRIT DMG">
+                <span class="hsr-attr-name">${t('statCritDmg')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalCritDmg}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconBreakUp.png" alt="Break">
+                <span class="hsr-attr-name">${t('statBreakEffect')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalBreakEffect}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconHealRatio.png" alt="Heal">
+                <span class="hsr-attr-name">${t('statHealBoost')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalHealBoost}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconEnergyRecovery.png" alt="Max Energy">
+                <span class="hsr-attr-name">${t('statMaxEnergy')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${maxEnergy}</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconEnergyRecovery.png" alt="ERR">
+                <span class="hsr-attr-name">${t('statEnergyRegen')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalErr}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconStatusProbability.png" alt="EHR">
+                <span class="hsr-attr-name">${t('statEhr')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalEhr}%</span>
+              </div>
+            </div>
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/IconStatusResistance.png" alt="RES">
+                <span class="hsr-attr-name">${t('statRes')}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalRes}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Elemental DMG -->
+        <div class="hsr-attr-section">
+          <div class="hsr-attr-header">${t('attrElemental')}</div>
+          <div class="hsr-attr-list">
+            <div class="hsr-attr-row">
+              <div class="hsr-attr-left">
+                <img class="hsr-attr-icon" src="${cdn}/Icon${elemIcon}.png" alt="${elemName}">
+                <span class="hsr-attr-name">${elemDmgLabel}</span>
+              </div>
+              <div class="hsr-attr-right">
+                <span class="hsr-attr-total">${totalElemDmg}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -2804,111 +3151,388 @@ function renderModalRelicsTab(avatarId) {
   }
 }
 
-// Open Slot Picker Modal
-function openSlotPicker(avatarId, slotNum) {
-  state.slotPickerAvatarId = avatarId;
-  state.slotPickerSlot = slotNum;
-  const slotInfo = SLOT_NAMES_FULL[slotNum];
+// Open Relic Slot Picker Modal (Spacious, Tabbed, Custom Set & Main Stat Builder + Inventory)
+let slotPickerSelectedSetId = 101;
+let slotPickerSelectedMainAffix = 1;
 
-  if (el.modalSlotPickerTitle) {
-    el.modalSlotPickerTitle.textContent = `🛡️ เลือกสวมใส่: ${slotInfo.name}`;
+function openSlotPicker(avatarId, slotNum) {
+  state.slotPickerAvatarId = parseInt(avatarId, 10);
+  state.slotPickerSlot = parseInt(slotNum, 10);
+  const aid = state.slotPickerAvatarId;
+  const slot = state.slotPickerSlot;
+  const meta = getAvatarInfo(aid);
+  const rec = getOptimalBuildForAvatar(aid);
+  const slotInfo = SLOT_NAMES_FULL[slot] || { name: `Slot ${slot}` };
+
+  const modal = document.getElementById('modal-select-relic-slot');
+  if (!modal) return;
+
+  // Title & Subtitle
+  const titleEl = document.getElementById('modal-slot-picker-title');
+  const subtitleEl = document.getElementById('modal-slot-picker-subtitle');
+  if (titleEl) {
+    titleEl.textContent = `${t('relicPickerTitle').replace('{slot}', slotInfo.name)} - ${meta.name}`;
+  }
+  if (subtitleEl) {
+    subtitleEl.textContent = t('quickGenRecDesc');
   }
 
-  if (el.slotPickerInventoryList) {
-    el.slotPickerInventoryList.innerHTML = '';
-    const allRelics = state.fullFreesrData?.relics || [];
-    const matchingRelics = allRelics.filter(r => (r.relic_id % 10) === slotNum);
+  // Current Equipped Relic Banner
+  const currentBox = document.getElementById('slot-picker-current-box');
+  const allRelics = state.fullFreesrData?.relics || [];
+  const currentRelic = allRelics.find(r => r.equip_avatar === aid && (r.relic_id % 10) === slot);
 
-    if (matchingRelics.length === 0) {
-      el.slotPickerInventoryList.innerHTML = `
-        <div style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
-          ไม่มีรีลิกส์สำหรับช่องนี้ในคลัง สามารถกดปุ่ม <strong>"สร้างชิ้นแนะนำสำหรับช่องนี้"</strong> ด้านบนได้ทันที!
-        </div>
-      `;
-    } else {
-      matchingRelics.forEach(r => {
-        const setId = Math.floor((r.relic_id % 10000) / 10);
-        const rInfo = getRelicSetInfo(setId);
-        const mainAffixName = getRelicMainAffixName(slotNum, r.main_affix_id);
-        const isCurrent = r.equip_avatar === avatarId;
-        const wearerMeta = r.equip_avatar && r.equip_avatar !== avatarId ? getAvatarInfo(r.equip_avatar) : null;
+  if (currentBox) {
+    if (currentRelic) {
+      const curSetId = Math.floor((currentRelic.relic_id % 10000) / 10);
+      const curSetInfo = getRelicSetInfo(curSetId);
+      const curMainAffixName = getRelicMainAffixName(slot, currentRelic.main_affix_id);
 
-        const row = document.createElement('div');
-        row.className = 'relic-slot-box';
-        row.style.cursor = 'pointer';
-        row.style.padding = '0.65rem 0.85rem';
-        if (isCurrent) row.style.borderColor = 'var(--accent-gold)';
-
-        row.innerHTML = `
-          <div class="relic-slot-icon-wrap" style="width: 44px; height: 44px; min-width: 44px;">
-            <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
-                 onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
-          </div>
-          <div class="relic-slot-content">
-            <div class="relic-slot-title">${rInfo.name} (+${r.level})</div>
-            <div class="relic-slot-main">✦ ${mainAffixName}</div>
-            <div class="relic-slot-subs">
-              ${isCurrent ? '<span style="color: var(--accent-gold); font-weight: 700;">(กำลังสวมใส่อยู่)</span>' : 
-                wearerMeta ? `<span style="color: var(--accent-cyan);">(สวมใส่โดย: ${wearerMeta.name})</span>` : '<span style="color: #4ade80;">(ว่างในคลัง)</span>'}
+      currentBox.className = 'slot-picker-current-banner';
+      currentBox.innerHTML = `
+        <div style="display: flex; gap: 0.85rem; align-items: center; min-width: 0;">
+          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${curSetId}.png"
+               onerror="this.src='./assets/logo.png'" alt="Relic"
+               style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 700;">
+              ${t('currentEquipped')} (+${currentRelic.level})
+            </div>
+            <div style="font-size: 1rem; font-weight: 800; color: #fff;">
+              ${curSetInfo.name}
+            </div>
+            <div style="font-size: 0.825rem; color: var(--accent-cyan); font-weight: 700;">
+              ✦ ${curMainAffixName}
             </div>
           </div>
-          <button type="button" class="btn btn-sm ${isCurrent ? 'btn-gold' : 'btn-primary'}" style="font-size: 0.725rem;">
-            ${isCurrent ? 'ใช้งานอยู่' : 'เลือกชิ้นนี้'}
-          </button>
-        `;
+        </div>
+        <button type="button" class="btn btn-sm btn-danger" id="btn-slot-picker-unequip" style="padding: 0.45rem 1rem; font-weight: 700;">
+          ${t('btnUnequip')}
+        </button>
+      `;
 
-        row.addEventListener('click', async () => {
-          if (!isCurrent) {
-            allRelics.forEach(other => {
-              if (other.equip_avatar === avatarId && (other.relic_id % 10) === slotNum) {
-                other.equip_avatar = 0;
-              }
-            });
-            r.equip_avatar = avatarId;
-            if (state.isConnected) await saveFreesrChangesToServer();
-            renderModalRelicsTab(avatarId);
-            renderModalOverviewTab(avatarId);
-            renderShowcaseCard(avatarId);
-            loadEquipment();
-            showToast(`สวมใส่ ${rInfo.name} สำเร็จ!`, 'success');
-          }
-          el.modalSelectRelicSlot?.classList.remove('active');
-        });
-
-        el.slotPickerInventoryList.appendChild(row);
+      document.getElementById('btn-slot-picker-unequip')?.addEventListener('click', async () => {
+        currentRelic.equip_avatar = 0;
+        if (state.isConnected) await saveFreesrChangesToServer();
+        renderModalRelicsTab(aid);
+        renderModalOverviewTab(aid);
+        renderShowcaseCard(aid);
+        loadEquipment();
+        openSlotPicker(aid, slot);
+        showToast('ถอดรีลิกส์เรียบร้อยแล้ว', 'info');
       });
+    } else {
+      currentBox.className = 'slot-picker-current-banner empty';
+      currentBox.innerHTML = `<span>${t('noRelicEquipped')}</span>`;
     }
   }
 
-  el.modalSelectRelicSlot?.classList.add('active');
+  // Recommended Set & Main Stat for this slot
+  const recSetId = slot <= 4 ? rec.cavern : rec.planar;
+  let recMainStat = 1;
+  if (slot === 1 || slot === 2) recMainStat = 1;
+  else if (slot === 3) recMainStat = rec.body;
+  else if (slot === 4) recMainStat = rec.feet;
+  else if (slot === 5) recMainStat = rec.sphere;
+  else if (slot === 6) recMainStat = rec.rope;
+
+  slotPickerSelectedSetId = recSetId;
+  slotPickerSelectedMainAffix = recMainStat;
+
+  // Render Recommended Highlight Banner
+  const recHighlight = document.getElementById('slot-picker-rec-highlight');
+  if (recHighlight) {
+    const recSetInfo = getRelicSetInfo(recSetId);
+    const recMainName = getRelicMainAffixName(slot, recMainStat);
+
+    recHighlight.innerHTML = `
+      <div style="display: flex; gap: 0.85rem; align-items: center;">
+        <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${recSetId}.png"
+             onerror="this.src='./assets/logo.png'" alt="Relic"
+             style="width: 52px; height: 52px; object-fit: contain;">
+        <div>
+          <div style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 800; text-transform: uppercase;">
+            ⭐ ${t('recommendedBadge')}: ${recSetInfo.name} (+15 5★)
+          </div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #fff; margin-top: 2px;">
+            ✦ ${recMainName}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+            ออฟรองแนะนำ 4 แถวเทพ ปรับสเต็ปการอัปเกรดระดับสูงครบถ้วน
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-slot-picker-quick-rec" style="font-weight: 800; padding: 0.55rem 1.15rem; font-size: 0.875rem;">
+        ⚡ ${t('btnEquipInstant')}
+      </button>
+    `;
+
+    document.getElementById('btn-slot-picker-quick-rec')?.addEventListener('click', async () => {
+      await equipCustomSlotRelic(aid, slot, recSetId, recMainStat);
+    });
+  }
+
+  // Populate Set Grid
+  renderSlotPickerSetGrid(slot, recSetId);
+
+  // Populate Main Stat Pills
+  renderSlotPickerMainStatPills(slot, recMainStat);
+
+  // Tab 2: Inventory Grid
+  renderSlotPickerInventoryGrid(aid, slot);
+
+  // Mode Tabs Switching
+  const tabQuickBtn = document.getElementById('tab-btn-relic-quick');
+  const tabInvBtn = document.getElementById('tab-btn-relic-inventory');
+  const paneQuick = document.getElementById('slot-picker-quick-tab');
+  const paneInv = document.getElementById('slot-picker-inventory-tab');
+
+  if (tabQuickBtn && tabInvBtn && paneQuick && paneInv) {
+    tabQuickBtn.classList.add('active');
+    tabInvBtn.classList.remove('active');
+    paneQuick.style.display = 'flex';
+    paneInv.style.display = 'none';
+
+    tabQuickBtn.onclick = () => {
+      tabQuickBtn.classList.add('active');
+      tabInvBtn.classList.remove('active');
+      paneQuick.style.display = 'flex';
+      paneInv.style.display = 'none';
+    };
+
+    tabInvBtn.onclick = () => {
+      tabInvBtn.classList.add('active');
+      tabQuickBtn.classList.remove('active');
+      paneQuick.style.display = 'none';
+      paneInv.style.display = 'flex';
+    };
+  }
+
+  // Close Button
+  const btnCloseSlot = document.getElementById('btn-close-slot-picker');
+  if (btnCloseSlot) {
+    btnCloseSlot.onclick = () => modal.classList.remove('active');
+  }
+
+  // Confirm Custom Button
+  const btnConfirmCustom = document.getElementById('btn-slot-picker-confirm-custom');
+  if (btnConfirmCustom) {
+    btnConfirmCustom.onclick = async () => {
+      await equipCustomSlotRelic(aid, slot, slotPickerSelectedSetId, slotPickerSelectedMainAffix);
+    };
+  }
+
+  modal.classList.add('active');
 }
 
-// Quick Auto-generate perfect piece for slot
-async function quickGenSlotRelic(avatarId, slotNum) {
-  const aid = parseInt(avatarId, 10);
-  const meta = getAvatarInfo(aid);
-  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
-  const setId = slotNum <= 4 ? rec.cavern : rec.planar;
-  const relicId = 60000 + (setId * 10) + slotNum;
+// Render Set Grid for Slot
+function renderSlotPickerSetGrid(slot, recSetId) {
+  const grid = document.getElementById('slot-picker-set-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
 
-  let mainAffixId = 1;
-  if (slotNum === 1 || slotNum === 2) mainAffixId = 1;
-  else if (slotNum === 3) {
-    if (meta.path === 'Preservation') mainAffixId = 3;
-    else if (meta.path === 'Abundance') mainAffixId = 6;
-    else if (meta.path === 'Nihility') mainAffixId = 7;
-    else mainAffixId = 4;
-  } else if (slotNum === 4) {
-    if (meta.path === 'Preservation') mainAffixId = 3;
-    else mainAffixId = 4;
-  } else if (slotNum === 5) {
-    const elemAffixMap = { Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Wind: 8, Quantum: 9, Imaginary: 10 };
-    mainAffixId = elemAffixMap[meta.element] || 2;
-  } else if (slotNum === 6) {
-    if (['Harmony', 'Abundance', 'Preservation'].includes(meta.path)) mainAffixId = 2;
-    else if (meta.path === 'Nihility') mainAffixId = 1;
-    else mainAffixId = 4;
+  const isCavern = slot <= 4;
+  const eligibleSetIds = [];
+  for (const sIdStr in RELIC_SET_METADATA) {
+    const sId = parseInt(sIdStr, 10);
+    if (isCavern && sId < 300) eligibleSetIds.push(sId);
+    else if (!isCavern && sId >= 300) eligibleSetIds.push(sId);
   }
+  eligibleSetIds.sort((a, b) => {
+    if (a === recSetId) return -1;
+    if (b === recSetId) return 1;
+    return b - a;
+  });
+
+  eligibleSetIds.forEach(sId => {
+    const sInfo = getRelicSetInfo(sId);
+    const card = document.createElement('div');
+    const isSelected = sId === slotPickerSelectedSetId;
+    card.className = `slot-picker-set-card ${isSelected ? 'selected' : ''}`;
+    card.innerHTML = `
+      <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${sId}.png"
+           onerror="this.src='./assets/logo.png'" alt="${sInfo.name}">
+      <span title="${sInfo.name}">${sInfo.name}</span>
+      ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">⭐ ${t('recommendedBadge')}</span>` : ''}
+    `;
+
+    card.addEventListener('click', () => {
+      slotPickerSelectedSetId = sId;
+      grid.querySelectorAll('.slot-picker-set-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+// Render Main Stat Pills for Slot
+function renderSlotPickerMainStatPills(slot, recMainStat) {
+  const container = document.getElementById('slot-picker-mainstat-pills');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const affixesBySlot = {
+    1: [{ id: 1, name: "HP (Flat)" }],
+    2: [{ id: 1, name: "ATK (Flat)" }],
+    3: [
+      { id: 4, name: "CRIT Rate%" },
+      { id: 5, name: "CRIT DMG%" },
+      { id: 2, name: "ATK%" },
+      { id: 1, name: "HP%" },
+      { id: 3, name: "DEF%" },
+      { id: 6, name: "Healing Boost%" },
+      { id: 7, name: "Effect Hit Rate%" }
+    ],
+    4: [
+      { id: 4, name: "SPD" },
+      { id: 2, name: "ATK%" },
+      { id: 1, name: "HP%" },
+      { id: 3, name: "DEF%" }
+    ],
+    5: [
+      { id: 4, name: "Physical DMG%" },
+      { id: 5, name: "Fire DMG%" },
+      { id: 6, name: "Ice DMG%" },
+      { id: 7, name: "Lightning DMG%" },
+      { id: 8, name: "Wind DMG%" },
+      { id: 9, name: "Quantum DMG%" },
+      { id: 10, name: "Imaginary DMG%" },
+      { id: 2, name: "ATK%" },
+      { id: 1, name: "HP%" },
+      { id: 3, name: "DEF%" }
+    ],
+    6: [
+      { id: 2, name: "Energy Regen Rate%" },
+      { id: 1, name: "Break Effect%" },
+      { id: 4, name: "ATK%" },
+      { id: 3, name: "HP%" },
+      { id: 5, name: "DEF%" }
+    ]
+  };
+
+  const list = affixesBySlot[slot] || [{ id: 1, name: "HP (Flat)" }];
+
+  list.forEach(item => {
+    const isSelected = item.id === slotPickerSelectedMainAffix;
+    const isRec = item.id === recMainStat;
+
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = `slot-picker-pill ${isSelected ? 'selected' : ''} ${isRec ? 'recommended' : ''}`;
+    pill.innerHTML = `
+      ${isRec ? '⭐ ' : ''}<span>${item.name}</span>
+    `;
+
+    pill.addEventListener('click', () => {
+      slotPickerSelectedMainAffix = item.id;
+      container.querySelectorAll('.slot-picker-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+    });
+
+    container.appendChild(pill);
+  });
+}
+
+// Render Tab 2: Inventory Grid
+function renderSlotPickerInventoryGrid(aid, slot) {
+  const container = document.getElementById('slot-picker-inventory-list');
+  const countBadge = document.getElementById('slot-picker-inv-count');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const allRelics = state.fullFreesrData?.relics || [];
+  const matchingRelics = allRelics.filter(r => (r.relic_id % 10) === slot);
+  if (countBadge) countBadge.textContent = matchingRelics.length;
+
+  if (matchingRelics.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+        <div style="font-size: 1rem; font-weight: 700; color: #fff;">ไม่มีรีลิกส์สำหรับช่องนี้ในคลัง</div>
+        <div style="font-size: 0.8rem; margin-top: 0.25rem;">
+          สามารถสลับไปที่แท็บ <strong>"⚡ สวมใส่ / สร้างชิ้นแนะนำ"</strong> เพื่อสร้างชิ้นใหม่ได้ทันที!
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  matchingRelics.forEach(r => {
+    const setId = Math.floor((r.relic_id % 10000) / 10);
+    const rInfo = getRelicSetInfo(setId);
+    const mainAffixName = getRelicMainAffixName(slot, r.main_affix_id);
+    const isCurrent = r.equip_avatar === aid;
+    const wearerMeta = r.equip_avatar && r.equip_avatar !== aid ? getAvatarInfo(r.equip_avatar) : null;
+
+    const card = document.createElement('div');
+    card.className = `slot-picker-inv-card ${isCurrent ? 'active-wearer' : ''}`;
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.65rem; align-items: center; min-width: 0;">
+          <img src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png"
+               onerror="this.src='./assets/logo.png'" alt="${rInfo.name}"
+               style="width: 40px; height: 40px; object-fit: contain;">
+          <div style="min-width: 0;">
+            <div style="font-weight: 800; font-size: 0.85rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${rInfo.name}
+            </div>
+            <div style="font-size: 0.725rem; color: var(--accent-gold); font-weight: 700;">
+              5★ • Lv.${r.level}
+            </div>
+          </div>
+        </div>
+        <span class="badge-super-tag" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.4);">
+          ✦ ${mainAffixName}
+        </span>
+      </div>
+
+      <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.2rem; padding: 0.35rem 0.5rem; background: rgba(0,0,0,0.25); border-radius: 4px;">
+        ${(r.sub_affixes || []).map(s => {
+          const sName = getRelicSubAffixName(s.sub_affix_id);
+          return `<div>• ${sName} (+${s.cnt})</div>`;
+        }).join('')}
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+        <div style="font-size: 0.75rem;">
+          ${isCurrent ? '<span style="color: var(--accent-gold); font-weight: 800;">(กำลังสวมใส่อยู่)</span>' :
+            wearerMeta ? `<span style="color: var(--accent-cyan); font-weight: 700;">(สวมใส่โดย: ${wearerMeta.name})</span>` :
+            '<span style="color: #4ade80; font-weight: 700;">(ว่างในคลัง)</span>'}
+        </div>
+        <button type="button" class="btn btn-sm ${isCurrent ? 'btn-gold' : 'btn-primary'}" style="font-size: 0.75rem; padding: 0.35rem 0.85rem;">
+          ${isCurrent ? 'ใช้งานอยู่' : 'เลือกชิ้นนี้'}
+        </button>
+      </div>
+    `;
+
+    card.addEventListener('click', async () => {
+      if (!isCurrent) {
+        allRelics.forEach(other => {
+          if (other.equip_avatar === aid && (other.relic_id % 10) === slot) {
+            other.equip_avatar = 0;
+          }
+        });
+        r.equip_avatar = aid;
+        if (state.isConnected) await saveFreesrChangesToServer();
+        renderModalRelicsTab(aid);
+        renderModalOverviewTab(aid);
+        renderShowcaseCard(aid);
+        loadEquipment();
+        showToast(`สวมใส่ ${rInfo.name} สำเร็จ!`, 'success');
+        document.getElementById('modal-select-relic-slot')?.classList.remove('active');
+      }
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// Equip custom created relic for avatar slot
+async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId) {
+  const aid = parseInt(avatarId, 10);
+  const rec = getOptimalBuildForAvatar(aid);
+  const relicId = 60000 + (setId * 10) + slotNum;
 
   if (!state.fullFreesrData) state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
   state.fullFreesrData.relics = state.fullFreesrData.relics || [];
@@ -2919,6 +3543,30 @@ async function quickGenSlotRelic(avatarId, slotNum) {
     }
   });
 
+  const mainToSubConflict = {
+    3: { 1: 4, 2: 5, 3: 6, 4: 8, 5: 9, 7: 10 },
+    4: { 1: 4, 2: 5, 3: 6, 4: 7 },
+    5: { 1: 4, 2: 5, 3: 6 },
+    6: { 1: 12, 3: 4, 4: 5, 5: 6 }
+  };
+  const conflictingSub = mainToSubConflict[slotNum]?.[mainAffixId];
+
+  const pool = [...rec.substats, 7, 8, 9, 5, 12, 11, 4, 6];
+  const chosenSubs = [];
+  for (const sId of pool) {
+    if (chosenSubs.length >= 4) break;
+    if (sId !== conflictingSub && !chosenSubs.includes(sId)) {
+      chosenSubs.push(sId);
+    }
+  }
+
+  const rolls = [4, 3, 1, 1];
+  const subAffixes = chosenSubs.map((sid, idx) => ({
+    sub_affix_id: sid,
+    cnt: rolls[idx] || 1,
+    step: 2
+  }));
+
   const nextUid = (state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
   state.fullFreesrData.relics.push({
     internal_uid: nextUid,
@@ -2926,12 +3574,7 @@ async function quickGenSlotRelic(avatarId, slotNum) {
     level: 15,
     equip_avatar: aid,
     main_affix_id: mainAffixId,
-    sub_affixes: [
-      { sub_affix_id: 1, cnt: 2, step: 2 },
-      { sub_affix_id: 2, cnt: 3, step: 2 },
-      { sub_affix_id: 3, cnt: 2, step: 2 },
-      { sub_affix_id: 4, cnt: 2, step: 2 }
-    ]
+    sub_affixes: subAffixes
   });
 
   if (state.isConnected) await saveFreesrChangesToServer();
@@ -2939,8 +3582,21 @@ async function quickGenSlotRelic(avatarId, slotNum) {
   renderModalOverviewTab(aid);
   renderShowcaseCard(aid);
   loadEquipment();
-  el.modalSelectRelicSlot?.classList.remove('active');
-  showToast(`สร้างและติดตั้งรีลิกส์แนะนำช่อง ${slotNum} สำเร็จ!`, 'success');
+  document.getElementById('modal-select-relic-slot')?.classList.remove('active');
+  const setInfo = getRelicSetInfo(setId);
+  showToast(`⚡ สวมใส่ ${setInfo.name} (+15 5★ ออฟเทพ) เรียบร้อยแล้ว!`, 'success');
+}
+
+async function quickGenSlotRelic(avatarId, slotNum) {
+  const aid = parseInt(avatarId, 10);
+  const rec = getOptimalBuildForAvatar(aid);
+  const setId = slotNum <= 4 ? rec.cavern : rec.planar;
+  let mainAffix = 1;
+  if (slotNum === 1 || slotNum === 2) mainAffix = 1;
+  else if (slotNum === 3) mainAffix = rec.body;
+  else if (slotNum === 4) mainAffix = rec.feet;
+  else if (slotNum === 5) mainAffix = rec.sphere;
+  else if (slotNum === 6) mainAffix = rec.rope;
 }
 
 // Open Lightcone Picker Modal
@@ -3698,27 +4354,21 @@ async function applyE6S5Build() {
     el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
   }
 
-  // Light Cone: Lv 80, S5
-  let curLcId = parseInt(el.modalLcId?.value, 10);
-  if (!curLcId || curLcId === 0) {
-    curLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
-    if (el.modalLcId) el.modalLcId.value = curLcId;
-  }
+  // Light Cone: Equip true Signature LC Lv 80, S5
+  const sigLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+  if (el.modalLcId) el.modalLcId.value = sigLcId;
   selectedLcRank = 5;
-  updateModalLcFullView(curLcId, 5, 80);
+  updateModalLcFullView(sigLcId, 5, 80);
 
-  // Auto equip recommended relics if none equipped
-  const hasRelics = (state.fullFreesrData?.relics || []).some(r => r.equip_avatar === aid);
-  if (!hasRelics) {
-    await autoEquipRecommendedRelics(aid, false);
-  }
+  // Equip optimal relics
+  await autoEquipRecommendedRelics(aid, false);
 
   await saveAvatarDetails(false);
   renderShowcaseCard(aid);
   showToast(t('toastE6S5Applied'), 'success');
 }
 
-// Apply E0S1 Build (Lv.80, Prom 6, E0, Max Skills/Traces, 50% Energy, S1 Light Cone)
+// Apply E0S1 Build (Lv.80, Prom 6, E0, Max Skills/Traces, 50% Energy, S1 Signature Light Cone)
 async function applyE0S1Build() {
   if (!state.selectedAvatarDetail) return;
   const aid = state.selectedAvatarDetail.avatar_id;
@@ -3741,20 +4391,14 @@ async function applyE0S1Build() {
     el.valCharEnergy.textContent = `${half}/${el.rangeCharEnergy.max}`;
   }
 
-  // Light Cone: Lv 80, S1
-  let curLcId = parseInt(el.modalLcId?.value, 10);
-  if (!curLcId || curLcId === 0) {
-    curLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
-    if (el.modalLcId) el.modalLcId.value = curLcId;
-  }
+  // Light Cone: Equip true Signature LC Lv 80, S1
+  const sigLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
+  if (el.modalLcId) el.modalLcId.value = sigLcId;
   selectedLcRank = 1;
-  updateModalLcFullView(curLcId, 1, 80);
+  updateModalLcFullView(sigLcId, 1, 80);
 
-  // Auto equip recommended relics if none equipped
-  const hasRelics = (state.fullFreesrData?.relics || []).some(r => r.equip_avatar === aid);
-  if (!hasRelics) {
-    await autoEquipRecommendedRelics(aid, false);
-  }
+  // Equip optimal relics
+  await autoEquipRecommendedRelics(aid, false);
 
   await saveAvatarDetails(false);
   renderShowcaseCard(aid);
@@ -3996,12 +4640,19 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
   state.fullFreesrData.relics = state.fullFreesrData.relics || [];
   const aid = parseInt(avatarId, 10);
   const meta = getAvatarInfo(aid);
-  const rec = RECOMMENDED_RELIC_BUILDS[meta.path] || RECOMMENDED_RELIC_BUILDS.Preservation;
+  const rec = getOptimalBuildForAvatar(aid);
 
   // Clear existing relics on this character
   state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.equip_avatar !== aid);
 
   let nextUid = (state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
+
+  const mainToSubConflict = {
+    3: { 1: 4, 2: 5, 3: 6, 4: 8, 5: 9, 7: 10 },
+    4: { 1: 4, 2: 5, 3: 6, 4: 7 },
+    5: { 1: 4, 2: 5, 3: 6 },
+    6: { 1: 12, 3: 4, 4: 5, 5: 6 }
+  };
 
   for (let slot = 1; slot <= 6; slot++) {
     const setId = slot <= 4 ? rec.cavern : rec.planar;
@@ -4011,27 +4662,32 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
     if (slot === 1 || slot === 2) {
       mainAffixId = 1;
     } else if (slot === 3) {
-      if (meta.path === 'Preservation') mainAffixId = 3; // DEF%
-      else if (meta.path === 'Abundance') mainAffixId = 6; // Outgoing Healing Boost%
-      else if (meta.path === 'Nihility') mainAffixId = 7; // Effect Hit Rate%
-      else mainAffixId = 4; // CRIT Rate%
+      mainAffixId = rec.body;
     } else if (slot === 4) {
-      if (meta.path === 'Preservation') mainAffixId = 3; // DEF%
-      else mainAffixId = 4; // SPD
+      mainAffixId = rec.feet;
     } else if (slot === 5) {
-      const elemAffixMap = {
-        Physical: 4, Fire: 5, Ice: 6, Lightning: 7, Wind: 8, Quantum: 9, Imaginary: 10
-      };
-      mainAffixId = elemAffixMap[meta.element] || 2; // Element DMG Boost or ATK%
+      mainAffixId = rec.sphere;
     } else if (slot === 6) {
-      if (['Harmony', 'Abundance', 'Preservation'].includes(meta.path)) {
-        mainAffixId = 2; // Energy Regen Rate%
-      } else if (meta.path === 'Nihility') {
-        mainAffixId = 1; // Break Effect%
-      } else {
-        mainAffixId = 4; // ATK%
+      mainAffixId = rec.rope;
+    }
+
+    // Select 4 non-conflicting god-tier substats
+    const conflictingSub = mainToSubConflict[slot]?.[mainAffixId];
+    const pool = [...rec.substats, 7, 8, 9, 5, 12, 11, 4, 6];
+    const chosenSubs = [];
+    for (const sId of pool) {
+      if (chosenSubs.length >= 4) break;
+      if (sId !== conflictingSub && !chosenSubs.includes(sId)) {
+        chosenSubs.push(sId);
       }
     }
+
+    const rolls = [4, 3, 1, 1];
+    const subAffixes = chosenSubs.map((sid, idx) => ({
+      sub_affix_id: sid,
+      cnt: rolls[idx] || 1,
+      step: 2
+    }));
 
     state.fullFreesrData.relics.push({
       internal_uid: nextUid++,
@@ -4039,12 +4695,7 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
       level: 15,
       equip_avatar: aid,
       main_affix_id: mainAffixId,
-      sub_affixes: [
-        { sub_affix_id: 1, cnt: 2, step: 2 },
-        { sub_affix_id: 2, cnt: 3, step: 2 },
-        { sub_affix_id: 3, cnt: 2, step: 2 },
-        { sub_affix_id: 4, cnt: 2, step: 2 }
-      ]
+      sub_affixes: subAffixes
     });
   }
 
@@ -6609,7 +7260,7 @@ function setupEvents() {
   updateCacheUsageDisplay();
 
   // Modal Backdrop Click to close
-  [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings].forEach(modal => {
+  [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings, el.modalSelectRelicSlot].forEach(modal => {
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {

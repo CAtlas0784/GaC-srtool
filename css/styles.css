@@ -2690,5 +2690,314 @@ input:checked + .slider:before {
   flex: 1;
 }
 
+/* ========================================================
+   Honkai: Star Rail In-Game Authentic Attributes Panel
+   ======================================================== */
+.hsr-attributes-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: rgba(13, 19, 31, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+}
 
+.hsr-attr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
 
+.hsr-attr-header {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.25rem;
+}
+
+.hsr-attr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.hsr-attr-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.hsr-attr-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.hsr-attr-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.hsr-attr-icon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.hsr-attr-name {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.hsr-attr-right {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-align: right;
+}
+
+.hsr-attr-total {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+  min-width: 50px;
+}
+
+.hsr-attr-breakdown {
+  font-size: 0.75rem;
+  display: inline-flex;
+  gap: 0.2rem;
+  align-items: baseline;
+}
+
+.hsr-attr-base {
+  color: #94a3b8;
+}
+
+.hsr-attr-extra {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* ========================================================
+   Spacious Relic Slot Picker Modal Styles
+   ======================================================== */
+.relic-picker-modal-content {
+  width: 95vw;
+  max-width: 960px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.25rem;
+}
+
+.slot-picker-current-banner {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.slot-picker-current-banner.empty {
+  border-style: dashed;
+  color: var(--text-muted);
+  justify-content: center;
+  padding: 1rem;
+}
+
+.slot-picker-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.slot-picker-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.slot-picker-tab-btn:hover {
+  color: var(--text-color);
+}
+
+.slot-picker-tab-btn.active {
+  color: var(--accent-cyan);
+}
+
+.slot-picker-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.slot-picker-tab-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.slot-picker-rec-highlight {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(14, 165, 233, 0.05) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.1);
+}
+
+.slot-picker-set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.65rem;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 0.35rem 0.2rem;
+}
+
+.slot-picker-set-card {
+  background: rgba(18, 24, 38, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.slot-picker-set-card:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(30, 41, 59, 0.8);
+  transform: translateY(-2px);
+}
+
+.slot-picker-set-card.selected {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.slot-picker-set-card img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.slot-picker-set-card span {
+  font-size: 0.725rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-color);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.slot-picker-mainstat-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.slot-picker-pill {
+  padding: 0.45rem 0.85rem;
+  border-radius: 20px;
+  background: rgba(18, 24, 38, 0.75);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.slot-picker-pill:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(30, 41, 59, 0.9);
+}
+
+.slot-picker-pill.selected {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--accent-cyan);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.slot-picker-pill.recommended {
+  border-color: rgba(251, 191, 36, 0.6);
+}
+
+.slot-picker-inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+  max-height: 440px;
+  overflow-y: auto;
+  padding: 0.35rem 0.2rem;
+}
+
+.slot-picker-inv-card {
+  background: rgba(18, 24, 38, 0.85);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.slot-picker-inv-card:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.slot-picker-inv-card.active-wearer {
+  border-color: var(--accent-gold);
+}

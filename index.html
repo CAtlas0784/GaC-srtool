@@ -689,18 +689,13 @@
 
   <!-- Character Detail / Build Modal -->
   <div class="modal-overlay" id="modal-avatar-detail">
-    <div class="modal-content" style="max-width: 760px;">
+    <div class="modal-content" style="max-width: 860px;">
       <!-- Modal Header -->
       <div class="modal-header">
         <h3 id="modal-char-title" style="font-weight: 800; font-size: 1.15rem; color: var(--text-highlight);" data-i18n="modalTitleCharEdit">
           ปรับแต่งตัวละคร
         </h3>
         <button class="btn btn-sm btn-secondary" id="btn-close-avatar-modal">✕</button>
-      </div>
-
-      <!-- Quick Avatar Switcher Bar (like neonteam) -->
-      <div id="modal-char-switcher" class="modal-char-switcher-strip">
-        <!-- Injected character icons for instant switching -->
       </div>
 
       <!-- Character Top Banner & Quick Max All -->
@@ -1378,30 +1373,75 @@
     </div>
   </div>
 
-  <!-- Modal: Select Relic for Specific Slot -->
+  <!-- Modal: Select Relic for Specific Slot (Large, Spacious & Easy to Use) -->
   <div class="modal-overlay" id="modal-select-relic-slot">
-    <div class="modal-content" style="max-width: 620px;">
-      <div class="modal-header">
-        <h3 id="modal-slot-picker-title" style="font-weight: 800;" data-i18n="slotPickerTitle">
-          🛡️ เลือกสวมใส่รีลิกส์
-        </h3>
+    <div class="modal-content relic-picker-modal-content">
+      <div class="modal-header" style="margin-bottom: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <img id="modal-slot-picker-icon" src="" alt="Slot" style="width: 28px; height: 28px; object-fit: contain;">
+          <div>
+            <h3 id="modal-slot-picker-title" style="font-weight: 800; font-size: 1.15rem; margin: 0;" data-i18n="slotPickerTitle">
+              🛡️ เลือกสวมใส่รีลิกส์
+            </h3>
+            <div id="modal-slot-picker-subtitle" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+              เลือกสวมใส่ชิ้นที่มีอยู่ หรือสร้างชิ้นใหม่ตรงตามบิลด์ที่แนะนำ
+            </div>
+          </div>
+        </div>
         <button type="button" class="btn btn-sm btn-secondary" id="btn-close-slot-picker">✕</button>
       </div>
 
-      <!-- Quick Option: Auto-generate recommended piece -->
-      <div style="background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
-        <div>
-          <div style="font-weight: 700; font-size: 0.875rem; color: var(--accent-cyan);" data-i18n="quickGenRecTitle">⚡ สร้างชิ้นแนะนำสำหรับช่องนี้</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="quickGenRecDesc">สร้างรีลิกส์ 5★ +15 สเตตัสหลักและรองที่เหมาะสมที่สุด</div>
-        </div>
-        <button type="button" class="btn btn-sm btn-primary" id="btn-slot-picker-quick-gen" data-i18n="btnGenAndEquip">สร้าง & สวมใส่</button>
+      <!-- Current Equipped Relic Banner with Unequip Button -->
+      <div id="slot-picker-current-box" class="slot-picker-current-banner">
+        <!-- Injected currently equipped relic or empty status -->
       </div>
 
-      <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight); margin-bottom: 0.5rem;" data-i18n="selectFromInventory">
-        เลือกจากคลังรีลิกส์ที่มีอยู่ (ตรงช่อง)
+      <!-- Tabs Navigation -->
+      <div class="slot-picker-tabs">
+        <button type="button" class="slot-picker-tab-btn active" id="tab-btn-relic-quick" data-pickertab="slot-picker-quick-tab">
+          <span data-i18n="tabQuickGen">⚡ สวมใส่ / สร้างชิ้นแนะนำ</span>
+        </button>
+        <button type="button" class="slot-picker-tab-btn" id="tab-btn-relic-inventory" data-pickertab="slot-picker-inventory-tab">
+          <span data-i18n="tabFromInventory">📦 เลือกจากคลัง</span> (<span id="slot-picker-inv-count">0</span>)
+        </button>
       </div>
-      <div id="slot-picker-inventory-list" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.35rem;">
-        <!-- Injected list of matching slot relics -->
+
+      <!-- Tab 1: Quick & Recommended Builder -->
+      <div id="slot-picker-quick-tab" class="slot-picker-tab-pane">
+        <!-- Recommended Fast Equip Card -->
+        <div class="slot-picker-rec-highlight" id="slot-picker-rec-highlight">
+          <!-- Injected recommended set card and instant equip button -->
+        </div>
+
+        <!-- Custom Relic Creator -->
+        <div>
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight); margin-bottom: 0.5rem;" data-i18n="chooseSet">
+            เลือกเซ็ตที่ต้องการ:
+          </div>
+          <div class="slot-picker-set-grid" id="slot-picker-set-grid">
+            <!-- Injected set cards for this slot -->
+          </div>
+
+          <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight); margin-top: 0.85rem; margin-bottom: 0.5rem;" data-i18n="chooseMainStat">
+            เลือกสเตตัสหลัก (Main Stat):
+          </div>
+          <div class="slot-picker-mainstat-pills" id="slot-picker-mainstat-pills">
+            <!-- Injected main stat pill buttons -->
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+            <button type="button" class="btn btn-primary" id="btn-slot-picker-confirm-custom" style="padding: 0.65rem 1.4rem; font-weight: 800; font-size: 0.9rem;" data-i18n="btnEquipInstant">
+              ⚡ สวมใส่ชิ้นนี้ทันที (+15 5★ ออฟเทพ)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Inventory Grid -->
+      <div id="slot-picker-inventory-tab" class="slot-picker-tab-pane" style="display: none;">
+        <div id="slot-picker-inventory-list" class="slot-picker-inv-grid">
+          <!-- Injected cards of matching slot relics -->
+        </div>
       </div>
     </div>
   </div>
