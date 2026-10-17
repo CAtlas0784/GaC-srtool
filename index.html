@@ -59,6 +59,7 @@
     <button class="tab-btn active" data-tab="tab-dashboard" data-i18n="tabDashboard">📊 แดชบอร์ด & จัดทีม</button>
     <button class="tab-btn" data-tab="tab-avatars" data-i18n="tabAvatars">👥 ตัวละคร</button>
     <button class="tab-btn" data-tab="tab-equipment" data-i18n="tabEquipment">🗡️ กรวยแสง & รีลิกส์</button>
+    <button class="tab-btn" data-tab="tab-damage-analyst" id="tab-btn-damage-analyst" data-i18n="tabDamageAnalyst">💥 Damage Analyst</button>
     <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaC</button>
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json" data-i18n="tabJson">📝 จัดการไฟล์ JSON</button>
@@ -157,7 +158,7 @@
               </span>
               <span class="badge-super-tag" id="badge-synergy-coverage" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-weight: 800;">ครอบคลุม 0/7 ธาตุ</span>
             </div>
-            <p class="card-subtitle" style="margin-bottom: 0.85rem;" data-i18n="synergySubtitle">วิเคราะห์การครอบคลุม Weakness Break, ความสมดุลของบทบาท และความพร้อมของทีม</p>
+            <p class="card-subtitle" style="margin-bottom: 0.85rem;" data-i18n="synergySubtitle">วิเคราะห์การครอบคลุม Weakness Break และความพร้อมของอุปกรณ์ในทีม</p>
 
             <!-- A. Weakness Break Coverage 7 Elements -->
             <div style="margin-bottom: 1rem;">
@@ -169,20 +170,7 @@
               </div>
             </div>
 
-            <!-- B. Team Role Balance -->
-            <div style="margin-bottom: 1rem;">
-              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyRoleBalance">
-                🛡️ การกระจายบทบาทในทีม (Team Composition & Roles)
-              </div>
-              <div id="synergy-roles-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
-                <!-- Role tags: DPS, Sub-DPS, Buffer/Debuffer, Sustain -->
-              </div>
-              <div id="synergy-advice-box" style="padding: 0.6rem 0.8rem; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
-                <!-- Dynamic Advice -->
-              </div>
-            </div>
-
-            <!-- C. Equipment Readiness & Stats Overview -->
+            <!-- B. Equipment Readiness & Stats Overview -->
             <div>
               <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyEquipmentTitle">
                 📊 ความพร้อมของอุปกรณ์และเลเวลเฉลี่ย
@@ -205,6 +193,18 @@
                   <div class="synergy-metric-lbl" data-i18n="synergyRelicFull">รีลิกส์ครบชุด</div>
                 </div>
               </div>
+            </div>
+
+            <!-- C. Quick Damage Analyst Banner -->
+            <div id="synergy-damage-banner" style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 8px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s ease;" title="คลิกเพื่อเปิดหน้า Damage Analyst">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.4rem;">💥</span>
+                <div>
+                  <div style="font-size: 0.85rem; font-weight: 700; color: #f87171;" id="dashboard-battle-title">Damage Analyst (จับดาเมจจากในเกม)</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);" id="dashboard-battle-summary">ยังไม่มีข้อมูลการต่อสู้ล่าสุด</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; pointer-events: none;">ดูบทวิเคราะห์ →</button>
             </div>
           </div>
         </div>
@@ -382,6 +382,101 @@
 
         <!-- Right: Inspector Side Card -->
         <div id="eq-inspector-card" class="eq-inspector-wrapper" style="width: 320px; position: sticky; top: 80px; flex-shrink: 0; display: none;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3.5. Damage Analyst (In-Game Battle Telemetry & Damage Analysis) -->
+    <section id="tab-damage-analyst" class="tab-content">
+      <!-- Toolbar & Control Card -->
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div class="card-title" style="margin-bottom: 0.25rem;">
+              <span data-i18n="analystTitle">💥 วิเคราะห์ความเสียหายจากการต่อสู้ (Damage Analyst)</span>
+              <span class="badge-super-tag" id="badge-analyst-status" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">พร้อมรับข้อมูลจากเกม</span>
+            </div>
+            <p class="card-subtitle" style="margin-bottom: 0;" data-i18n="analystSubtitle">
+              ดักจับและวิเคราะห์ดาเมจจากการต่อสู้จริงในเกม Star Rail (ระบบเดียวกับ FireflyGO / Veritas)
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; user-select: none; margin-right: 0.5rem;">
+              <input type="checkbox" id="chk-analyst-autosync" checked style="accent-color: var(--accent-cyan); cursor: pointer;">
+              <span data-i18n="analystAutoSync">ซิงค์อัตโนมัติ</span>
+            </label>
+            <button type="button" class="btn btn-primary" id="btn-analyst-fetch" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+              <span data-i18n="analystFetchBtn">🔄 ดึงดาเมจล่าสุดจากในเกม</span>
+            </button>
+            <input type="file" id="input-analyst-file" accept=".json" style="display: none;">
+            <button type="button" class="btn btn-secondary" id="btn-analyst-import" data-i18n="analystImportBtn">
+              📂 นำเข้า JSON
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-analyst-export" data-i18n="analystExportBtn">
+              💾 ส่งออก JSON
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-analyst-clear" style="color: #f87171;" data-i18n="analystClearBtn">
+              🗑️ ล้างข้อมูล
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview 4 Metrics Cards -->
+      <div class="grid-4" style="margin-bottom: 1.25rem;">
+        <div class="card" style="padding: 1.2rem; border-left: 4px solid #ef4444; background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(20,20,28,0.7) 100%);">
+          <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystTotalDamage">ดาเมจรวมทั้งทีม</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #f87171; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-team-damage">0</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-damage-av">เฉลี่ยต่อรอบ: -</div>
+        </div>
+
+        <div class="card" style="padding: 1.2rem; border-left: 4px solid #f59e0b; background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(20,20,28,0.7) 100%);">
+          <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystCycles">จำนวนรอบ (Cycles)</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #fbbf24; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-cycles">0 รอบ</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-cycles-note">MoC / PF / AS Standard</div>
+        </div>
+
+        <div class="card" style="padding: 1.2rem; border-left: 4px solid #38bdf8; background: linear-gradient(135deg, rgba(56,189,248,0.06) 0%, rgba(20,20,28,0.7) 100%);">
+          <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystTurns">เทิร์นทั้งหมด</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #38bdf8; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-total-turns">0 เทิร์น</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-auto-turns">เทิร์นอัตโนมัติ: 0</div>
+        </div>
+
+        <div class="card" style="padding: 1.2rem; border-left: 4px solid #34d399; background: linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(20,20,28,0.7) 100%);">
+          <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystDuration">ระยะเวลาการต่อสู้</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #34d399; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-duration">00:00</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-battle-meta">Stage: - | Battle: -</div>
+        </div>
+      </div>
+
+      <!-- Team Damage Share Bar -->
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <span data-i18n="analystDpsShare">สัดส่วนดาเมจของทีม (Team DPS Share)</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="analyst-total-share-label">รวม 100%</span>
+        </div>
+        <!-- Progress Bar Container -->
+        <div id="analyst-share-bar-container" style="height: 18px; width: 100%; border-radius: 9px; background: rgba(255,255,255,0.05); overflow: hidden; display: flex; margin-bottom: 0.85rem; border: 1px solid rgba(255,255,255,0.1);">
+          <!-- Dynamic segments filled by JS -->
+        </div>
+        <!-- Legend Container -->
+        <div id="analyst-share-legend" style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <!-- Dynamic legend filled by JS -->
+        </div>
+      </div>
+
+      <!-- Character Breakdown Grid -->
+      <div id="analyst-characters-container" class="grid-2" style="gap: 1.25rem; margin-bottom: 1.5rem;">
+        <!-- Populated dynamically by JS for each avatar in battle -->
+      </div>
+
+      <!-- Target Enemies Encountered -->
+      <div class="card" id="analyst-enemies-card" style="margin-bottom: 1.5rem;">
+        <div class="card-title" style="margin-bottom: 0.75rem;">
+          <span data-i18n="analystEnemyTitle">👾 รายชื่อศัตรูที่ถูกโจมตี (Targets / Enemies)</span>
+        </div>
+        <div id="analyst-enemies-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
           <!-- Populated by JS -->
         </div>
       </div>

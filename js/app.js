@@ -77,12 +77,37 @@ const el = {
   cardTeamSynergy: document.getElementById('card-team-synergy'),
   badgeSynergyCoverage: document.getElementById('badge-synergy-coverage'),
   synergyElementsContainer: document.getElementById('synergy-elements-container'),
-  synergyRolesContainer: document.getElementById('synergy-roles-container'),
-  synergyAdviceBox: document.getElementById('synergy-advice-box'),
   synergyAvgLevel: document.getElementById('synergy-avg-level'),
   synergyAvgEidolon: document.getElementById('synergy-avg-eidolon'),
   synergyLcReady: document.getElementById('synergy-lc-ready'),
   synergyRelicReady: document.getElementById('synergy-relic-ready'),
+  synergyDamageBanner: document.getElementById('synergy-damage-banner'),
+  dashboardBattleTitle: document.getElementById('dashboard-battle-title'),
+  dashboardBattleSummary: document.getElementById('dashboard-battle-summary'),
+
+  // Damage Analyst
+  tabDamageAnalyst: document.getElementById('tab-damage-analyst'),
+  tabBtnDamageAnalyst: document.getElementById('tab-btn-damage-analyst'),
+  badgeAnalystStatus: document.getElementById('badge-analyst-status'),
+  chkAnalystAutosync: document.getElementById('chk-analyst-autosync'),
+  btnAnalystFetch: document.getElementById('btn-analyst-fetch'),
+  inputAnalystFile: document.getElementById('input-analyst-file'),
+  btnAnalystImport: document.getElementById('btn-analyst-import'),
+  btnAnalystExport: document.getElementById('btn-analyst-export'),
+  btnAnalystClear: document.getElementById('btn-analyst-clear'),
+  analystTeamDamage: document.getElementById('analyst-team-damage'),
+  analystDamageAv: document.getElementById('analyst-damage-av'),
+  analystCycles: document.getElementById('analyst-cycles'),
+  analystCyclesNote: document.getElementById('analyst-cycles-note'),
+  analystTotalTurns: document.getElementById('analyst-total-turns'),
+  analystAutoTurns: document.getElementById('analyst-auto-turns'),
+  analystDuration: document.getElementById('analyst-duration'),
+  analystBattleMeta: document.getElementById('analyst-battle-meta'),
+  analystShareBarContainer: document.getElementById('analyst-share-bar-container'),
+  analystShareLegend: document.getElementById('analyst-share-legend'),
+  analystCharactersContainer: document.getElementById('analyst-characters-container'),
+  analystEnemiesContainer: document.getElementById('analyst-enemies-container'),
+  analystEnemiesCard: document.getElementById('analyst-enemies-card'),
 
   // GM Command Dispatcher & Live Log Console
   cardGmConsole: document.getElementById('card-gm-console'),
@@ -1350,51 +1375,13 @@ function renderTeamSynergy(lineups) {
     `;
   }).join('');
 
-  // Render Role Tags
-  if (el.synergyRolesContainer) {
-    el.synergyRolesContainer.innerHTML = `
-      <div class="badge-super-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 700;">
-        ${t('roleDps')} (${roles.dps.length}): ${roles.dps.join(', ') || '-'}
-      </div>
-      <div class="badge-super-tag" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-weight: 700;">
-        ${t('roleSupport')} (${roles.support.length}): ${roles.support.join(', ') || '-'}
-      </div>
-      <div class="badge-super-tag" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">
-        ${t('roleSustain')} (${roles.sustain.length}): ${roles.sustain.join(', ') || '-'}
-      </div>
-      ${roles.specialist.length ? `
-        <div class="badge-super-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">
-          ${t('roleSpecialist')} (${roles.specialist.length}): ${roles.specialist.join(', ')}
-        </div>
-      ` : ''}
-    `;
-  }
-
-  // Dynamic Advice Text
-  if (el.synergyAdviceBox) {
-    if (activeIds.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: var(--text-muted);">${t('adviceEmpty')}</span>`;
-      el.synergyAdviceBox.style.borderColor = 'rgba(255,255,255,0.08)';
-    } else if (roles.sustain.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">${t('adviceNoSustain')}</span>`;
-      el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-    } else if (roles.dps.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #38bdf8;">${t('adviceNoDps')}</span>`;
-      el.synergyAdviceBox.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-    } else if (roles.support.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">${t('adviceNoSupport')}</span>`;
-      el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-    } else {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #34d399;">${t('adviceBalanced')}</span>`;
-      el.synergyAdviceBox.style.borderColor = 'rgba(52, 211, 153, 0.4)';
-    }
-  }
-
   // Metrics
   if (el.synergyAvgLevel) el.synergyAvgLevel.textContent = activeIds.length ? `Lv.${avgLevel}` : '-';
   if (el.synergyAvgEidolon) el.synergyAvgEidolon.textContent = avgEidolon;
   if (el.synergyLcReady) el.synergyLcReady.textContent = activeIds.length ? `${lcCount}/${activeIds.length}` : '-';
   if (el.synergyRelicReady) el.synergyRelicReady.textContent = activeIds.length ? `${fullRelicCount}/${activeIds.length}` : '-';
+
+  updateDashboardBattleBanner();
 }
 
 // ==========================================
@@ -7386,6 +7373,675 @@ async function initGitBranchDisplay() {
   applyBranchToUI(currentGitBranch);
 }
 
+// ==========================================
+// In-Game Battle Telemetry & Damage Analyst
+// ==========================================
+
+const analystState = {
+  currentReport: null,
+  isFetching: false,
+  lastBattleTimestamp: 0,
+  autoSyncInterval: null
+};
+
+function formatNumber(num) {
+  if (num === null || num === undefined || isNaN(num)) return '0';
+  return Math.round(num).toLocaleString('en-US');
+}
+
+function formatDuration(seconds) {
+  if (!seconds || isNaN(seconds)) return '00:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function parseFireflySranalysisJson(json) {
+  if (!json || (!json.lineup && !json.skillHistory && !json.turnHistory)) return null;
+
+  const avatarsMap = {};
+  const teamLineup = json.lineup || [];
+  teamLineup.forEach(item => {
+    const aid = item.avatarId;
+    if (aid && aid > 0) {
+      avatarsMap[aid] = {
+        avatar_id: aid,
+        level: 80,
+        rank: 6,
+        total_damage: 0,
+        damage_percent: 0,
+        total_damage_taken: 0,
+        total_heal: 0,
+        total_shield: 0,
+        total_break_damage: 0,
+        total_turns: 0,
+        extra_turns: 0,
+        attack_type_damage: {},
+        attack_type_max_damage: {},
+        skill_times: []
+      };
+    }
+  });
+
+  let maxCycles = 0;
+  if (Array.isArray(json.turnHistory)) {
+    json.turnHistory.forEach(turn => {
+      if (turn.cycleIndex > maxCycles) maxCycles = turn.cycleIndex;
+      const aid = turn.avatarId;
+      if (aid && avatarsMap[aid]) {
+        avatarsMap[aid].total_turns++;
+      }
+    });
+  }
+
+  let teamTotalDmg = 0;
+  if (Array.isArray(json.skillHistory)) {
+    json.skillHistory.forEach(sk => {
+      const aid = sk.avatarId;
+      if (!aid || aid <= 0) return;
+      if (!avatarsMap[aid]) {
+        avatarsMap[aid] = {
+          avatar_id: aid,
+          level: 80,
+          rank: 6,
+          total_damage: 0,
+          damage_percent: 0,
+          total_damage_taken: 0,
+          total_heal: 0,
+          total_shield: 0,
+          total_break_damage: 0,
+          total_turns: 1,
+          extra_turns: 0,
+          attack_type_damage: {},
+          attack_type_max_damage: {},
+          skill_times: []
+        };
+      }
+      const av = avatarsMap[aid];
+      const dmg = sk.totalDamage || 0;
+      av.total_damage += dmg;
+      teamTotalDmg += dmg;
+
+      const skType = sk.skillType || 'Other';
+      av.attack_type_damage[skType] = (av.attack_type_damage[skType] || 0) + dmg;
+
+      if (Array.isArray(sk.damageDetail)) {
+        sk.damageDetail.forEach(d => {
+          const detailDmg = d.damage || 0;
+          const dType = d.type || skType;
+          if (detailDmg > (av.attack_type_max_damage[dType] || 0)) {
+            av.attack_type_max_damage[dType] = detailDmg;
+          }
+        });
+      }
+    });
+  }
+
+  const avatarsList = Object.values(avatarsMap);
+  avatarsList.forEach(a => {
+    if (teamTotalDmg > 0) {
+      a.damage_percent = (a.total_damage / teamTotalDmg) * 100;
+    }
+  });
+
+  return {
+    timestamp: Date.now(),
+    battle_id: Math.floor(Math.random() * 90000) + 10000,
+    stage_id: 1001,
+    end_status: 'WIN',
+    total_battle_turns: json.turnHistory?.length || 15,
+    total_auto_turns: 0,
+    round_cnt: maxCycles,
+    cost_time: 48,
+    challenge_score: 0,
+    team_total_damage: teamTotalDmg,
+    team_total_heal: 0,
+    team_total_shield: 0,
+    avatars: avatarsList,
+    monsters: []
+  };
+}
+
+async function fetchLatestBattleReport(silent = false) {
+  if (analystState.isFetching) return;
+  analystState.isFetching = true;
+  try {
+    const data = await apiRequest('/api/battle_report', 'GET');
+    if (data && data.has_report && data.report) {
+      const isNew = data.report.timestamp !== analystState.lastBattleTimestamp;
+      analystState.currentReport = data.report;
+      analystState.lastBattleTimestamp = data.report.timestamp;
+      renderDamageAnalyst();
+      updateDashboardBattleBanner();
+      if (!silent) {
+        showToast(t('analystToastFetched'), 'success');
+      } else if (isNew) {
+        showToast(t('analystToastFetched'), 'info');
+      }
+    } else {
+      if (!silent) {
+        showToast(data?.message || t('analystNoBattle'), 'info');
+      }
+      if (!analystState.currentReport) {
+        renderEmptyDamageAnalyst();
+      }
+    }
+  } catch (err) {
+    if (!silent) {
+      showToast(`Error: ${err.message}`, 'error');
+    }
+  } finally {
+    analystState.isFetching = false;
+  }
+}
+
+function renderEmptyDamageAnalyst() {
+  if (el.analystTeamDamage) el.analystTeamDamage.textContent = '0';
+  if (el.analystCycles) el.analystCycles.textContent = `0 ${t('analystCycles')}`;
+  if (el.analystTotalTurns) el.analystTotalTurns.textContent = `0 ${t('analystTurns')}`;
+  if (el.analystDuration) el.analystDuration.textContent = '00:00';
+  if (el.analystDamageAv) el.analystDamageAv.textContent = 'เฉลี่ย: -';
+  if (el.analystBattleMeta) el.analystBattleMeta.textContent = 'Stage: - | Battle: -';
+
+  if (el.badgeAnalystStatus) {
+    el.badgeAnalystStatus.textContent = 'พร้อมรับข้อมูลจากเกม';
+    el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.15)';
+    el.badgeAnalystStatus.style.color = '#4ade80';
+  }
+
+  if (el.analystShareBarContainer) {
+    el.analystShareBarContainer.innerHTML = '<div style="width: 100%; background: rgba(255,255,255,0.05); height: 100%;"></div>';
+  }
+  if (el.analystShareLegend) {
+    el.analystShareLegend.innerHTML = '';
+  }
+  if (el.analystCharactersContainer) {
+    el.analystCharactersContainer.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+        <div style="font-size: 3rem; margin-bottom: 0.75rem;">⚔️</div>
+        <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">${t('analystNoBattle')}</div>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" id="btn-empty-analyst-fetch" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">${t('analystFetchBtn')}</button>
+          <button type="button" class="btn btn-secondary" id="btn-empty-analyst-demo">✨ โหลดตัวอย่างการต่อสู้ (Demo)</button>
+        </div>
+      </div>
+    `;
+    const btnF = document.getElementById('btn-empty-analyst-fetch');
+    if (btnF) btnF.addEventListener('click', () => fetchLatestBattleReport(false));
+    const btnD = document.getElementById('btn-empty-analyst-demo');
+    if (btnD) btnD.addEventListener('click', () => loadDemoBattleReport());
+  }
+
+  if (el.analystEnemiesCard) {
+    el.analystEnemiesCard.style.display = 'none';
+  }
+}
+
+function renderDamageAnalyst() {
+  const report = analystState.currentReport;
+  if (!report) {
+    renderEmptyDamageAnalyst();
+    return;
+  }
+
+  const teamDmg = report.team_total_damage || 0;
+  if (el.analystTeamDamage) el.analystTeamDamage.textContent = formatNumber(teamDmg);
+  if (el.analystCycles) {
+    el.analystCycles.textContent = (report.round_cnt !== undefined) ? `${report.round_cnt} รอบ (${report.round_cnt}-Cycle)` : '0 รอบ';
+  }
+  if (el.analystTotalTurns) el.analystTotalTurns.textContent = `${report.total_battle_turns || 0} เทิร์น`;
+  if (el.analystDuration) el.analystDuration.textContent = formatDuration(report.cost_time);
+  if (el.analystDamageAv) {
+    el.analystDamageAv.textContent = (report.round_cnt > 0)
+      ? `เฉลี่ย: ${(teamDmg / report.round_cnt).toFixed(0).toLocaleString()} / รอบ`
+      : `เฉลี่ย: ${(teamDmg / Math.max(1, report.total_battle_turns || 1)).toFixed(0).toLocaleString()} / เทิร์น`;
+  }
+  if (el.analystBattleMeta) {
+    el.analystBattleMeta.textContent = `Stage: ${report.stage_id || '-'} | Battle: #${report.battle_id || '-'}`;
+  }
+
+  if (el.badgeAnalystStatus) {
+    if (report.end_status === 'WIN') {
+      el.badgeAnalystStatus.textContent = t('analystStatusWin');
+      el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.15)';
+      el.badgeAnalystStatus.style.color = '#4ade80';
+    } else if (report.end_status === 'QUIT') {
+      el.badgeAnalystStatus.textContent = t('analystStatusQuit');
+      el.badgeAnalystStatus.style.background = 'rgba(245, 158, 11, 0.15)';
+      el.badgeAnalystStatus.style.color = '#fbbf24';
+    } else {
+      el.badgeAnalystStatus.textContent = t('analystStatusLose');
+      el.badgeAnalystStatus.style.background = 'rgba(239, 68, 68, 0.15)';
+      el.badgeAnalystStatus.style.color = '#f87171';
+    }
+  }
+
+  const colors = ['#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899'];
+
+  // Team Share Bar
+  if (el.analystShareBarContainer) {
+    if (report.avatars && report.avatars.length > 0) {
+      el.analystShareBarContainer.innerHTML = report.avatars.map((a, idx) => {
+        const color = colors[idx % colors.length];
+        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+        const info = getAvatarInfo(a.avatar_id);
+        return `<div style="width: ${pct}%; background: ${color}; height: 100%; transition: width 0.4s ease;" title="${info.name}: ${pct.toFixed(1)}% (${formatNumber(a.total_damage)})"></div>`;
+      }).join('');
+    } else {
+      el.analystShareBarContainer.innerHTML = '<div style="width: 100%; background: rgba(255,255,255,0.05); height: 100%;"></div>';
+    }
+  }
+
+  // Legend
+  if (el.analystShareLegend) {
+    if (report.avatars && report.avatars.length > 0) {
+      el.analystShareLegend.innerHTML = report.avatars.map((a, idx) => {
+        const color = colors[idx % colors.length];
+        const info = getAvatarInfo(a.avatar_id);
+        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+        return `
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.825rem;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}88;"></div>
+            <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid ${color};">
+            <span style="font-weight: 700; color: var(--text-highlight);">${info.name}</span>
+            <span style="font-weight: 800; color: ${color};">${pct.toFixed(1)}%</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">(${formatNumber(a.total_damage)})</span>
+          </div>
+        `;
+      }).join('');
+    } else {
+      el.analystShareLegend.innerHTML = '';
+    }
+  }
+
+  // Characters Detailed Cards Grid
+  if (el.analystCharactersContainer) {
+    if (!report.avatars || report.avatars.length === 0) {
+      el.analystCharactersContainer.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          ${t('analystNoBattle')}
+        </div>
+      `;
+    } else {
+      el.analystCharactersContainer.innerHTML = report.avatars.map((a, idx) => {
+        const color = colors[idx % colors.length];
+        const info = getAvatarInfo(a.avatar_id);
+        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+
+        let maxHit = 0;
+        if (a.attack_type_max_damage) {
+          for (const key in a.attack_type_max_damage) {
+            if (a.attack_type_max_damage[key] > maxHit) maxHit = a.attack_type_max_damage[key];
+          }
+        }
+
+        const dNormal = a.attack_type_damage?.Normal || 0;
+        const dSkill = a.attack_type_damage?.BPSkill || a.attack_type_damage?.Skill || 0;
+        const dUlt = a.attack_type_damage?.Ultra || a.attack_type_damage?.Ultimate || 0;
+        const dBreak = a.total_break_damage || a.attack_type_damage?.BreakDamage || 0;
+        const dFollowup = (a.attack_type_damage?.Insert || 0) + (a.attack_type_damage?.Pursued || 0);
+        const dDot = a.attack_type_damage?.DOT || 0;
+
+        return `
+          <div class="card" style="padding: 1.25rem; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(20,20,30,0.8) 100%); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: ${color};"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="position: relative; width: 48px; height: 48px; flex-shrink: 0;">
+                  <img src="${getAvatarIconSrc(a.avatar_id)}"
+                       onerror="handleAvatarImgError(this, ${a.avatar_id})"
+                       style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid ${color};">
+                  ${info.element ? `
+                    <div style="position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
+                      ${getElementIconHtml(info.element, 14)}
+                    </div>
+                  ` : ''}
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.45rem;">
+                    <span>${info.name}</span>
+                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} E${a.rank !== undefined ? a.rank : 0}</span>
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
+                    ${translatePath(info.path)} • ${translateElement(info.element)}
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: right;">
+                <div style="font-size: 1.4rem; font-weight: 900; color: ${color}; letter-spacing: -0.5px;">${pct.toFixed(1)}%</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">DPS SHARE</div>
+              </div>
+            </div>
+
+            <div style="padding: 0.75rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${t('analystTotalDamage')}</div>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">${formatNumber(a.total_damage)}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystMaxHit')}</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${formatNumber(maxHit)}</div>
+              </div>
+            </div>
+
+            <div style="height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 1rem;">
+              <div style="height: 100%; width: ${pct}%; background: ${color}; border-radius: 3px;"></div>
+            </div>
+
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">
+              ${t('analystBreakdownTitle')}
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 1rem;">
+              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                <span style="color: var(--text-muted);">${t('analystDmgNormal')}</span>
+                <span style="font-weight: 700; color: var(--text-main);">${formatNumber(dNormal)}</span>
+              </div>
+              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                <span style="color: var(--text-muted);">${t('analystDmgSkill')}</span>
+                <span style="font-weight: 700; color: #38bdf8;">${formatNumber(dSkill)}</span>
+              </div>
+              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                <span style="color: var(--text-muted);">${t('analystDmgUlt')}</span>
+                <span style="font-weight: 700; color: #c084fc;">${formatNumber(dUlt)}</span>
+              </div>
+              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                <span style="color: var(--text-muted);">${t('analystDmgBreak')}</span>
+                <span style="font-weight: 700; color: #fbbf24;">${formatNumber(dBreak)}</span>
+              </div>
+              ${dFollowup > 0 ? `
+                <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                  <span style="color: var(--text-muted);">${t('analystDmgFollowup')}</span>
+                  <span style="font-weight: 700; color: #f472b6;">${formatNumber(dFollowup)}</span>
+                </div>
+              ` : ''}
+              ${dDot > 0 ? `
+                <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                  <span style="color: var(--text-muted);">${t('analystDmgDot')}</span>
+                  <span style="font-weight: 700; color: #a78bfa;">${formatNumber(dDot)}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted);">
+              <div>⏱️ เทิร์น: <strong style="color: #fff;">${a.total_turns || 0}</strong> ${a.extra_turns ? `(+${a.extra_turns})` : ''}</div>
+              <div>🛡️ โล่: <strong style="color: #38bdf8;">${formatNumber(a.total_shield)}</strong></div>
+              <div>💚 ฮีล: <strong style="color: #34d399;">${formatNumber(a.total_heal)}</strong></div>
+              <div>💔 โดนตี: <strong style="color: #f87171;">${formatNumber(a.total_damage_taken)}</strong></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Enemies Section
+  if (el.analystEnemiesContainer && el.analystEnemiesCard) {
+    if (report.monsters && report.monsters.length > 0) {
+      el.analystEnemiesCard.style.display = 'block';
+      el.analystEnemiesContainer.innerHTML = report.monsters.map(m => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.85rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); font-size: 0.825rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.2rem;">👾</span>
+            <div>
+              <div style="font-weight: 700; color: var(--text-highlight);">Monster #${m.monster_id || m.entity_id}</div>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">Wave: ${m.wave || 1} • Entity: ${m.entity_id}</div>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 800; color: #f87171;">${formatNumber(m.total_damage_taken)} DMG Taken</div>
+            <div style="font-size: 0.725rem; color: var(--text-muted);">${m.total_turns || 0} Turns (${formatNumber(m.total_damage)} Dealt)</div>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      el.analystEnemiesCard.style.display = 'none';
+    }
+  }
+}
+
+function updateDashboardBattleBanner() {
+  if (!el.dashboardBattleTitle || !el.dashboardBattleSummary) return;
+  const report = analystState.currentReport;
+  if (!report || !report.team_total_damage) {
+    el.dashboardBattleTitle.textContent = "Damage Analyst (จับดาเมจจากในเกม)";
+    el.dashboardBattleSummary.textContent = "ยังไม่มีข้อมูลการต่อสู้ล่าสุด — กดเพื่อเปิดหน้า Damage Analyst";
+    return;
+  }
+  const topAvatar = (report.avatars && report.avatars.length > 0)
+    ? [...report.avatars].sort((a, b) => b.total_damage - a.total_damage)[0]
+    : null;
+  const topName = topAvatar ? getAvatarInfo(topAvatar.avatar_id).name : '';
+  const topDmgPct = topAvatar ? `${topAvatar.damage_percent.toFixed(0)}%` : '';
+
+  el.dashboardBattleTitle.textContent = `💥 ดาเมจรวม ${formatNumber(report.team_total_damage)} (${report.round_cnt} รอบ)`;
+  el.dashboardBattleSummary.textContent = topName
+    ? `MVP: ${topName} (${topDmgPct} Share) • ${report.total_battle_turns} เทิร์น • เวลา ${formatDuration(report.cost_time)}`
+    : `สถานะ: ${report.end_status || 'WIN'} • ${report.total_battle_turns} เทิร์น`;
+}
+
+function exportBattleReportJson() {
+  if (!analystState.currentReport) {
+    showToast('ไม่มีข้อมูลการต่อสู้ที่จะส่งออก', 'error');
+    return;
+  }
+  const text = JSON.stringify(analystState.currentReport, null, 2);
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `battle-report-${analystState.currentReport.battle_id || Date.now()}.json`;
+  a.click();
+  showToast(`ส่งออก ${a.download} เรียบร้อย`, 'success');
+}
+
+async function clearBattleReport() {
+  analystState.currentReport = null;
+  analystState.lastBattleTimestamp = 0;
+  try {
+    await apiRequest('/api/battle_report/reset', 'POST');
+  } catch (_) {}
+  renderEmptyDamageAnalyst();
+  updateDashboardBattleBanner();
+  showToast(t('analystToastCleared'), 'info');
+}
+
+function loadDemoBattleReport() {
+  const demoReport = {
+    timestamp: Date.now(),
+    battle_id: 88421,
+    stage_id: 3001,
+    end_status: "WIN",
+    total_battle_turns: 11,
+    total_auto_turns: 0,
+    round_cnt: 0,
+    cost_time: 46.8,
+    challenge_score: 4000,
+    team_total_damage: 2840000,
+    team_total_heal: 8400,
+    team_total_shield: 0,
+    avatars: [
+      {
+        avatar_id: 1310,
+        level: 80,
+        rank: 2,
+        total_damage: 2150000,
+        damage_percent: 75.7,
+        total_damage_taken: 3200,
+        total_heal: 0,
+        total_shield: 0,
+        total_break_damage: 1890000,
+        total_turns: 5,
+        extra_turns: 2,
+        attack_type_damage: {
+          Normal: 45000,
+          BPSkill: 215000,
+          BreakDamage: 1890000
+        },
+        attack_type_max_damage: {
+          BreakDamage: 620000
+        },
+        skill_times: [
+          { skill_id: 131001, skill_type: "Normal", skill_use_count: 1 },
+          { skill_id: 131002, skill_type: "BPSkill", skill_use_count: 4 }
+        ]
+      },
+      {
+        avatar_id: 8005,
+        level: 80,
+        rank: 6,
+        total_damage: 410000,
+        damage_percent: 14.4,
+        total_damage_taken: 1800,
+        total_heal: 0,
+        total_shield: 0,
+        total_break_damage: 380000,
+        total_turns: 3,
+        extra_turns: 0,
+        attack_type_damage: {
+          BPSkill: 120000,
+          BreakDamage: 290000
+        },
+        attack_type_max_damage: {
+          BreakDamage: 195000
+        }
+      },
+      {
+        avatar_id: 1303,
+        level: 80,
+        rank: 1,
+        total_damage: 160000,
+        damage_percent: 5.6,
+        total_damage_taken: 1400,
+        total_heal: 0,
+        total_shield: 0,
+        total_break_damage: 160000,
+        total_turns: 2,
+        extra_turns: 0,
+        attack_type_damage: {
+          Normal: 20000,
+          BreakDamage: 140000
+        },
+        attack_type_max_damage: {
+          BreakDamage: 95000
+        }
+      },
+      {
+        avatar_id: 1301,
+        level: 80,
+        rank: 6,
+        total_damage: 120000,
+        damage_percent: 4.3,
+        total_damage_taken: 2100,
+        total_heal: 8400,
+        total_shield: 0,
+        total_break_damage: 95000,
+        total_turns: 3,
+        extra_turns: 1,
+        attack_type_damage: {
+          Normal: 25000,
+          Ultra: 35000,
+          BreakDamage: 60000
+        },
+        attack_type_max_damage: {
+          BreakDamage: 60000
+        }
+      }
+    ],
+    monsters: [
+      {
+        entity_id: 101,
+        monster_id: 3024010,
+        total_turns: 4,
+        total_damage: 8500,
+        total_damage_taken: 2840000,
+        wave: 1
+      }
+    ]
+  };
+
+  analystState.currentReport = demoReport;
+  analystState.lastBattleTimestamp = demoReport.timestamp;
+  renderDamageAnalyst();
+  updateDashboardBattleBanner();
+  showToast("✨ โหลดตัวอย่างการต่อสู้ 0-Cycle เรียบร้อยแล้ว", "success");
+}
+
+function setupDamageAnalystEvents() {
+  if (el.btnAnalystFetch) {
+    el.btnAnalystFetch.addEventListener('click', () => fetchLatestBattleReport(false));
+  }
+
+  if (el.btnAnalystClear) {
+    el.btnAnalystClear.addEventListener('click', clearBattleReport);
+  }
+
+  if (el.btnAnalystExport) {
+    el.btnAnalystExport.addEventListener('click', exportBattleReportJson);
+  }
+
+  if (el.btnAnalystImport && el.inputAnalystFile) {
+    el.btnAnalystImport.addEventListener('click', () => {
+      el.inputAnalystFile.click();
+    });
+
+    el.inputAnalystFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          let report = null;
+          if (parsed.avatars || parsed.team_total_damage !== undefined) {
+            report = parsed;
+          } else {
+            report = parseFireflySranalysisJson(parsed);
+          }
+
+          if (report && (report.avatars || report.team_total_damage !== undefined)) {
+            analystState.currentReport = report;
+            analystState.lastBattleTimestamp = report.timestamp || Date.now();
+            renderDamageAnalyst();
+            updateDashboardBattleBanner();
+            showToast(t('analystToastImported'), 'success');
+
+            try {
+              await apiRequest('/api/battle_report', 'POST', report);
+            } catch (_) {}
+          } else {
+            showToast('รูปแบบไฟล์ JSON ไม่ถูกต้อง (ต้องการ GaC Battle Report หรือ Firefly-Sranalysis JSON)', 'error');
+          }
+        } catch (err) {
+          showToast(`ไฟล์ JSON ผิดพลาด: ${err.message}`, 'error');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+  }
+
+  if (el.synergyDamageBanner) {
+    el.synergyDamageBanner.addEventListener('click', () => {
+      const btn = document.querySelector('.tab-btn[data-tab="tab-damage-analyst"]');
+      if (btn) btn.click();
+    });
+  }
+
+  if (!analystState.autoSyncInterval) {
+    analystState.autoSyncInterval = setInterval(() => {
+      if (el.chkAnalystAutosync && el.chkAnalystAutosync.checked && state.isConnected) {
+        fetchLatestBattleReport(true);
+      }
+    }, 3000);
+  }
+}
+
+window.fetchLatestBattleReport = fetchLatestBattleReport;
+window.loadDemoBattleReport = loadDemoBattleReport;
+window.exportBattleReportJson = exportBattleReportJson;
+window.clearBattleReport = clearBattleReport;
+
 // Background Ping Loop
 function startPingLoop() {
   setInterval(() => {
@@ -7409,14 +8065,17 @@ async function init() {
   setupTabs();
   setupModalSubtabs();
   setupEvents();
+  setupDamageAnalystEvents();
   setupGachabaseSyncEvents();
   setupGMConsoleEvents();
   applyTranslations();
   renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   renderAvatarsGrid();
   loadEquipment();
+  renderEmptyDamageAnalyst();
   updateGachabaseSyncUI();
   refreshStatus();
+  fetchLatestBattleReport(true);
   startPingLoop();
   updateCacheUsageDisplay();
 }
