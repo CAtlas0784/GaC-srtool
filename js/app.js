@@ -2,8 +2,6 @@ import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
 import {
-  syncGachabaseDatabase,
-  loadCachedGachabaseData,
   getAvatarIconUrl,
   getLightconeArtUrl,
   getLightconeThumbUrl,
@@ -120,14 +118,6 @@ const el = {
   consoleCmdInput: document.getElementById('console-cmd-input'),
   btnConsoleCmdSend: document.getElementById('btn-console-cmd-send'),
   lblConsoleConnStatus: document.getElementById('lbl-console-conn-status'),
-  // Gachabase Sync
-  btnHeaderGachabaseSync: document.getElementById('btn-header-gachabase-sync'),
-  btnQuickGachabaseSync: document.getElementById('btn-quick-gachabase-sync'),
-  btnSyncGachabaseAvatars: document.getElementById('btn-sync-gachabase-avatars'),
-  btnSyncGachabaseEq: document.getElementById('btn-sync-gachabase-eq'),
-  btnSyncGachabaseNow: document.getElementById('btn-sync-gachabase-now'),
-  badgeGachabaseStatus: document.getElementById('badge-gachabase-status'),
-  lblGachabaseInfo: document.getElementById('lbl-gachabase-info'),
 
   // Avatars
   avatarsGrid: document.getElementById('avatars-grid'),
@@ -6766,140 +6756,8 @@ function setupTabs() {
           loadJsonData(state.currentJsonMode);
         } else if (targetId === 'tab-settings') {
           updateCacheUsageDisplay();
-          updateGachabaseSyncUI();
         }
       }
-    });
-  });
-}
-
-// ==========================================
-// Gachabase Catalog Sync & Dynamic Image Engine
-// ==========================================
-let isGachabaseSyncing = false;
-
-async function updateGachabaseSyncUI() {
-  if (!el.badgeGachabaseStatus && !el.lblGachabaseInfo) return;
-  try {
-    const lastSync = await idbGet('gac_gachabase_last_sync');
-    if (lastSync && lastSync.timestamp) {
-      const dateStr = new Date(lastSync.timestamp).toLocaleString();
-      if (el.badgeGachabaseStatus) {
-        el.badgeGachabaseStatus.textContent = 'ซิงค์แล้ว';
-        el.badgeGachabaseStatus.style.color = 'var(--accent-green)';
-        el.badgeGachabaseStatus.style.borderColor = 'rgba(52, 211, 153, 0.4)';
-      }
-      if (el.lblGachabaseInfo) {
-        el.lblGachabaseInfo.innerHTML = `ซิงค์ล่าสุดเมื่อ: <strong>${dateStr}</strong> (ตัวละครในระบบ: ${lastSync.totalAvatarsCount || Object.keys(AVATAR_METADATA).length}, กรวยแสง: ${lastSync.totalLcsCount || Object.keys(LIGHTCONE_METADATA).length})`;
-      }
-    } else {
-      if (el.badgeGachabaseStatus) {
-        el.badgeGachabaseStatus.textContent = 'ยังไม่เคยซิงค์';
-        el.badgeGachabaseStatus.style.color = 'var(--accent-gold)';
-        el.badgeGachabaseStatus.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-      }
-      if (el.lblGachabaseInfo) {
-        el.lblGachabaseInfo.textContent = 'ยังไม่ได้ซิงค์แคตตาล็อกเกมจาก Gachabase กดปุ่มด้านล่างเพื่ออัปเดต';
-      }
-    }
-  } catch (err) {
-    console.warn('Error reading gachabase sync status:', err);
-  }
-}
-
-async function triggerGachabaseSync(showToastOnDone = true) {
-  if (isGachabaseSyncing) {
-    showToast('กำลังซิงค์ข้อมูลจาก Gachabase อยู่แล้ว กรุณารอสักครู่...', 'warning');
-    return;
-  }
-
-  isGachabaseSyncing = true;
-  const syncButtons = [
-    el.btnHeaderGachabaseSync,
-    el.btnQuickGachabaseSync,
-    el.btnSyncGachabaseAvatars,
-    el.btnSyncGachabaseEq,
-    el.btnSyncGachabaseNow
-  ].filter(Boolean);
-
-  syncButtons.forEach(btn => {
-    btn.disabled = true;
-    btn.classList.add('loading');
-  });
-
-  if (el.badgeGachabaseStatus) {
-    el.badgeGachabaseStatus.textContent = 'กำลังซิงค์...';
-    el.badgeGachabaseStatus.style.color = 'var(--accent-cyan)';
-    el.badgeGachabaseStatus.style.borderColor = 'rgba(56, 189, 248, 0.4)';
-  }
-  if (el.lblGachabaseInfo) {
-    el.lblGachabaseInfo.textContent = 'กำลังดึงฐานข้อมูลตัวละครและกรวยแสงจาก Gachabase CDN...';
-  }
-
-  showToast('🌐 เริ่มซิงค์ฐานข้อมูลตัวละครและรูปภาพจาก Gachabase...', 'info');
-
-  try {
-    const currentLang = getCurrentLanguage();
-    const result = await syncGachabaseDatabase({
-      apiUrl: state.apiUrl,
-      branch: 'beta',
-      lang: currentLang === 'th' ? 'th' : 'en',
-      metadataContext: {
-        AVATAR_METADATA,
-        LIGHTCONE_METADATA,
-        SIGNATURE_LIGHTCONES,
-        idbSet,
-        idbGet
-      }
-    });
-
-    initAvatarsList(true);
-    renderAvatarsGrid();
-    loadEquipment();
-    if (state.selectedAvatarDetail) {
-      renderModalSwitcher(state.selectedAvatarDetail.avatar_id);
-    }
-    await updateGachabaseSyncUI();
-
-    if (showToastOnDone) {
-      showToast(`✅ ซิงค์สำเร็จ! ตรวจพบตัวละครทั้งหมด ${result.totalAvatarsCount} ตัว (+ใหม่ ${result.newAvatarsCount}), กรวยแสง ${result.totalLcsCount} ชิ้น (+ใหม่ ${result.newLcsCount}) พร้อมผูกรูป Gachabase CDN เรียบร้อย`, 'success');
-    }
-  } catch (err) {
-    console.error('Gachabase sync failed:', err);
-    if (el.badgeGachabaseStatus) {
-      el.badgeGachabaseStatus.textContent = 'ซิงค์ล้มเหลว';
-      el.badgeGachabaseStatus.style.color = 'var(--accent-red)';
-      el.badgeGachabaseStatus.style.borderColor = 'rgba(248, 113, 113, 0.4)';
-    }
-    if (el.lblGachabaseInfo) {
-      el.lblGachabaseInfo.textContent = `ข้อผิดพลาด: ${err.message}`;
-    }
-    showToast(`❌ ซิงค์ข้อมูล Gachabase ไม่สำเร็จ: ${err.message}`, 'error');
-  } finally {
-    isGachabaseSyncing = false;
-    syncButtons.forEach(btn => {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-    });
-  }
-}
-
-
-
-
-
-function setupGachabaseSyncEvents() {
-  const syncButtons = [
-    el.btnHeaderGachabaseSync,
-    el.btnQuickGachabaseSync,
-    el.btnSyncGachabaseAvatars,
-    el.btnSyncGachabaseEq,
-    el.btnSyncGachabaseNow
-  ].filter(Boolean);
-
-  syncButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      triggerGachabaseSync(true);
     });
   });
 }
@@ -8462,12 +8320,6 @@ function startPingLoop() {
 // Initialize Application
 async function init() {
   await initGitBranchDisplay();
-  await loadCachedGachabaseData({
-    idbGet,
-    idbSet,
-    AVATAR_METADATA,
-    LIGHTCONE_METADATA
-  });
   initAvatarsList();
   await loadCachedStorageData();
   setupServerModes();
@@ -8476,14 +8328,12 @@ async function init() {
   setupModalSubtabs();
   setupEvents();
   setupDamageAnalystEvents();
-  setupGachabaseSyncEvents();
   setupGMConsoleEvents();
   applyTranslations();
   renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   renderAvatarsGrid();
   loadEquipment();
   renderEmptyDamageAnalyst();
-  updateGachabaseSyncUI();
   refreshStatus();
   fetchLatestBattleReport(true);
   startPingLoop();
