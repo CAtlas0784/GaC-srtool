@@ -1,9 +1,42 @@
-// Gachabase Data Fetcher, Parser & FreeSR Importer Module
-// Supports fetching datamined/beta characters, lightcones, and relics from hsr.gachabase.net
-// Integrates with GaC-srtool runtime metadata, IndexedDB cache, and FreeSR / persistent saves.
+// Gachabase Data Fetcher, Catalog Sync & Image Engine for GaC-srtool
+// Connects with hsr.gachabase.net to dynamically update characters, lightcones,
+// and high-res assets whenever the game updates or new patches/betas drop.
 
 export const GACHABASE_BASE_URL = 'https://hsr.gachabase.net';
 export const GACHABASE_CDN_URL = 'https://cdn.gachabase.net';
+
+// Pre-mapped known beta / newest assets from Gachabase CDN
+export const KNOWN_GACHABASE_ASSETS = {
+  avatars: {
+    1501: 'https://cdn.gachabase.net/hsr/assets/09ee6e2618ac2a0dab2aec8d73b0bb01.png', // Sparxie
+    1502: 'https://cdn.gachabase.net/hsr/assets/8ca2530c42791593b72d54a850fce97e.png', // Yao Guang
+    1505: 'https://cdn.gachabase.net/hsr/assets/723a90e789fd354fb96b450a90c73e30.png', // Evanescia
+    1506: 'https://cdn.gachabase.net/hsr/assets/0cbfb275bfef439b16ba6ff9f848eb3a.png', // Silver Wolf Collab
+    1511: 'https://cdn.gachabase.net/hsr/assets/2be49dbbe7cfe8f77187dcfea51d9863.png', // Aeon ★ Aha
+    1513: 'https://cdn.gachabase.net/hsr/assets/2fdf5d4fe6eb998064438ffd373ce95f.png', // Aventurine • Waveflair
+  },
+  avatarSplash: {
+    1511: 'https://cdn.gachabase.net/hsr/assets/f8b5630e85022ab8b2761e4e3f614b42.png', // Aha Splash Art (2048x1914)
+    1513: 'https://cdn.gachabase.net/hsr/assets/65b90212f8623ad92243d739ea1fc9ec.png', // Waveflair Splash
+    1505: 'https://cdn.gachabase.net/hsr/assets/71cbe3943310cb233e8dbe6ef69caeb1.png', // Evanescia Splash
+    1502: 'https://cdn.gachabase.net/hsr/assets/8ca2530c42791593b72d54a850fce97e.png', // Yao Guang
+    1501: 'https://cdn.gachabase.net/hsr/assets/09ee6e2618ac2a0dab2aec8d73b0bb01.png', // Sparxie
+  },
+  lightcones: {
+    23065: 'https://cdn.gachabase.net/hsr/assets/500cfc18698932759756f6b3ba4db417.png', // Upon the First Echo of "Aha" Full Art
+  },
+  lightconeThumbs: {
+    23065: 'https://cdn.gachabase.net/hsr/assets/c794417a81e656bfdf1212202230f80f.png', // Aha LC Thumbnail
+  }
+};
+
+// Global in-memory image cache populated dynamically from Gachabase catalogs
+export const GACHABASE_IMAGE_CACHE = {
+  avatars: { ...KNOWN_GACHABASE_ASSETS.avatars },
+  avatarSplash: { ...KNOWN_GACHABASE_ASSETS.avatarSplash },
+  lightcones: { ...KNOWN_GACHABASE_ASSETS.lightcones },
+  lightconeThumbs: { ...KNOWN_GACHABASE_ASSETS.lightconeThumbs }
+};
 
 // Path ID mappings according to HSR engine / Gachabase
 export const GACHABASE_PATHS = {
@@ -69,76 +102,7 @@ export function cleanRichText(str) {
 }
 
 /**
- * Parses user input into normalized search parameters
- * Handles full URLs or raw IDs
- */
-export function parseGachabaseInput(input, typeHint = 'character', branch = 'beta', lang = 'en') {
-  const trimmed = (input || '').trim();
-  if (!trimmed) return null;
-
-  // Check if input is a full URL
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    try {
-      const urlObj = new URL(trimmed);
-      const pathname = urlObj.pathname.toLowerCase();
-      let detectedType = typeHint;
-      if (pathname.includes('/characters/') || pathname.includes('/character/')) detectedType = 'character';
-      else if (pathname.includes('/lightcones/') || pathname.includes('/lightcone/')) detectedType = 'lightcone';
-      else if (pathname.includes('/relics/') || pathname.includes('/relic/')) detectedType = 'relic';
-
-      // Pattern: /type/:id/:slug?/:branch?
-      const parts = pathname.split('/').filter(Boolean);
-      // Expected: ['characters', '1511', 'aeon-aha', 'beta']
-      let id = null;
-      let detectedBranch = urlObj.searchParams.get('branch') || branch;
-      let detectedLang = urlObj.searchParams.get('lang') || lang;
-
-      if (parts.length >= 2) {
-        id = parseInt(parts[1], 10);
-      }
-      if (parts.length >= 4) {
-        detectedBranch = parts[3];
-      }
-
-      return {
-        url: trimmed,
-        id: id || null,
-        type: detectedType,
-        branch: detectedBranch || 'beta',
-        lang: detectedLang || 'en'
-      };
-    } catch (e) {
-      // Fall through to ID parsing
-    }
-  }
-
-  // Treat as numeric ID
-  const numId = parseInt(trimmed, 10);
-  if (!isNaN(numId)) {
-    let resolvedType = typeHint;
-    // Auto-guess type if default wasn't explicitly changed
-    if (numId >= 20000 && numId < 30000) resolvedType = 'lightcone';
-    else if (numId < 1000) resolvedType = 'relic';
-    else if (numId >= 1000 && numId < 9000) resolvedType = 'character';
-
-    const typeSlug = resolvedType === 'lightcone' ? 'lightcones' : (resolvedType === 'relic' ? 'relics' : 'characters');
-    const url = `${GACHABASE_BASE_URL}/${typeSlug}/${numId}/slug/${branch}?lang=${lang}`;
-
-    return {
-      url,
-      id: numId,
-      type: resolvedType,
-      branch: branch || 'beta',
-      lang: lang || 'en'
-    };
-  }
-
-  return null;
-}
-
-/**
- * Fetches Gachabase HTML content
- * Uses GaC-hkrpg-go API proxy if available to avoid CORS, falls back to direct fetch
+ * Fetches HTML from targetUrl via backend API proxy or direct fetch
  */
 export async function fetchGachabaseHtml(targetUrl, apiUrl = 'http://localhost:21000') {
   if (!targetUrl) throw new Error('Target URL is required for Gachabase fetch');
@@ -160,7 +124,7 @@ export async function fetchGachabaseHtml(targetUrl, apiUrl = 'http://localhost:2
     }
   }
 
-  // 2. Direct fetch fallback (works if user has CORS unblocker or runs in local browser environment)
+  // 2. Direct fetch fallback
   const directResp = await fetch(targetUrl, {
     method: 'GET',
     headers: {
@@ -175,451 +139,320 @@ export async function fetchGachabaseHtml(targetUrl, apiUrl = 'http://localhost:2
 }
 
 /**
- * Extracts and parses serialized SvelteKit DTO and refs from Gachabase HTML
+ * Parses SvelteKit streamed data payload from Gachabase catalog listing pages
  */
-export function parseGachabaseHtml(html, fallbackLang = 'en') {
-  if (!html || typeof html !== 'string') {
-    throw new Error('Invalid HTML content received from Gachabase');
-  }
-
-  // Look for kit.start(...) serialized state in <script>
-  let kitJson = null;
-  const kitMatch = html.match(/kit\.start\(app,\s*element,\s*(\{.*?\})\);\s*\}\);/s);
-  if (kitMatch && kitMatch[1]) {
-    kitJson = kitMatch[1];
-  } else {
-    // Alternate pattern in newer or minified builds
-    const altMatch = html.match(/kit\.start\(app,\s*element,\s*(\{[\s\S]*?\})\s*\);/);
-    if (altMatch && altMatch[1]) {
-      kitJson = altMatch[1];
+export function parseSvelteKitCatalog(html) {
+  if (!html || typeof html !== 'string') return null;
+  const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)];
+  for (const s of scripts) {
+    const text = s[1].trim();
+    if (text.includes('resolve') && text.includes('entries')) {
+      const startIdx = text.indexOf('() => ');
+      if (startIdx !== -1) {
+        let code = text.substring(startIdx + 6).trim();
+        if (code.endsWith(');')) code = code.slice(0, -2);
+        else if (code.endsWith(')')) code = code.slice(0, -1);
+        try {
+          const fn = new Function('return (' + code + ')');
+          const res = fn();
+          return res[0]?.data;
+        } catch (e) {
+          console.warn('Failed to parse catalog script:', e);
+        }
+      }
     }
   }
-
-  if (!kitJson) {
-    throw new Error('Could not find SvelteKit data payload in Gachabase HTML');
-  }
-
-  let kitData;
-  try {
-    const fn = new Function('return (' + kitJson + ')');
-    kitData = fn();
-  } catch (err) {
-    throw new Error('Failed to evaluate Gachabase state payload: ' + err.message);
-  }
-
-  if (!kitData || !Array.isArray(kitData.data)) {
-    throw new Error('Gachabase kitData does not contain data array');
-  }
-
-  // Search for the entry containing dto and refs
-  let targetData = null;
-  for (const entry of kitData.data) {
-    if (!entry) continue;
-    const cand = entry.data?.data?.data || entry.data?.data || entry.data;
-    if (cand && (cand.dto || cand.refs)) {
-      targetData = cand;
-      break;
-    }
-  }
-
-  if (!targetData || !targetData.dto) {
-    throw new Error('Gachabase DTO object not found in payload');
-  }
-
-  const dto = targetData.dto;
-  const refs = targetData.refs || {};
-  const assetsMap = refs.assets || {};
-  const pathsMap = refs.paths || {};
-  const typesMap = refs.types || {};
-
-  // Resolve CDN URL helper
-  const resolveAsset = (hash) => {
-    if (!hash) return null;
-    if (assetsMap[hash] && assetsMap[hash].url) {
-      return assetsMap[hash].url;
-    }
-    return `${GACHABASE_CDN_URL}/hsr/assets/${hash}.png`;
-  };
-
-  const id = dto.id;
-  const rawName = dto.name?.text || dto.name || `Item ${id}`;
-  const rarity = dto.rarity || 5;
-
-  // Path resolution
-  const pathId = dto.path_id || 0;
-  const rawPath = pathsMap[pathId]?.name?.text || GACHABASE_PATHS[pathId] || 'Unknown';
-
-  // Type / Element resolution
-  const typeId = dto.type_id || 0;
-  const rawElement = typesMap[typeId]?.name?.text || GACHABASE_ELEMENTS[typeId] || 'Unknown';
-
-  // Determine Item Type
-  let itemType = 'character';
-  if (dto.skills !== undefined || dto.eidolons !== undefined || dto.max_energy !== undefined) {
-    itemType = 'character';
-  } else if (dto.skill !== undefined || (id >= 20000 && id < 30000)) {
-    itemType = 'lightcone';
-  } else if (id < 1000) {
-    itemType = 'relic';
-  }
-
-  // Images resolution
-  const images = {
-    splash: resolveAsset(dto.assets?.splash_art_path_hash) || resolveAsset(dto.assets?.draw_card_art_path_hash),
-    icon: resolveAsset(dto.assets?.round_icon_path_hash) || resolveAsset(dto.assets?.small_icon_path_hash) || resolveAsset(dto.assets?.icon_path_hash),
-    square: resolveAsset(dto.assets?.square_icon_path_hash) || resolveAsset(dto.assets?.big_icon_path_hash),
-    fullArt: resolveAsset(dto.assets?.full_art_path_hash) || resolveAsset(dto.assets?.splash_art_path_hash),
-    thumbnail: resolveAsset(dto.assets?.thumbnail_art_path_hash) || resolveAsset(dto.assets?.big_icon_path_hash)
-  };
-
-  // Skills parsing (for characters)
-  const skills = [];
-  if (Array.isArray(dto.skills)) {
-    dto.skills.forEach(s => {
-      skills.push({
-        id: s.id,
-        type: s.type?.text || s.type || 'Skill',
-        name: s.name?.text || s.name || '',
-        tag: s.tag?.text || s.tag || '',
-        description: cleanRichText(s.description?.text || s.description || ''),
-        icon: resolveAsset(s.icon_path_hash)
-      });
-    });
-  }
-
-  // Eidolons parsing (for characters)
-  const eidolons = [];
-  if (Array.isArray(dto.eidolons)) {
-    dto.eidolons.forEach((e, idx) => {
-      eidolons.push({
-        rank: e.rank || idx + 1,
-        name: e.name?.text || e.name || `Eidolon ${idx + 1}`,
-        description: cleanRichText(e.description?.text || e.description || ''),
-        icon: resolveAsset(e.icon_path_hash) || resolveAsset(dto.assets?.[`eidolon_${idx + 1}_path_hash`])
-      });
-    });
-  }
-
-  // Lightcone skill (for lightcones)
-  let lcSkill = null;
-  if (dto.skill) {
-    lcSkill = {
-      name: dto.skill.name?.text || dto.skill.name || '',
-      description: cleanRichText(dto.skill.description?.text || dto.skill.description || '')
-    };
-  }
-
-  // Build recommendations
-  const rec = dto.build_recommendations || {};
-  const recommendedRelics = rec.relics?.relic_ids || [];
-  const cavernSets = recommendedRelics.filter(rId => rId < 300);
-  const planarSets = recommendedRelics.filter(rId => rId >= 300);
-
-  // Recommended Lightcones
-  const recommendedLcs = (Array.isArray(rec.lightcone_ids) ? rec.lightcone_ids : (rec.lightcones || []).map(lc => lc.lightcone_id)).filter(Boolean);
-
-  // Main stats recommendations
-  const mainStats = {};
-  if (Array.isArray(rec.relics?.main_stats)) {
-    rec.relics.main_stats.forEach(m => {
-      const pieceId = m.piece_type_id; // 3=Body, 4=Boots, 5=Sphere, 6=Rope
-      const stats = (m.stat_ids || []).map(sid => GACHABASE_STATS[sid] || `Stat ${sid}`);
-      mainStats[pieceId] = stats;
-    });
-  }
-
-  // Sub stats recommendations
-  const subStats = (rec.relics?.sub_stat_ids || []).map(sid => GACHABASE_STATS[sid] || `Stat ${sid}`);
-
-  return {
-    id,
-    type: itemType,
-    name: rawName,
-    rarity,
-    path: rawPath,
-    pathId,
-    element: rawElement,
-    typeId,
-    maxEnergy: dto.max_energy || 0,
-    images,
-    skills,
-    eidolons,
-    lcSkill,
-    recommended: {
-      relicIds: recommendedRelics,
-      cavernSets,
-      planarSets,
-      lightconeIds: recommendedLcs,
-      signatureLcId: recommendedLcs[0] || null,
-      mainStats,
-      subStats
-    },
-    rawDto: dto
-  };
+  return null;
 }
 
 /**
- * Registers parsed item into tool runtime metadata and saves to IndexedDB
+ * Automatically synchronizes the full game database from Gachabase
+ * Pulls all characters and lightcones, adds missing ones into metadata,
+ * and caches all Gachabase CDN asset URLs for seamless rendering.
  */
-export async function registerGachabaseItem(parsedItem, metadataContext = {}) {
-  const {
-    AVATAR_METADATA,
-    LIGHTCONE_METADATA,
-    RELIC_SET_METADATA,
-    SIGNATURE_LIGHTCONES,
-    idbSet
-  } = metadataContext;
-
-  const id = parsedItem.id;
-  const lang = parsedItem.lang || 'en';
-
-  if (parsedItem.type === 'character' && AVATAR_METADATA) {
-    if (!AVATAR_METADATA[id]) {
-      AVATAR_METADATA[id] = {
-        names: {
-          th: parsedItem.name,
-          en: parsedItem.name
-        },
-        path: parsedItem.path,
-        element: parsedItem.element,
-        rarity: parsedItem.rarity,
-        hasExRank: false,
-        isCustomGachabase: true,
-        images: parsedItem.images
-      };
-    } else {
-      // Update existing entry with high-res images and enriched data
-      AVATAR_METADATA[id].names = AVATAR_METADATA[id].names || {};
-      AVATAR_METADATA[id].names[lang] = parsedItem.name;
-      AVATAR_METADATA[id].names.en = AVATAR_METADATA[id].names.en || parsedItem.name;
-      AVATAR_METADATA[id].path = parsedItem.path;
-      AVATAR_METADATA[id].element = parsedItem.element;
-      AVATAR_METADATA[id].rarity = parsedItem.rarity;
-      AVATAR_METADATA[id].images = parsedItem.images;
-    }
-
-    if (SIGNATURE_LIGHTCONES && parsedItem.recommended.signatureLcId) {
-      SIGNATURE_LIGHTCONES[id] = parsedItem.recommended.signatureLcId;
-    }
-  } else if (parsedItem.type === 'lightcone' && LIGHTCONE_METADATA) {
-    if (!LIGHTCONE_METADATA[id]) {
-      LIGHTCONE_METADATA[id] = {
-        names: {
-          th: parsedItem.name,
-          en: parsedItem.name
-        },
-        rarity: parsedItem.rarity,
-        path: parsedItem.path,
-        isCustomGachabase: true,
-        images: parsedItem.images
-      };
-    } else {
-      LIGHTCONE_METADATA[id].names = LIGHTCONE_METADATA[id].names || {};
-      LIGHTCONE_METADATA[id].names[lang] = parsedItem.name;
-      LIGHTCONE_METADATA[id].path = parsedItem.path;
-      LIGHTCONE_METADATA[id].rarity = parsedItem.rarity;
-      LIGHTCONE_METADATA[id].images = parsedItem.images;
-    }
-  }
-
-  // Persist to IndexedDB
-  if (idbSet) {
-    try {
-      const cacheKey = `gac_gachabase_item_${parsedItem.type}_${id}`;
-      await idbSet(cacheKey, parsedItem);
-
-      // Also append to custom items registry
-      const regKey = 'gac_gachabase_registry';
-      const existing = (await (metadataContext.idbGet ? metadataContext.idbGet(regKey) : null)) || [];
-      const filtered = existing.filter(i => !(i.type === parsedItem.type && i.id === parsedItem.id));
-      filtered.push({
-        type: parsedItem.type,
-        id: parsedItem.id,
-        name: parsedItem.name,
-        path: parsedItem.path,
-        element: parsedItem.element,
-        rarity: parsedItem.rarity,
-        cacheKey
-      });
-      await idbSet(regKey, filtered);
-    } catch (e) {
-      console.warn('Failed to save Gachabase item to IndexedDB:', e);
-    }
-  }
-
-  return parsedItem;
-}
-
-/**
- * Loads all cached Gachabase items from IndexedDB into runtime metadata
- */
-export async function loadCachedGachabaseRegistry(metadataContext = {}) {
+export async function syncGachabaseDatabase({ apiUrl, branch = 'beta', lang = 'en', metadataContext }) {
   const {
     AVATAR_METADATA,
     LIGHTCONE_METADATA,
     SIGNATURE_LIGHTCONES,
+    idbSet,
     idbGet
   } = metadataContext;
 
+  const charactersUrl = `${GACHABASE_BASE_URL}/characters?lang=${lang}&branch=${branch}`;
+  const lightconesUrl = `${GACHABASE_BASE_URL}/lightcones?lang=${lang}&branch=${branch}`;
+
+  let newAvatarsCount = 0;
+  let newLcsCount = 0;
+  let totalAvatarsCount = 0;
+  let totalLcsCount = 0;
+
+  // 1. Fetch & Parse Characters Catalog
+  try {
+    const { html: charHtml } = await fetchGachabaseHtml(charactersUrl, apiUrl);
+    const charData = parseSvelteKitCatalog(charHtml);
+
+    if (charData && Array.isArray(charData.entries)) {
+      totalAvatarsCount = charData.entries.length;
+      const assetsMap = charData.refs?.assets || {};
+
+      for (const entry of charData.entries) {
+        const aid = entry.id;
+        const hash = entry.assets?.square_icon_path_hash || entry.assets?.round_icon_path_hash;
+        const iconUrl = assetsMap[hash]?.url || KNOWN_GACHABASE_ASSETS.avatars[aid] || `${GACHABASE_CDN_URL}/hsr/assets/${hash}.png`;
+
+        if (iconUrl) {
+          GACHABASE_IMAGE_CACHE.avatars[aid] = iconUrl;
+        }
+
+        // Register new / missing characters into AVATAR_METADATA
+        if (AVATAR_METADATA && !AVATAR_METADATA[aid]) {
+          const charName = entry.name?.text || entry.name || `Avatar ${aid}`;
+          const pathName = GACHABASE_PATHS[entry.path_id] || 'Unknown';
+          const elementName = GACHABASE_ELEMENTS[entry.type_id] || 'Unknown';
+
+          AVATAR_METADATA[aid] = {
+            names: {
+              th: charName,
+              en: charName,
+              'zh-CN': charName
+            },
+            path: pathName,
+            element: elementName,
+            rarity: entry.rarity || 5,
+            hasExRank: false,
+            isGachabaseSync: true,
+            images: {
+              icon: iconUrl,
+              square: iconUrl
+            }
+          };
+          newAvatarsCount++;
+        } else if (AVATAR_METADATA && AVATAR_METADATA[aid]) {
+          // Enrich existing metadata with Gachabase CDN image
+          AVATAR_METADATA[aid].images = AVATAR_METADATA[aid].images || {};
+          if (iconUrl) AVATAR_METADATA[aid].images.icon = iconUrl;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to sync characters from Gachabase:', err);
+    throw new Error('ไม่สามารถซิงค์ตัวละครจาก Gachabase ได้: ' + err.message);
+  }
+
+  // 2. Fetch & Parse Lightcones Catalog
+  try {
+    const { html: lcHtml } = await fetchGachabaseHtml(lightconesUrl, apiUrl);
+    const lcData = parseSvelteKitCatalog(lcHtml);
+
+    if (lcData && Array.isArray(lcData.entries)) {
+      totalLcsCount = lcData.entries.length;
+      const assetsMap = lcData.refs?.assets || {};
+
+      for (const entry of lcData.entries) {
+        const lcid = entry.id;
+        const thumbHash = entry.assets?.thumbnail_art_path_hash || entry.assets?.small_icon_path_hash;
+        const fullArtHash = entry.assets?.full_art_path_hash || entry.assets?.big_icon_path_hash;
+
+        const thumbUrl = assetsMap[thumbHash]?.url || KNOWN_GACHABASE_ASSETS.lightconeThumbs[lcid];
+        const fullArtUrl = assetsMap[fullArtHash]?.url || KNOWN_GACHABASE_ASSETS.lightcones[lcid];
+
+        if (thumbUrl) GACHABASE_IMAGE_CACHE.lightconeThumbs[lcid] = thumbUrl;
+        if (fullArtUrl) GACHABASE_IMAGE_CACHE.lightcones[lcid] = fullArtUrl;
+
+        // Register new / missing lightcones into LIGHTCONE_METADATA
+        if (LIGHTCONE_METADATA && !LIGHTCONE_METADATA[lcid]) {
+          const lcName = entry.name?.text || entry.name || `Lightcone ${lcid}`;
+          const pathName = GACHABASE_PATHS[entry.path_id] || 'Unknown';
+
+          LIGHTCONE_METADATA[lcid] = {
+            names: {
+              th: lcName,
+              en: lcName,
+              'zh-CN': lcName
+            },
+            rarity: entry.rarity || 5,
+            path: pathName,
+            isGachabaseSync: true,
+            images: {
+              thumbnail: thumbUrl,
+              fullArt: fullArtUrl
+            }
+          };
+          newLcsCount++;
+        } else if (LIGHTCONE_METADATA && LIGHTCONE_METADATA[lcid]) {
+          LIGHTCONE_METADATA[lcid].images = LIGHTCONE_METADATA[lcid].images || {};
+          if (thumbUrl) LIGHTCONE_METADATA[lcid].images.thumbnail = thumbUrl;
+          if (fullArtUrl) LIGHTCONE_METADATA[lcid].images.fullArt = fullArtUrl;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to sync lightcones from Gachabase:', err);
+    throw new Error('ไม่สามารถซิงค์กรวยแสงจาก Gachabase ได้: ' + err.message);
+  }
+
+  // 3. Save cache to IndexedDB
+  if (idbSet) {
+    try {
+      await idbSet('gac_gachabase_image_cache', GACHABASE_IMAGE_CACHE);
+      await idbSet('gac_gachabase_last_sync', {
+        timestamp: Date.now(),
+        newAvatarsCount,
+        newLcsCount,
+        totalAvatarsCount,
+        totalLcsCount
+      });
+    } catch (e) {
+      console.warn('Failed to cache Gachabase database to IndexedDB:', e);
+    }
+  }
+
+  return {
+    newAvatarsCount,
+    newLcsCount,
+    totalAvatarsCount,
+    totalLcsCount
+  };
+}
+
+/**
+ * Loads cached Gachabase images and metadata from IndexedDB
+ */
+export async function loadCachedGachabaseData(metadataContext = {}) {
+  const { idbGet, AVATAR_METADATA, LIGHTCONE_METADATA } = metadataContext;
   if (!idbGet) return;
 
   try {
-    const registry = await idbGet('gac_gachabase_registry');
-    if (!Array.isArray(registry)) return;
+    const cachedImages = await idbGet('gac_gachabase_image_cache');
+    if (cachedImages) {
+      if (cachedImages.avatars) Object.assign(GACHABASE_IMAGE_CACHE.avatars, cachedImages.avatars);
+      if (cachedImages.avatarSplash) Object.assign(GACHABASE_IMAGE_CACHE.avatarSplash, cachedImages.avatarSplash);
+      if (cachedImages.lightcones) Object.assign(GACHABASE_IMAGE_CACHE.lightcones, cachedImages.lightcones);
+      if (cachedImages.lightconeThumbs) Object.assign(GACHABASE_IMAGE_CACHE.lightconeThumbs, cachedImages.lightconeThumbs);
+    }
 
-    for (const itemMeta of registry) {
-      const fullItem = await idbGet(itemMeta.cacheKey);
-      if (fullItem) {
-        await registerGachabaseItem(fullItem, metadataContext);
+    // Attach cached image links to metadata
+    if (AVATAR_METADATA) {
+      for (const aid in GACHABASE_IMAGE_CACHE.avatars) {
+        if (AVATAR_METADATA[aid]) {
+          AVATAR_METADATA[aid].images = AVATAR_METADATA[aid].images || {};
+          AVATAR_METADATA[aid].images.icon = GACHABASE_IMAGE_CACHE.avatars[aid];
+        }
       }
     }
-    console.log(`[Gachabase] Successfully loaded ${registry.length} cached items from IndexedDB.`);
+    if (LIGHTCONE_METADATA) {
+      for (const lcid in GACHABASE_IMAGE_CACHE.lightcones) {
+        if (LIGHTCONE_METADATA[lcid]) {
+          LIGHTCONE_METADATA[lcid].images = LIGHTCONE_METADATA[lcid].images || {};
+          LIGHTCONE_METADATA[lcid].images.fullArt = GACHABASE_IMAGE_CACHE.lightcones[lcid];
+          LIGHTCONE_METADATA[lcid].images.thumbnail = GACHABASE_IMAGE_CACHE.lightconeThumbs[lcid];
+        }
+      }
+    }
   } catch (err) {
-    console.warn('[Gachabase] Failed to restore cached items from IndexedDB:', err);
+    console.warn('Failed to restore Gachabase cache from IndexedDB:', err);
   }
 }
 
 /**
- * Applies parsed Gachabase character, lightcone, or relics into FreeSR data structure
+ * Image resolver for avatars
+ * Prioritizes local asset, falls back to Gachabase CDN
  */
-export function applyGachabaseToFreeSR(parsedItem, fullFreesrData, options = {}) {
-  if (!fullFreesrData) {
-    throw new Error('FreeSR data is not initialized');
+export function getAvatarIconUrl(avatarId) {
+  const id = parseInt(avatarId, 10);
+  if (GACHABASE_IMAGE_CACHE.avatars[id]) {
+    return GACHABASE_IMAGE_CACHE.avatars[id];
   }
+  if (KNOWN_GACHABASE_ASSETS.avatars[id]) {
+    return KNOWN_GACHABASE_ASSETS.avatars[id];
+  }
+  return `./assets/avatars/${id}.png`;
+}
 
-  fullFreesrData.avatars = fullFreesrData.avatars || {};
-  fullFreesrData.lightcones = fullFreesrData.lightcones || [];
-  fullFreesrData.relics = fullFreesrData.relics || [];
+/**
+ * Image resolver for lightcones
+ */
+export function getLightconeArtUrl(lcId) {
+  const id = parseInt(lcId, 10);
+  if (GACHABASE_IMAGE_CACHE.lightcones[id]) {
+    return GACHABASE_IMAGE_CACHE.lightcones[id];
+  }
+  if (KNOWN_GACHABASE_ASSETS.lightcones[id]) {
+    return KNOWN_GACHABASE_ASSETS.lightcones[id];
+  }
+  if (id === 23065) {
+    return './assets/lightcones/23065.png';
+  }
+  return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+}
 
-  const eLevel = options.eLevel !== undefined ? options.eLevel : 0; // 0 or 6
-  const sLevel = options.sLevel !== undefined ? options.sLevel : 1; // 1 or 5
-  const autoEquipLc = options.autoEquipLc !== false;
-  const autoEquipRelics = options.autoEquipRelics !== false;
+/**
+ * Image resolver for lightcone thumbnails
+ */
+export function getLightconeThumbUrl(lcId) {
+  const id = parseInt(lcId, 10);
+  if (GACHABASE_IMAGE_CACHE.lightconeThumbs[id]) {
+    return GACHABASE_IMAGE_CACHE.lightconeThumbs[id];
+  }
+  if (KNOWN_GACHABASE_ASSETS.lightconeThumbs[id]) {
+    return KNOWN_GACHABASE_ASSETS.lightconeThumbs[id];
+  }
+  return getLightconeArtUrl(lcId);
+}
 
-  const results = {
-    avatarAdded: false,
-    lcAdded: false,
-    relicsAdded: 0
-  };
+/**
+ * Robust error handler for Avatar images
+ * Falls back through: Local Asset -> StarRailRes -> Gachabase CDN -> Letter Placeholder
+ */
+export function handleAvatarImgError(img, avatarId) {
+  if (!img) return;
+  const id = parseInt(avatarId, 10);
+  const step = parseInt(img.getAttribute('data-err-step') || '0', 10);
 
-  // If character:
-  if (parsedItem.type === 'character') {
-    const aid = parsedItem.id;
-
-    // Generate maxed traces & skills map
-    const skillsMap = {};
-    if (Array.isArray(parsedItem.skills) && parsedItem.skills.length > 0) {
-      parsedItem.skills.forEach(s => {
-        if (s.id) {
-          skillsMap[String(s.id)] = 10;
-        }
-      });
-    }
-    // Add standard fallback combat traces
-    skillsMap[`${aid}001`] = 6;  // Basic ATK
-    skillsMap[`${aid}002`] = 10; // Skill
-    skillsMap[`${aid}003`] = 10; // Ultimate
-    skillsMap[`${aid}004`] = 10; // Talent
-    skillsMap[`${aid}007`] = 1;  // Technique
-
-    if (!fullFreesrData.avatars[aid]) {
-      fullFreesrData.avatars[aid] = {
-        owner_uid: 0,
-        avatar_id: aid,
-        level: 80,
-        promotion: 6,
-        techniques: [],
-        sp_max: parsedItem.maxEnergy || 140,
-        sp_value: Math.floor((parsedItem.maxEnergy || 140) / 2),
-        data: {
-          rank: eLevel,
-          skills: skillsMap
-        }
-      };
+  if (step === 0) {
+    img.setAttribute('data-err-step', '1');
+    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/avatar/${id}.png`;
+  } else if (step === 1) {
+    img.setAttribute('data-err-step', '2');
+    const gachaUrl = GACHABASE_IMAGE_CACHE.avatars[id] || KNOWN_GACHABASE_ASSETS.avatars[id];
+    if (gachaUrl && img.src !== gachaUrl) {
+      img.src = gachaUrl;
     } else {
-      const av = fullFreesrData.avatars[aid];
-      av.level = 80;
-      av.promotion = 6;
-      av.data = av.data || {};
-      av.data.rank = eLevel;
-      av.data.skills = Object.assign(av.data.skills || {}, skillsMap);
-    }
-    results.avatarAdded = true;
-
-    // Equip Signature Lightcone if available
-    const sigLcId = parsedItem.recommended.signatureLcId || (options.sigLcId || null);
-    if (autoEquipLc && sigLcId) {
-      // Check if this character already has an LC
-      let existingLc = fullFreesrData.lightcones.find(l => l.equip_avatar === aid);
-      if (existingLc) {
-        existingLc.item_id = sigLcId;
-        existingLc.level = 80;
-        existingLc.promotion = 6;
-        existingLc.rank = sLevel;
-      } else {
-        const nextUid = (fullFreesrData.lightcones.reduce((m, l) => Math.max(m, l.unique_id || 0), 0)) + 1;
-        fullFreesrData.lightcones.push({
-          unique_id: nextUid,
-          item_id: sigLcId,
-          level: 80,
-          promotion: 6,
-          rank: sLevel,
-          equip_avatar: aid
-        });
-      }
-      results.lcAdded = true;
-    }
-
-    // Equip Recommended Relics if available
-    if (autoEquipRelics && (parsedItem.recommended.cavernSets.length > 0 || parsedItem.recommended.planarSets.length > 0)) {
-      // Clear existing relics on this character
-      fullFreesrData.relics = fullFreesrData.relics.filter(r => r.equip_avatar !== aid);
-
-      const cavernSet = parsedItem.recommended.cavernSets[0] || 121;
-      const planarSet = parsedItem.recommended.planarSets[0] || 310;
-      let nextRelicUid = (fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0)) + 1;
-
-      // 6 relic slots
-      for (let slot = 1; slot <= 6; slot++) {
-        const setId = slot <= 4 ? cavernSet : planarSet;
-        const relicId = 60000 + (setId * 10) + slot;
-
-        // Default smart main stats
-        let mainAffixId = 1;
-        if (slot === 3) mainAffixId = 5; // CRIT Rate% / ATK%
-        else if (slot === 4) mainAffixId = 5; // SPD / ATK%
-        else if (slot === 5) mainAffixId = 6; // Elemental DMG%
-        else if (slot === 6) mainAffixId = 4; // Energy Regen% / ATK%
-
-        fullFreesrData.relics.push({
-          internal_uid: nextRelicUid++,
-          relic_id: relicId,
-          level: 15,
-          equip_avatar: aid,
-          main_affix_id: mainAffixId,
-          sub_affixes: [
-            { sub_affix_id: 1, cnt: 2, step: 2 },
-            { sub_affix_id: 2, cnt: 3, step: 2 },
-            { sub_affix_id: 3, cnt: 2, step: 2 },
-            { sub_affix_id: 4, cnt: 2, step: 2 }
-          ]
-        });
-        results.relicsAdded++;
+      img.style.display = 'none';
+      if (img.nextElementSibling && img.nextElementSibling.classList.contains('avatar-icon-placeholder')) {
+        img.nextElementSibling.style.display = 'flex';
       }
     }
-  } else if (parsedItem.type === 'lightcone') {
-    // Add standalone lightcone to inventory
-    const nextUid = (fullFreesrData.lightcones.reduce((m, l) => Math.max(m, l.unique_id || 0), 0)) + 1;
-    fullFreesrData.lightcones.push({
-      unique_id: nextUid,
-      item_id: parsedItem.id,
-      level: 80,
-      promotion: 6,
-      rank: sLevel,
-      equip_avatar: 0
-    });
-    results.lcAdded = true;
+  } else {
+    img.style.display = 'none';
+    if (img.nextElementSibling && img.nextElementSibling.classList.contains('avatar-icon-placeholder')) {
+      img.nextElementSibling.style.display = 'flex';
+    }
   }
+}
 
-  return results;
+/**
+ * Robust error handler for Lightcone images
+ * Falls back through: Local Asset -> StarRailRes -> Gachabase CDN -> Default Logo
+ */
+export function handleLcImgError(img, lcId) {
+  if (!img) return;
+  const id = parseInt(lcId, 10);
+  const step = parseInt(img.getAttribute('data-err-step') || '0', 10);
+
+  if (step === 0) {
+    img.setAttribute('data-err-step', '1');
+    img.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+  } else if (step === 1) {
+    img.setAttribute('data-err-step', '2');
+    const gachaUrl = GACHABASE_IMAGE_CACHE.lightcones[id] || KNOWN_GACHABASE_ASSETS.lightcones[id] || GACHABASE_IMAGE_CACHE.lightconeThumbs[id] || KNOWN_GACHABASE_ASSETS.lightconeThumbs[id];
+    if (gachaUrl && img.src !== gachaUrl) {
+      img.src = gachaUrl;
+    } else {
+      img.src = './assets/logo.png';
+    }
+  } else {
+    img.src = './assets/logo.png';
+  }
 }

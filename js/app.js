@@ -2,13 +2,25 @@ import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
 import {
-  parseGachabaseInput,
-  fetchGachabaseHtml,
-  parseGachabaseHtml,
-  registerGachabaseItem,
-  loadCachedGachabaseRegistry,
-  applyGachabaseToFreeSR
+  syncGachabaseDatabase,
+  loadCachedGachabaseData,
+  getAvatarIconUrl,
+  getLightconeArtUrl,
+  getLightconeThumbUrl,
+  handleAvatarImgError,
+  handleLcImgError,
+  GACHABASE_IMAGE_CACHE,
+  KNOWN_GACHABASE_ASSETS
 } from './gachabase.js';
+
+// Expose image resolvers & error handlers to window for inline onclick/onerror attributes
+window.handleAvatarImgError = handleAvatarImgError;
+window.handleLcImgError = handleLcImgError;
+window.getAvatarIconUrl = getAvatarIconUrl;
+window.getLightconeArtUrl = getLightconeArtUrl;
+window.getLightconeThumbUrl = getLightconeThumbUrl;
+window.GACHABASE_IMAGE_CACHE = GACHABASE_IMAGE_CACHE;
+window.KNOWN_GACHABASE_ASSETS = KNOWN_GACHABASE_ASSETS;
 
 // Application State
 const state = {
@@ -66,25 +78,14 @@ const el = {
   btnQuickAddAllLcs: document.getElementById('btn-quick-add-all-lcs'),
   btnQuickTeleportTrain: document.getElementById('btn-quick-teleport-train'),
   btnQuickClearLineup: document.getElementById('btn-quick-clear-lineup'),
-  btnQuickGachabase: document.getElementById('btn-quick-gachabase'),
-  btnOpenGachabase: document.getElementById('btn-open-gachabase'),
-  btnAvatarsGachabase: document.getElementById('btn-avatars-gachabase'),
-  btnEqGachabase: document.getElementById('btn-eq-gachabase'),
-
-  // Gachabase Modal
-  modalGachabase: document.getElementById('modal-gachabase'),
-  btnCloseGachabaseModal: document.getElementById('btn-close-gachabase-modal'),
-  gachabaseInput: document.getElementById('gachabase-input'),
-  gachabaseType: document.getElementById('gachabase-type'),
-  gachabaseBranch: document.getElementById('gachabase-branch'),
-  gachabaseLang: document.getElementById('gachabase-lang'),
-  btnGachabaseFetch: document.getElementById('btn-gachabase-fetch'),
-  gachabaseStatus: document.getElementById('gachabase-status'),
-  gachabasePreviewContainer: document.getElementById('gachabase-preview-container'),
-  gachabaseFooterActions: document.getElementById('gachabase-footer-actions'),
-  btnGachabaseSaveMeta: document.getElementById('btn-gachabase-save-meta'),
-  btnGachabaseImportE0S1: document.getElementById('btn-gachabase-import-e0s1'),
-  btnGachabaseImportE6S5: document.getElementById('btn-gachabase-import-e6s5'),
+  // Gachabase Sync
+  btnHeaderGachabaseSync: document.getElementById('btn-header-gachabase-sync'),
+  btnQuickGachabaseSync: document.getElementById('btn-quick-gachabase-sync'),
+  btnSyncGachabaseAvatars: document.getElementById('btn-sync-gachabase-avatars'),
+  btnSyncGachabaseEq: document.getElementById('btn-sync-gachabase-eq'),
+  btnSyncGachabaseNow: document.getElementById('btn-sync-gachabase-now'),
+  badgeGachabaseStatus: document.getElementById('badge-gachabase-status'),
+  lblGachabaseInfo: document.getElementById('lbl-gachabase-info'),
 
   // Avatars
   avatarsGrid: document.getElementById('avatars-grid'),
@@ -977,8 +978,8 @@ function renderLineup(lineups) {
         <div class="lineup-slot-num">Slot ${slot + 1}</div>
         ${removeSlotBtnHtml}
         <img class="lineup-slot-img"
-             src="./assets/avatars/${avatarId}.png"
-             onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${avatarId}.png';}else{this.style.display='none';}"
+             src="${getAvatarIconSrc(avatarId)}"
+             onerror="handleAvatarImgError(this, ${avatarId})"
              alt="${info.name}">
         <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${info.name}</div>
         <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem; justify-content: center; align-items: center;">
@@ -1135,8 +1136,8 @@ function renderPickerGrid() {
     card.innerHTML = `
       <div class="picker-avatar-img-wrap">
         <img class="picker-avatar-img"
-             src="./assets/avatars/${item.avatar_id}.png"
-             onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';}"
+             src="${getAvatarIconSrc(item.avatar_id)}"
+             onerror="handleAvatarImgError(this, ${item.avatar_id})"
              alt="${meta.name}">
       </div>
       <div class="picker-avatar-info">
@@ -1266,8 +1267,8 @@ function renderAvatarsGrid() {
       <div class="avatar-header-info">
         <div class="avatar-image-container">
           <img class="avatar-img"
-               src="./assets/avatars/${item.avatar_id}.png"
-               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${item.avatar_id}.png';}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+               src="${getAvatarIconSrc(item.avatar_id)}"
+               onerror="handleAvatarImgError(this, ${item.avatar_id})"
                alt="${meta.name}">
           <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
         </div>
@@ -1575,12 +1576,14 @@ const RECOMMENDED_RELIC_BUILDS = {
   Elation: { cavern: 115, planar: 306, name: "Grand Duke (4) + Inert Salsotto (2)" }
 };
 
-// Lightcone Art URL Resolvers (Local asset -> Gachabase -> StarRailRes)
+// Lightcone Art URL Resolvers (Metadata -> Gachabase CDN -> Local asset -> StarRailRes)
 function getLightconeArtSrc(lcId) {
   const id = parseInt(lcId, 10);
   const meta = LIGHTCONE_METADATA[id];
   if (meta?.images?.fullArt) return meta.images.fullArt;
   if (meta?.images?.thumbnail) return meta.images.thumbnail;
+  if (GACHABASE_IMAGE_CACHE.lightcones[id]) return GACHABASE_IMAGE_CACHE.lightcones[id];
+  if (KNOWN_GACHABASE_ASSETS.lightcones[id]) return KNOWN_GACHABASE_ASSETS.lightcones[id];
   if (id === 23065) {
     return './assets/lightcones/23065.png';
   }
@@ -1592,6 +1595,10 @@ function getLightconeArtFallback(lcId) {
   const meta = LIGHTCONE_METADATA[id];
   if (meta?.images?.thumbnail) return meta.images.thumbnail;
   if (meta?.images?.fullArt) return meta.images.fullArt;
+  if (GACHABASE_IMAGE_CACHE.lightconeThumbs[id]) return GACHABASE_IMAGE_CACHE.lightconeThumbs[id];
+  if (KNOWN_GACHABASE_ASSETS.lightconeThumbs[id]) return KNOWN_GACHABASE_ASSETS.lightconeThumbs[id];
+  if (GACHABASE_IMAGE_CACHE.lightcones[id]) return GACHABASE_IMAGE_CACHE.lightcones[id];
+  if (KNOWN_GACHABASE_ASSETS.lightcones[id]) return KNOWN_GACHABASE_ASSETS.lightcones[id];
   if (id === 23065) {
     return 'https://cdn.gachabase.net/hsr/assets/500cfc18698932759756f6b3ba4db417.png';
   }
@@ -1603,6 +1610,8 @@ function getAvatarIconSrc(aid) {
   const meta = AVATAR_METADATA[id];
   if (meta?.images?.icon) return meta.images.icon;
   if (meta?.images?.square) return meta.images.square;
+  if (GACHABASE_IMAGE_CACHE.avatars[id]) return GACHABASE_IMAGE_CACHE.avatars[id];
+  if (KNOWN_GACHABASE_ASSETS.avatars[id]) return KNOWN_GACHABASE_ASSETS.avatars[id];
   return `./assets/avatars/${id}.png`;
 }
 
@@ -1611,6 +1620,8 @@ function getAvatarSplashSrc(aid) {
   const meta = AVATAR_METADATA[id];
   if (meta?.images?.splash) return meta.images.splash;
   if (meta?.images?.fullArt) return meta.images.fullArt;
+  if (GACHABASE_IMAGE_CACHE.avatarSplash[id]) return GACHABASE_IMAGE_CACHE.avatarSplash[id];
+  if (KNOWN_GACHABASE_ASSETS.avatarSplash[id]) return KNOWN_GACHABASE_ASSETS.avatarSplash[id];
   return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${id}.png`;
 }
 
@@ -1888,8 +1899,8 @@ function renderModalSwitcher(currentAvatarId) {
     item.className = `modal-char-switcher-item ${av.avatar_id === currentAvatarId ? 'active' : ''}`;
     item.title = `${meta.name} (ID: ${av.avatar_id})`;
     item.innerHTML = `
-      <img src="./assets/avatars/${av.avatar_id}.png"
-           onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${av.avatar_id}.png';}else{this.style.display='none';}"
+      <img src="${getAvatarIconSrc(av.avatar_id)}"
+           onerror="handleAvatarImgError(this, ${av.avatar_id})"
            alt="${meta.name}">
     `;
     item.addEventListener('click', () => {
@@ -1909,12 +1920,9 @@ function renderModalOverviewTab(avatarId) {
 
   // Portrait Art
   if (el.overviewPortraitImg) {
-    el.overviewPortraitImg.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${aid}.png`;
+    el.overviewPortraitImg.src = getAvatarSplashSrc(aid);
     el.overviewPortraitImg.onerror = function() {
-      this.src = `./assets/avatars/${aid}.png`;
-      this.onerror = function() {
-        this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${aid}.png`;
-      };
+      handleAvatarImgError(this, aid);
     };
   }
 
@@ -1940,12 +1948,7 @@ function renderModalOverviewTab(avatarId) {
   if (el.overviewLcThumb) {
     el.overviewLcThumb.src = getLightconeArtSrc(lcId);
     el.overviewLcThumb.onerror = function() {
-      const fallback = getLightconeArtFallback(lcId);
-      if (this.src !== fallback) {
-        this.src = fallback;
-      } else {
-        this.src = './assets/logo.png';
-      }
+      handleLcImgError(this, lcId);
     };
   }
   if (el.overviewLcName) el.overviewLcName.textContent = lcInfo.name || `Light Cone ${lcId}`;
@@ -2076,9 +2079,7 @@ function renderModalRelicsTab(avatarId) {
   if (lcThumbEl) {
     lcThumbEl.src = getLightconeArtSrc(lcId);
     lcThumbEl.onerror = function() {
-      const fb = getLightconeArtFallback(lcId);
-      if (this.src !== fb) this.src = fb;
-      else this.src = './assets/logo.png';
+      handleLcImgError(this, lcId);
     };
   }
   if (lcNameEl) lcNameEl.textContent = lcInfo.name || `Light Cone ${lcId}`;
@@ -2710,9 +2711,9 @@ function openAvatarDetailModal(avatarItem) {
   const meta = getAvatarInfo(aid);
 
   el.modalCharTitle.textContent = `${t('modalTitleCharEdit')}: ${meta.name} (ID: ${aid})`;
-  el.modalCharImg.src = `./assets/avatars/${aid}.png`;
+  el.modalCharImg.src = getAvatarIconSrc(aid);
   el.modalCharImg.onerror = function() {
-    this.src = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${aid}.png`;
+    handleAvatarImgError(this, aid);
   };
   el.modalCharName.textContent = meta.name;
   el.modalCharMeta.innerHTML = `
@@ -3274,15 +3275,14 @@ function renderShowcaseCard(avatarId) {
     `;
   }
 
-  const primaryPortrait = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/character_portrait/${aid}.png`;
+  const primaryPortrait = getAvatarSplashSrc(aid);
   const fallbackPortrait = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${aid}.png`;
   const lcArtThumb = getLightconeArtSrc(lcId);
-  const fallbackLcThumb = getLightconeArtFallback(lcId);
 
   el.showcaseCardContainer.innerHTML = `
     <!-- 1. Left Splash Art Column -->
     <div class="showcase-splash-col">
-      <img class="showcase-splash-img" src="${primaryPortrait}" onerror="if(this.src!=='${fallbackPortrait}')this.src='${fallbackPortrait}';else this.src='./assets/avatars/${aid}.png';" alt="${meta.name}">
+      <img class="showcase-splash-img" src="${primaryPortrait}" onerror="if(this.src!=='${fallbackPortrait}')this.src='${fallbackPortrait}';else handleAvatarImgError(this, ${aid});" alt="${meta.name}">
       <div class="showcase-splash-overlay">
         <div class="showcase-char-name">${meta.name}</div>
         <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
@@ -3300,7 +3300,7 @@ function renderShowcaseCard(avatarId) {
     <div class="showcase-center-col">
       <!-- Lightcone Box -->
       <div class="showcase-lc-box">
-        <img class="showcase-lc-thumb" src="${lcArtThumb}" onerror="if(this.src!=='${fallbackLcThumb}')this.src='${fallbackLcThumb}';else this.src='./assets/logo.png';" alt="${lcInfo.name}">
+        <img class="showcase-lc-thumb" src="${lcArtThumb}" onerror="handleLcImgError(this, ${lcId})" alt="${lcInfo.name}">
         <div style="flex: 1; min-width: 0;">
           <div style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lcInfo.name}</div>
           <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
@@ -4017,15 +4017,14 @@ function renderLightconesGrid() {
 
     const wearerBadgeHtml = lc.equip_avatar ? `
       <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(lc.equip_avatar).name}">
-        <img class="eq-tile-wearer-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/${lc.equip_avatar}.png" onerror="if(this.src!=='./assets/avatars/${lc.equip_avatar}.png')this.src='./assets/avatars/${lc.equip_avatar}.png';else this.src='./assets/logo.png';" alt="Wearer">
+        <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(lc.equip_avatar)}" onerror="handleAvatarImgError(this, ${lc.equip_avatar})" alt="Wearer">
       </div>
     ` : '';
 
     const primaryImg = getLightconeArtSrc(lc.item_id);
-    const fallbackImg = getLightconeArtFallback(lc.item_id);
 
     card.innerHTML = `
-      <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${meta.name}">
+      <img class="eq-tile-img" src="${primaryImg}" onerror="handleLcImgError(this, ${lc.item_id})" alt="${meta.name}">
       <div class="eq-tile-top-tag">${roman}</div>
       ${wearerBadgeHtml}
       <div class="eq-tile-bottom-bar">
@@ -4085,7 +4084,7 @@ function renderRelicsGrid() {
 
     const wearerBadgeHtml = r.equip_avatar ? `
       <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(r.equip_avatar).name}">
-        <img class="eq-tile-wearer-img" src="https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/character/${r.equip_avatar}.png" onerror="if(this.src!=='./assets/avatars/${r.equip_avatar}.png')this.src='./assets/avatars/${r.equip_avatar}.png';else this.src='./assets/logo.png';" alt="Wearer">
+        <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(r.equip_avatar)}" onerror="handleAvatarImgError(this, ${r.equip_avatar})" alt="Wearer">
       </div>
     ` : '';
 
@@ -4132,13 +4131,12 @@ function showLcInspector(lc) {
   const def = lcMeta.def || (lcMeta.rarity === 5 ? 529 : (lcMeta.rarity === 4 ? 396 : 264));
 
   const primaryThumb = getLightconeArtSrc(lc.item_id);
-  const fallbackThumb = getLightconeArtFallback(lc.item_id);
 
   el.eqInspectorCard.style.display = 'flex';
   el.eqInspectorCard.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div class="eq-inspector-hero">
-        <img class="eq-inspector-thumb" src="${primaryThumb}" onerror="if(this.src!=='${fallbackThumb}')this.src='${fallbackThumb}';else this.src='./assets/logo.png';" alt="${lcInfo.name}">
+        <img class="eq-inspector-thumb" src="${primaryThumb}" onerror="handleLcImgError(this, ${lc.item_id})" alt="${lcInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${lcInfo.name}</div>
           <div class="eq-inspector-stars">${'★'.repeat(lcInfo.rarity || 5)}</div>
@@ -4386,7 +4384,7 @@ function updateAddLcPreview(lcId) {
   const previewThumb = document.getElementById('add-lc-preview-thumb');
   if (previewThumb) {
     previewThumb.src = getLightconeArtSrc(id);
-    previewThumb.onerror = function() { this.src = getLightconeArtFallback(id); };
+    previewThumb.onerror = function() { handleLcImgError(this, id); };
   }
 
   const previewName = document.getElementById('add-lc-preview-name');
@@ -4463,7 +4461,7 @@ function renderAddLcVisualGrid() {
     card.dataset.lcId = id;
 
     card.innerHTML = `
-      <img class="add-lc-card-thumb" src="${getLightconeArtSrc(id)}" onerror="this.src='${getLightconeArtFallback(id)}'" alt="${info.name}" loading="lazy">
+      <img class="add-lc-card-thumb" src="${getLightconeArtSrc(id)}" onerror="handleLcImgError(this, ${id})" alt="${info.name}" loading="lazy">
       <div class="add-lc-card-body">
         <div class="add-lc-card-name" title="${info.name}">${info.name}</div>
         <div class="add-lc-card-stars">${'★'.repeat(info.rarity || 5)}</div>
@@ -4706,8 +4704,8 @@ function renderExRanks(exList) {
       <div style="display: flex; align-items: center; gap: 1rem;">
         <div class="avatar-image-container" style="width: 52px; height: 52px;">
           <img class="avatar-img"
-               src="./assets/avatars/${ex.avatar_id}.png"
-               onerror="if(this.src.indexOf('jsdelivr')===-1){this.src='https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/avatar/${ex.avatar_id}.png';}else{this.style.display='none';}"
+               src="${getAvatarIconSrc(ex.avatar_id)}"
+               onerror="handleAvatarImgError(this, ${ex.avatar_id})"
                alt="${info.name}">
         </div>
         <div>
@@ -4966,6 +4964,7 @@ function setupTabs() {
           loadJsonData(state.currentJsonMode);
         } else if (targetId === 'tab-settings') {
           updateCacheUsageDisplay();
+          updateGachabaseSyncUI();
         }
       }
     });
@@ -4973,323 +4972,134 @@ function setupTabs() {
 }
 
 // ==========================================
-// Gachabase Data Fetcher & Importer Logic
+// Gachabase Catalog Sync & Dynamic Image Engine
 // ==========================================
-let currentGachabaseItem = null;
+let isGachabaseSyncing = false;
 
-function openGachabaseModal(defaultId = null, defaultType = 'character') {
-  if (!el.modalGachabase) return;
-  el.modalGachabase.classList.add('active');
-  if (defaultId) {
-    if (el.gachabaseInput) el.gachabaseInput.value = String(defaultId);
-    if (el.gachabaseType) el.gachabaseType.value = defaultType;
-    performGachabaseFetch();
-  } else {
-    setTimeout(() => el.gachabaseInput?.focus(), 50);
+async function updateGachabaseSyncUI() {
+  if (!el.badgeGachabaseStatus && !el.lblGachabaseInfo) return;
+  try {
+    const lastSync = await idbGet('gac_gachabase_last_sync');
+    if (lastSync && lastSync.timestamp) {
+      const dateStr = new Date(lastSync.timestamp).toLocaleString();
+      if (el.badgeGachabaseStatus) {
+        el.badgeGachabaseStatus.textContent = 'ซิงค์แล้ว';
+        el.badgeGachabaseStatus.style.color = 'var(--accent-green)';
+        el.badgeGachabaseStatus.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+      }
+      if (el.lblGachabaseInfo) {
+        el.lblGachabaseInfo.innerHTML = `ซิงค์ล่าสุดเมื่อ: <strong>${dateStr}</strong> (ตัวละครในระบบ: ${lastSync.totalAvatarsCount || Object.keys(AVATAR_METADATA).length}, กรวยแสง: ${lastSync.totalLcsCount || Object.keys(LIGHTCONE_METADATA).length})`;
+      }
+    } else {
+      if (el.badgeGachabaseStatus) {
+        el.badgeGachabaseStatus.textContent = 'ยังไม่เคยซิงค์';
+        el.badgeGachabaseStatus.style.color = 'var(--accent-gold)';
+        el.badgeGachabaseStatus.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+      }
+      if (el.lblGachabaseInfo) {
+        el.lblGachabaseInfo.textContent = 'ยังไม่ได้ซิงค์แคตตาล็อกเกมจาก Gachabase กดปุ่มด้านล่างเพื่ออัปเดต';
+      }
+    }
+  } catch (err) {
+    console.warn('Error reading gachabase sync status:', err);
   }
 }
 
-function closeGachabaseModal() {
-  if (!el.modalGachabase) return;
-  el.modalGachabase.classList.remove('active');
-}
-
-async function performGachabaseFetch() {
-  const input = el.gachabaseInput?.value?.trim();
-  if (!input) {
-    showToast('กรุณาระบุ ID หรือ URL ของ Gachabase', 'warning');
+async function triggerGachabaseSync(showToastOnDone = true) {
+  if (isGachabaseSyncing) {
+    showToast('กำลังซิงค์ข้อมูลจาก Gachabase อยู่แล้ว กรุณารอสักครู่...', 'warning');
     return;
   }
 
-  const type = el.gachabaseType?.value || 'character';
-  const branch = el.gachabaseBranch?.value || 'beta';
-  const lang = el.gachabaseLang?.value || 'en';
+  isGachabaseSyncing = true;
+  const syncButtons = [
+    el.btnHeaderGachabaseSync,
+    el.btnQuickGachabaseSync,
+    el.btnSyncGachabaseAvatars,
+    el.btnSyncGachabaseEq,
+    el.btnSyncGachabaseNow
+  ].filter(Boolean);
 
-  const parsedParams = parseGachabaseInput(input, type, branch, lang);
-  if (!parsedParams) {
-    showToast('รูปแบบข้อมูลไม่ถูกต้อง กรุณาระบุ ID ตัวเลขหรือ URL', 'error');
-    return;
+  syncButtons.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('loading');
+  });
+
+  if (el.badgeGachabaseStatus) {
+    el.badgeGachabaseStatus.textContent = 'กำลังซิงค์...';
+    el.badgeGachabaseStatus.style.color = 'var(--accent-cyan)';
+    el.badgeGachabaseStatus.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+  }
+  if (el.lblGachabaseInfo) {
+    el.lblGachabaseInfo.textContent = 'กำลังดึงฐานข้อมูลตัวละครและกรวยแสงจาก Gachabase CDN...';
   }
 
-  if (parsedParams.type && el.gachabaseType) el.gachabaseType.value = parsedParams.type;
-  if (parsedParams.branch && el.gachabaseBranch) el.gachabaseBranch.value = parsedParams.branch;
-
-  if (el.gachabaseStatus) {
-    el.gachabaseStatus.style.display = 'block';
-    el.gachabaseStatus.style.background = 'rgba(56, 189, 248, 0.15)';
-    el.gachabaseStatus.style.border = '1px solid rgba(56, 189, 248, 0.4)';
-    el.gachabaseStatus.style.color = 'var(--accent-cyan)';
-    el.gachabaseStatus.innerHTML = `🔄 กำลังดึงข้อมูลจาก Gachabase (<code style="color: #fff;">${parsedParams.url}</code>)...`;
-  }
-  if (el.gachabasePreviewContainer) el.gachabasePreviewContainer.style.display = 'none';
-  if (el.gachabaseFooterActions) el.gachabaseFooterActions.style.display = 'none';
-  if (el.btnGachabaseFetch) el.btnGachabaseFetch.disabled = true;
+  showToast('🌐 เริ่มซิงค์ฐานข้อมูลตัวละครและรูปภาพจาก Gachabase...', 'info');
 
   try {
-    const { html, finalUrl } = await fetchGachabaseHtml(parsedParams.url, state.apiUrl);
-    const parsedItem = parseGachabaseHtml(html, lang);
-    parsedItem.sourceUrl = finalUrl;
-    parsedItem.branch = parsedParams.branch;
-    parsedItem.lang = lang;
-    currentGachabaseItem = parsedItem;
+    const currentLang = getCurrentLanguage();
+    const result = await syncGachabaseDatabase({
+      apiUrl: state.apiUrl,
+      branch: 'beta',
+      lang: currentLang === 'th' ? 'th' : 'en',
+      metadataContext: {
+        AVATAR_METADATA,
+        LIGHTCONE_METADATA,
+        SIGNATURE_LIGHTCONES,
+        idbSet,
+        idbGet
+      }
+    });
 
-    if (el.gachabaseStatus) {
-      el.gachabaseStatus.style.background = 'rgba(52, 211, 153, 0.15)';
-      el.gachabaseStatus.style.border = '1px solid rgba(52, 211, 153, 0.4)';
-      el.gachabaseStatus.style.color = 'var(--accent-green)';
-      el.gachabaseStatus.innerHTML = `✅ ดึงข้อมูลสำเร็จ: <strong>[${parsedItem.rarity}★] ${parsedItem.name}</strong> (ID: ${parsedItem.id})`;
+    initAvatarsList(true);
+    renderAvatarsGrid();
+    loadEquipment();
+    if (state.selectedAvatarDetail) {
+      renderModalSwitcher(state.selectedAvatarDetail.avatar_id);
     }
+    await updateGachabaseSyncUI();
 
-    renderGachabasePreview(parsedItem);
+    if (showToastOnDone) {
+      showToast(`✅ ซิงค์สำเร็จ! ตรวจพบตัวละครทั้งหมด ${result.totalAvatarsCount} ตัว (+ใหม่ ${result.newAvatarsCount}), กรวยแสง ${result.totalLcsCount} ชิ้น (+ใหม่ ${result.newLcsCount}) พร้อมผูกรูป Gachabase CDN เรียบร้อย`, 'success');
+    }
   } catch (err) {
-    console.error('Gachabase fetch error:', err);
-    if (el.gachabaseStatus) {
-      el.gachabaseStatus.style.background = 'rgba(248, 113, 113, 0.15)';
-      el.gachabaseStatus.style.border = '1px solid rgba(248, 113, 113, 0.4)';
-      el.gachabaseStatus.style.color = 'var(--accent-red)';
-      el.gachabaseStatus.innerHTML = `❌ เกิดข้อผิดพลาดในการดึงข้อมูล: ${err.message}`;
+    console.error('Gachabase sync failed:', err);
+    if (el.badgeGachabaseStatus) {
+      el.badgeGachabaseStatus.textContent = 'ซิงค์ล้มเหลว';
+      el.badgeGachabaseStatus.style.color = 'var(--accent-red)';
+      el.badgeGachabaseStatus.style.borderColor = 'rgba(248, 113, 113, 0.4)';
     }
+    if (el.lblGachabaseInfo) {
+      el.lblGachabaseInfo.textContent = `ข้อผิดพลาด: ${err.message}`;
+    }
+    showToast(`❌ ซิงค์ข้อมูล Gachabase ไม่สำเร็จ: ${err.message}`, 'error');
   } finally {
-    if (el.btnGachabaseFetch) el.btnGachabaseFetch.disabled = false;
-  }
-}
-
-function renderGachabasePreview(item) {
-  if (!el.gachabasePreviewContainer) return;
-  el.gachabasePreviewContainer.style.display = 'block';
-  if (el.gachabaseFooterActions) el.gachabaseFooterActions.style.display = 'flex';
-
-  const isChar = item.type === 'character';
-  const isLc = item.type === 'lightcone';
-  const isRelic = item.type === 'relic';
-
-  if (el.btnGachabaseImportE0S1) {
-    el.btnGachabaseImportE0S1.textContent = isChar ? '⚡ นำเข้า FreeSR (E0S1)' : '⚡ เพิ่มเข้า FreeSR (S1)';
-  }
-  if (el.btnGachabaseImportE6S5) {
-    el.btnGachabaseImportE6S5.textContent = isChar ? '⭐ นำเข้า FreeSR (E6S5)' : '⭐ เพิ่มเข้า FreeSR (S5)';
-  }
-
-  const starsHtml = '⭐'.repeat(item.rarity || 5);
-
-  let mainImgUrl = '';
-  if (isChar) {
-    mainImgUrl = item.images.splash || item.images.icon || `./assets/avatars/${item.id}.png`;
-  } else if (isLc) {
-    mainImgUrl = item.images.fullArt || item.images.thumbnail || `./assets/lightcones/${item.id}.png`;
-  } else {
-    mainImgUrl = item.images.icon || `./assets/logo.png`;
-  }
-
-  let recHtml = '';
-  if (isChar) {
-    const cavernSets = item.recommended.cavernSets || [];
-    const planarSets = item.recommended.planarSets || [];
-    const sigLcId = item.recommended.signatureLcId;
-    const sigLcMeta = sigLcId ? getLightconeInfo(sigLcId) : null;
-
-    recHtml = `
-      <div style="background: rgba(251, 191, 36, 0.08); border: 1px dashed rgba(251, 191, 36, 0.4); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.5rem;">
-        <div style="font-weight: 800; font-size: 0.825rem; color: var(--accent-gold); margin-bottom: 0.4rem;">
-          💡 คำแนะนำการจัด Build จาก Gachabase
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8rem;">
-          <div>
-            <strong>🗡️ กรวยแสงแนะนำ (Signature):</strong>
-            <span style="color: #fff;">${sigLcMeta ? sigLcMeta.name : (sigLcId ? `LC ID: ${sigLcId}` : 'ตามสายตัวละคร')}</span>
-          </div>
-          <div>
-            <strong>🛡️ เซ็ตรีลิกส์แนะนำ (Cavern):</strong>
-            <span style="color: #cbd5e1;">${cavernSets.map(s => getRelicSetInfo(s).name).join(', ') || 'ตามประเภทสาย'}</span>
-          </div>
-          <div>
-            <strong>🔮 เครื่องประดับแนะนำ (Planar):</strong>
-            <span style="color: #cbd5e1;">${planarSets.map(s => getRelicSetInfo(s).name).join(', ') || 'ตามประเภทสาย'}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  let skillsHtml = '';
-  if (isChar && item.skills && item.skills.length > 0) {
-    skillsHtml = `
-      <div style="margin-top: 1rem;">
-        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.6rem;">
-          ⚡ สกิลและการต่อสู้ (${item.skills.length} ท่า)
-        </h4>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 260px; overflow-y: auto; padding-right: 0.25rem;">
-          ${item.skills.map(s => `
-            <div class="gachabase-skill-item">
-              ${s.icon ? `<img class="gachabase-skill-icon" src="${s.icon}" alt="${s.name}" onerror="this.style.display='none'">` : ''}
-              <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; flex-wrap: wrap;">
-                  <span style="font-weight: 700; color: #fff; font-size: 0.875rem;">${s.name}</span>
-                  <span class="skill-type-tag" style="font-size: 0.7rem;">${s.type}</span>
-                  ${s.tag ? `<span class="badge-super-tag" style="font-size: 0.7rem;">${s.tag}</span>` : ''}
-                </div>
-                <div style="font-size: 0.775rem; color: var(--text-muted); line-height: 1.4;">${s.description}</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  } else if (isLc && item.lcSkill) {
-    skillsHtml = `
-      <div style="margin-top: 1rem; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem;">
-        <div style="font-weight: 700; color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 0.35rem;">
-          ✨ เอฟเฟกต์สกิลพิเศษ: ${item.lcSkill.name || 'Passive Skill'}
-        </div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">${item.lcSkill.description || '-'}</div>
-      </div>
-    `;
-  }
-
-  let eidolonsHtml = '';
-  if (isChar && item.eidolons && item.eidolons.length > 0) {
-    eidolonsHtml = `
-      <div style="margin-top: 1rem;">
-        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--accent-gold); margin-bottom: 0.6rem;">
-          ⭐ กลุ่มดาว Eidolons (E1 - E6)
-        </h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.5rem; max-height: 220px; overflow-y: auto; padding-right: 0.25rem;">
-          ${item.eidolons.map(e => `
-            <div class="gachabase-eidolon-item">
-              <span class="badge-super-tag" style="background: rgba(251, 191, 36, 0.2); color: var(--accent-gold); font-weight: 800; min-width: 32px; text-align: center;">E${e.rank}</span>
-              <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 700; color: #fff; font-size: 0.825rem;">${e.name}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${e.description}</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }
-
-  el.gachabasePreviewContainer.innerHTML = `
-    <div class="gachabase-preview-card">
-      <div class="gachabase-art-column">
-        <img class="gachabase-art-img" src="${mainImgUrl}" alt="${item.name}" onerror="this.src='./assets/logo.png'">
-        <div style="font-size: 1.1rem; letter-spacing: 2px;">${starsHtml}</div>
-        ${isChar && item.maxEnergy ? `<div class="badge-super-tag" style="font-size: 0.75rem;">⚡ พลังงานสูงสุด: ${item.maxEnergy}</div>` : ''}
-      </div>
-
-      <div class="gachabase-details-column">
-        <div class="gachabase-header-title">
-          <span>${item.name}</span>
-          <span style="font-size: 0.75rem; font-weight: 600; padding: 0.15rem 0.5rem; background: rgba(255,255,255,0.08); border-radius: 4px; color: var(--text-muted);">ID: ${item.id}</span>
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          ${isChar ? `${getElementIconHtml(item.element, 20)} <span style="font-size: 0.85rem; font-weight: 700;">${translateElement(item.element)}</span>` : ''}
-          ${getPathIconHtml(item.path, 20)} <span style="font-size: 0.85rem; font-weight: 700;">${translatePath(item.path)}</span>
-          <span class="badge-super-tag" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan);">${item.branch.toUpperCase()}</span>
-        </div>
-
-        ${recHtml}
-        ${skillsHtml}
-        ${eidolonsHtml}
-      </div>
-    </div>
-  `;
-}
-
-async function handleGachabaseSaveMetaOnly() {
-  if (!currentGachabaseItem) return;
-  try {
-    await registerGachabaseItem(currentGachabaseItem, {
-      AVATAR_METADATA,
-      LIGHTCONE_METADATA,
-      RELIC_SET_METADATA,
-      SIGNATURE_LIGHTCONES,
-      idbGet,
-      idbSet
+    isGachabaseSyncing = false;
+    syncButtons.forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('loading');
     });
-    initAvatarsList(true);
-    renderAvatarsGrid();
-    loadEquipment();
-    showToast(`💾 บันทึก Metadata ของ "${currentGachabaseItem.name}" เข้าสู่ระบบเรียบร้อย`, 'success');
-  } catch (err) {
-    showToast(err.message, 'error');
   }
 }
 
-async function handleGachabaseImportToFreeSR(eLevel, sLevel) {
-  if (!currentGachabaseItem) return;
-  try {
-    await registerGachabaseItem(currentGachabaseItem, {
-      AVATAR_METADATA,
-      LIGHTCONE_METADATA,
-      RELIC_SET_METADATA,
-      SIGNATURE_LIGHTCONES,
-      idbGet,
-      idbSet
-    });
 
-    if (!state.fullFreesrData) {
-      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
-    }
 
-    const result = applyGachabaseToFreeSR(currentGachabaseItem, state.fullFreesrData, {
-      eLevel,
-      sLevel,
-      autoEquipLc: true,
-      autoEquipRelics: true
-    });
 
-    await saveFreesrChangesToServer();
 
-    initAvatarsList(true);
-    renderAvatarsGrid();
-    loadEquipment();
-    updateDashboard();
+function setupGachabaseSyncEvents() {
+  const syncButtons = [
+    el.btnHeaderGachabaseSync,
+    el.btnQuickGachabaseSync,
+    el.btnSyncGachabaseAvatars,
+    el.btnSyncGachabaseEq,
+    el.btnSyncGachabaseNow
+  ].filter(Boolean);
 
-    closeGachabaseModal();
-
-    if (currentGachabaseItem.type === 'character' && state.fullFreesrData.avatars[currentGachabaseItem.id]) {
-      openAvatarDetailModal(state.fullFreesrData.avatars[currentGachabaseItem.id]);
-    }
-
-    const rankLabel = currentGachabaseItem.type === 'character' ? (eLevel === 6 ? 'E6S5' : 'E0S1') : `S${sLevel}`;
-    showToast(`⚡ นำเข้า "${currentGachabaseItem.name}" (${rankLabel}) ลง FreeSR และบันทึกเซิร์ฟเวอร์สำเร็จ!`, 'success');
-  } catch (err) {
-    console.error('Import error:', err);
-    showToast(err.message, 'error');
-  }
-}
-
-function setupGachabaseEvents() {
-  const openButtons = [el.btnOpenGachabase, el.btnQuickGachabase, el.btnAvatarsGachabase, el.btnEqGachabase];
-  openButtons.forEach(btn => {
-    if (btn) {
-      btn.addEventListener('click', () => openGachabaseModal());
-    }
-  });
-
-  el.btnCloseGachabaseModal?.addEventListener('click', closeGachabaseModal);
-
-  document.querySelectorAll('.gachabase-quick-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const cid = chip.getAttribute('data-id');
-      const ctype = chip.getAttribute('data-type') || 'character';
-      if (el.gachabaseInput) el.gachabaseInput.value = cid;
-      if (el.gachabaseType) el.gachabaseType.value = ctype;
-      performGachabaseFetch();
+  syncButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      triggerGachabaseSync(true);
     });
   });
-
-  el.btnGachabaseFetch?.addEventListener('click', performGachabaseFetch);
-  el.gachabaseInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      performGachabaseFetch();
-    }
-  });
-
-  el.btnGachabaseSaveMeta?.addEventListener('click', handleGachabaseSaveMetaOnly);
-  el.btnGachabaseImportE0S1?.addEventListener('click', () => handleGachabaseImportToFreeSR(0, 1));
-  el.btnGachabaseImportE6S5?.addEventListener('click', () => handleGachabaseImportToFreeSR(6, 5));
 }
 
 // Setup Event Listeners
@@ -6057,7 +5867,7 @@ function setupEvents() {
   updateCacheUsageDisplay();
 
   // Modal Backdrop Click to close
-  [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings, el.modalGachabase].forEach(modal => {
+  [el.modalAvatarDetail, el.modalLineupPicker, el.modalSettings].forEach(modal => {
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -6084,13 +5894,11 @@ function startPingLoop() {
 
 // Initialize Application
 async function init() {
-  await loadCachedGachabaseRegistry({
-    AVATAR_METADATA,
-    LIGHTCONE_METADATA,
-    RELIC_SET_METADATA,
-    SIGNATURE_LIGHTCONES,
+  await loadCachedGachabaseData({
     idbGet,
-    idbSet
+    idbSet,
+    AVATAR_METADATA,
+    LIGHTCONE_METADATA
   });
   initAvatarsList();
   await loadCachedStorageData();
@@ -6099,11 +5907,12 @@ async function init() {
   setupTabs();
   setupModalSubtabs();
   setupEvents();
-  setupGachabaseEvents();
+  setupGachabaseSyncEvents();
   applyTranslations();
   renderLineup(state.statusData?.lineups || DEFAULT_LINEUP);
   renderAvatarsGrid();
   loadEquipment();
+  updateGachabaseSyncUI();
   refreshStatus();
   startPingLoop();
   updateCacheUsageDisplay();
