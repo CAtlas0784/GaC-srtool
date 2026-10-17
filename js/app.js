@@ -398,7 +398,7 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('online');
     el.connectionStatusText.style.color = 'var(--accent-green)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = '● เซิร์ฟเวอร์ออนไลน์';
+      el.lblConsoleConnStatus.textContent = t('consoleOnline');
       el.lblConsoleConnStatus.style.color = 'var(--accent-green)';
     }
   } else {
@@ -406,7 +406,7 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('offline');
     el.connectionStatusText.style.color = 'var(--accent-red)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = '○ ออฟไลน์ (คำสั่งทำงานผ่านแคชภายใน)';
+      el.lblConsoleConnStatus.textContent = t('consoleOffline');
       el.lblConsoleConnStatus.style.color = 'var(--text-muted)';
     }
   }
@@ -827,6 +827,12 @@ function applyTranslations() {
   // Update connection status text with new language
   setConnectionStatus(state.isConnected);
 
+  // Update server mode badges & labels for current language
+  setupServerModes();
+
+  // Re-render team synergy in new language
+  renderTeamSynergy(state.statusData?.lineups);
+
   renderLineup(state.statusData?.lineups);
   if (state.statusData?.ex_ranks) {
     renderExRanks(state.statusData.ex_ranks);
@@ -870,7 +876,7 @@ function setupServerModes() {
       if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaC-hkrpg-go';
       if (el.tabBtnPersistent) {
         el.tabBtnPersistent.style.display = '';
-        el.tabBtnPersistent.textContent = '💾 จัดการเซฟ GaC';
+        el.tabBtnPersistent.textContent = t('tabPersistentGaC');
       }
       if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
       if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = '';
@@ -878,12 +884,12 @@ function setupServerModes() {
       if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = '';
       if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = '';
       if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceGaC');
     } else if (mode === 'firefly') {
       if (el.lblActiveMode) el.lblActiveMode.textContent = 'FireflyGo';
       if (el.tabBtnPersistent) {
         el.tabBtnPersistent.style.display = '';
-        el.tabBtnPersistent.textContent = '👤 ผู้บุกเบิก & March 7th';
+        el.tabBtnPersistent.textContent = t('tabPersistentFirefly');
       }
       if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
       if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = 'none'; // Hide unsupported GaC switches
@@ -891,7 +897,7 @@ function setupServerModes() {
       if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
       if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
       if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = ''; // Show data-in-game for Firefly
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
 
       if (state.activeTab === 'tab-exrank') {
         const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
@@ -909,7 +915,7 @@ function setupServerModes() {
       if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
       if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
       if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
 
       if (state.activeTab === 'tab-persistent' || state.activeTab === 'tab-exrank') {
         const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
@@ -1303,18 +1309,18 @@ function renderTeamSynergy(lineups) {
   // Render Element Chips
   const coveredCount = Object.keys(coveredElements).length;
   if (el.badgeSynergyCoverage) {
-    el.badgeSynergyCoverage.textContent = `ครอบคลุม ${coveredCount}/7 ธาตุ`;
+    el.badgeSynergyCoverage.textContent = t('synergyCoverageBadge', { count: coveredCount });
     el.badgeSynergyCoverage.style.color = coveredCount >= 4 ? 'var(--accent-green)' : (coveredCount >= 2 ? 'var(--accent-cyan)' : 'var(--accent-gold)');
   }
 
   el.synergyElementsContainer.innerHTML = HSR_ELEMENTS.map(elem => {
     const isCovered = !!coveredElements[elem.key];
     const providers = coveredElements[elem.key] || [];
-    const providerText = isCovered ? providers.join(', ') : 'ไม่มีในทีม';
+    const providerText = isCovered ? providers.join(', ') : t('synergyNoInTeam');
     return `
       <div class="synergy-element-chip ${isCovered ? 'active' : 'inactive'}" style="${isCovered ? `border-color: ${elem.color}66; box-shadow: 0 0 8px ${elem.color}22;` : ''}">
         ${getElementIconHtml(elem.key, 22)}
-        <span class="synergy-element-name" style="${isCovered ? `color: ${elem.color};` : ''}">${elem.nameTh}</span>
+        <span class="synergy-element-name" style="${isCovered ? `color: ${elem.color};` : ''}">${translateElement(elem.key)}</span>
         <span class="synergy-element-chars" title="${providerText}">${providerText}</span>
       </div>
     `;
@@ -1324,17 +1330,17 @@ function renderTeamSynergy(lineups) {
   if (el.synergyRolesContainer) {
     el.synergyRolesContainer.innerHTML = `
       <div class="badge-super-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171; font-weight: 700;">
-        🗡️ DPS (${roles.dps.length}): ${roles.dps.join(', ') || '-'}
+        ${t('roleDps')} (${roles.dps.length}): ${roles.dps.join(', ') || '-'}
       </div>
       <div class="badge-super-tag" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-weight: 700;">
-        ⚡ ซัพพอร์ต/ดีบัฟ (${roles.support.length}): ${roles.support.join(', ') || '-'}
+        ${t('roleSupport')} (${roles.support.length}): ${roles.support.join(', ') || '-'}
       </div>
       <div class="badge-super-tag" style="background: rgba(52, 211, 153, 0.15); color: #34d399; font-weight: 700;">
-        🛡️ Sustain ฮีล/ชิลด์ (${roles.sustain.length}): ${roles.sustain.join(', ') || '-'}
+        ${t('roleSustain')} (${roles.sustain.length}): ${roles.sustain.join(', ') || '-'}
       </div>
       ${roles.specialist.length ? `
         <div class="badge-super-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">
-          🔮 พิเศษ/FUA (${roles.specialist.length}): ${roles.specialist.join(', ')}
+          ${t('roleSpecialist')} (${roles.specialist.length}): ${roles.specialist.join(', ')}
         </div>
       ` : ''}
     `;
@@ -1343,18 +1349,19 @@ function renderTeamSynergy(lineups) {
   // Dynamic Advice Text
   if (el.synergyAdviceBox) {
     if (activeIds.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: var(--text-muted);">ยังไม่มีตัวละครในทีม กรุณาเลือกตัวละครในทีมด้านบน</span>`;
+      el.synergyAdviceBox.innerHTML = `<span style="color: var(--text-muted);">${t('adviceEmpty')}</span>`;
+      el.synergyAdviceBox.style.borderColor = 'rgba(255,255,255,0.08)';
     } else if (roles.sustain.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">⚠️ <strong>ข้อแนะนำ:</strong> ทีมยังขาดตัวละครสายป้องกันหรือรักษา (Preservation / Abundance) แนะนำใส่ 1 ตำแหน่งเพื่อความปลอดภัยในการเล่น</span>`;
+      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">${t('adviceNoSustain')}</span>`;
       el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
     } else if (roles.dps.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #38bdf8;">💡 <strong>ข้อแนะนำ:</strong> ทีมมีแต่ตัวซัพพอร์ต ยังไม่มีตัวทำดาเมจหลัก (Destruction / Hunt / Erudition)</span>`;
+      el.synergyAdviceBox.innerHTML = `<span style="color: #38bdf8;">${t('adviceNoDps')}</span>`;
       el.synergyAdviceBox.style.borderColor = 'rgba(56, 189, 248, 0.4)';
     } else if (roles.support.length === 0) {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">💡 <strong>ข้อแนะนำ:</strong> ทีมมีตัวดาเมจแต่ยังไม่มีตัวบัฟหรือดีบัฟ (Harmony / Nihility) เสริมตัวซัพพอร์ตจะช่วยเร่งดาเมจได้มหาศาล</span>`;
+      el.synergyAdviceBox.innerHTML = `<span style="color: #fbbf24;">${t('adviceNoSupport')}</span>`;
       el.synergyAdviceBox.style.borderColor = 'rgba(245, 158, 11, 0.4)';
     } else {
-      el.synergyAdviceBox.innerHTML = `<span style="color: #34d399;">✅ <strong>สมดุลยอดเยี่ยม:</strong> ทีมมีโครงสร้างครบเครื่อง ทั้งตัวทำดาเมจ ซัพพอร์ตบัฟ/ดีบัฟ และตัวฮีลเลอร์/ชิลเดอร์ พร้อมลุยทุกคอนเทนต์!</span>`;
+      el.synergyAdviceBox.innerHTML = `<span style="color: #34d399;">${t('adviceBalanced')}</span>`;
       el.synergyAdviceBox.style.borderColor = 'rgba(52, 211, 153, 0.4)';
     }
   }
@@ -1602,9 +1609,9 @@ function setupGMConsoleEvents() {
       if (!el.consoleTerminalLog) return;
       const text = el.consoleTerminalLog.innerText || el.consoleTerminalLog.textContent;
       navigator.clipboard?.writeText(text).then(() => {
-        showToast('คัดลอก Log ทั้งหมดลงในคลิปบอร์ดแล้ว', 'success');
+        showToast(t('consoleLogCopied'), 'success');
       }).catch(() => {
-        showToast('ไม่สามารถคัดลอก Log ได้', 'error');
+        showToast(t('consoleLogCopyFailed'), 'error');
       });
     });
   }
@@ -1614,7 +1621,7 @@ function setupGMConsoleEvents() {
     el.btnConsoleClearLog.addEventListener('click', () => {
       if (el.consoleTerminalLog) {
         el.consoleTerminalLog.innerHTML = '';
-        logToConsole('ล้างหน้าจอ Terminal เรียบร้อย', 'SYS');
+        logToConsole(t('consoleLogCleared'), 'SYS');
       }
     });
   }

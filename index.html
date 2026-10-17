@@ -45,7 +45,7 @@
         🔄 รีเฟรช
       </button>
 
-      <button class="btn btn-secondary btn-sm" id="btn-header-gachabase-sync" title="ซิงค์และอัปเดตข้อมูลเกม/รูปภาพจาก Gachabase เมื่อเกมอัปเดต" style="border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;">
+      <button class="btn btn-secondary btn-sm" id="btn-header-gachabase-sync" title="ซิงค์และอัปเดตข้อมูลเกม/รูปภาพจาก Gachabase เมื่อเกมอัปเดต" style="border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;" data-i18n="btnGachabaseSync">
         🌐 ซิงค์ Gachabase
       </button>
     </div>
@@ -144,15 +144,15 @@
             <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <span style="display: flex; align-items: center; gap: 0.5rem;">
                 <span>⚔️</span>
-                <span>วิเคราะห์ Synergy ทีม & จุดอ่อน</span>
+                <span data-i18n="synergyTitle">วิเคราะห์ Synergy ทีม & จุดอ่อน</span>
               </span>
               <span class="badge-super-tag" id="badge-synergy-coverage" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); font-weight: 800;">ครอบคลุม 0/7 ธาตุ</span>
             </div>
-            <p class="card-subtitle" style="margin-bottom: 0.85rem;">วิเคราะห์การครอบคลุม Weakness Break, ความสมดุลของบทบาท และความพร้อมของทีม</p>
+            <p class="card-subtitle" style="margin-bottom: 0.85rem;" data-i18n="synergySubtitle">วิเคราะห์การครอบคลุม Weakness Break, ความสมดุลของบทบาท และความพร้อมของทีม</p>
 
             <!-- A. Weakness Break Coverage 7 Elements -->
             <div style="margin-bottom: 1rem;">
-              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyBreakCoverage">
                 🎯 การทำลายจุดอ่อน (Weakness Break Coverage)
               </div>
               <div class="synergy-elements-grid" id="synergy-elements-container">
@@ -162,7 +162,7 @@
 
             <!-- B. Team Role Balance -->
             <div style="margin-bottom: 1rem;">
-              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyRoleBalance">
                 🛡️ การกระจายบทบาทในทีม (Team Composition & Roles)
               </div>
               <div id="synergy-roles-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
@@ -175,25 +175,25 @@
 
             <!-- C. Equipment Readiness & Stats Overview -->
             <div>
-              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.4rem;" data-i18n="synergyEquipmentTitle">
                 📊 ความพร้อมของอุปกรณ์และเลเวลเฉลี่ย
               </div>
               <div class="synergy-metrics-grid">
                 <div class="synergy-metric-box">
                   <div class="synergy-metric-val" id="synergy-avg-level">-</div>
-                  <div class="synergy-metric-lbl">เลเวลเฉลี่ย</div>
+                  <div class="synergy-metric-lbl" data-i18n="synergyAvgLevel">เลเวลเฉลี่ย</div>
                 </div>
                 <div class="synergy-metric-box">
                   <div class="synergy-metric-val" id="synergy-avg-eidolon">-</div>
-                  <div class="synergy-metric-lbl">Eidolon เฉลี่ย</div>
+                  <div class="synergy-metric-lbl" data-i18n="synergyAvgEidolon">Eidolon เฉลี่ย</div>
                 </div>
                 <div class="synergy-metric-box">
                   <div class="synergy-metric-val" id="synergy-lc-ready">-</div>
-                  <div class="synergy-metric-lbl">สวมกรวยแสง</div>
+                  <div class="synergy-metric-lbl" data-i18n="synergyLcEquipped">สวมกรวยแสง</div>
                 </div>
                 <div class="synergy-metric-box">
                   <div class="synergy-metric-val" id="synergy-relic-ready">-</div>
-                  <div class="synergy-metric-lbl">รีลิกส์ครบชุด</div>
+                  <div class="synergy-metric-lbl" data-i18n="synergyRelicFull">รีลิกส์ครบชุด</div>
                 </div>
               </div>
             </div>
@@ -205,22 +205,22 @@
           <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <span style="display: flex; align-items: center; gap: 0.5rem;">
               <span>💻</span>
-              <span>คอนโซลคำสั่ง GM & Log สด</span>
+              <span data-i18n="consoleTitle">คอนโซลคำสั่ง GM & Log สด</span>
             </span>
             <div style="display: flex; gap: 0.35rem;">
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-copy-log" title="คัดลอก Log ทั้งหมด" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-copy-log" title="คัดลอก Log ทั้งหมด" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" data-i18n="consoleCopyLog">
                 📋 คัดลอก
               </button>
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-clear-log" title="ล้างหน้าจอ Terminal" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-clear-log" title="ล้างหน้าจอ Terminal" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" data-i18n="consoleClearLog">
                 🗑️ ล้าง Log
               </button>
             </div>
           </div>
-          <p class="card-subtitle" style="margin-bottom: 0.25rem;">ส่งคำสั่ง GM / Server commands แบบเรียลไทม์ พร้อมติดตามสถานะและ Packet Log</p>
+          <p class="card-subtitle" style="margin-bottom: 0.25rem;" data-i18n="consoleSubtitle">ส่งคำสั่ง GM / Server commands แบบเรียลไทม์ พร้อมติดตามสถานะและ Packet Log</p>
 
           <!-- Quick GM Command Pills -->
           <div>
-            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;" data-i18n="consoleQuickTitle">
               ⚡ คำสั่งด่วนที่ใช้บ่อย (Quick Commands)
             </div>
             <div class="console-quick-pills">
@@ -251,14 +251,14 @@
           <form id="form-console-cmd" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
             <div class="console-input-wrap" style="flex: 1; display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 0 0.75rem;">
               <span style="color: var(--accent-cyan); font-family: monospace; font-weight: 800; font-size: 1.1rem; margin-right: 0.5rem;">&gt;</span>
-              <input type="text" id="console-cmd-input" class="form-input" placeholder="พิมพ์คำสั่ง GM เช่น /heal, /max, /teleport 20411, /give 102 1000..." style="background: transparent; border: none; padding: 0.6rem 0; font-family: monospace; font-size: 0.85rem; box-shadow: none;" autocomplete="off">
+              <input type="text" id="console-cmd-input" class="form-input" data-i18n-placeholder="consolePlaceholder" placeholder="พิมพ์คำสั่ง GM เช่น /heal, /max, /teleport 20411, /give 102 1000..." style="background: transparent; border: none; padding: 0.6rem 0; font-family: monospace; font-size: 0.85rem; box-shadow: none;" autocomplete="off">
             </div>
-            <button type="submit" class="btn btn-primary" id="btn-console-cmd-send" style="padding: 0.6rem 1.25rem; font-weight: 700; white-space: nowrap;">
+            <button type="submit" class="btn btn-primary" id="btn-console-cmd-send" data-i18n="consoleSend" style="padding: 0.6rem 1.25rem; font-weight: 700; white-space: nowrap;">
               ส่งคำสั่ง
             </button>
           </form>
           <div style="font-size: 0.725rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
-            <span>💡 รองรับกด <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↑</kbd> <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↓</kbd> เพื่อเลือกประวัติคำสั่งก่อนหน้า</span>
+            <span data-i18n="consoleHistoryHint">💡 รองรับกด <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↑</kbd> <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↓</kbd> เพื่อเลือกประวัติคำสั่งก่อนหน้า</span>
             <span id="lbl-console-conn-status" style="color: var(--accent-green);">● เซิร์ฟเวอร์ออนไลน์</span>
           </div>
         </div>
@@ -1410,7 +1410,7 @@
   <div class="modal-overlay" id="modal-select-lightcone">
     <div class="modal-content" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
       <div class="modal-header">
-        <h3 id="modal-lc-picker-title" style="font-weight: 800;">
+        <h3 id="modal-lc-picker-title" style="font-weight: 800;" data-i18n="lcPickerTitle">
           🗡️ เลือกสวมใส่กรวยแสง (Light Cone)
         </h3>
         <button type="button" class="btn btn-sm btn-secondary" id="btn-close-lc-picker">✕</button>
@@ -1446,11 +1446,11 @@
         <div style="display: flex; gap: 0.6rem; align-items: center; min-width: 0;">
           <img id="lc-picker-sig-thumb" src="" alt="" style="width: 38px; height: 52px; border-radius: 4px; object-fit: cover; border: 1px solid var(--accent-gold);">
           <div style="min-width: 0;">
-            <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800;">⭐ กรวยแสงประจำตัวแนะนำ (Signature)</div>
+            <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800;" data-i18n="lcPickerSigTitle">⭐ กรวยแสงประจำตัวแนะนำ (Signature)</div>
             <div id="lc-picker-sig-name" style="font-weight: 700; font-size: 0.875rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
           </div>
         </div>
-        <button type="button" class="btn btn-sm btn-gold" id="btn-lc-picker-quick-sig">⚡ สวมใส่ชิ้นนี้</button>
+        <button type="button" class="btn btn-sm btn-gold" id="btn-lc-picker-quick-sig" data-i18n="lcPickerEquipSig">⚡ สวมใส่ชิ้นนี้</button>
       </div>
 
       <!-- Lightcones List Grid -->
@@ -1460,8 +1460,8 @@
 
       <!-- Footer Actions -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-unequip" style="color: var(--accent-red);">✕ ถอดกรวยแสงออก</button>
-        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-close">ปิด</button>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-unequip" style="color: var(--accent-red);" data-i18n="lcPickerUnequip">✕ ถอดกรวยแสงออก</button>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-lc-picker-close" data-i18n="modalBtnClose">ปิด</button>
       </div>
     </div>
   </div>
