@@ -32,6 +32,7 @@ const state = {
   avatarsList: [],
   fullFreesrData: null,
   persistentData: null,
+  dataGameData: null,
   currentJsonMode: 'freesr',
   activeTab: 'tab-dashboard',
   selectedLineupSlot: null,
@@ -153,6 +154,8 @@ const el = {
 
   // Persistent Tab
   tabBtnPersistent: document.getElementById('tab-btn-persistent'),
+  cardPersistentChars: document.getElementById('card-persistent-chars'),
+  cardPersistentGlobal: document.getElementById('card-persistent-global'),
   formPersistentChars: document.getElementById('form-persistent-chars'),
   persistentMcSelect: document.getElementById('persistent-mc-select'),
   persistentMarchSelect: document.getElementById('persistent-march-select'),
@@ -170,6 +173,7 @@ const el = {
   // JSON Tab
   btnSelectFreesr: document.getElementById('btn-select-freesr'),
   btnSelectPersistent: document.getElementById('btn-select-persistent'),
+  btnSelectDatagame: document.getElementById('btn-select-datagame'),
   btnJsonBeautify: document.getElementById('btn-json-beautify'),
   btnJsonDownload: document.getElementById('btn-json-download'),
   btnJsonSave: document.getElementById('btn-json-save'),
@@ -654,6 +658,91 @@ async function savePersistentCache(data) {
   updateCacheUsageDisplay();
 }
 
+// FireflyGo data-in-game.json structure and path mappings (from FFGO dumps)
+const DEFAULT_DATA_GAME = {
+  leader: 0,
+  lineups: {
+    "0": 1506,
+    "1": 1502,
+    "2": 1511,
+    "3": 1503
+  },
+  position: {
+    x: 8000,
+    z: 1550,
+    y: 715,
+    rot_y: 131000
+  },
+  scene: {
+    plane_id: 80112,
+    floor_id: 80112001,
+    entry_id: 801120102,
+    map_rotation_group_id: 0
+  },
+  player_outfit: [ 1003 ],
+  char_path: {
+    main: 8010,
+    march_7: 1224
+  },
+  char_enhanced: {
+    "1004": 1,
+    "1005": 0,
+    "1006": 1,
+    "1102": 1,
+    "1205": 1,
+    "1212": 1,
+    "1217": 1,
+    "1306": 1,
+    "1307": 1,
+    "1310": 1
+  }
+};
+
+const FIREFLY_MC_MAP = {
+  'MalePhysical': 8001,
+  'FemalePhysical': 8002,
+  'MalePreservation': 8003,
+  'FemalePreservation': 8004,
+  'MaleHarmony': 8005,
+  'FemaleHarmony': 8010,
+  'MaleRemembrance': 8011,
+  'FemaleRemembrance': 8012
+};
+const FIREFLY_MC_REVERSE_MAP = {
+  8001: 'MalePhysical',
+  8002: 'FemalePhysical',
+  8003: 'MalePreservation',
+  8004: 'FemalePreservation',
+  8005: 'MaleHarmony',
+  8006: 'FemaleHarmony',
+  8010: 'FemaleHarmony',
+  8011: 'MaleRemembrance',
+  8012: 'FemaleRemembrance'
+};
+const FIREFLY_MARCH_MAP = {
+  'MarchPreservation': 1001,
+  'MarchHunt': 1224
+};
+const FIREFLY_MARCH_REVERSE_MAP = {
+  1001: 'MarchPreservation',
+  1224: 'MarchHunt'
+};
+
+async function saveDataGameCache(data) {
+  if (!data) return;
+  try {
+    await idbSet('gac_srtool_datagame_cache', data);
+  } catch (e) {
+    console.warn('Failed to save data-in-game cache to IndexedDB:', e);
+  }
+  try {
+    localStorage.setItem('gac_srtool_datagame_cache', JSON.stringify(data));
+  } catch (e) {
+    console.warn('localStorage quota exceeded for data-in-game cache:', e);
+  }
+  updateCacheUsageDisplay();
+}
+
 async function loadCachedStorageData() {
   try {
     let cachedFreesr = await idbGet('gac_srtool_freesr_cache');
@@ -698,6 +787,23 @@ async function loadCachedStorageData() {
     }
   } catch (e) {
     console.warn('Failed to load cached persistent data:', e);
+  }
+
+  try {
+    let cachedDataGame = await idbGet('gac_srtool_datagame_cache');
+    if (!cachedDataGame) {
+      const raw = localStorage.getItem('gac_srtool_datagame_cache');
+      if (raw) cachedDataGame = JSON.parse(raw);
+    }
+    if (cachedDataGame) {
+      state.dataGameData = cachedDataGame;
+      if (state.serverMode === 'firefly' && cachedDataGame.lineups && (!state.statusData || !state.statusData.lineups)) {
+        state.statusData = state.statusData || {};
+        state.statusData.lineups = cachedDataGame.lineups;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load cached data-in-game data:', e);
   }
 }
 
@@ -762,27 +868,66 @@ function setupServerModes() {
 
     if (mode === 'gac') {
       if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaC-hkrpg-go';
-      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = '';
+      if (el.tabBtnPersistent) {
+        el.tabBtnPersistent.style.display = '';
+        el.tabBtnPersistent.textContent = '💾 จัดการเซฟ GaC';
+      }
+      if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
+      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = '';
       if (el.tabBtnExrank) el.tabBtnExrank.style.display = '';
       if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = '';
       if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = '';
-    } else {
-      if (el.lblActiveMode) el.lblActiveMode.textContent = mode === 'firefly' ? 'FireflyGo' : 'RobinSR';
+      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+    } else if (mode === 'firefly') {
+      if (el.lblActiveMode) el.lblActiveMode.textContent = 'FireflyGo';
+      if (el.tabBtnPersistent) {
+        el.tabBtnPersistent.style.display = '';
+        el.tabBtnPersistent.textContent = '👤 ผู้บุกเบิก & March 7th';
+      }
+      if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
+      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = 'none'; // Hide unsupported GaC switches
+      if (el.tabBtnExrank) el.tabBtnExrank.style.display = 'none'; // Hide unsupported Ex-ranks
+      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
+      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
+      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = ''; // Show data-in-game for Firefly
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+
+      if (state.activeTab === 'tab-exrank') {
+        const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
+        if (dashboardBtn) dashboardBtn.click();
+      }
+
+      if (state.currentJsonMode === 'persistent') {
+        loadJsonData('datagame');
+      }
+    } else { // robin
+      if (el.lblActiveMode) el.lblActiveMode.textContent = 'RobinSR';
       if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
+      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = 'none';
       if (el.tabBtnExrank) el.tabBtnExrank.style.display = 'none';
       if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
       if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
+      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
+      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
 
-      // If user is currently viewing a hidden tab, auto switch back to dashboard
       if (state.activeTab === 'tab-persistent' || state.activeTab === 'tab-exrank') {
         const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
         if (dashboardBtn) dashboardBtn.click();
       }
 
-      // If user is viewing persistent JSON, switch back to freesr
-      if (state.currentJsonMode === 'persistent') {
+      if (state.currentJsonMode === 'persistent' || state.currentJsonMode === 'datagame') {
         loadJsonData('freesr');
       }
+    }
+
+    // Creative Mode is OPEN for all server modes!
+    if (el.toggleCreativeMode) {
+      el.toggleCreativeMode.disabled = false;
+      el.toggleCreativeMode.checked = state.creativeMode;
+    }
+    if (el.badgeCreativeMode) {
+      el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
     }
   };
 
@@ -850,9 +995,44 @@ async function refreshStatus() {
     let data;
     if (state.serverMode === 'gac') {
       data = await apiCall('/api/status');
-    } else {
+    } else if (state.serverMode === 'firefly') {
+      // FireflyGo uses data-in-game.json for live state and freesr-data.json for inventory
+      const datagame = await apiCall('/api/data-in-game').catch(() => null);
+      if (datagame && (datagame.data || datagame.lineups)) {
+        state.dataGameData = datagame.data || datagame;
+        await saveDataGameCache(state.dataGameData);
+      }
       const freesr = await apiCall('/api/freesr').catch(() => null);
       if (freesr && freesr.data) {
+        state.fullFreesrData = freesr.data;
+        data = {
+          status: 200,
+          avatar_count: Object.keys(freesr.data.avatars || {}).length,
+          lightcone_count: (freesr.data.lightcones || []).length,
+          relic_count: (freesr.data.relics || []).length,
+          lineups: state.dataGameData?.lineups || freesr.data.lineups || freesr.data.battle_config?.custom_battle_lineup || DEFAULT_LINEUP,
+          scene: state.dataGameData?.scene || freesr.data.scene,
+          position: state.dataGameData?.position || freesr.data.position,
+          ex_ranks: []
+        };
+      } else if (state.dataGameData) {
+        data = {
+          status: 200,
+          avatar_count: state.avatarsList.length,
+          lightcone_count: 0,
+          relic_count: 0,
+          lineups: state.dataGameData.lineups || DEFAULT_LINEUP,
+          scene: state.dataGameData.scene,
+          position: state.dataGameData.position,
+          ex_ranks: []
+        };
+      } else {
+        throw new Error('Firefly server not reachable');
+      }
+    } else { // robin
+      const freesr = await apiCall('/api/freesr').catch(() => null);
+      if (freesr && freesr.data) {
+        state.fullFreesrData = freesr.data;
         data = {
           status: 200,
           avatar_count: Object.keys(freesr.data.avatars || {}).length,
@@ -890,24 +1070,21 @@ async function refreshStatus() {
       if (state.serverMode === 'gac') {
         el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
         el.badgePersistenceMode.className = 'badge-creative';
+      } else if (state.serverMode === 'firefly') {
+        el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+        el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
-        el.badgePersistenceMode.textContent = 'FireflyGo: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
         el.badgePersistenceMode.className = 'badge-super-tag';
       }
     }
 
+    // Creative Mode is OPEN for all servers
     if (el.toggleCreativeMode) {
-      if (state.serverMode !== 'gac') {
-        el.toggleCreativeMode.disabled = true;
-        el.toggleCreativeMode.checked = false;
-        state.creativeMode = false;
-        if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'none';
-      } else {
-        el.toggleCreativeMode.disabled = false;
-        el.toggleCreativeMode.checked = state.creativeMode;
-        if (el.badgeCreativeMode) {
-          el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
-        }
+      el.toggleCreativeMode.disabled = false;
+      el.toggleCreativeMode.checked = state.creativeMode;
+      if (el.badgeCreativeMode) {
+        el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
       }
     }
 
@@ -933,8 +1110,11 @@ async function refreshStatus() {
       if (state.serverMode === 'gac') {
         el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
         el.badgePersistenceMode.className = 'badge-creative';
+      } else if (state.serverMode === 'firefly') {
+        el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+        el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
-        el.badgePersistenceMode.textContent = 'FireflyGo: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
         el.badgePersistenceMode.className = 'badge-super-tag';
       }
     }
@@ -947,12 +1127,9 @@ async function refreshStatus() {
 
 // Render party lineup cards
 function renderLineup(lineups) {
-  if (state.serverMode !== 'gac') {
-    state.creativeMode = false;
-  }
   if (el.toggleCreativeMode) {
     el.toggleCreativeMode.checked = state.creativeMode;
-    el.toggleCreativeMode.disabled = (state.serverMode !== 'gac');
+    el.toggleCreativeMode.disabled = false;
   }
   if (el.badgeCreativeMode) {
     el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
@@ -3993,30 +4170,49 @@ async function exportShowcaseImage(avatarId) {
   showToast(t('showcaseExport') || 'เปิดหน้าต่างสำหรับบันทึกการ์ดเรียบร้อย', 'info');
 }
 
-// Server Lineup Persistence Manager (GaC Persistent vs FireflyGo FreeSR)
+// Server Lineup Persistence Manager (GaC Persistent vs FireflyGo data-in-game vs FreeSR)
 async function saveLineupToServer(lineupData) {
-  if (!state.isConnected) return;
+  if (!lineupData) return;
+
+  // 1. GaC server handles lineups in persistent
   if (state.serverMode === 'gac') {
-    // GaC server handles lineups in persistent
-    await apiCall('/api/persistent', 'POST', { lineups: lineupData });
-  } else {
-    // FireflyGo / other FreeSR servers handle lineups in freesr-data.json
-    if (!state.fullFreesrData) {
-      state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+    if (state.persistentData) {
+      state.persistentData.lineups = lineupData;
+      savePersistentCache(state.persistentData);
     }
-    state.fullFreesrData.lineups = lineupData;
-    const arr = [
-      lineupData[0] || 0,
-      lineupData[1] || 0,
-      lineupData[2] || 0,
-      lineupData[3] || 0
-    ];
-    if (!state.fullFreesrData.battle_config) {
-      state.fullFreesrData.battle_config = {};
+    if (state.isConnected) {
+      await apiCall('/api/persistent', 'POST', { lineups: lineupData }).catch(() => {});
     }
-    state.fullFreesrData.battle_config.custom_battle_lineup = arr;
-    state.fullFreesrData.custom_battle_lineup = arr;
-    await saveFreesrChangesToServer();
+  }
+
+  // 2. FireflyGo / FreeSR servers handle lineups in freesr-data.json
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+  state.fullFreesrData.lineups = { ...lineupData };
+  if (!state.fullFreesrData.battle_config) {
+    state.fullFreesrData.battle_config = {};
+  }
+
+  // Dynamically map all active slots in order - never truncate slots in Creative Mode!
+  const slotKeys = Object.keys(lineupData).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+  const fullArr = slotKeys.map(k => lineupData[k] || 0);
+  state.fullFreesrData.battle_config.custom_battle_lineup = fullArr;
+  state.fullFreesrData.custom_battle_lineup = fullArr;
+  await saveFreesrCache(state.fullFreesrData);
+
+  // 3. Firefly live state in data-in-game.json
+  if (state.dataGameData || state.serverMode === 'firefly') {
+    state.dataGameData = state.dataGameData || { ...DEFAULT_DATA_GAME };
+    state.dataGameData.lineups = { ...lineupData };
+    await saveDataGameCache(state.dataGameData);
+    if (state.isConnected) {
+      await apiCall('/api/data-in-game', 'POST', state.dataGameData).catch(() => {});
+    }
+  }
+
+  if (state.isConnected && state.serverMode !== 'gac') {
+    await saveFreesrChangesToServer().catch(() => {});
   }
 }
 
@@ -5070,9 +5266,27 @@ async function handleAddRelicSubmit(e) {
   showToast(t('toastRelicAdded'), 'success');
 }
 
-// Load Persistent Save Settings (Exclusive to GaC-hkrpg-go)
+// Load Persistent / Character Path Settings (GaC persistent vs Firefly data-in-game)
 async function loadPersistentSettings() {
-  if (state.serverMode !== 'gac') return;
+  if (state.serverMode === 'robin') return;
+
+  if (state.serverMode === 'firefly') {
+    // Firefly uses data-in-game.json char_path { main, march_7 }
+    let dg = state.dataGameData;
+    if (!dg) {
+      dg = await idbGet('gac_srtool_datagame_cache') || JSON.parse(localStorage.getItem('gac_srtool_datagame_cache') || 'null');
+      if (dg) state.dataGameData = dg;
+    }
+    if (dg?.char_path) {
+      const mcKey = FIREFLY_MC_REVERSE_MAP[dg.char_path.main];
+      if (mcKey && el.persistentMcSelect) el.persistentMcSelect.value = mcKey;
+      const marchKey = FIREFLY_MARCH_REVERSE_MAP[dg.char_path.march_7];
+      if (marchKey && el.persistentMarchSelect) el.persistentMarchSelect.value = marchKey;
+    }
+    return;
+  }
+
+  // GaC mode
   try {
     let data = state.persistentData;
     if (state.isConnected) {
@@ -5180,7 +5394,8 @@ async function loadJsonData(mode) {
   state.currentJsonMode = mode;
   if (mode === 'freesr') {
     el.btnSelectFreesr.className = 'btn btn-sm btn-primary active';
-    el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
+    if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
+    if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = 'กำลังโหลด freesr-data.json...';
     try {
       if (state.fullFreesrData) {
@@ -5222,9 +5437,58 @@ async function loadJsonData(mode) {
         }
       }
     }
+  } else if (mode === 'datagame') {
+    el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
+    if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
+    if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-primary active';
+    el.jsonStatusInfo.textContent = 'กำลังโหลด data-in-game.json...';
+    try {
+      if (state.dataGameData) {
+        el.jsonEditor.value = JSON.stringify(state.dataGameData, null, 2);
+        el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากหน่วยความจำ/แคช)';
+      } else if (state.isConnected) {
+        const res = await apiCall('/api/data-in-game').catch(() => null);
+        if (res && (res.data || res.lineups)) {
+          const val = res.data || res;
+          state.dataGameData = val;
+          saveDataGameCache(val);
+          el.jsonEditor.value = JSON.stringify(val, null, 2);
+          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากเซิร์ฟเวอร์)';
+        } else {
+          throw new Error('Not available');
+        }
+      } else {
+        const cached = localStorage.getItem('gac_srtool_datagame_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          state.dataGameData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากแคช)';
+        } else {
+          state.dataGameData = { ...DEFAULT_DATA_GAME };
+          el.jsonEditor.value = JSON.stringify(DEFAULT_DATA_GAME, null, 2);
+          el.jsonStatusInfo.textContent = 'data-in-game.json (โครงสร้าง Firefly dump)';
+        }
+      }
+    } catch (err) {
+      const cached = localStorage.getItem('gac_srtool_datagame_cache');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          state.dataGameData = parsed;
+          el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากแคช)';
+        } catch (e) {}
+      } else {
+        state.dataGameData = { ...DEFAULT_DATA_GAME };
+        el.jsonEditor.value = JSON.stringify(DEFAULT_DATA_GAME, null, 2);
+        el.jsonStatusInfo.textContent = 'data-in-game.json (โครงสร้าง Firefly dump)';
+      }
+    }
   } else {
     el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
-    el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
+    if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
+    if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = 'กำลังโหลด persistent...';
     try {
       if (state.persistentData) {
@@ -5307,6 +5571,31 @@ async function saveJsonData() {
         showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
       } else {
         showToast('💾 บันทึก freesr-data.json ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+      }
+    } else if (state.currentJsonMode === 'datagame') {
+      state.dataGameData = parsed;
+      await saveDataGameCache(parsed);
+      if (parsed.lineups) {
+        state.statusData = state.statusData || {};
+        state.statusData.lineups = parsed.lineups;
+        renderLineup(parsed.lineups);
+      }
+      let serverSaved = false;
+      let serverError = null;
+      if (state.isConnected) {
+        try {
+          await apiCall('/api/data-in-game', 'POST', parsed);
+          serverSaved = true;
+        } catch (err) {
+          serverError = err.message;
+        }
+      }
+      if (serverSaved) {
+        showToast('✅ บันทึก data-in-game.json ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+      } else if (serverError) {
+        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+      } else {
+        showToast('💾 บันทึก data-in-game.json ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
       }
     } else {
       state.persistentData = parsed;
@@ -5764,15 +6053,9 @@ function setupEvents() {
 
   // Creative Mode Toggle
   if (el.toggleCreativeMode) {
-    el.toggleCreativeMode.checked = state.creativeMode && state.serverMode === 'gac';
-    el.toggleCreativeMode.disabled = (state.serverMode !== 'gac');
+    el.toggleCreativeMode.checked = state.creativeMode;
+    el.toggleCreativeMode.disabled = false;
     el.toggleCreativeMode.addEventListener('change', (e) => {
-      if (state.serverMode !== 'gac') {
-        el.toggleCreativeMode.checked = false;
-        state.creativeMode = false;
-        showToast('โหมดสร้างสรรค์รองรับเฉพาะบนเซิร์ฟเวอร์ GaC เท่านั้น', 'warning');
-        return;
-      }
       state.creativeMode = e.target.checked;
       localStorage.setItem('gac_srtool_creative_mode', state.creativeMode);
       if (el.badgeCreativeMode) {
@@ -5793,11 +6076,33 @@ function setupEvents() {
   el.btnQuickClearLineup?.addEventListener('click', quickClearLineup);
   el.btnMaxAllAvatars?.addEventListener('click', maxAllAvatars);
 
-  // Persistent Form Submit
+  // Persistent / Character Path Form Submit
   el.formPersistentChars.addEventListener('submit', async (e) => {
     e.preventDefault();
     const mc = el.persistentMcSelect.value;
     const march = el.persistentMarchSelect.value;
+
+    if (state.serverMode === 'firefly') {
+      state.dataGameData = state.dataGameData || { ...DEFAULT_DATA_GAME };
+      state.dataGameData.char_path = state.dataGameData.char_path || {};
+      state.dataGameData.char_path.main = FIREFLY_MC_MAP[mc] || 8010;
+      state.dataGameData.char_path.march_7 = FIREFLY_MARCH_MAP[march] || 1224;
+      await saveDataGameCache(state.dataGameData);
+
+      let serverUpdated = false;
+      if (state.isConnected) {
+        try {
+          await apiCall('/api/data-in-game', 'POST', state.dataGameData);
+          serverUpdated = true;
+        } catch (e) {
+          await saveFreesrChangesToServer().catch(() => {});
+        }
+      }
+      showToast(serverUpdated ? 'บันทึกสายของตัวละคร (Firefly data-in-game) สำเร็จ!' : 'บันทึกสายตัวละครลงในแคชแล้ว (Firefly data-in-game)', 'success');
+      refreshStatus();
+      return;
+    }
+
     try {
       await apiCall('/api/persistent', 'POST', {
         main_character: mc,
@@ -5960,8 +6265,9 @@ function setupEvents() {
   });
 
   // JSON Tab Controls
-  el.btnSelectFreesr.addEventListener('click', () => loadJsonData('freesr'));
-  el.btnSelectPersistent.addEventListener('click', () => loadJsonData('persistent'));
+  el.btnSelectFreesr?.addEventListener('click', () => loadJsonData('freesr'));
+  el.btnSelectPersistent?.addEventListener('click', () => loadJsonData('persistent'));
+  el.btnSelectDatagame?.addEventListener('click', () => loadJsonData('datagame'));
   
   el.btnJsonBeautify.addEventListener('click', () => {
     try {
