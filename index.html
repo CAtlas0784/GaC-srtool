@@ -1533,9 +1533,37 @@
             <!-- Injected main stat pill buttons -->
           </div>
 
-          <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+          <!-- Substats Customizer -->
+          <div class="slot-picker-substats-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight);">
+                🔧 ปรับแต่งออฟรอง (Substats Customizer):
+              </div>
+              <div class="substat-presets-strip">
+                <button type="button" class="btn-substat-preset" data-preset="god" title="ออฟแนะนำตามตัวละคร">⭐ ออฟเทพแนะนำ</button>
+                <button type="button" class="btn-substat-preset" data-preset="crit" title="เน้นคริล้วน">🎯 คริ Rate/DMG</button>
+                <button type="button" class="btn-substat-preset" data-preset="spd" title="เน้นความเร็ว">⚡ สปีด SPD</button>
+                <button type="button" class="btn-substat-preset" data-preset="break" title="เน้นทำลายล้าง">🔨 Break Effect</button>
+                <button type="button" class="btn-substat-preset" data-preset="tank" title="เน้นถึก ป้องกัน เลือด">🛡️ ถึก HP/DEF</button>
+              </div>
+            </div>
+
+            <div class="slot-picker-substats-grid" id="slot-picker-substats-grid">
+              <!-- Injected by JS: 4 substat rows with selects, steppers & previews -->
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; padding: 0.4rem 0.75rem; background: rgba(10, 14, 23, 0.75); border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.775rem;">
+              <span style="color: var(--text-muted);">
+                💡 รวมจำนวนโรล (Rolls): <strong id="slot-picker-total-rolls" style="color: var(--accent-gold); font-family: monospace; font-size: 0.9rem;">9</strong> / 9 โรล (ระดับ 5★ เลเวล 15)
+              </span>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-reset-substats" style="font-size: 0.725rem; padding: 0.2rem 0.6rem;">↺ คืนค่าเดิม</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div id="slot-picker-edit-mode-indicator" style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700;"></div>
             <button type="button" class="btn btn-primary" id="btn-slot-picker-confirm-custom" style="padding: 0.65rem 1.4rem; font-weight: 800; font-size: 0.9rem;" data-i18n="btnEquipInstant">
-              ⚡ สวมใส่ชิ้นนี้ทันที (+15 5★ ออฟเทพ)
+              ⚡ สวมใส่ชิ้นนี้ทันที (+15 5★ ออฟที่เลือก)
             </button>
           </div>
         </div>
