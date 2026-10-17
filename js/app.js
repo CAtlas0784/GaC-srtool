@@ -73,17 +73,19 @@ const el = {
   lineupContainer: document.getElementById('lineup-container'),
   toggleCreativeMode: document.getElementById('toggle-creative-mode'),
   badgeCreativeMode: document.getElementById('badge-creative-mode'),
-  // Team Combat Synergy
-  cardTeamSynergy: document.getElementById('card-team-synergy'),
-  badgeSynergyCoverage: document.getElementById('badge-synergy-coverage'),
-  synergyElementsContainer: document.getElementById('synergy-elements-container'),
+  // Mini Battle Summary & Team Stats
+  cardBattleSummary: document.getElementById('card-battle-summary'),
+  badgeMiniBattleStatus: document.getElementById('badge-mini-battle-status'),
+  miniTotalDmg: document.getElementById('mini-total-dmg'),
+  miniTeamDps: document.getElementById('mini-team-dps'),
+  miniBreakDmg: document.getElementById('mini-break-dmg'),
+  miniBattleTurns: document.getElementById('mini-battle-turns'),
+  miniBattleAvatarsList: document.getElementById('mini-battle-avatars-list'),
+  btnMiniViewFullAnalyst: document.getElementById('btn-mini-view-full-analyst'),
   synergyAvgLevel: document.getElementById('synergy-avg-level'),
   synergyAvgEidolon: document.getElementById('synergy-avg-eidolon'),
   synergyLcReady: document.getElementById('synergy-lc-ready'),
   synergyRelicReady: document.getElementById('synergy-relic-ready'),
-  synergyDamageBanner: document.getElementById('synergy-damage-banner'),
-  dashboardBattleTitle: document.getElementById('dashboard-battle-title'),
-  dashboardBattleSummary: document.getElementById('dashboard-battle-summary'),
 
   // Damage Analyst
   tabDamageAnalyst: document.getElementById('tab-damage-analyst'),
@@ -1267,20 +1269,112 @@ function renderLineup(lineups) {
 }
 
 // ==========================================
-// Team Combat Synergy & Weakness Break Analysis
+// Mini Battle Summary & Team Stats
 // ==========================================
-const HSR_ELEMENTS = [
-  { key: 'Physical', name: 'Physical', nameTh: 'กายภาพ', color: '#cbd5e1' },
-  { key: 'Fire', name: 'Fire', nameTh: 'ไฟ', color: '#ef4444' },
-  { key: 'Ice', name: 'Ice', nameTh: 'น้ำแข็ง', color: '#38bdf8' },
-  { key: 'Lightning', name: 'Lightning', nameTh: 'สายฟ้า', color: '#c084fc' },
-  { key: 'Wind', name: 'Wind', nameTh: 'ลม', color: '#34d399' },
-  { key: 'Quantum', name: 'Quantum', nameTh: 'ควอนตัม', color: '#818cf8' },
-  { key: 'Imaginary', name: 'Imaginary', nameTh: 'จินตภาพ', color: '#fbbf24' }
-];
+const ELEMENT_COLORS = {
+  Physical: '#cbd5e1',
+  Fire: '#ef4444',
+  Ice: '#38bdf8',
+  Lightning: '#c084fc',
+  Thunder: '#c084fc',
+  Wind: '#34d399',
+  Quantum: '#818cf8',
+  Imaginary: '#fbbf24'
+};
+
+function renderMiniBattleSummary() {
+  if (!el.miniBattleAvatarsList) return;
+  const report = analystState.currentReport;
+
+  if (!report || !report.team_total_damage || !report.avatars || report.avatars.length === 0) {
+    if (el.badgeMiniBattleStatus) {
+      el.badgeMiniBattleStatus.textContent = t('miniNoBattleTitle');
+      el.badgeMiniBattleStatus.style.background = 'rgba(156, 163, 175, 0.12)';
+      el.badgeMiniBattleStatus.style.color = 'var(--text-muted)';
+      el.badgeMiniBattleStatus.style.borderColor = 'rgba(156, 163, 175, 0.25)';
+    }
+    if (el.miniTotalDmg) el.miniTotalDmg.textContent = '-';
+    if (el.miniTeamDps) el.miniTeamDps.textContent = '-';
+    if (el.miniBreakDmg) el.miniBreakDmg.textContent = '-';
+    if (el.miniBattleTurns) el.miniBattleTurns.textContent = '-';
+
+    el.miniBattleAvatarsList.innerHTML = `
+      <div style="background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.85rem 1rem; text-align: center;">
+        <div style="font-size: 1.35rem; margin-bottom: 0.25rem;">⚔️</div>
+        <div style="font-size: 0.85rem; font-weight: 700; color: #fff;">${t('miniNoBattleTitle')}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+          ${t('miniNoBattleDesc')}
+        </div>
+        <div style="margin-top: 0.6rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-secondary" onclick="window.fetchLatestBattleReport(false)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
+            ${t('miniBtnFetch')}
+          </button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="window.loadDemoBattleReport()" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8;">
+            ${t('miniBtnDemo')}
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Active Report
+  const isWin = (report.end_status || 'WIN').toUpperCase() === 'WIN';
+  if (el.badgeMiniBattleStatus) {
+    el.badgeMiniBattleStatus.textContent = isWin ? '✅ ชนะการต่อสู้' : `⚠️ สิ้นสุด (${report.end_status})`;
+    el.badgeMiniBattleStatus.style.background = isWin ? 'rgba(52, 211, 153, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+    el.badgeMiniBattleStatus.style.color = isWin ? 'var(--accent-green)' : '#f87171';
+    el.badgeMiniBattleStatus.style.borderColor = isWin ? 'rgba(52, 211, 153, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+  }
+
+  const durationSec = report.cost_time || 0;
+  const teamDps = durationSec > 0 ? (report.team_total_damage / durationSec) : 0;
+  let totalBreakDmg = 0;
+  (report.avatars || []).forEach(a => {
+    totalBreakDmg += (a.total_break_damage || 0);
+  });
+
+  if (el.miniTotalDmg) el.miniTotalDmg.textContent = formatNumber(report.team_total_damage);
+  if (el.miniTeamDps) el.miniTeamDps.textContent = `${formatNumber(Math.round(teamDps))}/s`;
+  if (el.miniBreakDmg) el.miniBreakDmg.textContent = formatNumber(totalBreakDmg);
+  if (el.miniBattleTurns) el.miniBattleTurns.textContent = `${report.total_battle_turns || 0} เทิร์น (${formatDuration(durationSec)})`;
+
+  // Sort avatars by total damage descending
+  const sortedAvatars = [...report.avatars].sort((a, b) => (b.total_damage || 0) - (a.total_damage || 0));
+
+  el.miniBattleAvatarsList.innerHTML = sortedAvatars.map(av => {
+    const meta = getAvatarInfo(av.avatar_id);
+    const elemColor = ELEMENT_COLORS[meta.element] || '#38bdf8';
+    const pct = Math.max(0, Math.min(100, av.damage_percent || 0));
+    const iconUrl = getAvatarIconUrl(av.avatar_id);
+    const rankStr = av.rank !== undefined ? `E${av.rank}` : '';
+    const lvlStr = av.level ? `Lv.${av.level}` : '';
+    const metaSub = [lvlStr, rankStr, translatePath(meta.path)].filter(Boolean).join(' • ');
+
+    return `
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-sm); padding: 0.45rem 0.65rem; transition: background 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; min-width: 0;">
+            <img src="${iconUrl}" onerror="window.handleAvatarImgError(this, ${av.avatar_id})" style="width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid ${elemColor}; object-fit: cover; flex-shrink: 0;" alt="${meta.name}">
+            <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <div style="font-size: 0.825rem; font-weight: 700; color: #fff; line-height: 1.1;">${meta.name}</div>
+              <div style="font-size: 0.675rem; color: var(--text-muted);">${metaSub}</div>
+            </div>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <span style="font-size: 0.875rem; font-weight: 800; color: ${elemColor}; font-family: monospace;">${formatNumber(av.total_damage)}</span>
+            <span style="font-size: 0.725rem; font-weight: 700; color: #fff; background: rgba(255,255,255,0.08); padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 0.35rem;">${pct.toFixed(1)}%</span>
+          </div>
+        </div>
+        <div style="height: 5px; width: 100%; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden;">
+          <div style="height: 100%; width: ${pct}%; background: ${elemColor}; border-radius: 3px; transition: width 0.4s ease;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 function renderTeamSynergy(lineups) {
-  if (!el.synergyElementsContainer) return;
   const currentLineup = lineups || state.statusData?.lineups || DEFAULT_LINEUP;
 
   // Extract active character IDs
@@ -1292,47 +1386,18 @@ function renderTeamSynergy(lineups) {
     }
   }
 
-  // 1. Weakness Break Coverage
-  const coveredElements = {};
-  const roles = {
-    dps: [],        // Destruction, Hunt, Erudition
-    specialist: [], // Remembrance, Elation
-    support: [],    // Harmony, Nihility
-    sustain: []     // Preservation, Abundance
-  };
-
   let totalLevel = 0;
   let totalEidolon = 0;
   let lcCount = 0;
   let fullRelicCount = 0;
 
   activeIds.forEach(aid => {
-    const meta = getAvatarInfo(aid);
     const av = state.fullFreesrData?.avatars?.[aid];
     const lvl = av?.level || 80;
     const rank = av?.data?.rank ?? (state.avatarsList.find(a => a.avatar_id === aid)?.rank ?? 0);
 
     totalLevel += lvl;
     totalEidolon += rank;
-
-    // Element coverage
-    const rawElem = normalizeElement(meta.rawElement || meta.element);
-    if (!coveredElements[rawElem]) {
-      coveredElements[rawElem] = [];
-    }
-    coveredElements[rawElem].push(meta.name);
-
-    // Path / Role
-    const rawPath = normalizePath(meta.rawPath || meta.path);
-    if (['Destruction', 'Hunt', 'Erudition'].includes(rawPath)) {
-      roles.dps.push(meta.name);
-    } else if (['Remembrance', 'Elation'].includes(rawPath)) {
-      roles.specialist.push(meta.name);
-    } else if (['Harmony', 'Nihility'].includes(rawPath)) {
-      roles.support.push(meta.name);
-    } else if (['Preservation', 'Abundance'].includes(rawPath)) {
-      roles.sustain.push(meta.name);
-    }
 
     // LC check
     const hasLc = (state.fullFreesrData?.lightcones || []).some(l => l.equip_avatar === aid);
@@ -1347,33 +1412,13 @@ function renderTeamSynergy(lineups) {
   const avgLevel = activeIds.length ? (totalLevel / count).toFixed(1) : '-';
   const avgEidolon = activeIds.length ? `E${(totalEidolon / count).toFixed(1)}` : '-';
 
-  // Render Element Chips
-  const coveredCount = Object.keys(coveredElements).length;
-  if (el.badgeSynergyCoverage) {
-    el.badgeSynergyCoverage.textContent = t('synergyCoverageBadge', { count: coveredCount });
-    el.badgeSynergyCoverage.style.color = coveredCount >= 4 ? 'var(--accent-green)' : (coveredCount >= 2 ? 'var(--accent-cyan)' : 'var(--accent-gold)');
-  }
-
-  el.synergyElementsContainer.innerHTML = HSR_ELEMENTS.map(elem => {
-    const isCovered = !!coveredElements[elem.key];
-    const providers = coveredElements[elem.key] || [];
-    const providerText = isCovered ? providers.join(', ') : t('synergyNoInTeam');
-    return `
-      <div class="synergy-element-chip ${isCovered ? 'active' : 'inactive'}" style="${isCovered ? `border-color: ${elem.color}66; box-shadow: 0 0 8px ${elem.color}22;` : ''}">
-        ${getElementIconHtml(elem.key, 22)}
-        <span class="synergy-element-name" style="${isCovered ? `color: ${elem.color};` : ''}">${translateElement(elem.key)}</span>
-        <span class="synergy-element-chars" title="${providerText}">${providerText}</span>
-      </div>
-    `;
-  }).join('');
-
   // Metrics
   if (el.synergyAvgLevel) el.synergyAvgLevel.textContent = activeIds.length ? `Lv.${avgLevel}` : '-';
   if (el.synergyAvgEidolon) el.synergyAvgEidolon.textContent = avgEidolon;
   if (el.synergyLcReady) el.synergyLcReady.textContent = activeIds.length ? `${lcCount}/${activeIds.length}` : '-';
   if (el.synergyRelicReady) el.synergyRelicReady.textContent = activeIds.length ? `${fullRelicCount}/${activeIds.length}` : '-';
 
-  updateDashboardBattleBanner();
+  renderMiniBattleSummary();
 }
 
 // ==========================================
@@ -8070,23 +8115,7 @@ function renderDamageAnalyst() {
 }
 
 function updateDashboardBattleBanner() {
-  if (!el.dashboardBattleTitle || !el.dashboardBattleSummary) return;
-  const report = analystState.currentReport;
-  if (!report || !report.team_total_damage) {
-    el.dashboardBattleTitle.textContent = "Damage Analyst (จับดาเมจจากในเกม)";
-    el.dashboardBattleSummary.textContent = "ยังไม่มีข้อมูลการต่อสู้ล่าสุด — กดเพื่อเปิดหน้า Damage Analyst";
-    return;
-  }
-  const topAvatar = (report.avatars && report.avatars.length > 0)
-    ? [...report.avatars].sort((a, b) => b.total_damage - a.total_damage)[0]
-    : null;
-  const topName = topAvatar ? getAvatarInfo(topAvatar.avatar_id).name : '';
-  const topDmgPct = topAvatar ? `${topAvatar.damage_percent.toFixed(0)}%` : '';
-
-  el.dashboardBattleTitle.textContent = `💥 ดาเมจรวม ${formatNumber(report.team_total_damage)} (${report.round_cnt} รอบ)`;
-  el.dashboardBattleSummary.textContent = topName
-    ? `MVP: ${topName} (${topDmgPct} Share) • ${report.total_battle_turns} เทิร์น • เวลา ${formatDuration(report.cost_time)}`
-    : `สถานะ: ${report.end_status || 'WIN'} • ${report.total_battle_turns} เทิร์น`;
+  renderMiniBattleSummary();
 }
 
 function exportBattleReportJson() {
@@ -8289,8 +8318,8 @@ function setupDamageAnalystEvents() {
     });
   }
 
-  if (el.synergyDamageBanner) {
-    el.synergyDamageBanner.addEventListener('click', () => {
+  if (el.btnMiniViewFullAnalyst) {
+    el.btnMiniViewFullAnalyst.addEventListener('click', () => {
       const btn = document.querySelector('.tab-btn[data-tab="tab-damage-analyst"]');
       if (btn) btn.click();
     });
@@ -8305,6 +8334,7 @@ function setupDamageAnalystEvents() {
   }
 }
 
+window.renderMiniBattleSummary = renderMiniBattleSummary;
 window.fetchLatestBattleReport = fetchLatestBattleReport;
 window.loadDemoBattleReport = loadDemoBattleReport;
 window.exportBattleReportJson = exportBattleReportJson;
