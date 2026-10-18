@@ -1,7 +1,7 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.4';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.5';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -8143,6 +8143,33 @@ function renderEmptyDamageAnalyst() {
   }
 }
 
+function orderBattleReportAvatars(avatars) {
+  if (!Array.isArray(avatars) || avatars.length < 2) return avatars || [];
+
+  const lineup = state.statusData?.lineups;
+  if (!lineup) return avatars;
+
+  const lineupSlots = Array.isArray(lineup)
+    ? lineup.map((avatarId, slot) => [slot, avatarId])
+    : Object.entries(lineup).sort(([left], [right]) => Number(left) - Number(right));
+  const lineupIds = lineupSlots
+    .map(([, avatarId]) => Number(avatarId))
+    .filter(avatarId => Number.isSafeInteger(avatarId) && avatarId > 0);
+  const reportById = new Map();
+
+  for (const avatar of avatars) {
+    const avatarId = Number(avatar?.avatar_id);
+    if (!Number.isSafeInteger(avatarId) || avatarId <= 0 || reportById.has(avatarId)) {
+      return avatars;
+    }
+    reportById.set(avatarId, avatar);
+  }
+
+  const orderedIds = [...new Set(lineupIds)].filter(avatarId => reportById.has(avatarId));
+  if (orderedIds.length !== avatars.length) return avatars;
+  return orderedIds.map(avatarId => reportById.get(avatarId));
+}
+
 function renderDamageAnalyst() {
   const report = analystState.currentReport;
   if (!report) {
@@ -8151,6 +8178,7 @@ function renderDamageAnalyst() {
   }
 
   const teamDmg = report.team_total_damage || 0;
+  const analystAvatars = orderBattleReportAvatars(report.avatars);
   const hasAvatarDamage = Array.isArray(report.avatars)
     && report.avatars.some(a => Number(a.total_damage) > 0);
   if (el.analystTotalShareLabel) {
@@ -8195,8 +8223,8 @@ function renderDamageAnalyst() {
 
   // Team Share Bar
   if (el.analystShareBarContainer) {
-    if (report.avatars && report.avatars.length > 0) {
-      el.analystShareBarContainer.innerHTML = report.avatars.map((a, idx) => {
+    if (analystAvatars.length > 0) {
+      el.analystShareBarContainer.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : 0;
         const info = getAvatarInfo(a.avatar_id);
@@ -8209,8 +8237,8 @@ function renderDamageAnalyst() {
 
   // Legend
   if (el.analystShareLegend) {
-    if (report.avatars && report.avatars.length > 0) {
-      el.analystShareLegend.innerHTML = report.avatars.map((a, idx) => {
+    if (analystAvatars.length > 0) {
+      el.analystShareLegend.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
         const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
@@ -8231,14 +8259,14 @@ function renderDamageAnalyst() {
 
   // Characters Detailed Cards Grid
   if (el.analystCharactersContainer) {
-    if (!report.avatars || report.avatars.length === 0) {
+    if (analystAvatars.length === 0) {
       el.analystCharactersContainer.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted);">
           ${t('analystNoBattle')}
         </div>
       `;
     } else {
-      el.analystCharactersContainer.innerHTML = report.avatars.map((a, idx) => {
+      el.analystCharactersContainer.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
         const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
