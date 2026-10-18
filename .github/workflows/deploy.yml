@@ -25,6 +25,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Generate deployment branch metadata
+        env:
+          DEPLOY_BRANCH: ${{ github.ref_name }}
+        run: |
+          node -e 'const fs = require("node:fs"); const data = { branch: process.env.DEPLOY_BRANCH, version: "1.0.0", updatedAt: new Date().toISOString() }; fs.writeFileSync("version.json", JSON.stringify(data, null, 2) + "\n");'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
