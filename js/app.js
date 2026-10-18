@@ -7996,7 +7996,7 @@ async function fetchLatestBattleReport(silent = false) {
   if (analystState.isFetching) return;
   analystState.isFetching = true;
   try {
-    const data = await apiRequest('/api/battle_report', 'GET');
+    const data = await apiCall('/api/battle_report', 'GET');
     if (data && data.has_report && data.report) {
       const isNew = data.report.timestamp !== analystState.lastBattleTimestamp;
       analystState.currentReport = data.report;
@@ -8313,7 +8313,7 @@ async function clearBattleReport() {
   analystState.currentReport = null;
   analystState.lastBattleTimestamp = 0;
   try {
-    await apiRequest('/api/battle_report/reset', 'POST');
+    await apiCall('/api/battle_report/reset', 'POST');
   } catch (_) {}
   renderEmptyDamageAnalyst();
   updateDashboardBattleBanner();
@@ -8481,7 +8481,7 @@ function setupDamageAnalystEvents() {
             showToast(t('analystToastImported'), 'success');
 
             try {
-              await apiRequest('/api/battle_report', 'POST', report);
+              await apiCall('/api/battle_report', 'POST', report);
             } catch (_) {}
           } else {
             showToast('รูปแบบไฟล์ JSON ไม่ถูกต้อง (ต้องการ GaC Battle Report หรือ Firefly-Sranalysis JSON)', 'error');
