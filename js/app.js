@@ -1,6 +1,6 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.3';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -110,6 +110,7 @@ const el = {
   analystDuration: document.getElementById('analyst-duration'),
   analystBattleMeta: document.getElementById('analyst-battle-meta'),
   analystShareBarContainer: document.getElementById('analyst-share-bar-container'),
+  analystTotalShareLabel: document.getElementById('analyst-total-share-label'),
   analystShareLegend: document.getElementById('analyst-share-legend'),
   analystCharactersContainer: document.getElementById('analyst-characters-container'),
   analystEnemiesContainer: document.getElementById('analyst-enemies-container'),
@@ -8075,6 +8076,11 @@ function renderDamageAnalyst() {
   }
 
   const teamDmg = report.team_total_damage || 0;
+  const hasAvatarDamage = Array.isArray(report.avatars)
+    && report.avatars.some(a => Number(a.total_damage) > 0);
+  if (el.analystTotalShareLabel) {
+    el.analystTotalShareLabel.textContent = hasAvatarDamage ? t('analystShareTotal') : t('analystShareUnavailable');
+  }
   if (el.analystTeamDamage) el.analystTeamDamage.textContent = formatNumber(teamDmg);
   if (el.analystCycles) {
     el.analystCycles.textContent = (report.round_cnt !== undefined) ? `${report.round_cnt} รอบ (${report.round_cnt}-Cycle)` : '0 รอบ';
@@ -8113,7 +8119,7 @@ function renderDamageAnalyst() {
     if (report.avatars && report.avatars.length > 0) {
       el.analystShareBarContainer.innerHTML = report.avatars.map((a, idx) => {
         const color = colors[idx % colors.length];
-        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : 0;
         const info = getAvatarInfo(a.avatar_id);
         return `<div style="width: ${pct}%; background: ${color}; height: 100%; transition: width 0.4s ease;" title="${info.name}: ${pct.toFixed(1)}% (${formatNumber(a.total_damage)})"></div>`;
       }).join('');
@@ -8128,13 +8134,13 @@ function renderDamageAnalyst() {
       el.analystShareLegend.innerHTML = report.avatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
-        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
         return `
           <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.825rem;">
             <div style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}88;"></div>
             <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid ${color};">
             <span style="font-weight: 700; color: var(--text-highlight);">${info.name}</span>
-            <span style="font-weight: 800; color: ${color};">${pct.toFixed(1)}%</span>
+            <span style="font-weight: 800; color: ${color};">${pct === null ? '—' : `${pct.toFixed(1)}%`}</span>
             <span style="color: var(--text-muted); font-size: 0.75rem;">(${formatNumber(a.total_damage)})</span>
           </div>
         `;
@@ -8156,7 +8162,7 @@ function renderDamageAnalyst() {
       el.analystCharactersContainer.innerHTML = report.avatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
-        const pct = a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0);
+        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
 
         let maxHit = 0;
         if (a.attack_type_max_damage) {
@@ -8200,7 +8206,7 @@ function renderDamageAnalyst() {
               </div>
 
               <div style="text-align: right;">
-                <div style="font-size: 1.4rem; font-weight: 900; color: ${color}; letter-spacing: -0.5px;">${pct.toFixed(1)}%</div>
+                <div style="font-size: 1.4rem; font-weight: 900; color: ${color}; letter-spacing: -0.5px;">${pct === null ? '—' : `${pct.toFixed(1)}%`}</div>
                 <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">DPS SHARE</div>
               </div>
             </div>
