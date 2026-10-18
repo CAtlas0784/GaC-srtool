@@ -43,7 +43,11 @@ const state = {
   defaultCreative: localStorage.getItem('gac_srtool_default_creative') === 'true',
   showcaseRolls: localStorage.getItem('gac_srtool_showcase_rolls') !== 'false',
   showcaseAura: localStorage.getItem('gac_srtool_showcase_aura') !== 'false',
-  eqActiveSubtab: 'lc'
+  eqActiveSubtab: 'lc',
+  inventoryItems: [],
+  inventorySaved: {},
+  inventoryDraft: {},
+  inventoryPage: 0
 };
 
 // UI Elements Map
@@ -182,6 +186,18 @@ const el = {
   toggleCastoriceGlobal: document.getElementById('toggle-castorice-global'),
   toggleAhaGlobal: document.getElementById('toggle-aha-global'),
   btnSavePersistentToggles: document.getElementById('btn-save-persistent-toggles'),
+
+  // Material Inventory
+  inventorySearch: document.getElementById('inventory-search'),
+  inventoryBody: document.getElementById('inventory-materials-body'),
+  inventoryCount: document.getElementById('inventory-count'),
+  inventoryDirtyCount: document.getElementById('inventory-dirty-count'),
+  inventoryStatus: document.getElementById('inventory-status'),
+  inventoryPageLabel: document.getElementById('inventory-page-label'),
+  btnInventorySave: document.getElementById('btn-inventory-save'),
+  btnInventoryDiscard: document.getElementById('btn-inventory-discard'),
+  btnInventoryPrev: document.getElementById('btn-inventory-prev'),
+  btnInventoryNext: document.getElementById('btn-inventory-next'),
 
   // Ex-Rank
   tabBtnExrank: document.getElementById('tab-btn-exrank'),
@@ -1070,7 +1086,18 @@ async function refreshStatus() {
   try {
     let data;
     if (state.serverMode === 'gac') {
-      data = await apiCall('/api/status');
+      const [status, freesr] = await Promise.all([
+        apiCall('/api/status'),
+        apiCall('/api/freesr').catch(() => null)
+      ]);
+      data = status;
+      // GAC status contains persistent settings and lineup only. Refresh the
+      // FreeSR snapshot separately so the avatar editor shows the server's
+      // latest skills/Trace values instead of a stale browser cache.
+      if (freesr?.data) {
+        state.fullFreesrData = freesr.data;
+        await saveFreesrCache(freesr.data);
+      }
     } else if (state.serverMode === 'firefly') {
       // FireflyGo uses data-in-game.json for live state and freesr-data.json for inventory
       const datagame = await apiCall('/api/data-in-game').catch(() => null);
@@ -6820,6 +6847,8 @@ function setupTabs() {
           renderAvatarsGrid();
         } else if (targetId === 'tab-equipment') {
           loadEquipment();
+        } else if (targetId === 'tab-inventory') {
+          loadMaterialsInventory();
         } else if (targetId === 'tab-persistent') {
           loadPersistentSettings();
         } else if (targetId === 'tab-json') {
@@ -6830,6 +6859,129 @@ function setupTabs() {
       }
     });
   });
+}
+
+const INVENTORY_PAGE_SIZE = 100;
+
+function inventoryFilteredIds() {
+  const query = (el.inventorySearch?.value || '').trim();
+  if (!query) return state.inventoryItems;
+  return state.inventoryItems.filter(id => String(id).includes(query));
+}
+
+function inventoryDirtyIds() {
+  return state.inventoryItems.filter(id => {
+    const key = String(id);
+    if (!Object.prototype.hasOwnProperty.call(state.inventoryDraft, key)) return false;
+    const hasSaved = Object.prototype.hasOwnProperty.call(state.inventorySaved, key);
+    const draft = state.inventoryDraft[key];
+    return draft === null ? hasSaved : (!hasSaved || draft !== state.inventorySaved[key]);
+  });
+}
+
+function renderMaterialsInventory() {
+  if (!el.inventoryBody) return;
+  const ids = inventoryFilteredIds();
+  const dirty = inventoryDirtyIds();
+  const pageCount = Math.max(1, Math.ceil(ids.length / INVENTORY_PAGE_SIZE));
+  state.inventoryPage = Math.min(state.inventoryPage, pageCount - 1);
+  const start = state.inventoryPage * INVENTORY_PAGE_SIZE;
+  const pageIds = ids.slice(start, start + INVENTORY_PAGE_SIZE);
+
+  el.inventoryCount.textContent = t('inventoryItemTotal', { count: state.inventoryItems.length });
+  el.inventoryDirtyCount.textContent = t('inventoryPending', { count: dirty.length });
+  el.inventoryDirtyCount.style.display = dirty.length ? '' : 'none';
+  el.btnInventorySave.disabled = dirty.length === 0;
+  el.btnInventoryDiscard.disabled = dirty.length === 0;
+  el.btnInventoryPrev.disabled = state.inventoryPage === 0;
+  el.btnInventoryNext.disabled = state.inventoryPage >= pageCount - 1;
+  el.inventoryPageLabel.textContent = t('inventoryPage', { page: state.inventoryPage + 1, pages: pageCount, count: ids.length });
+
+  if (!pageIds.length) {
+    el.inventoryBody.innerHTML = `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text-muted);">${t('inventoryNoMatch')}</td></tr>`;
+    return;
+  }
+  el.inventoryBody.innerHTML = pageIds.map(id => {
+    const key = String(id);
+    const hasSaved = Object.prototype.hasOwnProperty.call(state.inventorySaved, key);
+    const value = Object.prototype.hasOwnProperty.call(state.inventoryDraft, key)
+      ? state.inventoryDraft[key]
+      : (hasSaved ? state.inventorySaved[key] : '');
+    const changed = Object.prototype.hasOwnProperty.call(state.inventoryDraft, key)
+      && (value === null ? hasSaved : (!hasSaved || value !== state.inventorySaved[key]));
+    const displayValue = value === null ? '' : value;
+    return `<tr style="border-top:1px solid var(--border-color);${changed ? 'background:rgba(245,158,11,.08);' : ''}">
+      <td style="padding:.55rem 1rem;font-family:monospace;">${id}</td>
+      <td style="padding:.4rem 1rem;"><input type="number" class="form-input inventory-count-input" data-item-id="${id}" min="0" max="4294967295" step="1" value="${displayValue}" placeholder="${t('inventoryDefaultPlaceholder')}" aria-label="${t('inventoryCountFor', { id })}" style="max-width:220px;"></td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadMaterialsInventory() {
+  if (!el.inventoryStatus) return;
+  if (state.serverMode !== 'gac') {
+    el.inventoryStatus.textContent = t('inventoryGaCOnly');
+    return;
+  }
+  el.inventoryStatus.textContent = t('inventoryLoadHint');
+  try {
+    const result = await apiCall('/api/inventory/materials');
+    if (!Array.isArray(result.item_ids)) throw new Error('Server returned an invalid item catalog');
+    state.inventoryItems = [...new Set([...result.item_ids, 1, 2])].filter(Number.isInteger).sort((a, b) => a - b);
+    state.inventorySaved = result.materials && typeof result.materials === 'object' ? result.materials : {};
+    state.inventoryDraft = {};
+    state.inventoryPage = 0;
+    el.inventoryStatus.textContent = t('inventoryLoadSuccess', { count: state.inventoryItems.length });
+    renderMaterialsInventory();
+  } catch (error) {
+    el.inventoryStatus.textContent = `${t('inventoryLoadFailed')}: ${error.message}`;
+    el.inventoryBody.innerHTML = `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text-muted);">${t('inventoryLoadFailed')}</td></tr>`;
+  }
+}
+
+async function saveMaterialsInventory() {
+  const updates = inventoryDirtyIds().map(id => {
+    const count = state.inventoryDraft[String(id)];
+    return count === null ? { item_id: id, reset: true } : { item_id: id, count };
+  });
+  if (!updates.length) return;
+  el.btnInventorySave.disabled = true;
+  el.inventoryStatus.textContent = t('inventorySaving', { count: updates.length });
+  try {
+    const result = await apiCall('/api/inventory/materials', 'POST', { updates });
+    state.inventorySaved = result.materials || state.inventorySaved;
+    state.inventoryDraft = {};
+    if (state.fullFreesrData) {
+      state.fullFreesrData.materials = { ...state.inventorySaved };
+      await saveFreesrCache(state.fullFreesrData);
+    }
+    el.inventoryStatus.textContent = t('inventorySaveSuccess', { count: updates.length });
+    renderMaterialsInventory();
+  } catch (error) {
+    el.inventoryStatus.textContent = `${t('inventorySaveFailed')}: ${error.message}`;
+    renderMaterialsInventory();
+  }
+}
+
+function setupInventoryEvents() {
+  el.inventorySearch?.addEventListener('input', () => { state.inventoryPage = 0; renderMaterialsInventory(); });
+  el.inventoryBody?.addEventListener('change', event => {
+    const input = event.target.closest('.inventory-count-input');
+    if (!input) return;
+    const raw = input.value.trim();
+    if (raw === '') {
+      state.inventoryDraft[input.dataset.itemId] = null;
+    } else {
+      const value = Number(raw);
+      if (!Number.isSafeInteger(value) || value < 0 || value > 4294967295) return;
+      state.inventoryDraft[input.dataset.itemId] = value;
+    }
+    renderMaterialsInventory();
+  });
+  el.btnInventorySave?.addEventListener('click', saveMaterialsInventory);
+  el.btnInventoryDiscard?.addEventListener('click', () => { state.inventoryDraft = {}; renderMaterialsInventory(); });
+  el.btnInventoryPrev?.addEventListener('click', () => { state.inventoryPage = Math.max(0, state.inventoryPage - 1); renderMaterialsInventory(); });
+  el.btnInventoryNext?.addEventListener('click', () => { state.inventoryPage++; renderMaterialsInventory(); });
 }
 
 // Setup Event Listeners
@@ -8382,6 +8534,7 @@ async function init() {
   setupTabs();
   setupModalSubtabs();
   setupEvents();
+  setupInventoryEvents();
   setupDamageAnalystEvents();
   setupGMConsoleEvents();
   applyTranslations();
