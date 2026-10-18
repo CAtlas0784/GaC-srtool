@@ -55,6 +55,7 @@
     <button class="tab-btn active" data-tab="tab-dashboard" data-i18n="tabDashboard">📊 แดชบอร์ด & จัดทีม</button>
     <button class="tab-btn" data-tab="tab-avatars" data-i18n="tabAvatars">👥 ตัวละคร</button>
     <button class="tab-btn" data-tab="tab-equipment" data-i18n="tabEquipment">🗡️ กรวยแสง & รีลิกส์</button>
+    <button class="tab-btn" data-tab="tab-inventory" data-i18n="tabInventory">🎒 ไอเทมในกระเป๋า</button>
     <button class="tab-btn" data-tab="tab-damage-analyst" id="tab-btn-damage-analyst" data-i18n="tabDamageAnalyst">💥 Damage Analyst</button>
     <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaC</button>
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
@@ -394,6 +395,48 @@
         <!-- Right: Inspector Side Card -->
         <div id="eq-inspector-card" class="eq-inspector-wrapper" style="width: 320px; position: sticky; top: 80px; flex-shrink: 0; display: none;">
           <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Material inventory editor: edits only Client-catalog item quantities. -->
+    <section id="tab-inventory" class="tab-content">
+      <div class="card" style="margin-bottom: 1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div class="card-title" data-i18n="inventoryTitle">🎒 จัดการจำนวนไอเทม</div>
+            <p class="card-subtitle" data-i18n="inventoryDescription">ค้นหาด้วย Item ID แล้วแก้จำนวนหลายรายการก่อนบันทึกครั้งเดียว รายการมาจาก catalog ของ Client ที่เซิร์ฟเวอร์ใช้ ช่องว่างหมายถึงใช้ค่าเริ่มต้นของเซิร์ฟเวอร์</p>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+            <span id="inventory-count" class="badge-super-tag">—</span>
+            <span id="inventory-dirty-count" class="badge-super-tag" style="display:none;">0</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:1rem;">
+          <input type="search" id="inventory-search" class="form-input" style="flex:1;min-width:220px;" data-i18n-placeholder="inventorySearchPlaceholder" placeholder="ค้นหา Item ID...">
+          <button type="button" class="btn btn-secondary" id="btn-inventory-discard" disabled data-i18n="inventoryDiscard">ทิ้งการแก้ไข</button>
+          <button type="button" class="btn btn-success" id="btn-inventory-save" disabled data-i18n="inventorySave">บันทึกการเปลี่ยนแปลง</button>
+        </div>
+        <div id="inventory-status" role="status" aria-live="polite" style="font-size:.8rem;color:var(--text-muted);margin-top:.7rem;" data-i18n="inventoryLoadHint">กำลังโหลดรายการจากเซิร์ฟเวอร์...</div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="overflow:auto;max-height:65vh;">
+          <table style="width:100%;border-collapse:collapse;min-width:420px;">
+            <thead style="position:sticky;top:0;background:var(--bg-card-hover);z-index:1;">
+              <tr>
+                <th style="text-align:left;padding:.8rem 1rem;" data-i18n="inventoryItemId">Item ID</th>
+                <th style="text-align:left;padding:.8rem 1rem;" data-i18n="inventoryDefaultCount">จำนวนในกระเป๋า</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-materials-body">
+              <tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text-muted);" data-i18n="inventoryLoadHint">กำลังโหลดรายการจากเซิร์ฟเวอร์...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.75rem 1rem;border-top:1px solid var(--border-color);">
+          <button type="button" class="btn btn-sm btn-secondary" id="btn-inventory-prev" disabled data-i18n="inventoryPrevious">ก่อนหน้า</button>
+          <span id="inventory-page-label" style="font-size:.8rem;color:var(--text-muted);"></span>
+          <button type="button" class="btn btn-sm btn-secondary" id="btn-inventory-next" disabled data-i18n="inventoryNext">ถัดไป</button>
         </div>
       </div>
     </section>
