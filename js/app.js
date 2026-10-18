@@ -381,7 +381,8 @@ async function apiCall(endpoint, method = 'GET', data = null) {
   const options = {
     method,
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'X-GaC-Srtool': '1'
     }
   };
 
@@ -409,8 +410,34 @@ async function apiCall(endpoint, method = 'GET', data = null) {
   }
 }
 
+// Explicit, expiring custom-battle connection. The backend returns its TTL.
+let toolSessionTimer = null;
+let toolSessionConnected = false;
+let toolSessionGeneration = 0;
+async function syncToolSession(connected) {
+  const generation = ++toolSessionGeneration;
+  if (toolSessionTimer) { clearTimeout(toolSessionTimer); toolSessionTimer = null; }
+  toolSessionConnected = connected;
+  try {
+    const result = await apiCall('/api/tool-session', 'POST', { connected, client: 'GaC-Srtool' });
+    if (generation === toolSessionGeneration && connected && toolSessionConnected && Number(result.lease_seconds) > 0) {
+      toolSessionTimer = setTimeout(() => syncToolSession(true), Number(result.lease_seconds) * 1000 / 3);
+    }
+  } catch (error) {
+    if (generation === toolSessionGeneration) toolSessionConnected = false;
+    // Older backends remain usable, but cannot enable the custom encounter lease.
+    console.warn('Tool session unavailable:', error.message);
+  }
+}
+window.addEventListener('pagehide', () => {
+  if (!toolSessionConnected) return;
+  const base = state.apiUrl.replace(/\/+$/, '');
+  navigator.sendBeacon(`${base}/api/tool-session`, JSON.stringify({ connected: false, client: 'GaC-Srtool' }));
+});
+
 // Update connection status UI
 function setConnectionStatus(connected, extraText = '') {
+  if (connected !== toolSessionConnected) syncToolSession(connected);
   state.isConnected = connected;
   if (connected) {
     el.statusDot.classList.add('connected');
@@ -4600,7 +4627,7 @@ async function maxAllBuildForCurrentAvatar() {
 }
 
 // Save avatar details from modal
-async function saveAvatarDetails() {
+async function saveAvatarDetails(closeModal = true) {
   if (!state.selectedAvatarDetail) return;
   const aid = state.selectedAvatarDetail.avatar_id;
   const level = parseInt(el.modalCharLevel.value, 10) || 80;
@@ -4735,15 +4762,13 @@ async function saveAvatarDetails() {
 
   if (state.isConnected) {
     try {
-      if (state.serverMode === 'gac') {
-        await apiCall('/api/freesr/avatars', 'POST', { avatar_id: aid, level, promotion, rank });
-        await saveFreesrChangesToServer();
-      } else {
-        await saveFreesrChangesToServer();
-      }
+      // Save the complete avatar record once. The full payload includes skills
+      // and Trace values; a preceding rank-only request can trigger live sync
+      // with an incomplete intermediate state.
+      await saveFreesrChangesToServer();
       showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
     } catch (err) {
-      showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'info');
+      showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
     }
   } else {
     showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
