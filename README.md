@@ -111,3 +111,7 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 | `/api/avatar/rank` | POST | เปลี่ยนระดับ Eidolon ของตัวละคร |
 | `/api/avatar/max_all` | POST | ปรับตัวละครทุกตัวเป็น Max E6 และสกิลเต็ม |
 | `/api/command` | POST | ส่งคำสั่ง GM ไปยังเซิร์ฟเวอร์ |
+
+### บันทึกตัวละครและ Traces
+
+การบันทึกจากหน้ารายละเอียดส่งข้อมูลตัวละครทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวมถึง `data.skills` และ `data.skills_by_anchor_type` สำหรับ Traces เพื่อไม่ให้ server sync ข้อมูลระดับ/Eidolon ระหว่างทางก่อนข้อมูล Trace จะถูกบันทึก `saveAvatarDetails(closeModal = true)` ยังรองรับการเรียกจากปุ่ม build ที่ไม่ต้องปิดหน้าต่าง ถ้า server ตอบผิดพลาดจะแสดงข้อความบันทึกไม่สำเร็จแทนการแจ้งว่าสำเร็จ
