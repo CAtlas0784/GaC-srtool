@@ -5,6 +5,7 @@
   "main": "index.html",
   "scripts": {
     "sync-branch": "node scripts/sync-branch.js",
+    "sync-build-guides": "node scripts/sync-build-guides.mjs",
     "dev": "node scripts/sync-branch.js && npx serve . -l 5173",
     "start": "node scripts/sync-branch.js && npx serve . -l 5173",
     "serve": "npx serve . -l 5173"

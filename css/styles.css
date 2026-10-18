@@ -3209,3 +3209,137 @@ input:checked + .slider:before {
   flex-shrink: 0;
   opacity: 0.85;
 }
+
+.build-guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.build-guide-topline,
+.build-guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.build-guide-title {
+  color: var(--text-highlight);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.build-guide-meta,
+.build-guide-note,
+.build-guide-sample,
+.build-guide-footer {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.build-guide-note {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.build-guide-sample {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.08);
+  color: #bae6fd;
+  padding: 0.3rem 0.7rem;
+}
+
+.build-guide-low-sample {
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+}
+
+.build-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.build-guide-card {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: rgba(18, 24, 38, 0.72);
+}
+
+.build-guide-card h4 {
+  margin: 0 0 0.6rem;
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+}
+
+.build-guide-ranked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.build-guide-ranked-list li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.build-guide-ranked-list li span {
+  min-width: 0;
+}
+
+.build-guide-ranked-list li strong {
+  flex-shrink: 0;
+  color: var(--accent-gold);
+  font-size: 0.72rem;
+}
+
+.build-guide-empty,
+.build-guide-no-data {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.build-guide-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.build-guide-stat-grid > div > span {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.build-guide-footer {
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.65rem;
+}
+
+.build-guide-footer a:not(.btn) {
+  color: var(--accent-cyan);
+}
+
+@media (max-width: 640px) {
+  .build-guide-grid,
+  .build-guide-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

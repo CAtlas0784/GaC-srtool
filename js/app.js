@@ -1,6 +1,7 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.3';
+import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.4';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -2494,8 +2495,74 @@ function switchModalSubtab(targetId) {
       renderModalRelicsTab(aid);
     } else if (targetId === 'modaltab-skills') {
       renderModalSkillsTab(aid);
+    } else if (targetId === 'modaltab-build-guide') {
+      renderCharacterBuildGuide(aid);
     }
   }
+}
+
+function renderGuideRankedList(items, emptyText) {
+  if (!items?.length) return `<div class="build-guide-empty">${escapeHtml(emptyText)}</div>`;
+  return `<ol class="build-guide-ranked-list">${items.map(item => `
+    <li><span>${escapeHtml(item.name)}</span><strong>${Number(item.usage).toLocaleString(undefined, { maximumFractionDigits: 2 })}%</strong></li>
+  `).join('')}</ol>`;
+}
+
+const BUILD_GUIDE_MODE_KEYS = {
+  'Memory of Chaos': 'buildGuideModeMoc',
+  'Pure Fiction': 'buildGuideModePf',
+  'Apocalyptic Shadow': 'buildGuideModeAs',
+  'Anomaly Arbitration': 'buildGuideModeAa'
+};
+
+function renderCharacterBuildGuide(avatarId) {
+  const container = document.getElementById('build-guide-content');
+  if (!container) return;
+  const profile = PRYDWEN_BUILD_GUIDES.profiles[String(avatarId)];
+  const empty = t('buildGuideNoSample');
+  const source = PRYDWEN_BUILD_GUIDES.source;
+  const sampleCount = Number(profile?.count || profile?.sampleSize || 0);
+  const modeKey = BUILD_GUIDE_MODE_KEYS[profile?.mode];
+  const modeUrl = profile?.slug
+    ? `https://www.prydwen.gg/star-rail/characters/${encodeURIComponent(profile.slug)}`
+    : 'https://www.prydwen.gg/star-rail/characters/';
+  const sampleLabel = sampleCount > 0
+    ? t('buildGuideSampleCount', { count: sampleCount.toLocaleString(), mode: modeKey ? t(modeKey) : (profile.mode || 'endgame') })
+    : t('buildGuideSampleUnavailable');
+
+  container.innerHTML = `
+    <div class="build-guide-topline">
+      <div>
+        <div class="build-guide-title">${escapeHtml(t('buildGuideTitle'))}</div>
+        <div class="build-guide-meta">${escapeHtml(t('buildGuideSnapshot', { version: source.version, date: source.collectedAt }))}</div>
+      </div>
+      <a class="btn btn-sm btn-secondary" href="${escapeHtml(modeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('buildGuideOpenPrydwen'))} ↗</a>
+    </div>
+    <p class="build-guide-note">${escapeHtml(t('buildGuideDescription'))}</p>
+    <div class="build-guide-sample">${escapeHtml(sampleLabel)}</div>
+    ${profile && sampleCount > 0 && sampleCount < 20 ? `<div class="build-guide-low-sample">${escapeHtml(t('buildGuideLowSample'))}</div>` : ''}
+    ${profile && sampleCount > 0 ? `
+      <div class="build-guide-grid">
+        <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideLightCones'))}</h4>${renderGuideRankedList(profile.lightCones, empty)}</section>
+        <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideRelicSets'))}</h4>${renderGuideRankedList(profile.relicSets, empty)}</section>
+        <section class="build-guide-card"><h4>${escapeHtml(t('buildGuidePlanarSets'))}</h4>${renderGuideRankedList(profile.planarSets, empty)}</section>
+        <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideMainStats'))}</h4>
+          <div class="build-guide-stat-grid">
+            <div><span>${escapeHtml(t('buildGuideBody'))}</span>${renderGuideRankedList(profile.mainStats.body, empty)}</div>
+            <div><span>${escapeHtml(t('buildGuideFeet'))}</span>${renderGuideRankedList(profile.mainStats.feet, empty)}</div>
+            <div><span>${escapeHtml(t('buildGuideSphere'))}</span>${renderGuideRankedList(profile.mainStats.sphere, empty)}</div>
+            <div><span>${escapeHtml(t('buildGuideRope'))}</span>${renderGuideRankedList(profile.mainStats.rope, empty)}</div>
+          </div>
+        </section>
+      </div>
+    ` : `<div class="build-guide-no-data">${escapeHtml(t('buildGuideNoData'))}</div>`}
+    <div class="build-guide-footer">
+      <span>${escapeHtml(t('buildGuideCredit', { credit: source.credit }))} <a href="https://huggingface.co/datasets/LvlUrArti/MocDataProcessed" target="_blank" rel="noopener noreferrer">${escapeHtml(source.dataset)}</a></span>
+      <button type="button" class="btn btn-sm btn-primary" id="btn-guide-open-equipment">${escapeHtml(t('buildGuideOpenEquipment'))}</button>
+    </div>
+  `;
+
+  document.getElementById('btn-guide-open-equipment')?.addEventListener('click', () => switchModalSubtab('modaltab-relics'));
 }
 
 function setupModalSubtabs() {
@@ -7109,7 +7176,7 @@ function setupEvents() {
     });
     if (unequippedCount > 0) {
       if (state.isConnected) await saveFreesrChangesToServer();
-      showToast(t('toastRelicsCleared') || `ถอดรีลิกส์เรียบร้อย (${unequippedCount} ชิ้น)`, 'info');
+      showToast(t('toastRelicsCleared', { count: unequippedCount }) || `ถอดรีลิกส์เรียบร้อย (${unequippedCount} ชิ้น)`, 'info');
       renderModalRelicsTab(aid);
       renderModalOverviewTab(aid);
       renderShowcaseCard(aid);
@@ -7872,6 +7939,8 @@ const analystState = {
   currentReport: null,
   isFetching: false,
   lastBattleTimestamp: 0,
+  lastReportRevision: 0,
+  isLive: false,
   autoSyncInterval: null
 };
 
@@ -7999,14 +8068,20 @@ async function fetchLatestBattleReport(silent = false) {
   try {
     const data = await apiCall('/api/battle_report', 'GET');
     if (data && data.has_report && data.report) {
-      const isNew = data.report.timestamp !== analystState.lastBattleTimestamp;
+      const revision = Number(data.revision || data.report.timestamp || 0);
+      const isLive = data.is_live === true || data.report.end_status === 'LIVE';
+      const isNew = revision !== analystState.lastReportRevision || isLive !== analystState.isLive;
       analystState.currentReport = data.report;
       analystState.lastBattleTimestamp = data.report.timestamp;
-      renderDamageAnalyst();
-      updateDashboardBattleBanner();
+      analystState.lastReportRevision = revision;
+      analystState.isLive = isLive;
+      if (isNew) {
+        renderDamageAnalyst();
+        updateDashboardBattleBanner();
+      }
       if (!silent) {
         showToast(t('analystToastFetched'), 'success');
-      } else if (isNew) {
+      } else if (isNew && !isLive) {
         showToast(t('analystToastFetched'), 'info');
       }
     } else {
@@ -8097,7 +8172,11 @@ function renderDamageAnalyst() {
   }
 
   if (el.badgeAnalystStatus) {
-    if (report.end_status === 'WIN') {
+    if (analystState.isLive || report.end_status === 'LIVE') {
+      el.badgeAnalystStatus.textContent = t('analystStatusLive');
+      el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.2)';
+      el.badgeAnalystStatus.style.color = '#4ade80';
+    } else if (report.end_status === 'WIN') {
       el.badgeAnalystStatus.textContent = t('analystStatusWin');
       el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.15)';
       el.badgeAnalystStatus.style.color = '#4ade80';
@@ -8318,6 +8397,8 @@ function exportBattleReportJson() {
 async function clearBattleReport() {
   analystState.currentReport = null;
   analystState.lastBattleTimestamp = 0;
+  analystState.lastReportRevision = 0;
+  analystState.isLive = false;
   try {
     await apiCall('/api/battle_report/reset', 'POST');
   } catch (_) {}
@@ -8482,6 +8563,8 @@ function setupDamageAnalystEvents() {
           if (report && (report.avatars || report.team_total_damage !== undefined)) {
             analystState.currentReport = report;
             analystState.lastBattleTimestamp = report.timestamp || Date.now();
+            analystState.lastReportRevision = Date.now();
+            analystState.isLive = false;
             renderDamageAnalyst();
             updateDashboardBattleBanner();
             showToast(t('analystToastImported'), 'success');
@@ -8513,7 +8596,7 @@ function setupDamageAnalystEvents() {
       if (el.chkAnalystAutosync && el.chkAnalystAutosync.checked && state.isConnected) {
         fetchLatestBattleReport(true);
       }
-    }, 3000);
+    }, 1000);
   }
 }
 
