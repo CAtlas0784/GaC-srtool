@@ -2,7 +2,7 @@ name: Deploy GaC-Srtool to GitHub Pages
 
 on:
   push:
-    branches: ["main", "test-gay"]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
