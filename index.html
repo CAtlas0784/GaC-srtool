@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[test-gay] GaC-Srtool — Ultimate Star Rail Server & Build Manager</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.1">
+  <title>GaC-Srtool</title>
+  <link rel="stylesheet" href="css/styles.css?v=2.3">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -17,7 +17,7 @@
       <div>
         <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem;">
           <span>GaC-Srtool</span>
-          <span class="badge-branch" id="header-branch-badge">test-gay</span>
+          <span class="badge-branch" id="header-branch-badge" style="display: none;"></span>
         </div>
         <div class="brand-subtitle" data-i18n="appSubtitle">Star Rail FreeSR & Server Controller</div>
       </div>
@@ -25,7 +25,7 @@
 
     <div class="header-controls">
       <!-- Server Mode Selector -->
-      <div class="server-mode-badge" title="โหมดการเชื่อมต่อเซิร์ฟเวอร์">
+      <div class="server-mode-badge" title="โหมดการเชื่อมต่อเซิร์ฟเวอร์" data-i18n-title="lblServerModeActive">
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
           <option value="gac" selected>GaC-hkrpg-go</option>
@@ -35,16 +35,16 @@
       </div>
 
       <!-- Language Selector (13 Languages) -->
-      <select id="lang-select" class="form-select btn-sm" style="width: auto; padding: 0.4rem 0.75rem; background: var(--bg-secondary); cursor: pointer;" title="Language / ภาษา">
+      <select id="lang-select" class="form-select btn-sm" style="width: auto; padding: 0.4rem 0.75rem; background: var(--bg-secondary); cursor: pointer;" title="Language / ภาษา" data-i18n-title="languageSelectorTitle">
       </select>
 
       <!-- Connection Pill -->
-      <div class="connection-pill" id="btn-open-settings" title="คลิกเพื่อตั้งค่าการเชื่อมต่อ API">
+      <div class="connection-pill" id="btn-open-settings" title="คลิกเพื่อตั้งค่าการเชื่อมต่อ API" data-i18n-title="apiSettingsTooltip">
         <span class="status-dot" id="status-dot"></span>
         <span id="connection-status-text">กำลังตรวจสอบ...</span>
       </div>
 
-      <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="รีเฟรชการเชื่อมต่อ" data-i18n="refresh">
+      <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="รีเฟรชการเชื่อมต่อ" data-i18n="refresh" data-i18n-title="refresh">
         🔄 รีเฟรช
       </button>
     </div>
@@ -61,11 +61,11 @@
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json" data-i18n="tabJson">📝 จัดการไฟล์ JSON</button>
     <button class="tab-btn" data-tab="tab-settings" data-i18n="tabSettings">⚙️ ตั้งค่า</button>
-    <div class="nav-branch-pill" id="nav-branch-pill" title="Git Branch ที่ใช้งานอยู่">
+    <div class="nav-branch-pill" id="nav-branch-pill" title="Git Branch ที่ใช้งานอยู่" data-i18n-title="branchTooltip" style="display: none;">
       <svg class="branch-icon" viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
         <path fill-rule="evenodd" d="M11.75 2.5a.75.75 0 100 1.5.75.75 0 000-1.5zm-2.25.75a2.25 2.25 0 113 2.122V6A2.5 2.5 0 0110 8.5H6a1 1 0 00-1 1v1.128a2.251 2.251 0 11-1.5 0V5.372a2.25 2.25 0 111.5 0v1.836A2.492 2.492 0 016 7h4a1 1 0 001-1v-.628A2.25 2.25 0 019.5 3.25zM4.25 12a.75.75 0 100 1.5.75.75 0 000-1.5zM3.5 3.25a.75.75 0 111.5 0 .75.75 0 01-1.5 0z"></path>
       </svg>
-      <span id="nav-branch-name">test-gay</span>
+      <span id="nav-branch-name"></span>
     </div>
   </nav>
 
@@ -118,7 +118,7 @@
           <div class="card">
             <div class="card-title">
               <span data-i18n="serverStatusTitle">📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
-              <span class="btn-sm btn-secondary" id="badge-version">API Live</span>
+              <span class="btn-sm btn-secondary" id="badge-version" data-i18n="apiLive">API Live</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div>
@@ -154,7 +154,7 @@
                 <span data-i18n="miniBattleTitle">สรุปการต่อสู้ล่าสุด & ดาเมจทีม</span>
               </span>
               <div style="display: flex; align-items: center; gap: 0.4rem;">
-                <span class="badge-super-tag" id="badge-mini-battle-status" style="background: rgba(156, 163, 175, 0.12); color: var(--text-muted); font-weight: 800; border: 1px solid rgba(156, 163, 175, 0.25);">
+                <span class="badge-super-tag" id="badge-mini-battle-status" data-i18n="miniNoBattleTitle" style="background: rgba(156, 163, 175, 0.12); color: var(--text-muted); font-weight: 800; border: 1px solid rgba(156, 163, 175, 0.25);">
                   ยังไม่มีข้อมูลการต่อสู้
                 </span>
                 <button type="button" class="btn btn-sm btn-secondary" id="btn-mini-view-full-analyst" style="font-size: 0.725rem; padding: 0.2rem 0.55rem; color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.35); font-weight: 700;" title="เปิดหน้า Damage Analyst ตัวเต็ม" data-i18n="miniViewFullAnalyst">
@@ -228,34 +228,18 @@
           <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <span style="display: flex; align-items: center; gap: 0.5rem;">
               <span>💻</span>
-              <span data-i18n="consoleTitle">คอนโซลคำสั่ง GM & Log สด</span>
+              <span>GM Command Console & Live Log</span>
             </span>
             <div style="display: flex; gap: 0.35rem;">
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-copy-log" title="คัดลอก Log ทั้งหมด" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" data-i18n="consoleCopyLog">
-                📋 คัดลอก
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-copy-log" title="Copy all logs" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+                📋 Copy
               </button>
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-clear-log" title="ล้างหน้าจอ Terminal" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" data-i18n="consoleClearLog">
-                🗑️ ล้าง Log
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-console-clear-log" title="Clear terminal log" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+                🗑️ Clear
               </button>
             </div>
           </div>
-          <p class="card-subtitle" style="margin-bottom: 0.25rem;" data-i18n="consoleSubtitle">ส่งคำสั่ง GM / Server commands แบบเรียลไทม์ พร้อมติดตามสถานะและ Packet Log</p>
-
-          <!-- Quick GM Command Pills -->
-          <div>
-            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.35rem;" data-i18n="consoleQuickTitle">
-              ⚡ คำสั่งด่วนที่ใช้บ่อย (Quick Commands)
-            </div>
-            <div class="console-quick-pills">
-              <button type="button" class="console-pill-btn" data-cmd="/heal" title="ฟื้นฟู HP/Energy ทั้งทีม" data-i18n="quickCmdHeal">💖 /heal</button>
-              <button type="button" class="console-pill-btn" data-cmd="/give 102 100000" title="รับ 100,000 Stellar Jades" data-i18n="quickCmdJades">💎 +100k Jades</button>
-              <button type="button" class="console-pill-btn" data-cmd="/give 2 10000000" title="รับ 10,000,000 Credits" data-i18n="quickCmdCredits">💰 +10M Credits</button>
-              <button type="button" class="console-pill-btn" data-cmd="/max" title="อัปเต็มเลเวล 80 E6 ทุกตัว" data-i18n="quickCmdMax">⚡ /max</button>
-              <button type="button" class="console-pill-btn" data-cmd="/teleport 20001 1" title="วาร์ปไปรถไฟ Astral Express" data-i18n="quickCmdExpress">🚂 รถไฟ Express</button>
-              <button type="button" class="console-pill-btn" data-cmd="/clear lineup" title="ล้างตัวละครในทีม" data-i18n="quickCmdClearLineup">🧹 เคลียร์ทีม</button>
-              <button type="button" class="console-pill-btn" data-cmd="/help" title="ดูรายการคำสั่งทั้งหมด" data-i18n="quickCmdHelp">❓ /help</button>
-            </div>
-          </div>
+          <p class="card-subtitle" style="margin-bottom: 0.25rem;">Send GM and server commands, with live status and packet logs.</p>
 
           <!-- Interactive Terminal Screen -->
           <div class="console-terminal-wrapper">
@@ -274,15 +258,22 @@
           <form id="form-console-cmd" style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
             <div class="console-input-wrap" style="flex: 1; display: flex; align-items: center; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 6px; padding: 0 0.75rem;">
               <span style="color: var(--accent-cyan); font-family: monospace; font-weight: 800; font-size: 1.1rem; margin-right: 0.5rem;">&gt;</span>
-              <input type="text" id="console-cmd-input" class="form-input" data-i18n-placeholder="consolePlaceholder" placeholder="พิมพ์คำสั่ง GM เช่น /heal, /max, /teleport 20411, /give 102 1000..." style="background: transparent; border: none; padding: 0.6rem 0; font-family: monospace; font-size: 0.85rem; box-shadow: none;" autocomplete="off">
+              <input type="text" id="console-cmd-input" class="form-input" placeholder="Type a command, e.g. /heal, /teleport 20411, /give 102 1000" style="background: transparent; border: none; padding: 0.6rem 0; font-family: monospace; font-size: 0.85rem; box-shadow: none;" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="console-suggestion-options" aria-expanded="false">
             </div>
-            <button type="submit" class="btn btn-primary" id="btn-console-cmd-send" data-i18n="consoleSend" style="padding: 0.6rem 1.25rem; font-weight: 700; white-space: nowrap;">
-              ส่งคำสั่ง
+            <button type="submit" class="btn btn-primary" id="btn-console-cmd-send" style="padding: 0.6rem 1.25rem; font-weight: 700; white-space: nowrap;">
+              Run
             </button>
           </form>
+          <div id="console-command-suggestions" class="console-suggestions" hidden>
+            <div class="console-suggestions-header">
+              <span>Command suggestions</span>
+              <span id="console-suggestion-count" class="console-suggestion-count">‹ 0/0 ›</span>
+            </div>
+            <div id="console-suggestion-options" role="listbox" aria-label="Command suggestions"></div>
+          </div>
           <div style="font-size: 0.725rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
-            <span data-i18n="consoleHistoryHint">💡 รองรับกด <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↑</kbd> <kbd style="background: rgba(255,255,255,0.1); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: monospace;">↓</kbd> เพื่อเลือกประวัติคำสั่งก่อนหน้า</span>
-            <span id="lbl-console-conn-status" style="color: var(--accent-green);">● เซิร์ฟเวอร์ออนไลน์</span>
+            <span>Use ↑ / ↓ to browse suggestions or command history. Press Tab to complete.</span>
+            <span id="lbl-console-conn-status" style="color: var(--accent-green);">● Server Online</span>
           </div>
         </div>
       </div>
@@ -355,20 +346,20 @@
 
           <!-- Search & Filter Controls -->
           <div style="display: flex; gap: 0.4rem; flex: 1; max-width: 620px; flex-wrap: wrap;">
-            <input type="text" id="eq-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID อุปกรณ์..." style="flex: 1; min-width: 160px;">
+            <input type="text" id="eq-search" class="form-input" data-i18n-placeholder="equipmentSearchPlaceholder" placeholder="🔍 ค้นหาชื่อหรือ ID อุปกรณ์..." style="flex: 1; min-width: 160px;">
             <select id="eq-filter-rarity" class="form-select" style="max-width: 110px;">
               <option value="all" data-i18n="filterAllRarity">ทุกดาว</option>
               <option value="5" data-i18n="filter5Star">5 ดาว</option>
               <option value="4" data-i18n="filter4Star">4 ดาว</option>
-              <option value="3">3 ดาว</option>
+              <option value="3" data-i18n="filter3Star">3 ดาว</option>
             </select>
             <select id="eq-filter-equipped" class="form-select" style="max-width: 130px;">
-              <option value="all">สถานะทั้งหมด</option>
-              <option value="equipped">สวมใส่อยู่</option>
-              <option value="unequipped">ในกระเป๋า</option>
+              <option value="all" data-i18n="filterAllStatus">สถานะทั้งหมด</option>
+              <option value="equipped" data-i18n="filterEquipped">สวมใส่อยู่</option>
+              <option value="unequipped" data-i18n="filterInInventory">ในกระเป๋า</option>
             </select>
             <select id="eq-filter-extra" class="form-select" style="max-width: 120px;">
-              <option value="all">ทุกประเภท</option>
+              <option value="all" data-i18n="filterAllTypes">ทุกประเภท</option>
             </select>
           </div>
 
@@ -488,7 +479,7 @@
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #f59e0b; background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(20,20,28,0.7) 100%);">
           <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystCycles">จำนวนรอบ (Cycles)</div>
           <div style="font-size: 1.85rem; font-weight: 900; color: #fbbf24; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-cycles">0 รอบ</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-cycles-note">MoC / PF / AS Standard</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-cycles-note" data-i18n="analystCyclesNote">MoC / PF / AS Standard</div>
         </div>
 
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #38bdf8; background: linear-gradient(135deg, rgba(56,189,248,0.06) 0%, rgba(20,20,28,0.7) 100%);">
@@ -587,7 +578,7 @@
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
             <div class="ex-switch-card">
               <div>
-                <div style="font-weight: 700;">Silver Wolf Global Feature</div>
+                <div style="font-weight: 700;" data-i18n="globalFeatureSilverWolf">Silver Wolf Global Feature</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="swGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ SW ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>
               <label class="switch">
@@ -598,7 +589,7 @@
 
             <div class="ex-switch-card">
               <div>
-                <div style="font-weight: 700;">Castorice Global Feature</div>
+                <div style="font-weight: 700;" data-i18n="globalFeatureCastorice">Castorice Global Feature</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="castoriceGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ Castorice ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>
               <label class="switch">
@@ -609,7 +600,7 @@
 
             <div class="ex-switch-card">
               <div>
-                <div style="font-weight: 700;">Aeon ★ Aha Global Feature</div>
+                <div style="font-weight: 700;" data-i18n="globalFeatureAha">Aeon ★ Aha Global Feature</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="ahaGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ Aeon ★ Aha ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>
               <label class="switch">
@@ -727,7 +718,7 @@
                   <span style="font-weight: 700; font-size: 0.875rem;" data-i18n="lblPersistenceInfo">ระบบบันทึกทีมและข้อมูล (Lineup Storage)</span>
                   <span id="badge-persistence-mode" class="badge-super-tag" style="padding: 0.15rem 0.55rem; font-size: 0.75rem;">Persistent API (GaC)</span>
                 </div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;" id="desc-persistence-mode">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;" id="desc-persistence-mode" data-i18n="persistentDescription">
                   GaC Server เก็บทีมใน persistent.json (รองรับโหมดสร้างสรรค์) • สำหรับ FireflyGo เก็บใน freesr-data.json
                 </div>
               </div>
@@ -800,7 +791,7 @@
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                 <span style="color: var(--text-muted);" data-i18n="lblCacheSize">สถานะหน่วยความจำ LocalStorage:</span>
-                <strong id="lbl-cache-usage" style="color: var(--accent-cyan); font-family: monospace;">ตรวจวัด...</strong>
+                <strong id="lbl-cache-usage" style="color: var(--accent-cyan); font-family: monospace;">—</strong>
               </div>
 
               <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap;">
@@ -879,7 +870,7 @@
         <div class="overview-layout">
           <!-- Left: Big portrait art & character identity -->
           <div class="overview-portrait-box">
-            <img id="overview-portrait-img" class="overview-portrait-img" src="" alt="Character Art">
+            <img id="overview-portrait-img" class="overview-portrait-img" src="" alt="Character Art" data-i18n-alt="characterArtwork">
             <div class="overview-portrait-info">
               <div id="overview-char-name" style="font-size: 1.35rem; font-weight: 800; color: #fff;">-</div>
               <div id="overview-char-meta" style="display: flex; gap: 0.4rem; align-items: center; margin-top: 0.35rem; flex-wrap: wrap;"></div>
@@ -906,10 +897,10 @@
             <!-- Quick Equipped Equipment Glance -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
               <!-- LC Glance -->
-              <div class="card" id="overview-lc-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการ Light Cone">
+              <div class="card" id="overview-lc-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการ Light Cone" data-i18n-title="overviewEquippedLc">
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
                   <span data-i18n="overviewEquippedLc">🗡️ กรวยแสงที่สวมใส่</span>
-                  <span style="color: var(--accent-cyan); font-size: 0.7rem;">จัดการ ➔</span>
+                  <span style="color: var(--accent-cyan); font-size: 0.7rem;" data-i18n="btnManage">จัดการ ➔</span>
                 </div>
                 <div style="display: flex; gap: 0.65rem; align-items: center;">
                   <img id="overview-lc-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-color);">
@@ -921,10 +912,10 @@
               </div>
 
               <!-- Relics Glance -->
-              <div class="card" id="overview-relics-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการรีลิกส์">
+              <div class="card" id="overview-relics-card" style="background: rgba(18, 24, 38, 0.7); border: 1px solid var(--border-color); padding: 0.85rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อจัดการรีลิกส์" data-i18n-title="overviewEquippedRelics">
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
                   <span data-i18n="overviewEquippedRelics">🛡️ รีลิกส์และเซ็ต</span>
-                  <span style="color: var(--accent-cyan); font-size: 0.7rem;">จัดการ ➔</span>
+                  <span style="color: var(--accent-cyan); font-size: 0.7rem;" data-i18n="btnManage">จัดการ ➔</span>
                 </div>
                 <div id="overview-relics-summary" style="display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem;">
                   <!-- Set bonuses active -->
@@ -957,10 +948,10 @@
         </div>
 
         <!-- Equipped Lightcone Slot in Equipment Tab -->
-        <div class="card" id="relics-equipped-lc-box" style="background: rgba(18, 24, 38, 0.75); border: 1px solid var(--border-color); padding: 0.85rem 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อเลือกเปลี่ยน Light Cone">
+        <div class="card" id="relics-equipped-lc-box" style="background: rgba(18, 24, 38, 0.75); border: 1px solid var(--border-color); padding: 0.85rem 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;" title="คลิกเพื่อเลือกเปลี่ยน Light Cone" data-i18n-title="overviewEquippedLc">
           <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: var(--accent-cyan); font-weight: 800;">🗡️ กรวยแสงที่สวมใส่ (คลิกเพื่อเลือกเปลี่ยน)</span>
-            <span style="color: var(--accent-gold); font-size: 0.75rem; font-weight: 700;">เปลี่ยนกรวยแสง ➔</span>
+            <span style="color: var(--accent-cyan); font-weight: 800;" data-i18n="overviewEquippedLc">🗡️ กรวยแสงที่สวมใส่ (คลิกเพื่อเลือกเปลี่ยน)</span>
+            <span style="color: var(--accent-gold); font-size: 0.75rem; font-weight: 700;" data-i18n="btnChangeLc">เปลี่ยนกรวยแสง ➔</span>
           </div>
           <div style="display: flex; gap: 0.85rem; align-items: center;">
             <img id="relics-tab-lc-thumb" src="" alt="" style="width: 46px; height: 64px; border-radius: 6px; object-fit: cover; border: 1px solid var(--accent-gold);">
@@ -977,7 +968,7 @@
                 <span id="relics-tab-lc-stats" style="color: var(--accent-cyan); font-family: monospace;">HP 952 / ATK 582 / DEF 529</span>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-primary" style="pointer-events: none;">เลือกเปลี่ยน</button>
+            <button type="button" class="btn btn-sm btn-primary" style="pointer-events: none;" data-i18n="btnChangeLc">เลือกเปลี่ยน</button>
           </div>
         </div>
 
@@ -1014,7 +1005,7 @@
           <div class="skill-row-card">
             <div class="skill-row-header">
               <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <img id="skill-icon-basic" class="skill-row-icon" src="" alt="Basic ATK">
+            <img id="skill-icon-basic" class="skill-row-icon" src="" alt="Basic ATK" data-i18n-alt="modalSkillBasic">
                 <div>
                   <div style="display: flex; align-items: center; gap: 0.4rem;">
                     <span class="skill-type-tag" data-i18n="modalSkillBasic">โจมตีปกติ</span>
@@ -1037,7 +1028,7 @@
           <div class="skill-row-card">
             <div class="skill-row-header">
               <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <img id="skill-icon-skill" class="skill-row-icon" src="" alt="Skill">
+                  <img id="skill-icon-skill" class="skill-row-icon" src="" alt="Skill" data-i18n-alt="modalSkillSkill">
                 <div>
                   <div style="display: flex; align-items: center; gap: 0.4rem;">
                     <span class="skill-type-tag" data-i18n="modalSkillSkill">สกิลต่อสู้</span>
@@ -1060,7 +1051,7 @@
           <div class="skill-row-card">
             <div class="skill-row-header">
               <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <img id="skill-icon-ultra" class="skill-row-icon" src="" alt="Ultimate">
+                  <img id="skill-icon-ultra" class="skill-row-icon" src="" alt="Ultimate" data-i18n-alt="modalSkillUltra">
                 <div>
                   <div style="display: flex; align-items: center; gap: 0.4rem;">
                     <span class="skill-type-tag" data-i18n="modalSkillUltra">ท่าไม้ตาย</span>
@@ -1083,7 +1074,7 @@
           <div class="skill-row-card">
             <div class="skill-row-header">
               <div style="display: flex; align-items: center; gap: 0.65rem;">
-                <img id="skill-icon-talent" class="skill-row-icon" src="" alt="Talent">
+                  <img id="skill-icon-talent" class="skill-row-icon" src="" alt="Talent" data-i18n-alt="modalSkillTalent">
                 <div>
                   <div style="display: flex; align-items: center; gap: 0.4rem;">
                     <span class="skill-type-tag" data-i18n="modalSkillTalent">พรสวรรค์</span>
@@ -1113,7 +1104,7 @@
             <div class="skill-row-card" style="padding: 0.75rem 1rem;">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 0.65rem;">
-                  <img id="skill-icon-technique" class="skill-row-icon" src="" alt="Technique">
+                  <img id="skill-icon-technique" class="skill-row-icon" src="" alt="Technique" data-i18n-alt="modalTraceTechnique">
                   <div>
                     <span class="skill-type-tag" data-i18n="modalTraceTechnique">เทคนิค</span>
                     <span id="skill-real-name-technique" class="skill-name">-</span>
@@ -1132,8 +1123,8 @@
               <div class="trace-card-item">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img id="trace-icon-a2" class="trace-icon-small" src="" alt="A2">
-                    <span id="trace-name-a2" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A2</span>
+                    <img id="trace-icon-a2" class="trace-icon-small" src="" alt="A2" data-i18n-alt="traceA2">
+                    <span id="trace-name-a2" style="font-weight: 700; font-size: 0.875rem;" data-i18n="traceA2">🌟 ร่องรอยพิเศษ A2</span>
                   </div>
                   <label class="switch">
                     <input type="checkbox" id="check-trace-a2" checked>
@@ -1146,8 +1137,8 @@
               <div class="trace-card-item">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img id="trace-icon-a4" class="trace-icon-small" src="" alt="A4">
-                    <span id="trace-name-a4" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A4</span>
+                    <img id="trace-icon-a4" class="trace-icon-small" src="" alt="A4" data-i18n-alt="traceA4">
+                    <span id="trace-name-a4" style="font-weight: 700; font-size: 0.875rem;" data-i18n="traceA4">🌟 ร่องรอยพิเศษ A4</span>
                   </div>
                   <label class="switch">
                     <input type="checkbox" id="check-trace-a4" checked>
@@ -1160,8 +1151,8 @@
               <div class="trace-card-item">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img id="trace-icon-a6" class="trace-icon-small" src="" alt="A6">
-                    <span id="trace-name-a6" style="font-weight: 700; font-size: 0.875rem;">🌟 ร่องรอยพิเศษ A6</span>
+                    <img id="trace-icon-a6" class="trace-icon-small" src="" alt="A6" data-i18n-alt="traceA6">
+                    <span id="trace-name-a6" style="font-weight: 700; font-size: 0.875rem;" data-i18n="traceA6">🌟 ร่องรอยพิเศษ A6</span>
                   </div>
                   <label class="switch">
                     <input type="checkbox" id="check-trace-a6" checked>
@@ -1230,9 +1221,9 @@
         <div class="lc-preview-container">
           <!-- Left: Full vertical artwork card -->
           <div class="lc-art-wrapper" id="modal-lc-art-wrapper">
-            <img id="modal-lc-full-img" class="lc-full-img" src="" alt="Light Cone Artwork">
+            <img id="modal-lc-full-img" class="lc-full-img" src="" alt="Light Cone Artwork" data-i18n-alt="lightConeArtwork">
             <div id="modal-lc-no-art" class="lc-placeholder-text" style="display: none;">
-              🗡️ ไม่มีรูปตัวอย่าง
+              <span data-i18n="lightConeArtworkMissing">🗡️ ไม่มีรูปตัวอย่าง</span>
             </div>
           </div>
 
@@ -1297,7 +1288,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
           <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.5rem;">
             <span data-i18n="modalTabShowcase">🖼️ การ์ดแสดงผล</span>
-            <span class="btn-sm btn-secondary" id="showcase-build-tag">Build Overview</span>
+            <span class="btn-sm btn-secondary" id="showcase-build-tag" data-i18n="overviewStatsTitle">Build Overview</span>
           </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button type="button" class="btn btn-sm btn-gold" id="btn-showcase-auto-relics" data-i18n="showcaseAutoRelics">
@@ -1387,7 +1378,7 @@
           <img id="add-lc-preview-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--accent-gold); background: #0b0d14; flex-shrink: 0;">
           <div style="flex: 1; min-width: 0;">
             <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">
-              ✓ กรวยแสงที่เลือก (Selected)
+              <span data-i18n="selectedLightConeLabel">✓ กรวยแสงที่เลือก (Selected)</span>
             </div>
             <div id="add-lc-preview-name" style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
             <div id="add-lc-preview-meta" style="display: flex; gap: 0.65rem; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; align-items: center; flex-wrap: wrap;">
@@ -1400,7 +1391,7 @@
 
         <!-- 2. Search & Filter Bar -->
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
-          <input type="text" id="add-lc-search" class="form-input" placeholder="🔍 ค้นหากรวยแสง (ชื่อหรือ ID)..." style="flex: 1; min-width: 160px;">
+          <input type="text" id="add-lc-search" class="form-input" data-i18n-placeholder="lightConeSearchPlaceholder" placeholder="🔍 ค้นหากรวยแสง (ชื่อหรือ ID)..." style="flex: 1; min-width: 160px;">
           <select id="add-lc-filter-path" class="form-select" style="max-width: 140px;">
             <option value="all">ทุกสาย (All)</option>
             <option value="Destruction">ทำลายล้าง</option>
@@ -1414,10 +1405,10 @@
             <option value="Elation">ปีติ</option>
           </select>
           <select id="add-lc-filter-rarity" class="form-select" style="max-width: 110px;">
-            <option value="all">ทุกระดับดาว</option>
-            <option value="5" selected>★5 ดาว</option>
-            <option value="4">★4 ดาว</option>
-            <option value="3">★3 ดาว</option>
+            <option value="all" data-i18n="filterAllRarity">ทุกระดับดาว</option>
+            <option value="5" selected data-i18n="filter5Star">★5 ดาว</option>
+            <option value="4" data-i18n="filter4Star">★4 ดาว</option>
+            <option value="3" data-i18n="filter3Star">★3 ดาว</option>
           </select>
         </div>
 
@@ -1437,13 +1428,13 @@
             <input type="number" id="add-lc-promotion" class="form-input" min="0" max="6" value="6" required>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" style="font-size: 0.75rem;">Superimpose (ขัดเกลา)</label>
+            <label class="form-label" data-i18n="superimpositionLabel" style="font-size: 0.75rem;">Superimpose (ขัดเกลา)</label>
             <select id="add-lc-rank" class="form-select" required>
-              <option value="5" selected>S5 (ขัดเกลา 5)</option>
-              <option value="4">S4 (ขัดเกลา 4)</option>
-              <option value="3">S3 (ขัดเกลา 3)</option>
-              <option value="2">S2 (ขัดเกลา 2)</option>
-              <option value="1">S1 (ขัดเกลา 1)</option>
+              <option value="5" selected data-superimposition-rank>S5 (ขัดเกลา 5)</option>
+              <option value="4" data-superimposition-rank>S4 (ขัดเกลา 4)</option>
+              <option value="3" data-superimposition-rank>S3 (ขัดเกลา 3)</option>
+              <option value="2" data-superimposition-rank>S2 (ขัดเกลา 2)</option>
+              <option value="1" data-superimposition-rank>S1 (ขัดเกลา 1)</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
@@ -1482,12 +1473,12 @@
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" data-i18n="lblRelicSlot">ชิ้นส่วน (Slot)</label>
             <select id="add-relic-slot" class="form-select" required>
-              <option value="1">1: ส่วนหัว (Head / HP)</option>
-              <option value="2">2: ส่วนมือ (Hands / ATK)</option>
-              <option value="3">3: ลำตัว (Body)</option>
-              <option value="4">4: รองเท้า (Feet)</option>
-              <option value="5">5: ลูกแก้ว (Planar Sphere)</option>
-              <option value="6">6: สร้อยเชื่อมต่อ (Link Rope)</option>
+              <option value="1" data-relic-slot="head">1: ส่วนหัว (Head / HP)</option>
+              <option value="2" data-relic-slot="hands">2: ส่วนมือ (Hands / ATK)</option>
+              <option value="3" data-relic-slot="body">3: ลำตัว (Body)</option>
+              <option value="4" data-relic-slot="feet">4: รองเท้า (Feet)</option>
+              <option value="5" data-relic-slot="sphere">5: ลูกแก้ว (Planar Sphere)</option>
+              <option value="6" data-relic-slot="rope">6: สร้อยเชื่อมต่อ (Link Rope)</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom: 0;">
@@ -1521,12 +1512,12 @@
     <div class="modal-content relic-picker-modal-content">
       <div class="modal-header" style="margin-bottom: 0.75rem;">
         <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <img id="modal-slot-picker-icon" src="" alt="Slot" style="width: 28px; height: 28px; object-fit: contain;">
+          <img id="modal-slot-picker-icon" src="" alt="Slot" data-i18n-alt="slot" style="width: 28px; height: 28px; object-fit: contain;">
           <div>
             <h3 id="modal-slot-picker-title" style="font-weight: 800; font-size: 1.15rem; margin: 0;" data-i18n="slotPickerTitle">
               🛡️ เลือกสวมใส่รีลิกส์
             </h3>
-            <div id="modal-slot-picker-subtitle" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+            <div id="modal-slot-picker-subtitle" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;" data-i18n="slotPickerSubtitle">
               เลือกสวมใส่ชิ้นที่มีอยู่ หรือสร้างชิ้นใหม่ตรงตามบิลด์ที่แนะนำ
             </div>
           </div>
@@ -1575,15 +1566,15 @@
           <!-- Substats Customizer -->
           <div class="slot-picker-substats-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight);">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-highlight);" data-i18n="substatCustomizerTitle">
                 🔧 ปรับแต่งออฟรอง (Substats Customizer):
               </div>
               <div class="substat-presets-strip">
-                <button type="button" class="btn-substat-preset" data-preset="god" title="ออฟแนะนำตามตัวละคร">⭐ ออฟเทพแนะนำ</button>
-                <button type="button" class="btn-substat-preset" data-preset="crit" title="เน้นคริล้วน">🎯 คริ Rate/DMG</button>
-                <button type="button" class="btn-substat-preset" data-preset="spd" title="เน้นความเร็ว">⚡ สปีด SPD</button>
-                <button type="button" class="btn-substat-preset" data-preset="break" title="เน้นทำลายล้าง">🔨 Break Effect</button>
-                <button type="button" class="btn-substat-preset" data-preset="tank" title="เน้นถึก ป้องกัน เลือด">🛡️ ถึก HP/DEF</button>
+                <button type="button" class="btn-substat-preset" data-preset="god" data-i18n="substatPresetRecommended" data-i18n-title="substatPresetRecommended" title="ออฟแนะนำตามตัวละคร">⭐ ออฟเทพแนะนำ</button>
+                <button type="button" class="btn-substat-preset" data-preset="crit" data-i18n="substatPresetCrit" data-i18n-title="substatPresetCrit" title="เน้นคริล้วน">🎯 คริ Rate/DMG</button>
+                <button type="button" class="btn-substat-preset" data-preset="spd" data-i18n="substatPresetSpeed" data-i18n-title="substatPresetSpeed" title="เน้นความเร็ว">⚡ สปีด SPD</button>
+                <button type="button" class="btn-substat-preset" data-preset="break" data-i18n="substatPresetBreak" data-i18n-title="substatPresetBreak" title="เน้นทำลายล้าง">🔨 Break Effect</button>
+                <button type="button" class="btn-substat-preset" data-preset="tank" data-i18n="substatPresetTank" data-i18n-title="substatPresetTank" title="เน้นถึก ป้องกัน เลือด">🛡️ ถึก HP/DEF</button>
               </div>
             </div>
 
@@ -1593,9 +1584,9 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; padding: 0.4rem 0.75rem; background: rgba(10, 14, 23, 0.75); border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.775rem;">
               <span style="color: var(--text-muted);">
-                💡 รวมจำนวนโรล (Rolls): <strong id="slot-picker-total-rolls" style="color: var(--accent-gold); font-family: monospace; font-size: 0.9rem;">9</strong> / 9 โรล (ระดับ 5★ เลเวล 15)
+                <span data-i18n="substatRollCountLabel">💡 รวมจำนวนโรล (Rolls):</span> <strong id="slot-picker-total-rolls" style="color: var(--accent-gold); font-family: monospace; font-size: 0.9rem;">9</strong> <span id="slot-picker-roll-limit" data-i18n="substatRollLimit">/ 9 โรล (ระดับ 5★ เลเวล 15)</span>
               </span>
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-reset-substats" style="font-size: 0.725rem; padding: 0.2rem 0.6rem;">↺ คืนค่าเดิม</button>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-reset-substats" data-i18n="substatResetButton" style="font-size: 0.725rem; padding: 0.2rem 0.6rem;">↺ คืนค่าเดิม</button>
             </div>
           </div>
 
@@ -1629,7 +1620,7 @@
 
       <!-- Search & Filters -->
       <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-        <input type="text" id="lc-picker-search" class="form-input" placeholder="🔍 ค้นหาชื่อหรือ ID กรวยแสง..." style="flex: 1; min-width: 160px;">
+        <input type="text" id="lc-picker-search" class="form-input" data-i18n-placeholder="lightConeSearchPlaceholder" placeholder="🔍 ค้นหาชื่อหรือ ID กรวยแสง..." style="flex: 1; min-width: 160px;">
         <select id="lc-picker-filter-path" class="form-select" style="max-width: 140px;">
           <option value="all">ทุกสาย</option>
           <option value="same" selected>ตรงสายตัวละคร</option>
@@ -1643,12 +1634,12 @@
           <option value="Remembrance">ความทรงจำ</option>
           <option value="Elation">ปีติ</option>
         </select>
-        <select id="lc-picker-rank" class="form-select" style="max-width: 110px;" title="ระดับการขัดเกลาเมื่อสวมใส่">
-          <option value="5" selected>ขัดเกลา S5</option>
-          <option value="4">ขัดเกลา S4</option>
-          <option value="3">ขัดเกลา S3</option>
-          <option value="2">ขัดเกลา S2</option>
-          <option value="1">ขัดเกลา S1</option>
+        <select id="lc-picker-rank" class="form-select" style="max-width: 110px;" data-i18n-title="superimpositionSelectTitle" title="ระดับการขัดเกลาเมื่อสวมใส่">
+          <option value="5" selected data-superimposition-rank>ขัดเกลา S5</option>
+          <option value="4" data-superimposition-rank>ขัดเกลา S4</option>
+          <option value="3" data-superimposition-rank>ขัดเกลา S3</option>
+          <option value="2" data-superimposition-rank>ขัดเกลา S2</option>
+          <option value="1" data-superimposition-rank>ขัดเกลา S1</option>
         </select>
       </div>
 
@@ -1681,6 +1672,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=2.5"></script>
+  <script type="module" src="js/app.js?v=2.9"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.5';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.7';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -124,6 +124,9 @@ const el = {
   consoleTerminalLog: document.getElementById('console-terminal-log'),
   formConsoleCmd: document.getElementById('form-console-cmd'),
   consoleCmdInput: document.getElementById('console-cmd-input'),
+  consoleSuggestions: document.getElementById('console-command-suggestions'),
+  consoleSuggestionCount: document.getElementById('console-suggestion-count'),
+  consoleSuggestionOptions: document.getElementById('console-suggestion-options'),
   btnConsoleCmdSend: document.getElementById('btn-console-cmd-send'),
   lblConsoleConnStatus: document.getElementById('lbl-console-conn-status'),
 
@@ -398,6 +401,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
 
   const options = {
     method,
+    cache: method === 'GET' ? 'no-store' : 'default',
     headers: {
       'Content-Type': 'application/json',
       'X-GaC-Srtool': '1'
@@ -462,7 +466,7 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('online');
     el.connectionStatusText.style.color = 'var(--accent-green)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = t('consoleOnline');
+      el.lblConsoleConnStatus.textContent = '● Server Online';
       el.lblConsoleConnStatus.style.color = 'var(--accent-green)';
     }
   } else {
@@ -470,7 +474,7 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('offline');
     el.connectionStatusText.style.color = 'var(--accent-red)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = t('consoleOffline');
+      el.lblConsoleConnStatus.textContent = '○ Offline (Local Mode)';
       el.lblConsoleConnStatus.style.color = 'var(--text-muted)';
     }
   }
@@ -553,6 +557,27 @@ function getPathIconHtml(path, size = 20) {
   </span>`;
 }
 
+function updateEquipmentFilterExtraOptions() {
+  if (!el.eqFilterExtra) return;
+  const selected = el.eqFilterExtra.value || 'all';
+  if (state.eqActiveSubtab === 'relic') {
+    const slots = [
+      ['head', 1], ['hands', 2], ['body', 3],
+      ['feet', 4], ['sphere', 5], ['rope', 6]
+    ];
+    el.eqFilterExtra.innerHTML = `<option value="all">${t('filterAllRelicSlots')}</option>${slots.map(([slot, id]) => {
+      const key = `relicSlot${slot.charAt(0).toUpperCase()}${slot.slice(1)}`;
+      return `<option value="${id}">${id} - ${t(key)}</option>`;
+    }).join('')}`;
+  } else {
+    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance'];
+    el.eqFilterExtra.innerHTML = `<option value="all">${t('filterAllTypes')}</option>${paths.map(path => `<option value="${path}">${translatePath(path)}</option>`).join('')}`;
+  }
+  if (Array.from(el.eqFilterExtra.options).some(option => option.value === selected)) {
+    el.eqFilterExtra.value = selected;
+  }
+}
+
 // Update filter dropdown options to current language
 function updateFilterDropdownTranslations() {
   if (el.avatarFilterElement) {
@@ -587,7 +612,7 @@ function updateFilterDropdownTranslations() {
   if (addLcFilter) {
     const selected = addLcFilter.value;
     const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance', 'Elation'];
-    if (addLcFilter.options[0]) addLcFilter.options[0].textContent = `${t('filterAllPaths') || 'ทุกสาย'} (All)`;
+    if (addLcFilter.options[0]) addLcFilter.options[0].textContent = t('filterAllPaths') || 'ทุกสาย';
     paths.forEach((p, idx) => {
       if (addLcFilter.options[idx + 1]) addLcFilter.options[idx + 1].textContent = translatePath(p);
     });
@@ -605,6 +630,20 @@ function updateFilterDropdownTranslations() {
     });
     lcPickerFilter.value = selected;
   }
+
+  document.querySelectorAll('[data-superimposition-rank]').forEach((option) => {
+    option.textContent = t('superimpositionRank', { rank: option.value });
+  });
+  document.querySelectorAll('#lc-picker-rank option').forEach((option) => {
+    option.textContent = t('superimpositionRank', { rank: option.value });
+  });
+  document.querySelectorAll('[data-relic-slot]').forEach((option) => {
+    const slotKey = option.dataset.relicSlot;
+    const slotLabel = t(`relicSlot${slotKey.charAt(0).toUpperCase()}${slotKey.slice(1)}`);
+    option.textContent = `${option.value}: ${slotLabel}`;
+  });
+
+  updateEquipmentFilterExtraOptions();
 
   const dict = TRANSLATIONS[getCurrentLanguage()] || TRANSLATIONS.en || TRANSLATIONS.th;
   if (el.persistentMcSelect && dict.tbOptions) {
@@ -908,6 +947,18 @@ function applyTranslations() {
     if (val) elem.placeholder = val;
   });
 
+  document.querySelectorAll('[data-i18n-title]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n-title');
+    const val = t(key);
+    if (val) elem.title = val;
+  });
+
+  document.querySelectorAll('[data-i18n-alt]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n-alt');
+    const val = t(key);
+    if (val) elem.alt = val;
+  });
+
   // Update dynamic filter dropdown options
   updateFilterDropdownTranslations();
 
@@ -928,6 +979,12 @@ function applyTranslations() {
     renderAvatarsGrid();
   }
   loadEquipment();
+  if (analystState.currentReport) {
+    renderDamageAnalyst();
+  } else {
+    renderEmptyDamageAnalyst();
+  }
+  updateDashboardBattleBanner();
   updateDocumentTitle();
 }
 
@@ -948,7 +1005,7 @@ function setupLanguageSelector() {
     const newLang = e.target.value;
     setLanguage(newLang);
     applyTranslations();
-    showToast(`Language: ${SUPPORTED_LANGUAGES.find(l => l.code === newLang)?.name || newLang}`, 'info');
+    showToast(t('languageChanged', { language: SUPPORTED_LANGUAGES.find(l => l.code === newLang)?.name || newLang }), 'info');
   });
 }
 
@@ -1173,13 +1230,13 @@ async function refreshStatus() {
 
     if (el.badgePersistenceMode) {
       if (state.serverMode === 'gac') {
-        el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+        el.badgePersistenceMode.textContent = t('badgePersistenceGaC');
         el.badgePersistenceMode.className = 'badge-creative';
       } else if (state.serverMode === 'firefly') {
-        el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+        el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
         el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
-        el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
         el.badgePersistenceMode.className = 'badge-super-tag';
       }
     }
@@ -1196,6 +1253,10 @@ async function refreshStatus() {
     renderLineup(data.lineups || DEFAULT_LINEUP);
     renderExRanks(data.ex_ranks || []);
     loadAvatars();
+    if (analystState.currentReport) {
+      renderDamageAnalyst();
+      updateDashboardBattleBanner();
+    }
   } catch (err) {
     setConnectionStatus(false, t('offline'));
     el.lblApiUrl.textContent = state.apiUrl;
@@ -1213,13 +1274,13 @@ async function refreshStatus() {
 
     if (el.badgePersistenceMode) {
       if (state.serverMode === 'gac') {
-        el.badgePersistenceMode.textContent = 'GaC: persistent.json (/api/persistent)';
+        el.badgePersistenceMode.textContent = t('badgePersistenceGaC');
         el.badgePersistenceMode.className = 'badge-creative';
       } else if (state.serverMode === 'firefly') {
-        el.badgePersistenceMode.textContent = 'FireflyGo: data-in-game.json & freesr-data.json';
+        el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
         el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
-        el.badgePersistenceMode.textContent = 'RobinSR: freesr-data.json (/api/freesr)';
+        el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
         el.badgePersistenceMode.className = 'badge-super-tag';
       }
     }
@@ -1271,7 +1332,7 @@ function renderLineup(lineups) {
 
     if (avatarId === 0) {
       slotCard.innerHTML = `
-        <div class="lineup-slot-num">Slot ${slot + 1}</div>
+        <div class="lineup-slot-num">${t('slot')} ${slot + 1}</div>
         ${removeSlotBtnHtml}
         <div style="font-size: 2.2rem; color: var(--text-muted); opacity: 0.5;">➕</div>
         <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">${t('slotEmpty')}</div>
@@ -1279,7 +1340,7 @@ function renderLineup(lineups) {
     } else {
       const info = getAvatarInfo(avatarId);
       slotCard.innerHTML = `
-        <div class="lineup-slot-num">Slot ${slot + 1}</div>
+        <div class="lineup-slot-num">${t('slot')} ${slot + 1}</div>
         ${removeSlotBtnHtml}
         <img class="lineup-slot-img"
              src="${getAvatarIconSrc(avatarId)}"
@@ -1342,7 +1403,7 @@ function renderMiniBattleSummary() {
   if (!el.miniBattleAvatarsList) return;
   const report = analystState.currentReport;
 
-  if (!report || !report.team_total_damage || !report.avatars || report.avatars.length === 0) {
+  if (!report || !Array.isArray(report.avatars) || report.avatars.length === 0) {
     if (el.badgeMiniBattleStatus) {
       el.badgeMiniBattleStatus.textContent = t('miniNoBattleTitle');
       el.badgeMiniBattleStatus.style.background = 'rgba(156, 163, 175, 0.12)';
@@ -1375,33 +1436,39 @@ function renderMiniBattleSummary() {
   }
 
   // Active Report
-  const isWin = (report.end_status || 'WIN').toUpperCase() === 'WIN';
+  const status = String(report.end_status || 'WIN').toUpperCase();
+  const isLive = analystState.isLive || status === 'LIVE';
+  const isWin = status === 'WIN';
   if (el.badgeMiniBattleStatus) {
-    el.badgeMiniBattleStatus.textContent = isWin ? '✅ ชนะการต่อสู้' : `⚠️ สิ้นสุด (${report.end_status})`;
-    el.badgeMiniBattleStatus.style.background = isWin ? 'rgba(52, 211, 153, 0.15)' : 'rgba(239, 68, 68, 0.15)';
-    el.badgeMiniBattleStatus.style.color = isWin ? 'var(--accent-green)' : '#f87171';
-    el.badgeMiniBattleStatus.style.borderColor = isWin ? 'rgba(52, 211, 153, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+    const statusKey = isLive ? 'analystStatusLive'
+      : isWin ? 'analystStatusWin'
+        : status === 'QUIT' ? 'analystStatusQuit' : 'analystStatusLose';
+    const color = isLive || isWin ? 'var(--accent-green)' : status === 'QUIT' ? '#fbbf24' : '#f87171';
+    el.badgeMiniBattleStatus.textContent = t(statusKey);
+    el.badgeMiniBattleStatus.style.background = isLive || isWin ? 'rgba(52, 211, 153, 0.15)' : status === 'QUIT' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+    el.badgeMiniBattleStatus.style.color = color;
+    el.badgeMiniBattleStatus.style.borderColor = isLive || isWin ? 'rgba(52, 211, 153, 0.4)' : status === 'QUIT' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(239, 68, 68, 0.4)';
   }
 
   const durationSec = report.cost_time || 0;
   const teamDps = durationSec > 0 ? (report.team_total_damage / durationSec) : 0;
+  const orderedAvatars = orderBattleReportAvatars(report.avatars);
+  const hasAvatarDamage = hasAvatarDamageData(orderedAvatars);
+  const hasAvatarStats = hasAvatarBattleStatsData(orderedAvatars);
   let totalBreakDmg = 0;
-  (report.avatars || []).forEach(a => {
+  orderedAvatars.forEach(a => {
     totalBreakDmg += (a.total_break_damage || 0);
   });
 
   if (el.miniTotalDmg) el.miniTotalDmg.textContent = formatNumber(report.team_total_damage);
   if (el.miniTeamDps) el.miniTeamDps.textContent = `${formatNumber(Math.round(teamDps))}/s`;
-  if (el.miniBreakDmg) el.miniBreakDmg.textContent = formatNumber(totalBreakDmg);
-  if (el.miniBattleTurns) el.miniBattleTurns.textContent = `${report.total_battle_turns || 0} เทิร์น (${formatDuration(durationSec)})`;
+  if (el.miniBreakDmg) el.miniBreakDmg.textContent = hasAvatarStats ? formatNumber(totalBreakDmg) : '—';
+  if (el.miniBattleTurns) el.miniBattleTurns.textContent = `${t('analystTurnValue', { count: report.total_battle_turns || 0 })} (${formatDuration(durationSec)})`;
 
-  // Sort avatars by total damage descending
-  const sortedAvatars = [...report.avatars].sort((a, b) => (b.total_damage || 0) - (a.total_damage || 0));
-
-  el.miniBattleAvatarsList.innerHTML = sortedAvatars.map(av => {
+  el.miniBattleAvatarsList.innerHTML = `${hasAvatarDamage ? '' : `<div style="font-size: 0.72rem; color: var(--text-muted);">${t('analystShareUnavailable')}</div>`}${orderedAvatars.map(av => {
     const meta = getAvatarInfo(av.avatar_id);
     const elemColor = ELEMENT_COLORS[meta.element] || '#38bdf8';
-    const pct = Math.max(0, Math.min(100, av.damage_percent || 0));
+    const pct = getAvatarDamagePercent(av, report.team_total_damage || 0, hasAvatarDamage);
     const iconUrl = getAvatarIconUrl(av.avatar_id);
     const rankStr = av.rank !== undefined ? `E${av.rank}` : '';
     const lvlStr = av.level ? `Lv.${av.level}` : '';
@@ -1418,16 +1485,50 @@ function renderMiniBattleSummary() {
             </div>
           </div>
           <div style="text-align: right; flex-shrink: 0;">
-            <span style="font-size: 0.875rem; font-weight: 800; color: ${elemColor}; font-family: monospace;">${formatNumber(av.total_damage)}</span>
-            <span style="font-size: 0.725rem; font-weight: 700; color: #fff; background: rgba(255,255,255,0.08); padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 0.35rem;">${pct.toFixed(1)}%</span>
+            <span style="font-size: 0.875rem; font-weight: 800; color: ${elemColor}; font-family: monospace;">${hasAvatarDamage ? formatNumber(av.total_damage) : '—'}</span>
+            <span style="font-size: 0.725rem; font-weight: 700; color: #fff; background: rgba(255,255,255,0.08); padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 0.35rem;">${pct === null ? '—' : `${pct.toFixed(1)}%`}</span>
           </div>
         </div>
         <div style="height: 5px; width: 100%; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden;">
-          <div style="height: 100%; width: ${pct}%; background: ${elemColor}; border-radius: 3px; transition: width 0.4s ease;"></div>
+          <div style="height: 100%; width: ${pct ?? 0}%; background: ${elemColor}; border-radius: 3px; transition: width 0.4s ease;"></div>
         </div>
       </div>
     `;
-  }).join('');
+  }).join('')}`;
+}
+
+function hasAvatarDamageData(avatars) {
+  return Array.isArray(avatars) && avatars.some(avatar =>
+    Number(avatar?.total_damage) > 0 || Number(avatar?.damage_percent) > 0
+  );
+}
+
+function hasAvatarBattleStatsData(avatars) {
+  return Array.isArray(avatars) && avatars.some(avatar => {
+    const scalarStats = [
+      avatar?.total_damage, avatar?.total_damage_taken, avatar?.total_heal,
+      avatar?.total_hp_recover, avatar?.total_shield, avatar?.total_shield_taken,
+      avatar?.total_break_damage, avatar?.total_turns, avatar?.extra_turns,
+      avatar?.die_times, avatar?.revive_times, avatar?.break_times
+    ];
+    const damageProperties = [
+      avatar?.attack_type_damage, avatar?.attack_type_break_damage,
+      avatar?.attack_type_max_damage
+    ];
+    return scalarStats.some(value => Number(value) > 0)
+      || damageProperties.some(properties => properties && Object.values(properties).some(value => Number(value) > 0))
+      || (Array.isArray(avatar?.skill_times) && avatar.skill_times.length > 0);
+  });
+}
+
+function getAvatarDamagePercent(avatar, teamDamage, available) {
+  if (!available) return null;
+  const reportedPercent = Number(avatar?.damage_percent);
+  const damage = Math.max(0, Number(avatar?.total_damage) || 0);
+  const percent = Number.isFinite(reportedPercent) && (reportedPercent > 0 || damage === 0)
+    ? reportedPercent
+    : teamDamage > 0 ? (damage / teamDamage) * 100 : 0;
+  return Math.max(0, Math.min(100, percent));
 }
 
 function renderTeamSynergy(lineups) {
@@ -1483,8 +1584,22 @@ function renderTeamSynergy(lineups) {
 const consoleState = {
   history: [],
   historyIndex: -1,
-  maxLogs: 200
+  maxLogs: 200,
+  suggestions: [],
+  suggestionIndex: -1
 };
+
+const GM_COMMAND_SUGGESTIONS = [
+  { label: '/avatar <id> [level] [rank]', insert: '/avatar ', description: 'Update a character level and Eidolon rank' },
+  { label: '/clear lineup', insert: '/clear lineup', description: 'Clear the active lineup' },
+  { label: '/give <item_id> [count]', insert: '/give ', description: 'Add an item or currency' },
+  { label: '/heal', insert: '/heal', description: 'Restore team HP, SP, and Energy' },
+  { label: '/help', insert: '/help', description: 'Show available commands' },
+  { label: '/item <item_id> [count]', insert: '/item ', description: 'Add an item to inventory' },
+  { label: '/max', insert: '/max', description: 'Set all characters to Level 80 and E6' },
+  { label: '/scene <plane_id> [floor_id]', insert: '/scene ', description: 'Teleport to a scene' },
+  { label: '/teleport <plane_id> [floor_id]', insert: '/teleport ', description: 'Teleport to a scene' }
+];
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -1494,6 +1609,104 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function findGMCommandSuggestions(value) {
+  const query = String(value || '').trimStart().toLowerCase();
+  if (!query) return [];
+
+  const normalizedQuery = query.replace(/^\/+/, '');
+  if (!normalizedQuery) return GM_COMMAND_SUGGESTIONS.slice(0, 6);
+
+  return GM_COMMAND_SUGGESTIONS
+    .filter(({ label }) => {
+      const normalizedLabel = label.toLowerCase().replace(/^\/+/, '');
+      if (/\s/.test(normalizedQuery)) return normalizedLabel.startsWith(normalizedQuery);
+      return normalizedLabel.split(/[\s<]/, 1)[0].startsWith(normalizedQuery);
+    })
+    .slice(0, 6);
+}
+
+function hideGMCommandSuggestions() {
+  consoleState.suggestions = [];
+  consoleState.suggestionIndex = -1;
+  if (el.consoleSuggestions) el.consoleSuggestions.hidden = true;
+  if (el.consoleCmdInput) {
+    el.consoleCmdInput.setAttribute('aria-expanded', 'false');
+    el.consoleCmdInput.removeAttribute('aria-activedescendant');
+  }
+}
+
+function renderGMCommandSuggestions() {
+  if (!el.consoleSuggestions || !el.consoleSuggestionOptions) return;
+  consoleState.suggestions = findGMCommandSuggestions(el.consoleCmdInput?.value);
+  consoleState.suggestionIndex = -1;
+
+  if (consoleState.suggestions.length === 0) {
+    hideGMCommandSuggestions();
+    return;
+  }
+
+  el.consoleSuggestionOptions.replaceChildren();
+  consoleState.suggestions.forEach((suggestion, index) => {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'console-suggestion-option';
+    option.setAttribute('role', 'option');
+    option.setAttribute('aria-selected', 'false');
+    option.dataset.suggestionIndex = String(index);
+
+    const command = document.createElement('span');
+    command.className = 'console-suggestion-command';
+    command.textContent = suggestion.label;
+    option.appendChild(command);
+
+    const description = document.createElement('span');
+    description.className = 'console-suggestion-description';
+    description.textContent = suggestion.description;
+    option.appendChild(description);
+    el.consoleSuggestionOptions.appendChild(option);
+  });
+
+  if (el.consoleSuggestionCount) {
+    el.consoleSuggestionCount.textContent = `‹ 0/${consoleState.suggestions.length} ›`;
+  }
+  el.consoleSuggestions.hidden = false;
+  el.consoleCmdInput?.setAttribute('aria-expanded', 'true');
+}
+
+function selectGMCommandSuggestion(index) {
+  const suggestion = consoleState.suggestions[index];
+  if (!suggestion || !el.consoleCmdInput) return false;
+
+  el.consoleCmdInput.value = suggestion.insert;
+  hideGMCommandSuggestions();
+  consoleState.historyIndex = -1;
+  el.consoleCmdInput.focus();
+  el.consoleCmdInput.setSelectionRange(suggestion.insert.length, suggestion.insert.length);
+  return true;
+}
+
+function moveGMCommandSuggestion(direction) {
+  if (consoleState.suggestions.length === 0) return false;
+  const count = consoleState.suggestions.length;
+  if (consoleState.suggestionIndex < 0) {
+    consoleState.suggestionIndex = direction > 0 ? 0 : count - 1;
+  } else {
+    consoleState.suggestionIndex = (consoleState.suggestionIndex + direction + count) % count;
+  }
+
+  const options = el.consoleSuggestionOptions?.querySelectorAll('[role="option"]') || [];
+  options.forEach((option, index) => {
+    const selected = index === consoleState.suggestionIndex;
+    option.setAttribute('aria-selected', String(selected));
+    if (selected) el.consoleCmdInput?.setAttribute('aria-activedescendant', `console-command-option-${index}`);
+    option.id = `console-command-option-${index}`;
+  });
+  if (el.consoleSuggestionCount) {
+    el.consoleSuggestionCount.textContent = `‹ ${consoleState.suggestionIndex + 1}/${count} ›`;
+  }
+  return true;
 }
 
 function logToConsole(message, tag = 'SYS') {
@@ -1542,15 +1755,16 @@ async function dispatchGMCommand(rawCmd) {
 
   // Handle local /help command immediately
   if (cmd.toLowerCase() === '/help') {
-    logToConsole('คำสั่ง GM ที่พร้อมใช้งาน (Available Commands):', 'SYS');
-    logToConsole('  /heal                     - ฟื้นฟู HP/Energy เต็มตัวละครในทีมทั้งหมด', 'SYS');
-    logToConsole('  /max                      - อัปตัวละครทั้งหมดเป็น Lv.80, E6, Traces 10', 'SYS');
-    logToConsole('  /teleport <plane> [floor] - วาร์ปไปยังฉาก/Plane ID (เช่น 20001 รถไฟ Express)', 'SYS');
-    logToConsole('  /scene <plane> [floor]    - คำสั่งย่อของ /teleport', 'SYS');
-    logToConsole('  /clear lineup             - ล้างตัวละครในทีมปัจจุบันทั้งหมด', 'SYS');
-    logToConsole('  /avatar <id> [lvl] [rank] - ปลดล็อกหรือตั้งค่าตัวละคร (เช่น /avatar 1308 80 6)', 'SYS');
-    logToConsole('  /give <id> [count]        - เพิ่มไอเทมหรือเงิน (เช่น 102 Jades, 2 Credits)', 'SYS');
-    logToConsole('  /help                     - แสดงคู่มือรายการคำสั่งนี้', 'SYS');
+    logToConsole('Available GM commands:', 'SYS');
+    logToConsole('  /heal                         - Restore team HP, SP, and Energy', 'SYS');
+    logToConsole('  /max                          - Set all characters to Level 80 and E6', 'SYS');
+    logToConsole('  /teleport <plane_id> [floor]  - Teleport to a scene', 'SYS');
+    logToConsole('  /scene <plane_id> [floor]     - Teleport to a scene (alias)', 'SYS');
+    logToConsole('  /clear lineup                 - Clear the active lineup', 'SYS');
+    logToConsole('  /avatar <id> [level] [rank]   - Add or update a character', 'SYS');
+    logToConsole('  /give <item_id> [count]       - Add an item or currency', 'SYS');
+    logToConsole('  /item <item_id> [count]       - Add an item (alias)', 'SYS');
+    logToConsole('  /help                         - Show this command list', 'SYS');
     return;
   }
 
@@ -1559,60 +1773,62 @@ async function dispatchGMCommand(rawCmd) {
     try {
       const res = await apiCall('/api/command', 'POST', { command: cmd });
       if (res) {
-        const msg = res.message || res.msg || 'คำสั่งประมวลผลสำเร็จ';
-        logToConsole(msg, 'OK');
+        const succeeded = res.success !== false;
+        const msg = res.output || res.message || res.msg || (succeeded ? 'Command completed.' : 'Command failed.');
+        logToConsole(msg, succeeded ? 'OK' : 'ERR');
+        if (!succeeded) return;
 
         // Command specific post-processing
         const lowerCmd = cmd.toLowerCase();
         if (lowerCmd.startsWith('/heal')) {
-          showToast('ฟื้นฟู HP และ Energy เรียบร้อย', 'success');
+          showToast('Team HP and Energy restored.', 'success');
           refreshStatus();
         } else if (lowerCmd.startsWith('/teleport') || lowerCmd.startsWith('/scene')) {
-          showToast('ส่งคำสั่งเปลี่ยนฉากเรียบร้อย', 'success');
+          showToast('Scene change command sent.', 'success');
           refreshStatus();
         } else if (lowerCmd.startsWith('/clear lineup')) {
-          showToast('ล้างตัวละครในทีมเรียบร้อย', 'info');
+          showToast('Active lineup cleared.', 'info');
           refreshStatus();
         } else if (lowerCmd.startsWith('/max')) {
-          showToast('ปรับ Max เลเวลและ Traces เรียบร้อย', 'success');
+          showToast('Characters updated to max level and Eidolon rank.', 'success');
           refreshStatus();
-        } else if (lowerCmd.startsWith('/give')) {
-          showToast('เพิ่มไอเทม/เงินเรียบร้อย', 'success');
+        } else if (lowerCmd.startsWith('/give') || lowerCmd.startsWith('/item')) {
+          showToast('Item command completed.', 'success');
         } else if (lowerCmd.startsWith('/avatar')) {
-          showToast('อัปเดตตัวละครเรียบร้อย', 'success');
+          showToast('Character updated.', 'success');
           loadAvatars();
         }
         return;
       }
     } catch (err) {
-      logToConsole(`Server Dispatcher: ${err.message} (เข้าสู่โหมด Local Fallback)`, 'NET');
+      logToConsole(`Server dispatcher: ${err.message}. Trying local fallback.`, 'NET');
     }
   }
 
   // Fallback to client-side local executions if server is offline or doesn't support the command
   const lowerCmd = cmd.toLowerCase();
   if (lowerCmd.startsWith('/heal')) {
-    logToConsole('Local Fallback: ฟื้นฟู Energy ของตัวละครในทีมเป็น 100%', 'OK');
+    logToConsole('Local fallback: restoring team Energy to 100%.', 'OK');
     if (state.fullFreesrData?.avatars) {
       for (const aid in state.fullFreesrData.avatars) {
         state.fullFreesrData.avatars[aid].sp_value = 140;
       }
       saveFreesrChangesToServer();
     }
-    showToast('ฟื้นฟูพลังงานทีมเรียบร้อย', 'success');
+    showToast('Team Energy restored.', 'success');
   } else if (lowerCmd.startsWith('/max')) {
-    logToConsole('Local Fallback: กำลังรัน maxAllAvatars()...', 'SYS');
-    await maxAllAvatars();
-    logToConsole('Local: อัปเลเวล 80 และ E6 ตัวละครทั้งหมดเรียบร้อย', 'OK');
+    logToConsole('Local fallback: setting all characters to maximum values...', 'SYS');
+    await maxAllAvatars({ englishOnly: true });
+    logToConsole('Local: all characters updated to Level 80 and E6.', 'OK');
   } else if (lowerCmd.startsWith('/clear lineup')) {
-    logToConsole('Local Fallback: กำลังล้างทีม...', 'SYS');
-    await quickClearLineup();
-    logToConsole('Local: ล้างทีมเรียบร้อยแล้ว', 'OK');
+    logToConsole('Local fallback: clearing the active lineup...', 'SYS');
+    await quickClearLineup({ englishOnly: true });
+    logToConsole('Local: active lineup cleared.', 'OK');
   } else if (lowerCmd.startsWith('/teleport') || lowerCmd.startsWith('/scene')) {
     const parts = cmd.split(/\s+/);
     const planeId = parseInt(parts[1], 10) || 20001;
     const floorId = parseInt(parts[2], 10) || 1;
-    logToConsole(`Local Fallback: ตั้งค่าฉากเป็น Plane ID ${planeId}, Floor ${floorId}`, 'OK');
+    logToConsole(`Local fallback: setting scene to Plane ID ${planeId}, Floor ${floorId}.`, 'OK');
     if (state.fullFreesrData) {
       state.fullFreesrData.scene = state.fullFreesrData.scene || {};
       state.fullFreesrData.scene.plane_id = planeId;
@@ -1620,7 +1836,7 @@ async function dispatchGMCommand(rawCmd) {
       saveFreesrChangesToServer();
       refreshStatus();
     }
-    showToast(`เปลี่ยนฉากเป็น Plane ${planeId} เรียบร้อย`, 'success');
+    showToast(`Scene changed to Plane ${planeId}.`, 'success');
   } else if (lowerCmd.startsWith('/avatar')) {
     const parts = cmd.split(/\s+/);
     const aid = parseInt(parts[1], 10);
@@ -1638,23 +1854,23 @@ async function dispatchGMCommand(rawCmd) {
       };
       saveFreesrChangesToServer();
       loadAvatars();
-      logToConsole(`Local: ปลดล็อก/อัปเดต Avatar ID ${aid} (Lv.${lvl}, E${rank}) เรียบร้อย`, 'OK');
-      showToast(`อัปเดตตัวละคร ${aid} สำเร็จ`, 'success');
+      logToConsole(`Local: Avatar ${aid} added or updated (Lv.${lvl}, E${rank}).`, 'OK');
+      showToast(`Character ${aid} updated.`, 'success');
     } else {
-      logToConsole('รูปแบบคำสั่งไม่ถูกต้อง: /avatar <id> [level] [rank]', 'ERR');
+      logToConsole('Invalid syntax. Usage: /avatar <id> [level] [rank]', 'ERR');
     }
-  } else if (lowerCmd.startsWith('/give')) {
+  } else if (lowerCmd.startsWith('/give') || lowerCmd.startsWith('/item')) {
     const parts = cmd.split(/\s+/);
     const itemId = parseInt(parts[1], 10);
     const count = parseInt(parts[2], 10) || 1;
     if (itemId) {
-      logToConsole(`Local: ได้รับ Item ID ${itemId} จำนวน ${count.toLocaleString()}`, 'OK');
-      showToast(`เพิ่มไอเทม ${itemId} x${count}`, 'success');
+      logToConsole(`Local: Item ID ${itemId} x${count.toLocaleString()} added.`, 'OK');
+      showToast(`Item ${itemId} x${count} added.`, 'success');
     } else {
-      logToConsole('รูปแบบคำสั่งไม่ถูกต้อง: /give <id> [count]', 'ERR');
+      logToConsole('Invalid syntax. Usage: /give <item_id> [count]', 'ERR');
     }
   } else {
-    logToConsole(`คำสั่งที่ไม่รู้จักหรือไม่รองรับในโหมดออฟไลน์: "${cmd}" (พิมพ์ /help เพื่อดูคำสั่ง)`, 'ERR');
+    logToConsole(`Unknown or unsupported command in offline mode: "${cmd}". Type /help for available commands.`, 'ERR');
   }
 }
 
@@ -1663,16 +1879,40 @@ function setupGMConsoleEvents() {
     el.formConsoleCmd.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!el.consoleCmdInput) return;
+      if (consoleState.suggestionIndex >= 0 && selectGMCommandSuggestion(consoleState.suggestionIndex)) return;
       const cmd = el.consoleCmdInput.value.trim();
       if (!cmd) return;
+      hideGMCommandSuggestions();
       el.consoleCmdInput.value = '';
       dispatchGMCommand(cmd);
     });
   }
 
-  // Key navigation in console input
   if (el.consoleCmdInput) {
+    el.consoleCmdInput.addEventListener('input', () => {
+      consoleState.historyIndex = -1;
+      renderGMCommandSuggestions();
+    });
+
     el.consoleCmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && consoleState.suggestions.length > 0) {
+        e.preventDefault();
+        hideGMCommandSuggestions();
+        return;
+      }
+
+      if (e.key === 'Tab' && consoleState.suggestions.length > 0) {
+        e.preventDefault();
+        selectGMCommandSuggestion(consoleState.suggestionIndex >= 0 ? consoleState.suggestionIndex : 0);
+        return;
+      }
+
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && consoleState.suggestions.length > 0) {
+        e.preventDefault();
+        moveGMCommandSuggestion(e.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (consoleState.history.length === 0) return;
@@ -1682,6 +1922,7 @@ function setupGMConsoleEvents() {
           consoleState.historyIndex--;
         }
         el.consoleCmdInput.value = consoleState.history[consoleState.historyIndex] || '';
+        hideGMCommandSuggestions();
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
         if (consoleState.history.length === 0 || consoleState.historyIndex === -1) return;
@@ -1692,46 +1933,41 @@ function setupGMConsoleEvents() {
           consoleState.historyIndex = -1;
           el.consoleCmdInput.value = '';
         }
+        hideGMCommandSuggestions();
       }
     });
   }
 
-  // Quick pill buttons
-  document.querySelectorAll('.console-pill-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const cmd = btn.getAttribute('data-cmd');
-      if (cmd) {
-        if (el.consoleCmdInput) el.consoleCmdInput.value = cmd;
-        dispatchGMCommand(cmd);
-      }
+  if (el.consoleSuggestionOptions) {
+    el.consoleSuggestionOptions.addEventListener('click', (e) => {
+      const option = e.target.closest('[data-suggestion-index]');
+      if (!option) return;
+      selectGMCommandSuggestion(Number(option.dataset.suggestionIndex));
     });
-  });
+  }
 
-  // Copy Log button
   if (el.btnConsoleCopyLog) {
     el.btnConsoleCopyLog.addEventListener('click', () => {
       if (!el.consoleTerminalLog) return;
       const text = el.consoleTerminalLog.innerText || el.consoleTerminalLog.textContent;
       navigator.clipboard?.writeText(text).then(() => {
-        showToast(t('consoleLogCopied'), 'success');
+        showToast('Console log copied.', 'success');
       }).catch(() => {
-        showToast(t('consoleLogCopyFailed'), 'error');
+        showToast('Could not copy the console log.', 'error');
       });
     });
   }
 
-  // Clear Log button
   if (el.btnConsoleClearLog) {
     el.btnConsoleClearLog.addEventListener('click', () => {
       if (el.consoleTerminalLog) {
         el.consoleTerminalLog.innerHTML = '';
-        logToConsole(t('consoleLogCleared'), 'SYS');
+        logToConsole('Console log cleared.', 'SYS');
       }
     });
   }
 
-  // Initial greeting
-  logToConsole(t('consoleReady') || 'GaC Server Console is ready (type /help for available commands)', 'SYS');
+  logToConsole('GaC server console ready. Type /help for available commands.', 'SYS');
 }
 
 // Add extra slot in Creative Mode
@@ -1907,7 +2143,7 @@ async function assignAvatarToLineup(slot, avatarId) {
     const name = avatarId ? getAvatarInfo(avatarId).name : t('slotEmpty');
     showToast(t('toastSlotUpdated', { slot: slot + 1, name }), 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -2104,7 +2340,7 @@ async function setAvatarE0S1(avatarId) {
   if (state.selectedAvatarDetail?.avatar_id === aid) {
     openAvatarDetailModal(target || { avatar_id: aid, level: 80, promotion: 6, rank: 0 });
   }
-  showToast(`ตั้งค่า ${meta.name} เป็น E0S1 เรียบร้อยแล้ว!`, 'success');
+  showToast(t('toastE0S1Applied', { name: meta.name }), 'success');
 }
 
 // Quick Set Single Avatar to E6S5 (Lv 80 + Prom 6 + E6 + Max Skills + S5 Signature Light Cone)
@@ -2196,7 +2432,7 @@ async function setAvatarE6S5(avatarId) {
   if (state.selectedAvatarDetail?.avatar_id === aid) {
     openAvatarDetailModal(target || { avatar_id: aid, level: 80, promotion: 6, rank: 6 });
   }
-  showToast(`ตั้งค่า ${meta.name} เป็น E6S5 เต็มพลังเรียบร้อยแล้ว!`, 'success');
+  showToast(t('toastE6S5Applied', { name: meta.name }), 'success');
 }
 
 // Quick Max Single Avatar (Lv 80 + Prom 6 + E6 + Max Traces)
@@ -3335,7 +3571,7 @@ function renderModalRelicsTab(avatarId) {
         renderModalRelicsTab(aid);
         renderModalOverviewTab(aid);
         renderShowcaseCard(aid);
-        showToast(`ถอดรีลิกส์ ${slotInfo.name} เรียบร้อย`, 'info');
+    showToast(t('toastRelicUnequippedSlot', { slot: slotInfo.name }), 'info');
       });
     } else {
       box.className = 'relic-slot-box empty';
@@ -3501,7 +3737,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
         renderShowcaseCard(aid);
         loadEquipment();
         openSlotPicker(aid, slot);
-        showToast('ถอดรีลิกส์เรียบร้อยแล้ว', 'info');
+  showToast(t('toastRelicUnequipped'), 'info');
       });
     } else {
       currentBox.className = 'slot-picker-current-banner empty';
@@ -4027,7 +4263,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
         renderModalOverviewTab(aid);
         renderShowcaseCard(aid);
         loadEquipment();
-        showToast(`สวมใส่ ${rInfo.name} สำเร็จ!`, 'success');
+  showToast(t('toastRelicEquipped', { name: rInfo.name }), 'success');
         document.getElementById('modal-select-relic-slot')?.classList.remove('active');
       }
     });
@@ -4096,7 +4332,7 @@ async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId, custo
   loadEquipment();
   document.getElementById('modal-select-relic-slot')?.classList.remove('active');
   const setInfo = getRelicSetInfo(setId);
-  showToast(`⚡ สวมใส่ ${setInfo.name} (+15 5★ ออฟที่เลือก) เรียบร้อยแล้ว!`, 'success');
+  showToast(t('toastRelicsEquipped', { name: getAvatarInfo(aid).name }), 'success');
 }
 
 // Save edits to existing relic (main stat & substats)
@@ -4125,7 +4361,7 @@ async function saveEditedRelicSubstats(relic, newSetId, newMainAffixId, newSubAf
   document.getElementById('modal-select-relic-slot')?.classList.remove('active');
   slotPickerTargetRelic = null;
   const rInfo = getRelicSetInfo(newSetId || Math.floor((relic.relic_id % 10000) / 10));
-  showToast(`💾 บันทึกการแก้ไขออฟรอง ${rInfo.name} เรียบร้อย!`, 'success');
+  showToast(t('toastSubstatsSaved', { name: rInfo.name }), 'success');
 }
 
 async function quickGenSlotRelic(avatarId, slotNum) {
@@ -4326,7 +4562,7 @@ async function equipLightconeToAvatar(avatarId, lcId, rank = 5, level = 80) {
   renderShowcaseCard(aid);
   renderLightconesGrid();
 
-  showToast(`🗡️ สวมใส่ ${lcInfo.name} (S${rank}) ให้กับ ${meta.name} เรียบร้อย!`, 'success');
+  showToast(t('toastLightConeEquipped', { lightcone: lcInfo.name, character: meta.name }), 'success');
 }
 
 // Unequip Lightcone from Avatar
@@ -4342,7 +4578,7 @@ async function unequipLightconeFromAvatar(avatarId) {
     renderModalRelicsTab(aid);
     renderShowcaseCard(aid);
     renderLightconesGrid();
-    showToast(`ถอดกรวยแสงออกจาก ${meta.name} เรียบร้อย`, 'info');
+  showToast(t('toastLightConeUnequipped', { character: meta.name }), 'info');
   }
 }
 
@@ -4433,9 +4669,9 @@ async function quickSetAllAvatarsE0S1() {
 
     renderAvatarsGrid();
     if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
-    showToast('⚡ ปรับตัวละครทุกตัวเป็น E0S1 พร้อมกรวยแสงประจำตัวเรียบร้อยแล้ว!', 'success');
+    showToast(t('toastAllCharactersE0S1'), 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -4659,7 +4895,7 @@ async function setAvatarRank(avatarId, rank) {
       console.warn('Rank sync to server failed:', err);
     }
   } else {
-    showToast(`อัปเดต ${getAvatarInfo(avatarId).name} เป็น E${rank} (บันทึกในเครื่อง)`, 'info');
+    showToast(t('toastLocalRankUpdated', { name: getAvatarInfo(avatarId).name, rank }), 'info');
   }
 }
 
@@ -4863,7 +5099,7 @@ async function saveAvatarDetails(closeModal = true) {
       await saveFreesrChangesToServer();
       showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
     } catch (err) {
-      showToast(`บันทึกไม่สำเร็จ: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   } else {
     showToast(t('toastCharSaved', { name: getAvatarInfo(aid).name }), 'success');
@@ -5291,7 +5527,7 @@ Generated via GaC-Srtool`;
   navigator.clipboard.writeText(text).then(() => {
     showToast(t('toastShowcaseCopied'), 'success');
   }).catch(() => {
-    showToast('Failed to copy to clipboard', 'warning');
+    showToast(t('toastClipboardCopyFailed'), 'warning');
   });
 }
 
@@ -5301,7 +5537,7 @@ async function exportShowcaseImage(avatarId) {
   const showcaseEl = document.getElementById('showcase-card-container');
   if (!showcaseEl) return;
 
-  showToast('กำลังประมวลผลและสร้างรูปภาพการ์ด PNG...', 'info');
+  showToast(t('toastCardExporting'), 'info');
 
   if (typeof html2canvas !== 'undefined') {
     try {
@@ -5329,7 +5565,7 @@ async function exportShowcaseImage(avatarId) {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      showToast('ดาวน์โหลดรูปภาพการ์ด PNG เรียบร้อยแล้ว!', 'success');
+    showToast(t('toastCardDownloaded'), 'success');
       return;
     } catch (err) {
       console.warn('html2canvas failed, falling back to print view:', err);
@@ -5338,7 +5574,7 @@ async function exportShowcaseImage(avatarId) {
 
   const win = window.open('', '_blank');
   if (!win) {
-    showToast('กรุณาอนุญาต Pop-up เพื่อพิมพ์หรือบันทึกรูปภาพการ์ด', 'warning');
+    showToast(t('toastPopupRequired'), 'warning');
     return;
   }
 
@@ -5453,9 +5689,9 @@ async function quickSetLineupE0S1() {
     for (const aid of lineupIds) {
       await setAvatarE0S1(aid);
     }
-    showToast('ปรับตัวละครทุกคนในทีมเป็น E0S1 พร้อมรบเรียบร้อยแล้ว!', 'success');
+    showToast(t('toastTeamE0S1'), 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -5473,9 +5709,9 @@ async function quickEquipLineupRelics() {
     for (const aid of lineupIds) {
       await autoEquipRecommendedRelics(aid, false);
     }
-    showToast('ติดตั้งรีลิกส์และเครื่องประดับแนะนำให้ทั้งทีมเรียบร้อยแล้ว!', 'success');
+    showToast(t('toastTeamRecommendedRelics'), 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -5546,7 +5782,7 @@ async function quickUnlockAllAvatars() {
     if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
     showToast(t('toastUnlockedAll') || 'ปลดล็อกตัวละครครบทุกตัว (70+ ตัว E6) เรียบร้อยแล้ว', 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -5588,7 +5824,7 @@ async function quickAddAll5StarLightcones() {
     loadEquipment();
     showToast(t('toastAddedAllLcs') || `เพิ่มกรวยแสง 5 ดาวทั้งหมด (${addedCount} ชิ้น) เข้าคลังแล้ว`, 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -5636,12 +5872,12 @@ async function quickTeleportAstralExpress() {
     if (el.lblCoordinates) el.lblCoordinates.textContent = `X: ${trainLoc.x}, Y: ${trainLoc.y}, Z: ${trainLoc.z}`;
     showToast(t('toastTeleportedTrain') || 'วาร์ปกลับสู่ Astral Express Parlor Car เรียบร้อยแล้ว', 'success');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
 // 5. Quick Clear Lineup Slots
-async function quickClearLineup() {
+async function quickClearLineup({ englishOnly = false } = {}) {
   try {
     state.statusData = state.statusData || {};
     let currentLineup = state.statusData.lineups || DEFAULT_LINEUP;
@@ -5670,15 +5906,15 @@ async function quickClearLineup() {
     await saveLineupToServer(cleared);
 
     renderLineup(cleared);
-    showToast(t('toastLineupCleared') || 'ล้างตัวละครในทีมเรียบร้อยแล้ว', 'info');
+    showToast(englishOnly ? 'Active lineup cleared.' : (t('toastLineupCleared') || 'ล้างตัวละครในทีมเรียบร้อยแล้ว'), 'info');
   } catch (err) {
-    showToast(err.message, 'error');
+    showToast(englishOnly ? `Could not clear the active lineup: ${err.message}` : err.message, 'error');
   }
 }
 
 // Max all avatars
-async function maxAllAvatars() {
-  if (!confirm(t('confirmMaxAll'))) return;
+async function maxAllAvatars({ englishOnly = false } = {}) {
+  if (!confirm(englishOnly ? 'Set all characters to Level 80, E6, and max Traces?' : t('confirmMaxAll'))) return;
   state.avatarsList.forEach(a => {
     a.level = 80;
     a.promotion = 6;
@@ -5706,13 +5942,13 @@ async function maxAllAvatars() {
       } else {
         await saveFreesrChangesToServer();
       }
-      showToast(t('maxAllSuccess'), 'success');
+      showToast(englishOnly ? 'All characters updated.' : t('maxAllSuccess'), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`ปรับในเครื่องสำเร็จ แต่ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message}`, 'warning');
+      showToast(englishOnly ? `Updated locally, but could not reach the server: ${err.message}` : `ปรับในเครื่องสำเร็จ แต่ส่งเซิร์ฟเวอร์ไม่ได้: ${err.message}`, 'warning');
     }
   } else {
-    showToast('ปรับ Max Lv.80, เลื่อนขั้น 6, E6 ตัวละครทั้งหมดเรียบร้อย (โหมดออฟไลน์)', 'success');
+    showToast(englishOnly ? 'All characters set to Level 80, Promotion 6, and E6 (offline mode).' : 'ปรับ Max Lv.80, เลื่อนขั้น 6, E6 ตัวละครทั้งหมดเรียบร้อย (โหมดออฟไลน์)', 'success');
   }
 }
 
@@ -6049,13 +6285,13 @@ function showLcInspector(lc) {
     if (state.isConnected) {
       await saveFreesrChangesToServer();
     }
-    showToast(`อัปเดตผู้สวมใส่ ${lcInfo.name} เรียบร้อย`, 'success');
+    showToast(t('toastInventoryLightConeUpdated', { lightcone: lcInfo.name }), 'success');
     renderEquipment();
     showLcInspector(lc);
   });
 
   document.getElementById('btn-inspector-delete')?.addEventListener('click', async () => {
-    if (!confirm(`ยืนยันการลบ ${lcInfo.name} ออกจากคลัง FreeSR หรือไม่?`)) return;
+    if (!confirm(t('confirmDeleteLightCone', { name: lcInfo.name }))) return;
     if (state.fullFreesrData?.lightcones) {
       state.fullFreesrData.lightcones = state.fullFreesrData.lightcones.filter(l => l.internal_uid !== lc.internal_uid);
       if (state.isConnected) {
@@ -6177,13 +6413,13 @@ function showRelicInspector(relic) {
     if (state.isConnected) {
       await saveFreesrChangesToServer();
     }
-    showToast(`อัปเดตผู้สวมใส่ ${rInfo.name} (${slotName}) เรียบร้อย`, 'success');
+    showToast(t('toastRelicEquipped', { name: rInfo.name }), 'success');
     renderEquipment();
     showRelicInspector(relic);
   });
 
   document.getElementById('btn-inspector-delete')?.addEventListener('click', async () => {
-    if (!confirm(`ยืนยันการลบ ${rInfo.name} ออกจากคลัง FreeSR หรือไม่?`)) return;
+    if (!confirm(t('confirmDeleteRelic', { name: rInfo.name }))) return;
     if (state.fullFreesrData?.relics) {
       state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.internal_uid !== relic.internal_uid);
       if (state.isConnected) {
@@ -6620,10 +6856,13 @@ function renderExRanks(exList) {
 async function toggleSingleExRank(avatarId, unlock) {
   try {
     await apiCall('/api/exrank/toggle', 'POST', { avatar_id: avatarId, unlocked: unlock });
-    showToast(unlock ? 'ปลดล็อค Ex-Rank สำเร็จ!' : 'ปิดใช้งาน Ex-Rank เรียบร้อย', 'success');
+    showToast(t('exrankToggleSuccess', {
+      name: getAvatarInfo(avatarId).name,
+      status: t(unlock ? 'enabled' : 'disabled')
+    }), 'success');
     refreshStatus();
   } catch (err) {
-    showToast(`Error: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -6804,11 +7043,11 @@ async function saveJsonData() {
       }
 
       if (serverSaved) {
-        showToast('✅ บันทึก freesr-data.json ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+    showToast(t('toastDataSavedServer', { file: 'freesr-data.json' }), 'success');
       } else if (serverError) {
-        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+    showToast(t('toastDataCacheOnlyFailure', { file: 'freesr-data.json', error: serverError }), 'warning');
       } else {
-        showToast('💾 บันทึก freesr-data.json ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+    showToast(t('toastDataSavedOffline', { file: 'freesr-data.json' }), 'info');
       }
     } else if (state.currentJsonMode === 'datagame') {
       state.dataGameData = parsed;
@@ -6829,11 +7068,11 @@ async function saveJsonData() {
         }
       }
       if (serverSaved) {
-        showToast('✅ บันทึก data-in-game.json ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+    showToast(t('toastDataSavedServer', { file: 'data-in-game.json' }), 'success');
       } else if (serverError) {
-        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+    showToast(t('toastDataCacheOnlyFailure', { file: 'data-in-game.json', error: serverError }), 'warning');
       } else {
-        showToast('💾 บันทึก data-in-game.json ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+    showToast(t('toastDataSavedOffline', { file: 'data-in-game.json' }), 'info');
       }
     } else {
       state.persistentData = parsed;
@@ -6856,17 +7095,17 @@ async function saveJsonData() {
         renderLineup(parsed.lineups);
       }
       if (serverSaved) {
-        showToast('✅ บันทึกไฟล์ persistent ลงในเซิร์ฟเวอร์และแคชเรียบร้อย', 'success');
+    showToast(t('toastDataSavedServer', { file: 'persistent.json' }), 'success');
       } else if (serverError) {
-        showToast(`⚠️ บันทึกลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError}`, 'warning');
+    showToast(t('toastDataCacheOnlyFailure', { file: 'persistent.json', error: serverError }), 'warning');
       } else {
-        showToast('💾 บันทึกไฟล์ persistent ลงในแคชแล้ว (โหมดออฟไลน์)', 'info');
+    showToast(t('toastDataSavedOffline', { file: 'persistent.json' }), 'info');
       }
     }
     updateCacheUsageDisplay();
     refreshStatus();
   } catch (err) {
-    showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
 }
 
@@ -7182,7 +7421,7 @@ function setupEvents() {
       renderShowcaseCard(aid);
       loadEquipment();
     } else {
-      showToast('ไม่มีรีลิกส์ที่ติดตั้งอยู่', 'warning');
+  showToast(t('toastNoEquippedRelics'), 'warning');
     }
   });
 
@@ -7232,7 +7471,7 @@ function setupEvents() {
 
     updateModalLcFullView(newLcId, selectedLcRank, curLvl);
     const lcInfo = getLightconeInfo(newLcId);
-    showToast(`เปลี่ยน Light Cone เป็น: ${lcInfo.name} เรียบร้อยแล้ว`, 'info');
+    showToast(t('toastLightConeChanged', { name: lcInfo.name }), 'info');
     renderShowcaseCard(aid);
   });
 
@@ -7295,7 +7534,7 @@ function setupEvents() {
       }
       renderLineup(state.statusData?.lineups);
       const title = t('lblCreativeMode') || 'โหมดสร้างสรรค์';
-      showToast(`${title}: ${state.creativeMode ? 'ON' : 'OFF'}`, 'info');
+      showToast(t('toastCreativeModeToggled', { title, status: t(state.creativeMode ? 'enabled' : 'disabled') }), 'info');
     });
   }
 
@@ -7330,7 +7569,7 @@ function setupEvents() {
           await saveFreesrChangesToServer().catch(() => {});
         }
       }
-      showToast(serverUpdated ? 'บันทึกสายของตัวละคร (Firefly data-in-game) สำเร็จ!' : 'บันทึกสายตัวละครลงในแคชแล้ว (Firefly data-in-game)', 'success');
+      showToast(t('toastCharacterSettingsSaved'), 'success');
       refreshStatus();
       return;
     }
@@ -7340,10 +7579,10 @@ function setupEvents() {
         main_character: mc,
         march_type: march
       });
-      showToast('บันทึกการตั้งค่าตัวละครสำเร็จ!', 'success');
+      showToast(t('toastCharacterSettingsSaved'), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   });
 
@@ -7358,10 +7597,10 @@ function setupEvents() {
         enable_castorice_global: castorice,
         enable_aha_global: aha
       });
-      showToast(t('btnSaveGlobalSwitch') || 'บันทึกสวิตช์ Global เรียบร้อย!', 'success');
+      showToast(t('toastGlobalSwitchSaved'), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`เกิดข้อผิดพลาด: ${err.message}`, 'error');
+      showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   });
 
@@ -7399,34 +7638,6 @@ function setupEvents() {
   }
 
   // Equipment Subtab Switching & Filters (Tiles View)
-  const updateEqFiltersExtra = () => {
-    if (!el.eqFilterExtra) return;
-    el.eqFilterExtra.innerHTML = '';
-    if (state.eqActiveSubtab === 'relic') {
-      el.eqFilterExtra.innerHTML = `
-        <option value="all">ทุกชิ้นส่วน</option>
-        <option value="1">1 - ส่วนหัว</option>
-        <option value="2">2 - ส่วนมือ</option>
-        <option value="3">3 - ลำตัว</option>
-        <option value="4">4 - รองเท้า</option>
-        <option value="5">5 - ลูกแก้ว</option>
-        <option value="6">6 - สร้อย</option>
-      `;
-    } else {
-      el.eqFilterExtra.innerHTML = `
-        <option value="all">ทุกประเภท</option>
-        <option value="Destruction">ทำลายล้าง</option>
-        <option value="Hunt">ล่าสังหาร</option>
-        <option value="Erudition">ปัญญา</option>
-        <option value="Harmony">ประสาน</option>
-        <option value="Nihility">ลบล้าง</option>
-        <option value="Preservation">อนุรักษ์</option>
-        <option value="Abundance">เฟื่องฟู</option>
-        <option value="Remembrance">ความทรงจำ</option>
-      `;
-    }
-  };
-
   if (el.btnEqSubtabLc) {
     el.btnEqSubtabLc.addEventListener('click', () => {
       state.eqActiveSubtab = 'lc';
@@ -7439,7 +7650,7 @@ function setupEvents() {
       if (el.btnOpenAddLc) el.btnOpenAddLc.style.display = '';
       if (el.btnOpenAddRelic) el.btnOpenAddRelic.style.display = 'none';
       if (el.eqInspectorCard) el.eqInspectorCard.style.display = 'none';
-      updateEqFiltersExtra();
+      updateEquipmentFilterExtraOptions();
       renderEquipment();
     });
   }
@@ -7456,7 +7667,7 @@ function setupEvents() {
       if (el.btnOpenAddRelic) el.btnOpenAddRelic.style.display = '';
       if (el.btnOpenAddLc) el.btnOpenAddLc.style.display = 'none';
       if (el.eqInspectorCard) el.eqInspectorCard.style.display = 'none';
-      updateEqFiltersExtra();
+      updateEquipmentFilterExtraOptions();
       renderEquipment();
     });
   }
@@ -7466,7 +7677,7 @@ function setupEvents() {
   if (el.eqFilterEquipped) el.eqFilterEquipped.addEventListener('change', renderEquipment);
   if (el.eqFilterExtra) el.eqFilterExtra.addEventListener('change', renderEquipment);
 
-  updateEqFiltersExtra();
+  updateEquipmentFilterExtraOptions();
 
   // Avatar Search & Filters
   el.avatarSearch.addEventListener('input', renderAvatarsGrid);
@@ -7482,7 +7693,7 @@ function setupEvents() {
       showToast(t('exrankAllSuccess', { status: t('enabled') }), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`Error: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   });
 
@@ -7492,7 +7703,7 @@ function setupEvents() {
       showToast(t('exrankAllSuccess', { status: t('disabled') }), 'success');
       refreshStatus();
     } catch (err) {
-      showToast(`Error: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   });
 
@@ -7505,7 +7716,7 @@ function setupEvents() {
     try {
       const parsed = JSON.parse(el.jsonEditor.value);
       el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-      showToast('จัดรูปแบบ JSON สวยงามแล้ว', 'info');
+    showToast(t('toastJsonFormatted'), 'info');
     } catch (err) {
       showToast(t('jsonInvalid'), 'error');
     }
@@ -7520,7 +7731,7 @@ function setupEvents() {
     a.href = URL.createObjectURL(blob);
     a.download = `${state.currentJsonMode}-${Date.now()}.json`;
     a.click();
-    showToast(`ดาวน์โหลด ${a.download} เรียบร้อย`, 'success');
+    showToast(t('toastFileDownloaded', { file: a.download }), 'success');
   });
 
   el.jsonFileInput.addEventListener('change', (e) => {
@@ -7631,11 +7842,11 @@ function setupEvents() {
         refreshStatus();
 
         if (serverSaved) {
-          showToast(`✅ อัปโหลดและบันทึก ${file.name} ลงเซิร์ฟเวอร์ + แคชสำเร็จ!`, 'success');
+          showToast(t('toastDataSavedServer', { file: file.name }), 'success');
         } else if (serverError) {
-          showToast(`💾 บันทึก ${file.name} ลงแคชแล้ว (แต่ส่งเซิร์ฟเวอร์ไม่สำเร็จ: ${serverError})`, 'warning');
+          showToast(t('toastDataCacheOnlyFailure', { file: file.name, error: serverError }), 'warning');
         } else {
-          showToast(`💾 บันทึก ${file.name} ลงแคชสำเร็จ (โหมดออฟไลน์)`, 'info');
+          showToast(t('toastDataSavedOffline', { file: file.name }), 'info');
         }
       } catch (err) {
         showToast(t('jsonInvalid') || 'ไฟล์ JSON ไม่ถูกต้อง', 'error');
@@ -7657,7 +7868,7 @@ function setupEvents() {
     btn.addEventListener('click', () => {
       if (el.settingApiUrl) {
         el.settingApiUrl.value = btn.dataset.url;
-        showToast(`เลือก Endpoint: ${btn.dataset.url}`, 'info');
+        showToast(t('toastEndpointSelected', { url: btn.dataset.url }), 'info');
       }
     });
   });
@@ -7726,7 +7937,7 @@ function setupEvents() {
       btn.classList.remove('btn-secondary');
       localStorage.setItem('gac_srtool_default_energy', btn.dataset.energy);
       state.defaultEnergy = parseInt(btn.dataset.energy, 10);
-      showToast(`ตั้งค่าพลังงานเริ่มต้น: ${btn.dataset.energy}%`, 'info');
+      showToast(t('toastDefaultEnergySet', { energy: btn.dataset.energy }), 'info');
     });
   });
 
@@ -7855,20 +8066,22 @@ function setupEvents() {
 // ==========================================
 // Git Branch Detection & Browser Tab Title
 // ==========================================
-let currentGitBranch = 'test-gay';
+let currentGitBranch = '';
 
 function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
   const branchPrefix = currentGitBranch ? `[${currentGitBranch}] ` : '';
   const tabNames = {
-    'tab-dashboard': 'GaC-Srtool — Ultimate Star Rail Server & Build Manager',
-    'tab-avatars': `👥 ${t('tabAvatars') || 'ตัวละคร'} | GaC-Srtool`,
-    'tab-equipment': `🗡️ ${t('tabEquipment') || 'กรวยแสง & รีลิกส์'} | GaC-Srtool`,
-    'tab-persistent': `💾 ${t('tabPersistent') || 'จัดการเซฟ GaC'} | GaC-Srtool`,
-    'tab-exrank': `⚡ ${t('tabExrank') || 'สกิลพิเศษ Ex-Rank'} | GaC-Srtool`,
-    'tab-json': `📝 ${t('tabJson') || 'จัดการไฟล์ JSON'} | GaC-Srtool`,
-    'tab-settings': `⚙️ ${t('tabSettings') || 'ตั้งค่า'} | GaC-Srtool`
+    'tab-dashboard': `GaC-Srtool — ${t('appSubtitle')}`,
+    'tab-avatars': `👥 ${t('tabAvatars')} | GaC-Srtool`,
+    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaC-Srtool`,
+    'tab-inventory': `🎒 ${t('tabInventory')} | GaC-Srtool`,
+    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaC-Srtool`,
+    'tab-persistent': `💾 ${t('tabPersistent')} | GaC-Srtool`,
+    'tab-exrank': `⚡ ${t('tabExrank')} | GaC-Srtool`,
+    'tab-json': `📝 ${t('tabJson')} | GaC-Srtool`,
+    'tab-settings': `⚙️ ${t('tabSettings')} | GaC-Srtool`
   };
-  const titleBody = tabNames[tabId] || 'GaC-Srtool — Ultimate Star Rail Server & Build Manager';
+  const titleBody = tabNames[tabId] || `GaC-Srtool — ${t('appSubtitle')}`;
   document.title = `${branchPrefix}${titleBody}`;
 }
 
@@ -7882,14 +8095,16 @@ function applyBranchToUI(branch) {
   // 2. Header Brand Badge
   const headerBadge = document.getElementById('header-branch-badge');
   if (headerBadge) {
-    headerBadge.textContent = branch;
-    headerBadge.style.display = 'inline-flex';
+    headerBadge.textContent = branch || '';
+    headerBadge.style.display = branch ? 'inline-flex' : 'none';
   }
 
   // 3. Nav Tabs Branch Indicator
+  const navPill = document.getElementById('nav-branch-pill');
   const navBadge = document.getElementById('nav-branch-name');
+  if (navPill) navPill.style.display = branch ? 'inline-flex' : 'none';
   if (navBadge) {
-    navBadge.textContent = branch;
+    navBadge.textContent = branch || '';
   }
 }
 
@@ -7940,6 +8155,7 @@ const analystState = {
   isFetching: false,
   lastBattleTimestamp: 0,
   lastReportRevision: 0,
+  lastReportFingerprint: '',
   isLive: false,
   autoSyncInterval: null
 };
@@ -8070,10 +8286,14 @@ async function fetchLatestBattleReport(silent = false) {
     if (data && data.has_report && data.report) {
       const revision = Number(data.revision || data.report.timestamp || 0);
       const isLive = data.is_live === true || data.report.end_status === 'LIVE';
-      const isNew = revision !== analystState.lastReportRevision || isLive !== analystState.isLive;
+      const fingerprint = JSON.stringify(data.report);
+      const isNew = revision !== analystState.lastReportRevision
+        || isLive !== analystState.isLive
+        || fingerprint !== analystState.lastReportFingerprint;
       analystState.currentReport = data.report;
       analystState.lastBattleTimestamp = data.report.timestamp;
       analystState.lastReportRevision = revision;
+      analystState.lastReportFingerprint = fingerprint;
       analystState.isLive = isLive;
       if (isNew) {
         renderDamageAnalyst();
@@ -8094,7 +8314,7 @@ async function fetchLatestBattleReport(silent = false) {
     }
   } catch (err) {
     if (!silent) {
-      showToast(`Error: ${err.message}`, 'error');
+    showToast(t('toastErrorMessage', { message: err.message }), 'error');
     }
   } finally {
     analystState.isFetching = false;
@@ -8103,14 +8323,15 @@ async function fetchLatestBattleReport(silent = false) {
 
 function renderEmptyDamageAnalyst() {
   if (el.analystTeamDamage) el.analystTeamDamage.textContent = '0';
-  if (el.analystCycles) el.analystCycles.textContent = `0 ${t('analystCycles')}`;
-  if (el.analystTotalTurns) el.analystTotalTurns.textContent = `0 ${t('analystTurns')}`;
+  if (el.analystCycles) el.analystCycles.textContent = t('analystCycleValue', { count: 0 });
+  if (el.analystTotalTurns) el.analystTotalTurns.textContent = t('analystTurnValue', { count: 0 });
+  if (el.analystAutoTurns) el.analystAutoTurns.textContent = t('analystAutoTurnValue', { count: 0 });
   if (el.analystDuration) el.analystDuration.textContent = '00:00';
-  if (el.analystDamageAv) el.analystDamageAv.textContent = 'เฉลี่ย: -';
-  if (el.analystBattleMeta) el.analystBattleMeta.textContent = 'Stage: - | Battle: -';
+  if (el.analystDamageAv) el.analystDamageAv.textContent = '—';
+  if (el.analystBattleMeta) el.analystBattleMeta.textContent = t('analystBattleMeta', { stage: '—', battle: '—' });
 
   if (el.badgeAnalystStatus) {
-    el.badgeAnalystStatus.textContent = 'พร้อมรับข้อมูลจากเกม';
+    el.badgeAnalystStatus.textContent = t('analystStatusReady');
     el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.15)';
     el.badgeAnalystStatus.style.color = '#4ade80';
   }
@@ -8118,6 +8339,7 @@ function renderEmptyDamageAnalyst() {
   if (el.analystShareBarContainer) {
     el.analystShareBarContainer.innerHTML = '<div style="width: 100%; background: rgba(255,255,255,0.05); height: 100%;"></div>';
   }
+  if (el.analystTotalShareLabel) el.analystTotalShareLabel.textContent = t('analystShareTotal');
   if (el.analystShareLegend) {
     el.analystShareLegend.innerHTML = '';
   }
@@ -8128,7 +8350,7 @@ function renderEmptyDamageAnalyst() {
         <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">${t('analystNoBattle')}</div>
         <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
           <button type="button" class="btn btn-primary" id="btn-empty-analyst-fetch" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">${t('analystFetchBtn')}</button>
-          <button type="button" class="btn btn-secondary" id="btn-empty-analyst-demo">✨ โหลดตัวอย่างการต่อสู้ (Demo)</button>
+          <button type="button" class="btn btn-secondary" id="btn-empty-analyst-demo">${t('miniBtnDemo')}</button>
         </div>
       </div>
     `;
@@ -8179,24 +8401,29 @@ function renderDamageAnalyst() {
 
   const teamDmg = report.team_total_damage || 0;
   const analystAvatars = orderBattleReportAvatars(report.avatars);
-  const hasAvatarDamage = Array.isArray(report.avatars)
-    && report.avatars.some(a => Number(a.total_damage) > 0);
+  const hasAvatarDamage = hasAvatarDamageData(analystAvatars);
+  const hasAvatarStats = hasAvatarBattleStatsData(analystAvatars);
   if (el.analystTotalShareLabel) {
     el.analystTotalShareLabel.textContent = hasAvatarDamage ? t('analystShareTotal') : t('analystShareUnavailable');
   }
   if (el.analystTeamDamage) el.analystTeamDamage.textContent = formatNumber(teamDmg);
   if (el.analystCycles) {
-    el.analystCycles.textContent = (report.round_cnt !== undefined) ? `${report.round_cnt} รอบ (${report.round_cnt}-Cycle)` : '0 รอบ';
+    el.analystCycles.textContent = t('analystCycleValue', { count: report.round_cnt ?? 0 });
   }
-  if (el.analystTotalTurns) el.analystTotalTurns.textContent = `${report.total_battle_turns || 0} เทิร์น`;
+  if (el.analystTotalTurns) el.analystTotalTurns.textContent = t('analystTurnValue', { count: report.total_battle_turns || 0 });
+  if (el.analystAutoTurns) el.analystAutoTurns.textContent = t('analystAutoTurnValue', { count: report.total_auto_turns || 0 });
   if (el.analystDuration) el.analystDuration.textContent = formatDuration(report.cost_time);
   if (el.analystDamageAv) {
-    el.analystDamageAv.textContent = (report.round_cnt > 0)
-      ? `เฉลี่ย: ${(teamDmg / report.round_cnt).toFixed(0).toLocaleString()} / รอบ`
-      : `เฉลี่ย: ${(teamDmg / Math.max(1, report.total_battle_turns || 1)).toFixed(0).toLocaleString()} / เทิร์น`;
+    const perCycle = Number(report.round_cnt) > 0;
+    const divisor = perCycle ? Number(report.round_cnt) : Math.max(1, Number(report.total_battle_turns) || 1);
+    const averageKey = perCycle ? 'analystAveragePerCycle' : 'analystAveragePerTurn';
+    el.analystDamageAv.textContent = t(averageKey, { value: formatNumber(teamDmg / divisor) });
   }
   if (el.analystBattleMeta) {
-    el.analystBattleMeta.textContent = `Stage: ${report.stage_id || '-'} | Battle: #${report.battle_id || '-'}`;
+    el.analystBattleMeta.textContent = t('analystBattleMeta', {
+      stage: report.stage_id || '—',
+      battle: report.battle_id || '—'
+    });
   }
 
   if (el.badgeAnalystStatus) {
@@ -8223,10 +8450,10 @@ function renderDamageAnalyst() {
 
   // Team Share Bar
   if (el.analystShareBarContainer) {
-    if (analystAvatars.length > 0) {
+    if (analystAvatars.length > 0 && hasAvatarDamage) {
       el.analystShareBarContainer.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
-        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : 0;
+        const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage) || 0;
         const info = getAvatarInfo(a.avatar_id);
         return `<div style="width: ${pct}%; background: ${color}; height: 100%; transition: width 0.4s ease;" title="${info.name}: ${pct.toFixed(1)}% (${formatNumber(a.total_damage)})"></div>`;
       }).join('');
@@ -8241,14 +8468,14 @@ function renderDamageAnalyst() {
       el.analystShareLegend.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
-        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
+        const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage);
         return `
           <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.825rem;">
             <div style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}88;"></div>
             <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid ${color};">
             <span style="font-weight: 700; color: var(--text-highlight);">${info.name}</span>
             <span style="font-weight: 800; color: ${color};">${pct === null ? '—' : `${pct.toFixed(1)}%`}</span>
-            <span style="color: var(--text-muted); font-size: 0.75rem;">(${formatNumber(a.total_damage)})</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">(${hasAvatarDamage ? formatNumber(a.total_damage) : '—'})</span>
           </div>
         `;
       }).join('');
@@ -8269,7 +8496,7 @@ function renderDamageAnalyst() {
       el.analystCharactersContainer.innerHTML = analystAvatars.map((a, idx) => {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
-        const pct = hasAvatarDamage ? (a.damage_percent || (teamDmg > 0 ? (a.total_damage / teamDmg) * 100 : 0)) : null;
+        const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage);
 
         let maxHit = 0;
         if (a.attack_type_max_damage) {
@@ -8314,23 +8541,23 @@ function renderDamageAnalyst() {
 
               <div style="text-align: right;">
                 <div style="font-size: 1.4rem; font-weight: 900; color: ${color}; letter-spacing: -0.5px;">${pct === null ? '—' : `${pct.toFixed(1)}%`}</div>
-                <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">DPS SHARE</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">${t('analystDpsShareLabel')}</div>
               </div>
             </div>
 
             <div style="padding: 0.75rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <div style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${t('analystTotalDamage')}</div>
-                <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">${formatNumber(a.total_damage)}</div>
+                <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">${hasAvatarDamage ? formatNumber(a.total_damage) : '—'}</div>
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystMaxHit')}</div>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${formatNumber(maxHit)}</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${hasAvatarDamage ? formatNumber(maxHit) : '—'}</div>
               </div>
             </div>
 
             <div style="height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 1rem;">
-              <div style="height: 100%; width: ${pct}%; background: ${color}; border-radius: 3px;"></div>
+              <div style="height: 100%; width: ${pct ?? 0}%; background: ${color}; border-radius: 3px;"></div>
             </div>
 
             <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">
@@ -8339,19 +8566,19 @@ function renderDamageAnalyst() {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 1rem;">
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgNormal')}</span>
-                <span style="font-weight: 700; color: var(--text-main);">${formatNumber(dNormal)}</span>
+                <span style="font-weight: 700; color: var(--text-main);">${hasAvatarDamage ? formatNumber(dNormal) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgSkill')}</span>
-                <span style="font-weight: 700; color: #38bdf8;">${formatNumber(dSkill)}</span>
+                <span style="font-weight: 700; color: #38bdf8;">${hasAvatarDamage ? formatNumber(dSkill) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgUlt')}</span>
-                <span style="font-weight: 700; color: #c084fc;">${formatNumber(dUlt)}</span>
+                <span style="font-weight: 700; color: #c084fc;">${hasAvatarDamage ? formatNumber(dUlt) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgBreak')}</span>
-                <span style="font-weight: 700; color: #fbbf24;">${formatNumber(dBreak)}</span>
+                <span style="font-weight: 700; color: #fbbf24;">${hasAvatarDamage ? formatNumber(dBreak) : '—'}</span>
               </div>
               ${dFollowup > 0 ? `
                 <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
@@ -8368,10 +8595,10 @@ function renderDamageAnalyst() {
             </div>
 
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted);">
-              <div>⏱️ เทิร์น: <strong style="color: #fff;">${a.total_turns || 0}</strong> ${a.extra_turns ? `(+${a.extra_turns})` : ''}</div>
-              <div>🛡️ โล่: <strong style="color: #38bdf8;">${formatNumber(a.total_shield)}</strong></div>
-              <div>💚 ฮีล: <strong style="color: #34d399;">${formatNumber(a.total_heal)}</strong></div>
-              <div>💔 โดนตี: <strong style="color: #f87171;">${formatNumber(a.total_damage_taken)}</strong></div>
+              <div>⏱️ ${t('analystTurnsTaken')}: <strong style="color: #fff;">${hasAvatarStats ? a.total_turns || 0 : '—'}</strong> ${hasAvatarStats && a.extra_turns ? `(+${a.extra_turns})` : ''}</div>
+              <div>🛡️ ${t('analystShield')}: <strong style="color: #38bdf8;">${hasAvatarStats ? formatNumber(a.total_shield) : '—'}</strong></div>
+              <div>💚 ${t('analystHealing')}: <strong style="color: #34d399;">${hasAvatarStats ? formatNumber(a.total_heal) : '—'}</strong></div>
+              <div>💔 ${t('analystDamageTaken')}: <strong style="color: #f87171;">${hasAvatarStats ? formatNumber(a.total_damage_taken) : '—'}</strong></div>
             </div>
           </div>
         `;
@@ -8388,13 +8615,13 @@ function renderDamageAnalyst() {
           <div style="display: flex; align-items: center; gap: 0.6rem;">
             <span style="font-size: 1.2rem;">👾</span>
             <div>
-              <div style="font-weight: 700; color: var(--text-highlight);">Monster #${m.monster_id || m.entity_id}</div>
-              <div style="font-size: 0.725rem; color: var(--text-muted);">Wave: ${m.wave || 1} • Entity: ${m.entity_id}</div>
+              <div style="font-weight: 700; color: var(--text-highlight);">${t('analystMonsterName', { id: m.monster_id || m.entity_id })}</div>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystWaveEntity', { wave: m.wave || 1, entity: m.entity_id })}</div>
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-weight: 800; color: #f87171;">${formatNumber(m.total_damage_taken)} DMG Taken</div>
-            <div style="font-size: 0.725rem; color: var(--text-muted);">${m.total_turns || 0} Turns (${formatNumber(m.total_damage)} Dealt)</div>
+            <div style="font-weight: 800; color: #f87171;">${t('analystEnemyDmgTaken')}: ${formatNumber(m.total_damage_taken)}</div>
+            <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystTurnValue', { count: m.total_turns || 0 })} (${t('analystDamageDealt')}: ${formatNumber(m.total_damage)})</div>
           </div>
         </div>
       `).join('');
@@ -8410,7 +8637,7 @@ function updateDashboardBattleBanner() {
 
 function exportBattleReportJson() {
   if (!analystState.currentReport) {
-    showToast('ไม่มีข้อมูลการต่อสู้ที่จะส่งออก', 'error');
+    showToast(t('analystExportEmpty'), 'error');
     return;
   }
   const text = JSON.stringify(analystState.currentReport, null, 2);
@@ -8419,13 +8646,14 @@ function exportBattleReportJson() {
   a.href = URL.createObjectURL(blob);
   a.download = `battle-report-${analystState.currentReport.battle_id || Date.now()}.json`;
   a.click();
-  showToast(`ส่งออก ${a.download} เรียบร้อย`, 'success');
+  showToast(t('analystExportSuccess', { file: a.download }), 'success');
 }
 
 async function clearBattleReport() {
   analystState.currentReport = null;
   analystState.lastBattleTimestamp = 0;
   analystState.lastReportRevision = 0;
+  analystState.lastReportFingerprint = '';
   analystState.isLive = false;
   try {
     await apiCall('/api/battle_report/reset', 'POST');
@@ -8551,9 +8779,11 @@ function loadDemoBattleReport() {
 
   analystState.currentReport = demoReport;
   analystState.lastBattleTimestamp = demoReport.timestamp;
+  analystState.lastReportFingerprint = JSON.stringify(demoReport);
+  analystState.isLive = false;
   renderDamageAnalyst();
   updateDashboardBattleBanner();
-  showToast("✨ โหลดตัวอย่างการต่อสู้ 0-Cycle เรียบร้อยแล้ว", "success");
+  showToast(t('analystDemoLoaded'), 'success');
 }
 
 function setupDamageAnalystEvents() {
@@ -8592,6 +8822,7 @@ function setupDamageAnalystEvents() {
             analystState.currentReport = report;
             analystState.lastBattleTimestamp = report.timestamp || Date.now();
             analystState.lastReportRevision = Date.now();
+            analystState.lastReportFingerprint = JSON.stringify(report);
             analystState.isLive = false;
             renderDamageAnalyst();
             updateDashboardBattleBanner();
@@ -8601,10 +8832,10 @@ function setupDamageAnalystEvents() {
               await apiCall('/api/battle_report', 'POST', report);
             } catch (_) {}
           } else {
-            showToast('รูปแบบไฟล์ JSON ไม่ถูกต้อง (ต้องการ GaC Battle Report หรือ Firefly-Sranalysis JSON)', 'error');
+            showToast(t('analystImportInvalid'), 'error');
           }
         } catch (err) {
-          showToast(`ไฟล์ JSON ผิดพลาด: ${err.message}`, 'error');
+          showToast(t('analystImportFailed', { message: err.message }), 'error');
         }
       };
       reader.readAsText(file);
@@ -8619,12 +8850,18 @@ function setupDamageAnalystEvents() {
     });
   }
 
+  const syncLatestWhenVisible = () => {
+    if (el.chkAnalystAutosync?.checked && state.isConnected && !document.hidden) {
+      fetchLatestBattleReport(true);
+    }
+  };
+  if (el.chkAnalystAutosync) {
+    el.chkAnalystAutosync.addEventListener('change', syncLatestWhenVisible);
+  }
+  document.addEventListener('visibilitychange', syncLatestWhenVisible);
+  window.addEventListener('focus', syncLatestWhenVisible);
   if (!analystState.autoSyncInterval) {
-    analystState.autoSyncInterval = setInterval(() => {
-      if (el.chkAnalystAutosync && el.chkAnalystAutosync.checked && state.isConnected) {
-        fetchLatestBattleReport(true);
-      }
-    }, 1000);
+    analystState.autoSyncInterval = setInterval(syncLatestWhenVisible, 750);
   }
 }
 

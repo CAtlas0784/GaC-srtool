@@ -6083,13 +6083,564 @@ const ADDITIONAL_TRANSLATIONS = {
   }
 };
 
+const DAMAGE_ANALYST_TRANSLATIONS = {
+  "th": {
+    "analystCycleValue": "{count} รอบ ({count}-Cycle)",
+    "analystTurnValue": "{count} เทิร์น",
+    "analystAveragePerCycle": "เฉลี่ย {value} ต่อรอบ",
+    "analystAveragePerTurn": "เฉลี่ย {value} ต่อเทิร์น",
+    "analystBattleMeta": "ด่าน {stage} | การต่อสู้ #{battle}",
+    "analystStatusReady": "พร้อมรับข้อมูลจากเกม",
+    "analystAutoTurnValue": "เทิร์นอัตโนมัติ: {count}",
+    "analystDemoLoaded": "✨ โหลดข้อมูลตัวอย่างการต่อสู้เรียบร้อยแล้ว",
+    "analystCyclesNote": "มาตรฐาน MoC / PF / AS",
+    "analystExportEmpty": "ไม่มีรายงานการต่อสู้ให้ส่งออก",
+    "analystExportSuccess": "ส่งออก {file} เรียบร้อยแล้ว",
+    "analystImportInvalid": "ไฟล์ JSON ไม่ใช่รายงาน GaC Battle Report หรือ Firefly-Sranalysis",
+    "analystImportFailed": "ไฟล์ JSON ผิดพลาด: {message}",
+    "analystDpsShareLabel": "สัดส่วนดาเมจ",
+    "analystMonsterName": "มอนสเตอร์ #{id}",
+    "analystWaveEntity": "เวฟ {wave} • เอนทิตี: {entity}",
+    "analystDamageDealt": "ดาเมจที่ทำได้"
+  },
+  "en": {
+    "analystCycleValue": "{count} Cycles",
+    "analystTurnValue": "{count} Turns",
+    "analystAveragePerCycle": "Average: {value} per cycle",
+    "analystAveragePerTurn": "Average: {value} per turn",
+    "analystBattleMeta": "Stage: {stage} | Battle: #{battle}",
+    "analystStatusReady": "Ready for in-game battle data",
+    "analystAutoTurnValue": "Auto turns: {count}",
+    "analystDemoLoaded": "✨ Demo battle report loaded",
+    "analystCyclesNote": "MoC / PF / AS standard",
+    "analystExportEmpty": "There is no battle report to export",
+    "analystExportSuccess": "Exported {file} successfully",
+    "analystImportInvalid": "JSON must be a GaC Battle Report or Firefly-Sranalysis report",
+    "analystImportFailed": "Invalid JSON file: {message}",
+    "analystDpsShareLabel": "DAMAGE SHARE",
+    "analystMonsterName": "Monster #{id}",
+    "analystWaveEntity": "Wave {wave} • Entity: {entity}",
+    "analystDamageDealt": "Damage dealt"
+  },
+  "zh-CN": {
+    "analystCycleValue": "{count} 轮",
+    "analystTurnValue": "{count} 回合",
+    "analystAveragePerCycle": "平均每轮 {value}",
+    "analystAveragePerTurn": "平均每回合 {value}",
+    "analystBattleMeta": "关卡：{stage} | 战斗：#{battle}",
+    "analystStatusReady": "等待游戏战斗数据",
+    "analystAutoTurnValue": "自动回合：{count}",
+    "analystDemoLoaded": "✨ 已载入战斗示例数据",
+    "analystCyclesNote": "MoC / PF / AS 标准",
+    "analystExportEmpty": "没有可导出的战斗报告",
+    "analystExportSuccess": "已成功导出 {file}",
+    "analystImportInvalid": "JSON 必须是 GaC Battle Report 或 Firefly-Sranalysis 报告",
+    "analystImportFailed": "JSON 文件无效：{message}",
+    "analystDpsShareLabel": "伤害占比",
+    "analystMonsterName": "怪物 #{id}",
+    "analystWaveEntity": "第 {wave} 波 • 实体：{entity}",
+    "analystDamageDealt": "造成伤害"
+  },
+  "zh-TW": {
+    "analystCycleValue": "{count} 輪",
+    "analystTurnValue": "{count} 回合",
+    "analystAveragePerCycle": "平均每輪 {value}",
+    "analystAveragePerTurn": "平均每回合 {value}",
+    "analystBattleMeta": "關卡：{stage} | 戰鬥：#{battle}",
+    "analystStatusReady": "等待遊戲戰鬥資料",
+    "analystAutoTurnValue": "自動回合：{count}",
+    "analystDemoLoaded": "✨ 已載入戰鬥範例資料",
+    "analystCyclesNote": "MoC / PF / AS 標準",
+    "analystExportEmpty": "沒有可匯出的戰鬥報告",
+    "analystExportSuccess": "已成功匯出 {file}",
+    "analystImportInvalid": "JSON 必須是 GaC Battle Report 或 Firefly-Sranalysis 報告",
+    "analystImportFailed": "JSON 檔案無效：{message}",
+    "analystDpsShareLabel": "傷害佔比",
+    "analystMonsterName": "怪物 #{id}",
+    "analystWaveEntity": "第 {wave} 波 • 實體：{entity}",
+    "analystDamageDealt": "造成傷害"
+  },
+  "ja": {
+    "analystCycleValue": "{count} サイクル",
+    "analystTurnValue": "{count} ターン",
+    "analystAveragePerCycle": "1サイクル平均：{value}",
+    "analystAveragePerTurn": "1ターン平均：{value}",
+    "analystBattleMeta": "ステージ：{stage} | 戦闘：#{battle}",
+    "analystStatusReady": "ゲーム内の戦闘データを待機中",
+    "analystAutoTurnValue": "自動ターン：{count}",
+    "analystDemoLoaded": "✨ 戦闘デモデータを読み込みました",
+    "analystCyclesNote": "MoC / PF / AS 標準",
+    "analystExportEmpty": "エクスポートする戦闘レポートがありません",
+    "analystExportSuccess": "{file} をエクスポートしました",
+    "analystImportInvalid": "JSON は GaC Battle Report または Firefly-Sranalysis のレポートである必要があります",
+    "analystImportFailed": "JSON ファイルが無効です：{message}",
+    "analystDpsShareLabel": "ダメージ割合",
+    "analystMonsterName": "モンスター #{id}",
+    "analystWaveEntity": "ウェーブ {wave} • エンティティ：{entity}",
+    "analystDamageDealt": "与えたダメージ"
+  },
+  "ko": {
+    "analystCycleValue": "{count} 사이클",
+    "analystTurnValue": "{count}턴",
+    "analystAveragePerCycle": "사이클당 평균: {value}",
+    "analystAveragePerTurn": "턴당 평균: {value}",
+    "analystBattleMeta": "스테이지: {stage} | 전투: #{battle}",
+    "analystStatusReady": "게임 전투 데이터 대기 중",
+    "analystAutoTurnValue": "자동 턴: {count}",
+    "analystDemoLoaded": "✨ 전투 예시 데이터를 불러왔습니다",
+    "analystCyclesNote": "MoC / PF / AS 표준",
+    "analystExportEmpty": "내보낼 전투 보고서가 없습니다",
+    "analystExportSuccess": "{file} 내보내기 완료",
+    "analystImportInvalid": "JSON은 GaC Battle Report 또는 Firefly-Sranalysis 보고서여야 합니다",
+    "analystImportFailed": "JSON 파일이 올바르지 않습니다: {message}",
+    "analystDpsShareLabel": "피해 비중",
+    "analystMonsterName": "몬스터 #{id}",
+    "analystWaveEntity": "웨이브 {wave} • 개체: {entity}",
+    "analystDamageDealt": "가한 피해"
+  },
+  "vi": {
+    "analystCycleValue": "{count} chu kỳ",
+    "analystTurnValue": "{count} lượt",
+    "analystAveragePerCycle": "Trung bình mỗi chu kỳ: {value}",
+    "analystAveragePerTurn": "Trung bình mỗi lượt: {value}",
+    "analystBattleMeta": "Màn: {stage} | Trận: #{battle}",
+    "analystStatusReady": "Đang chờ dữ liệu chiến đấu trong game",
+    "analystAutoTurnValue": "Lượt tự động: {count}",
+    "analystDemoLoaded": "✨ Đã tải dữ liệu chiến đấu mẫu",
+    "analystCyclesNote": "Tiêu chuẩn MoC / PF / AS",
+    "analystExportEmpty": "Không có báo cáo chiến đấu để xuất",
+    "analystExportSuccess": "Đã xuất {file}",
+    "analystImportInvalid": "JSON phải là báo cáo GaC Battle Report hoặc Firefly-Sranalysis",
+    "analystImportFailed": "Tệp JSON không hợp lệ: {message}",
+    "analystDpsShareLabel": "Tỷ lệ sát thương",
+    "analystMonsterName": "Quái #{id}",
+    "analystWaveEntity": "Đợt {wave} • Thực thể: {entity}",
+    "analystDamageDealt": "Sát thương gây ra"
+  },
+  "id": {
+    "analystCycleValue": "{count} Siklus",
+    "analystTurnValue": "{count} Giliran",
+    "analystAveragePerCycle": "Rata-rata per siklus: {value}",
+    "analystAveragePerTurn": "Rata-rata per giliran: {value}",
+    "analystBattleMeta": "Stage: {stage} | Pertempuran: #{battle}",
+    "analystStatusReady": "Menunggu data pertarungan dalam game",
+    "analystAutoTurnValue": "Giliran otomatis: {count}",
+    "analystDemoLoaded": "✨ Laporan pertarungan demo dimuat",
+    "analystCyclesNote": "Standar MoC / PF / AS",
+    "analystExportEmpty": "Tidak ada laporan pertarungan untuk diekspor",
+    "analystExportSuccess": "Berhasil mengekspor {file}",
+    "analystImportInvalid": "JSON harus berupa laporan GaC Battle Report atau Firefly-Sranalysis",
+    "analystImportFailed": "File JSON tidak valid: {message}",
+    "analystDpsShareLabel": "Porsi Damage",
+    "analystMonsterName": "Monster #{id}",
+    "analystWaveEntity": "Gelombang {wave} • Entitas: {entity}",
+    "analystDamageDealt": "Damage yang diberikan"
+  },
+  "es": {
+    "analystCycleValue": "{count} ciclos",
+    "analystTurnValue": "{count} turnos",
+    "analystAveragePerCycle": "Promedio por ciclo: {value}",
+    "analystAveragePerTurn": "Promedio por turno: {value}",
+    "analystBattleMeta": "Fase: {stage} | Combate: n.º {battle}",
+    "analystStatusReady": "Esperando datos de combate del juego",
+    "analystAutoTurnValue": "Turnos automáticos: {count}",
+    "analystDemoLoaded": "✨ Informe de combate de demostración cargado",
+    "analystCyclesNote": "Estándar de MoC / PF / AS",
+    "analystExportEmpty": "No hay ningún informe de combate para exportar",
+    "analystExportSuccess": "Se exportó {file}",
+    "analystImportInvalid": "El JSON debe ser un informe de GaC Battle Report o Firefly-Sranalysis",
+    "analystImportFailed": "El archivo JSON no es válido: {message}",
+    "analystDpsShareLabel": "Porcentaje de daño",
+    "analystMonsterName": "Monstruo n.º {id}",
+    "analystWaveEntity": "Oleada {wave} • Entidad: {entity}",
+    "analystDamageDealt": "Daño infligido"
+  },
+  "fr": {
+    "analystCycleValue": "{count} cycles",
+    "analystTurnValue": "{count} tours",
+    "analystAveragePerCycle": "Moyenne par cycle : {value}",
+    "analystAveragePerTurn": "Moyenne par tour : {value}",
+    "analystBattleMeta": "Niveau : {stage} | Combat : nº {battle}",
+    "analystStatusReady": "En attente des données de combat du jeu",
+    "analystAutoTurnValue": "Tours automatiques : {count}",
+    "analystDemoLoaded": "✨ Rapport de combat de démonstration chargé",
+    "analystCyclesNote": "Standard MoC / PF / AS",
+    "analystExportEmpty": "Aucun rapport de combat à exporter",
+    "analystExportSuccess": "{file} exporté",
+    "analystImportInvalid": "Le JSON doit être un rapport GaC Battle Report ou Firefly-Sranalysis",
+    "analystImportFailed": "Fichier JSON invalide : {message}",
+    "analystDpsShareLabel": "Part des dégâts",
+    "analystMonsterName": "Monstre nº {id}",
+    "analystWaveEntity": "Vague {wave} • Entité : {entity}",
+    "analystDamageDealt": "Dégâts infligés"
+  },
+  "de": {
+    "analystCycleValue": "{count} Zyklen",
+    "analystTurnValue": "{count} Züge",
+    "analystAveragePerCycle": "Durchschnitt pro Zyklus: {value}",
+    "analystAveragePerTurn": "Durchschnitt pro Zug: {value}",
+    "analystBattleMeta": "Stufe: {stage} | Kampf: Nr. {battle}",
+    "analystStatusReady": "Warte auf Kampfdaten aus dem Spiel",
+    "analystAutoTurnValue": "Automatische Züge: {count}",
+    "analystDemoLoaded": "✨ Demo-Kampfbericht geladen",
+    "analystCyclesNote": "MoC / PF / AS Standard",
+    "analystExportEmpty": "Kein Kampfbericht zum Exportieren vorhanden",
+    "analystExportSuccess": "{file} erfolgreich exportiert",
+    "analystImportInvalid": "JSON muss ein GaC Battle Report oder ein Firefly-Sranalysis-Bericht sein",
+    "analystImportFailed": "Ungültige JSON-Datei: {message}",
+    "analystDpsShareLabel": "Schadensanteil",
+    "analystMonsterName": "Monster Nr. {id}",
+    "analystWaveEntity": "Welle {wave} • Einheit: {entity}",
+    "analystDamageDealt": "Verursachter Schaden"
+  },
+  "ru": {
+    "analystCycleValue": "Циклов: {count}",
+    "analystTurnValue": "Ходов: {count}",
+    "analystAveragePerCycle": "В среднем за цикл: {value}",
+    "analystAveragePerTurn": "В среднем за ход: {value}",
+    "analystBattleMeta": "Этап: {stage} | Бой: №{battle}",
+    "analystStatusReady": "Ожидание боевых данных из игры",
+    "analystAutoTurnValue": "Автоходы: {count}",
+    "analystDemoLoaded": "✨ Загружен демонстрационный отчёт о бое",
+    "analystCyclesNote": "Стандарт MoC / PF / AS",
+    "analystExportEmpty": "Нет отчёта о бое для экспорта",
+    "analystExportSuccess": "Отчёт {file} успешно экспортирован",
+    "analystImportInvalid": "JSON должен быть отчётом GaC Battle Report или Firefly-Sranalysis",
+    "analystImportFailed": "Некорректный JSON-файл: {message}",
+    "analystDpsShareLabel": "Доля урона",
+    "analystMonsterName": "Монстр №{id}",
+    "analystWaveEntity": "Волна {wave} • Сущность: {entity}",
+    "analystDamageDealt": "Нанесённый урон"
+  },
+  "pt": {
+    "analystCycleValue": "{count} ciclos",
+    "analystTurnValue": "{count} turnos",
+    "analystAveragePerCycle": "Média por ciclo: {value}",
+    "analystAveragePerTurn": "Média por turno: {value}",
+    "analystBattleMeta": "Fase: {stage} | Batalha: nº {battle}",
+    "analystStatusReady": "Aguardando dados de combate do jogo",
+    "analystAutoTurnValue": "Turnos automáticos: {count}",
+    "analystDemoLoaded": "✨ Relatório de combate de demonstração carregado",
+    "analystCyclesNote": "Padrão MoC / PF / AS",
+    "analystExportEmpty": "Não há relatório de combate para exportar",
+    "analystExportSuccess": "{file} exportado com sucesso",
+    "analystImportInvalid": "O JSON precisa ser um relatório GaC Battle Report ou Firefly-Sranalysis",
+    "analystImportFailed": "Arquivo JSON inválido: {message}",
+    "analystDpsShareLabel": "Participação no dano",
+    "analystMonsterName": "Monstro nº {id}",
+    "analystWaveEntity": "Onda {wave} • Entidade: {entity}",
+    "analystDamageDealt": "Dano causado"
+  }
+};
+
+const UI_COMPLETION_TRANSLATIONS = {
+  th: {
+    appSubtitle: 'ตัวจัดการเซิร์ฟเวอร์และ FreeSR สำหรับ Star Rail', tabDamageAnalyst: '💥 วิเคราะห์ดาเมจ',
+    equipmentSearchPlaceholder: '🔍 ค้นหา Light Cone, รีลิกส์ หรือ ID...', filter3Star: '3 ดาว', filterAllStatus: 'ทุกสถานะ', filterEquipped: 'สวมใส่อยู่', filterInInventory: 'ในคลัง', filterAllTypes: 'ทุกประเภท', filterAllRelicSlots: 'ทุกชิ้นส่วน',
+    globalFeatureSilverWolf: 'ฟีเจอร์พิเศษ Silver Wolf ทั่วเซิร์ฟเวอร์', globalFeatureCastorice: 'ฟีเจอร์พิเศษ Castorice ทั่วเซิร์ฟเวอร์', globalFeatureAha: 'ฟีเจอร์พิเศษ Aeon ★ Aha ทั่วเซิร์ฟเวอร์', lightConeSearchPlaceholder: '🔍 ค้นหา Light Cone ตามชื่อหรือ ID...',
+    superimpositionLabel: 'ระดับการขัดเกลา', superimpositionSelectTitle: 'เลือกระดับการขัดเกลาเมื่อติดตั้ง', superimpositionRank: 'S{rank} (ขัดเกลา {rank})',
+    relicSlotHead: 'ส่วนหัว (HP)', relicSlotHands: 'ส่วนมือ (ATK)', relicSlotBody: 'ลำตัว', relicSlotFeet: 'รองเท้า', relicSlotSphere: 'ลูกแก้วมิติ', relicSlotRope: 'เชือกเชื่อมต่อ', slotPickerSubtitle: 'เลือกชิ้นที่มีอยู่ หรือสร้างชิ้นใหม่ตามบิลด์แนะนำ',
+    substatCustomizerTitle: '🔧 ปรับแต่งค่าสถานะรอง:', substatPresetRecommended: '⭐ ค่าสถานะแนะนำ', substatPresetCrit: '🎯 CRIT Rate/DMG', substatPresetSpeed: '⚡ ความเร็ว SPD', substatPresetBreak: '🔨 Break Effect', substatPresetTank: '🛡️ HP/DEF', substatRollCountLabel: '💡 จำนวนครั้งที่ทอยทั้งหมด:', substatRollLimit: '/ 9 ครั้ง (5★ เลเวล 15)', substatResetButton: '↺ รีเซ็ต'
+  },
+  en: {
+    tabDamageAnalyst: '💥 Damage Analyst',
+    equipmentSearchPlaceholder: '🔍 Search Light Cones, Relics, or item IDs...', filter3Star: '3-Star', filterAllStatus: 'All Statuses', filterEquipped: 'Equipped', filterInInventory: 'In Inventory', filterAllTypes: 'All Types', filterAllRelicSlots: 'All Relic Slots',
+    globalFeatureSilverWolf: 'Silver Wolf Global Feature', globalFeatureCastorice: 'Castorice Global Feature', globalFeatureAha: 'Aeon ★ Aha Global Feature', lightConeSearchPlaceholder: '🔍 Search Light Cones by name or ID...',
+    superimpositionLabel: 'Superimposition', superimpositionSelectTitle: 'Choose superimposition when equipping', superimpositionRank: 'S{rank} (Superimposition {rank})',
+    relicSlotHead: 'Head (HP)', relicSlotHands: 'Hands (ATK)', relicSlotBody: 'Body', relicSlotFeet: 'Feet', relicSlotSphere: 'Planar Sphere', relicSlotRope: 'Link Rope', slotPickerSubtitle: 'Choose an owned piece or create one based on the recommended build',
+    substatCustomizerTitle: '🔧 Customize Substats:', substatPresetRecommended: '⭐ Recommended Stats', substatPresetCrit: '🎯 CRIT Rate/DMG', substatPresetSpeed: '⚡ Speed SPD', substatPresetBreak: '🔨 Break Effect', substatPresetTank: '🛡️ HP/DEF', substatRollCountLabel: '💡 Total rolls:', substatRollLimit: '/ 9 rolls (5★ Level 15)', substatResetButton: '↺ Reset'
+  },
+  'zh-CN': {
+    equipmentSearchPlaceholder: '🔍 搜索光锥、遗器或物品 ID…', filter3Star: '3 星', filterAllStatus: '全部状态', filterEquipped: '已装备', filterInInventory: '背包中', filterAllTypes: '全部类型', filterAllRelicSlots: '全部部位',
+    globalFeatureSilverWolf: '银狼全局功能', globalFeatureCastorice: '遐蝶全局功能', globalFeatureAha: '星神 ★ 阿哈全局功能', lightConeSearchPlaceholder: '🔍 按名称或 ID 搜索光锥…',
+    superimpositionLabel: '叠影等级', superimpositionSelectTitle: '装备时选择叠影等级', superimpositionRank: 'S{rank}（叠影 {rank}）',
+    relicSlotHead: '头部（生命值）', relicSlotHands: '手部（攻击力）', relicSlotBody: '躯干', relicSlotFeet: '脚部', relicSlotSphere: '位面球', relicSlotRope: '连结绳', slotPickerSubtitle: '选择已有遗器，或按推荐配装生成新遗器',
+    substatCustomizerTitle: '🔧 自定义副词条：', substatPresetRecommended: '⭐ 推荐属性', substatPresetCrit: '🎯 暴击率/暴击伤害', substatPresetSpeed: '⚡ 速度', substatPresetBreak: '🔨 击破特攻', substatPresetTank: '🛡️ 生命值/防御力', substatRollCountLabel: '💡 总强化次数：', substatRollLimit: '/ 9 次（5 星 15 级）', substatResetButton: '↺ 重置'
+  },
+  'zh-TW': {
+    equipmentSearchPlaceholder: '🔍 搜尋光錐、遺器或物品 ID…', filter3Star: '3 星', filterAllStatus: '所有狀態', filterEquipped: '已裝備', filterInInventory: '背包中', filterAllTypes: '所有類型', filterAllRelicSlots: '所有部位',
+    globalFeatureSilverWolf: '銀狼全域功能', globalFeatureCastorice: '遐蝶全域功能', globalFeatureAha: '星神 ★ 阿哈全域功能', lightConeSearchPlaceholder: '🔍 依名稱或 ID 搜尋光錐…',
+    superimpositionLabel: '疊影等級', superimpositionSelectTitle: '裝備時選擇疊影等級', superimpositionRank: 'S{rank}（疊影 {rank}）',
+    relicSlotHead: '頭部（生命值）', relicSlotHands: '手部（攻擊力）', relicSlotBody: '軀幹', relicSlotFeet: '腳部', relicSlotSphere: '位面球', relicSlotRope: '連結繩', slotPickerSubtitle: '選擇已有遺器，或依推薦配裝建立新遺器',
+    substatCustomizerTitle: '🔧 自訂副詞條：', substatPresetRecommended: '⭐ 推薦屬性', substatPresetCrit: '🎯 暴擊率/暴擊傷害', substatPresetSpeed: '⚡ 速度', substatPresetBreak: '🔨 擊破特攻', substatPresetTank: '🛡️ 生命值/防禦力', substatRollCountLabel: '💡 總強化次數：', substatRollLimit: '/ 9 次（5 星 15 級）', substatResetButton: '↺ 重設'
+  },
+  ja: {
+    equipmentSearchPlaceholder: '🔍 光円錐・遺物・アイテムIDを検索…', filter3Star: '星3', filterAllStatus: 'すべての状態', filterEquipped: '装備中', filterInInventory: '所持中', filterAllTypes: 'すべての種類', filterAllRelicSlots: 'すべての部位',
+    globalFeatureSilverWolf: '銀狼 グローバル機能', globalFeatureCastorice: 'キャストリス グローバル機能', globalFeatureAha: '星神 ★ アッハ グローバル機能', lightConeSearchPlaceholder: '🔍 光円錐を名前またはIDで検索…',
+    superimpositionLabel: '重畳ランク', superimpositionSelectTitle: '装備時の重畳ランクを選択', superimpositionRank: 'S{rank}（重畳{rank}）',
+    relicSlotHead: '頭部（HP）', relicSlotHands: '手部（攻撃力）', relicSlotBody: '胴体', relicSlotFeet: '脚部', relicSlotSphere: '次元界オーブ', relicSlotRope: '連結縄', slotPickerSubtitle: '所持済みの遺物を選ぶか、おすすめビルドに合わせて新しく作成します',
+    substatCustomizerTitle: '🔧 サブステータスを調整：', substatPresetRecommended: '⭐ おすすめステータス', substatPresetCrit: '🎯 会心率/会心ダメージ', substatPresetSpeed: '⚡ 速度', substatPresetBreak: '🔨 撃破特効', substatPresetTank: '🛡️ HP/防御力', substatRollCountLabel: '💡 強化回数：', substatRollLimit: '/ 9回（星5・Lv.15）', substatResetButton: '↺ リセット'
+  },
+  ko: {
+    equipmentSearchPlaceholder: '🔍 광추, 유물 또는 아이템 ID 검색…', filter3Star: '3성', filterAllStatus: '전체 상태', filterEquipped: '장착 중', filterInInventory: '보유 중', filterAllTypes: '전체 유형', filterAllRelicSlots: '전체 부위',
+    globalFeatureSilverWolf: '은랑 글로벌 기능', globalFeatureCastorice: '캐스토리스 글로벌 기능', globalFeatureAha: '에이언즈 ★ 아하 글로벌 기능', lightConeSearchPlaceholder: '🔍 이름 또는 ID로 광추 검색…',
+    superimpositionLabel: '중첩 단계', superimpositionSelectTitle: '장착할 중첩 단계를 선택하세요', superimpositionRank: 'S{rank} (중첩 {rank})',
+    relicSlotHead: '머리 (HP)', relicSlotHands: '팔 (공격력)', relicSlotBody: '몸통', relicSlotFeet: '다리', relicSlotSphere: '차원 구체', relicSlotRope: '연결 매듭', slotPickerSubtitle: '보유한 유물을 선택하거나 추천 빌드에 맞춰 새 유물을 만드세요',
+    substatCustomizerTitle: '🔧 부옵션 설정:', substatPresetRecommended: '⭐ 추천 능력치', substatPresetCrit: '🎯 치명타 확률/피해', substatPresetSpeed: '⚡ 속도', substatPresetBreak: '🔨 격파 특수효과', substatPresetTank: '🛡️ HP/방어력', substatRollCountLabel: '💡 총 강화 횟수:', substatRollLimit: '/ 9회 (5성 Lv.15)', substatResetButton: '↺ 초기화'
+  },
+  vi: {
+    equipmentSearchPlaceholder: '🔍 Tìm nón ánh sáng, di vật hoặc ID vật phẩm…', filter3Star: '3 sao', filterAllStatus: 'Mọi trạng thái', filterEquipped: 'Đang trang bị', filterInInventory: 'Trong túi', filterAllTypes: 'Mọi loại', filterAllRelicSlots: 'Mọi vị trí',
+    globalFeatureSilverWolf: 'Tính năng toàn máy chủ của Sói Bạc', globalFeatureCastorice: 'Tính năng toàn máy chủ của Castorice', globalFeatureAha: 'Tính năng toàn máy chủ của Aeon ★ Aha', lightConeSearchPlaceholder: '🔍 Tìm nón ánh sáng theo tên hoặc ID…',
+    superimpositionLabel: 'Bậc tinh luyện', superimpositionSelectTitle: 'Chọn bậc tinh luyện khi trang bị', superimpositionRank: 'S{rank} (Tinh luyện {rank})',
+    relicSlotHead: 'Đầu (HP)', relicSlotHands: 'Tay (Tấn Công)', relicSlotBody: 'Thân', relicSlotFeet: 'Chân', relicSlotSphere: 'Quả Cầu Vị Diện', relicSlotRope: 'Dây Liên Kết', slotPickerSubtitle: 'Chọn di vật đang có hoặc tạo món mới theo đề xuất xây dựng',
+    substatCustomizerTitle: '🔧 Tùy chỉnh chỉ số phụ:', substatPresetRecommended: '⭐ Chỉ số đề xuất', substatPresetCrit: '🎯 Tỷ Lệ ST Bạo Kích/ST Bạo Kích', substatPresetSpeed: '⚡ Tốc Độ', substatPresetBreak: '🔨 Tấn Công Kích Phá', substatPresetTank: '🛡️ HP/Phòng Thủ', substatRollCountLabel: '💡 Tổng số lần cường hóa:', substatRollLimit: '/ 9 lần (5★ cấp 15)', substatResetButton: '↺ Đặt lại'
+  },
+  id: {
+    appSubtitle: 'Pengelola server dan FreeSR Star Rail', offline: 'Luring', btnPersistent: '💾 Simpanan persistent', slot: 'Posisi',
+    analystDmgNormal: '🗡️ Serangan Dasar', analystDmgSkill: '⚡ Skill Tempur', analystDmgUlt: '💥 Serangan Pamungkas', analystDmgFollowup: '🔄 Serangan Lanjutan', analystMonsterName: 'Musuh #{id}',
+    modalSkillBasic: 'Serangan Dasar', modalSkillSkill: 'Skill Tempur', modalSkillTalent: 'Talenta', traceA2: '🌟 Jejak Bonus A2', traceA4: '🌟 Jejak Bonus A4', traceA6: '🌟 Jejak Bonus A6', btnResetE0: 'Atur Ulang E0', modalEnergy50: 'Atur 50%', modalEnergy100: 'Atur 100%',
+    equipmentSearchPlaceholder: '🔍 Cari Light Cone, Relik, atau ID item…', filter3Star: '3 Bintang', filterAllStatus: 'Semua Status', filterEquipped: 'Dipakai', filterInInventory: 'Di Inventaris', filterAllTypes: 'Semua Jenis', filterAllRelicSlots: 'Semua Slot Relik',
+    globalFeatureSilverWolf: 'Fitur Global Silver Wolf', globalFeatureCastorice: 'Fitur Global Castorice', globalFeatureAha: 'Fitur Global Aeon ★ Aha', lightConeSearchPlaceholder: '🔍 Cari Light Cone berdasarkan nama atau ID…',
+    superimpositionLabel: 'Superimposisi', superimpositionSelectTitle: 'Pilih superimposisi saat dipasang', superimpositionRank: 'S{rank} (Superimposisi {rank})',
+    relicSlotHead: 'Kepala (HP)', relicSlotHands: 'Tangan (ATK)', relicSlotBody: 'Badan', relicSlotFeet: 'Kaki', relicSlotSphere: 'Bola Planar', relicSlotRope: 'Tali Penghubung', slotPickerSubtitle: 'Pilih relik yang dimiliki atau buat relik baru sesuai rekomendasi build',
+    substatCustomizerTitle: '🔧 Atur Substat:', substatPresetRecommended: '⭐ Stat Rekomendasi', substatPresetCrit: '🎯 CRIT Rate/DMG', substatPresetSpeed: '⚡ SPD', substatPresetBreak: '🔨 Break Effect', substatPresetTank: '🛡️ HP/DEF', substatRollCountLabel: '💡 Total roll:', substatRollLimit: '/ 9 roll (5★ Level 15)', substatResetButton: '↺ Atur Ulang'
+  },
+  es: {
+    equipmentSearchPlaceholder: '🔍 Buscar conos de luz, artefactos o ID de objeto…', filter3Star: '3 estrellas', filterAllStatus: 'Todos los estados', filterEquipped: 'Equipado', filterInInventory: 'En el inventario', filterAllTypes: 'Todos los tipos', filterAllRelicSlots: 'Todas las posiciones',
+    globalFeatureSilverWolf: 'Función global de Silver Wolf', globalFeatureCastorice: 'Función global de Castorice', globalFeatureAha: 'Función global de Aeon ★ Aha', lightConeSearchPlaceholder: '🔍 Buscar conos de luz por nombre o ID…',
+    superimpositionLabel: 'Superposición', superimpositionSelectTitle: 'Elige la superposición al equipar', superimpositionRank: 'S{rank} (Superposición {rank})',
+    relicSlotHead: 'Cabeza (PV)', relicSlotHands: 'Manos (ATQ)', relicSlotBody: 'Torso', relicSlotFeet: 'Pies', relicSlotSphere: 'Esfera planar', relicSlotRope: 'Cuerda de unión', slotPickerSubtitle: 'Elige una reliquia que tengas o crea una según la build recomendada',
+    substatCustomizerTitle: '🔧 Personalizar subatributos:', substatPresetRecommended: '⭐ Atributos recomendados', substatPresetCrit: '🎯 Prob. CRIT/Daño CRIT', substatPresetSpeed: '⚡ Velocidad', substatPresetBreak: '🔨 Efecto de Ruptura', substatPresetTank: '🛡️ PV/DEF', substatRollCountLabel: '💡 Mejoras totales:', substatRollLimit: '/ 9 mejoras (5★ Nivel 15)', substatResetButton: '↺ Restablecer'
+  },
+  fr: {
+    equipmentSearchPlaceholder: '🔍 Rechercher des cônes de lumière, reliques ou ID…', filter3Star: '3 étoiles', filterAllStatus: 'Tous les états', filterEquipped: 'Équipé', filterInInventory: 'Dans l’inventaire', filterAllTypes: 'Tous les types', filterAllRelicSlots: 'Tous les emplacements',
+    globalFeatureSilverWolf: 'Fonction globale de Silver Wolf', globalFeatureCastorice: 'Fonction globale de Castorice', globalFeatureAha: 'Fonction globale de l’Éon ★ Aha', lightConeSearchPlaceholder: '🔍 Rechercher un cône de lumière par nom ou ID…',
+    superimpositionLabel: 'Superposition', superimpositionSelectTitle: 'Choisir la superposition à équiper', superimpositionRank: 'S{rank} (Superposition {rank})',
+    relicSlotHead: 'Tête (PV)', relicSlotHands: 'Mains (ATQ)', relicSlotBody: 'Torse', relicSlotFeet: 'Pieds', relicSlotSphere: 'Orbe planaire', relicSlotRope: 'Corde de liaison', slotPickerSubtitle: 'Choisissez une relique possédée ou créez-en une selon le build recommandé',
+    substatCustomizerTitle: '🔧 Personnaliser les sous-stats :', substatPresetRecommended: '⭐ Stats recommandées', substatPresetCrit: '🎯 Taux CRIT/DGT CRIT', substatPresetSpeed: '⚡ Vitesse', substatPresetBreak: '🔨 Effet de Rupture', substatPresetTank: '🛡️ PV/DÉF', substatRollCountLabel: '💡 Renforcements totaux :', substatRollLimit: '/ 9 renforcements (5★ niv. 15)', substatResetButton: '↺ Réinitialiser'
+  },
+  de: {
+    equipmentSearchPlaceholder: '🔍 Lichtkegel, Relikte oder Item-ID suchen …', filter3Star: '3 Sterne', filterAllStatus: 'Alle Status', filterEquipped: 'Ausgerüstet', filterInInventory: 'Im Inventar', filterAllTypes: 'Alle Typen', filterAllRelicSlots: 'Alle Reliktplätze',
+    globalFeatureSilverWolf: 'Silver-Wolf-Globalfunktion', globalFeatureCastorice: 'Castorice-Globalfunktion', globalFeatureAha: 'Äonen-Globalfunktion ★ Aha', lightConeSearchPlaceholder: '🔍 Lichtkegel nach Name oder ID suchen …',
+    superimpositionLabel: 'Überlagerung', superimpositionSelectTitle: 'Überlagerung beim Ausrüsten wählen', superimpositionRank: 'S{rank} (Überlagerung {rank})',
+    relicSlotHead: 'Kopf (LP)', relicSlotHands: 'Hände (ANG)', relicSlotBody: 'Körper', relicSlotFeet: 'Füße', relicSlotSphere: 'Planare Sphäre', relicSlotRope: 'Verbindungsschnur', slotPickerSubtitle: 'Wähle ein vorhandenes Relikt oder erstelle eines nach dem empfohlenen Build',
+    substatCustomizerTitle: '🔧 Nebenwerte anpassen:', substatPresetRecommended: '⭐ Empfohlene Werte', substatPresetCrit: '🎯 KRIT-Rate/Schaden', substatPresetSpeed: '⚡ Geschwindigkeit', substatPresetBreak: '🔨 Bruch-Effekt', substatPresetTank: '🛡️ LP/VER', substatRollCountLabel: '💡 Verstärkungen gesamt:', substatRollLimit: '/ 9 Verstärkungen (5★ Stufe 15)', substatResetButton: '↺ Zurücksetzen'
+  },
+  ru: {
+    equipmentSearchPlaceholder: '🔍 Поиск световых конусов, реликвий или ID предмета…', filter3Star: '3 звезды', filterAllStatus: 'Все статусы', filterEquipped: 'Экипировано', filterInInventory: 'В инвентаре', filterAllTypes: 'Все типы', filterAllRelicSlots: 'Все слоты реликвий',
+    globalFeatureSilverWolf: 'Глобальная функция Серебряного Волка', globalFeatureCastorice: 'Глобальная функция Кастории', globalFeatureAha: 'Глобальная функция эона ★ Ахи', lightConeSearchPlaceholder: '🔍 Поиск светового конуса по названию или ID…',
+    superimpositionLabel: 'Наложение', superimpositionSelectTitle: 'Выберите наложение при экипировке', superimpositionRank: 'S{rank} (наложение {rank})',
+    relicSlotHead: 'Голова (HP)', relicSlotHands: 'Руки (ATK)', relicSlotBody: 'Тело', relicSlotFeet: 'Ноги', relicSlotSphere: 'Планарная сфера', relicSlotRope: 'Соединительная верёвка', slotPickerSubtitle: 'Выберите имеющуюся реликвию или создайте новую по рекомендуемой сборке',
+    substatCustomizerTitle: '🔧 Настройка дополнительных характеристик:', substatPresetRecommended: '⭐ Рекомендуемые характеристики', substatPresetCrit: '🎯 Шанс/урон крит. попадания', substatPresetSpeed: '⚡ Скорость', substatPresetBreak: '🔨 Эффект пробития', substatPresetTank: '🛡️ HP/Защита', substatRollCountLabel: '💡 Всего усилений:', substatRollLimit: '/ 9 усилений (5★, ур. 15)', substatResetButton: '↺ Сбросить'
+  },
+  pt: {
+    equipmentSearchPlaceholder: '🔍 Buscar cones de luz, relíquias ou ID do item…', filter3Star: '3 estrelas', filterAllStatus: 'Todos os status', filterEquipped: 'Equipado', filterInInventory: 'No inventário', filterAllTypes: 'Todos os tipos', filterAllRelicSlots: 'Todos os espaços',
+    globalFeatureSilverWolf: 'Recurso global da Loba Prateada', globalFeatureCastorice: 'Recurso global de Castorice', globalFeatureAha: 'Recurso global do Aeon ★ Aha', lightConeSearchPlaceholder: '🔍 Buscar cone de luz por nome ou ID…',
+    superimpositionLabel: 'Sobreposição', superimpositionSelectTitle: 'Escolha a sobreposição ao equipar', superimpositionRank: 'S{rank} (Sobreposição {rank})',
+    relicSlotHead: 'Cabeça (PV)', relicSlotHands: 'Mãos (ATQ)', relicSlotBody: 'Corpo', relicSlotFeet: 'Pés', relicSlotSphere: 'Orbe planar', relicSlotRope: 'Corda de ligação', slotPickerSubtitle: 'Escolha uma relíquia que possui ou crie uma de acordo com a build recomendada',
+    substatCustomizerTitle: '🔧 Personalizar subatributos:', substatPresetRecommended: '⭐ Atributos recomendados', substatPresetCrit: '🎯 Taxa CRIT/Dano CRIT', substatPresetSpeed: '⚡ Velocidade', substatPresetBreak: '🔨 Efeito de Quebra', substatPresetTank: '🛡️ PV/DEF', substatRollCountLabel: '💡 Aprimoramentos totais:', substatRollLimit: '/ 9 aprimoramentos (5★ Nv. 15)', substatResetButton: '↺ Redefinir'
+  }
+};
+
+const GLOBAL_UI_LABEL_TRANSLATIONS = {
+  th: {
+    apiSettingsTooltip: 'คลิกเพื่อตั้งค่าการเชื่อมต่อ API', languageSelectorTitle: 'เลือกภาษา', branchTooltip: 'สาขา Git ที่ใช้งาน', apiLive: 'API ทำงานอยู่',
+    persistentDescription: 'เซิร์ฟเวอร์ GaC จัดเก็บทีมใน persistent.json (รองรับโหมดสร้างสรรค์) • FireflyGo จัดเก็บใน freesr-data.json', languageChanged: 'เปลี่ยนภาษาเป็น {language} แล้ว'
+  },
+  en: {
+    apiSettingsTooltip: 'Click to configure the API connection', languageSelectorTitle: 'Choose language', branchTooltip: 'Active Git branch', apiLive: 'API Live',
+    persistentDescription: 'GaC stores the lineup in persistent.json (including Creative Mode) • FireflyGo stores it in freesr-data.json', languageChanged: 'Language changed to {language}'
+  },
+  'zh-CN': {
+    apiSettingsTooltip: '点击设置 API 连接', languageSelectorTitle: '选择语言', branchTooltip: '当前 Git 分支', apiLive: 'API 运行中',
+    persistentDescription: 'GaC 将队伍保存在 persistent.json（支持创意模式）• FireflyGo 将数据保存在 freesr-data.json', languageChanged: '语言已切换为{language}'
+  },
+  'zh-TW': {
+    apiSettingsTooltip: '點擊設定 API 連線', languageSelectorTitle: '選擇語言', branchTooltip: '目前 Git 分支', apiLive: 'API 運作中',
+    persistentDescription: 'GaC 將隊伍儲存在 persistent.json（支援創意模式）• FireflyGo 將資料儲存在 freesr-data.json', languageChanged: '語言已切換為{language}'
+  },
+  ja: {
+    apiSettingsTooltip: 'クリックして API 接続を設定', languageSelectorTitle: '言語を選択', branchTooltip: '現在の Git ブランチ', apiLive: 'API 稼働中',
+    persistentDescription: 'GaC はチームを persistent.json に保存します（クリエイティブモード対応）• FireflyGo は freesr-data.json に保存します', languageChanged: '言語を{language}に変更しました'
+  },
+  ko: {
+    apiSettingsTooltip: '클릭하여 API 연결 설정', languageSelectorTitle: '언어 선택', branchTooltip: '현재 Git 브랜치', apiLive: 'API 실행 중',
+    persistentDescription: 'GaC는 파티를 persistent.json에 저장합니다(크리에이티브 모드 지원) • FireflyGo는 freesr-data.json에 저장합니다', languageChanged: '언어를 {language}(으)로 변경했습니다'
+  },
+  vi: {
+    apiSettingsTooltip: 'Nhấn để cấu hình kết nối API', languageSelectorTitle: 'Chọn ngôn ngữ', branchTooltip: 'Nhánh Git hiện tại', apiLive: 'API đang hoạt động',
+    persistentDescription: 'GaC lưu đội hình trong persistent.json (hỗ trợ Chế độ Sáng tạo) • FireflyGo lưu dữ liệu trong freesr-data.json', languageChanged: 'Đã chuyển ngôn ngữ sang {language}'
+  },
+  id: {
+    apiSettingsTooltip: 'Klik untuk mengatur koneksi API', languageSelectorTitle: 'Pilih bahasa', branchTooltip: 'Branch Git aktif', apiLive: 'API aktif',
+    persistentDescription: 'GaC menyimpan susunan tim di persistent.json (mendukung Mode Kreatif) • FireflyGo menyimpan data di freesr-data.json', languageChanged: 'Bahasa diubah ke {language}'
+  },
+  es: {
+    apiSettingsTooltip: 'Haz clic para configurar la conexión API', languageSelectorTitle: 'Elegir idioma', branchTooltip: 'Rama Git activa', apiLive: 'API activa',
+    persistentDescription: 'GaC guarda el equipo en persistent.json (incluido el modo creativo) • FireflyGo guarda los datos en freesr-data.json', languageChanged: 'Idioma cambiado a {language}'
+  },
+  fr: {
+    apiSettingsTooltip: 'Cliquez pour configurer la connexion API', languageSelectorTitle: 'Choisir la langue', branchTooltip: 'Branche Git active', apiLive: 'API active',
+    persistentDescription: 'GaC enregistre l’équipe dans persistent.json (mode créatif inclus) • FireflyGo enregistre les données dans freesr-data.json', languageChanged: 'Langue changée : {language}'
+  },
+  de: {
+    apiSettingsTooltip: 'Klicken, um die API-Verbindung einzurichten', languageSelectorTitle: 'Sprache auswählen', branchTooltip: 'Aktiver Git-Branch', apiLive: 'API aktiv',
+    persistentDescription: 'GaC speichert das Team in persistent.json (mit Kreativmodus) • FireflyGo speichert die Daten in freesr-data.json', languageChanged: 'Sprache auf {language} umgestellt'
+  },
+  ru: {
+    apiSettingsTooltip: 'Нажмите, чтобы настроить подключение к API', languageSelectorTitle: 'Выбрать язык', branchTooltip: 'Текущая ветка Git', apiLive: 'API работает',
+    persistentDescription: 'GaC сохраняет отряд в persistent.json (включая творческий режим) • FireflyGo сохраняет данные в freesr-data.json', languageChanged: 'Язык изменён: {language}'
+  },
+  pt: {
+    apiSettingsTooltip: 'Clique para configurar a conexão com a API', languageSelectorTitle: 'Escolher idioma', branchTooltip: 'Branch Git ativa', apiLive: 'API ativa',
+    persistentDescription: 'GaC salva a equipe em persistent.json (incluindo o Modo Criativo) • FireflyGo salva os dados em freesr-data.json', languageChanged: 'Idioma alterado para {language}'
+  }
+};
+
+const INTERACTION_FEEDBACK_TRANSLATIONS = {
+  th: {
+    toastRelicUnequippedSlot: 'ถอดรีลิกส์ {slot} แล้ว', toastRelicUnequipped: 'ถอดรีลิกส์เรียบร้อยแล้ว', toastRelicEquipped: 'สวมใส่ {name} สำเร็จ!', toastSubstatsSaved: 'บันทึกค่าสถานะรองของ {name} แล้ว',
+    toastLightConeEquipped: 'สวมใส่ {lightcone} ให้ {character} แล้ว', toastLightConeUnequipped: 'ถอด Light Cone ออกจาก {character} แล้ว', toastAllCharactersE0S1: 'ตั้งตัวละครทุกตัวเป็น E0S1 พร้อม Light Cone ประจำตัวแล้ว', toastLocalRankUpdated: 'ตั้ง {name} เป็น E{rank} (บันทึกในเครื่อง)',
+    toastErrorMessage: 'เกิดข้อผิดพลาด: {message}', toastClipboardCopyFailed: 'คัดลอกไปยังคลิปบอร์ดไม่สำเร็จ', toastCardExporting: 'กำลังสร้างการ์ดบิลด์ PNG...', toastCardDownloaded: 'ดาวน์โหลดการ์ดบิลด์ PNG แล้ว', toastPopupRequired: 'อนุญาตป๊อปอัปเพื่อพิมพ์หรือบันทึกรูปภาพ',
+    toastTeamE0S1: 'ตั้งตัวละครทุกตัวในทีมเป็น E0S1 แล้ว', toastTeamRecommendedRelics: 'ติดตั้งรีลิกส์และเครื่องประดับแนะนำให้ทั้งทีมแล้ว', toastInventoryLightConeUpdated: 'อัปเดตผู้สวมใส่ {lightcone} แล้ว', confirmDeleteLightCone: 'ยืนยันการลบ {name} ออกจากคลัง FreeSR หรือไม่?', confirmDeleteRelic: 'ยืนยันการลบ {name} ออกจากคลัง FreeSR หรือไม่?',
+    toastDataSavedServer: 'บันทึก {file} ลงเซิร์ฟเวอร์และแคชแล้ว', toastDataCacheOnlyFailure: 'บันทึก {file} ลงแคชแล้ว แต่ส่งไปยังเซิร์ฟเวอร์ไม่สำเร็จ: {error}', toastDataSavedOffline: 'บันทึก {file} ลงแคชแล้ว (โหมดออฟไลน์)', toastNoEquippedRelics: 'ไม่มีรีลิกส์ที่สวมใส่อยู่',
+    toastLightConeChanged: 'เปลี่ยน Light Cone เป็น {name} แล้ว', toastCharacterSettingsSaved: 'บันทึกการตั้งค่าตัวละครแล้ว', toastJsonFormatted: 'จัดรูปแบบ JSON แล้ว', toastFileDownloaded: 'ดาวน์โหลด {file} แล้ว', toastEndpointSelected: 'เลือก Endpoint: {url}', toastDefaultEnergySet: 'ตั้งค่าพลังงานเริ่มต้นเป็น {energy}%', toastGlobalSwitchSaved: 'บันทึกสวิตช์ Global เรียบร้อยแล้ว', toastCreativeModeToggled: '{title}: {status}'
+  },
+  en: {
+    toastRelicUnequippedSlot: 'Unequipped the {slot} relic', toastRelicUnequipped: 'Relic unequipped', toastRelicEquipped: 'Equipped {name}!', toastSubstatsSaved: 'Saved substat changes for {name}',
+    toastLightConeEquipped: 'Equipped {lightcone} on {character}', toastLightConeUnequipped: 'Unequipped the Light Cone from {character}', toastAllCharactersE0S1: 'Set all characters to E0S1 with their signature Light Cones', toastLocalRankUpdated: 'Set {name} to E{rank} (saved locally)',
+    toastErrorMessage: 'Error: {message}', toastClipboardCopyFailed: 'Could not copy to clipboard', toastCardExporting: 'Creating the PNG build card...', toastCardDownloaded: 'PNG build card downloaded', toastPopupRequired: 'Allow pop-ups to print or save the image',
+    toastTeamE0S1: 'Set the whole team to E0S1', toastTeamRecommendedRelics: 'Equipped recommended Relics and Planar Ornaments for the team', toastInventoryLightConeUpdated: 'Updated the wearer of {lightcone}', confirmDeleteLightCone: 'Delete {name} from the FreeSR inventory?', confirmDeleteRelic: 'Delete {name} from the FreeSR inventory?',
+    toastDataSavedServer: 'Saved {file} to the server and cache', toastDataCacheOnlyFailure: 'Saved {file} to cache, but the server save failed: {error}', toastDataSavedOffline: 'Saved {file} to cache (offline mode)', toastNoEquippedRelics: 'No Relics are currently equipped',
+    toastLightConeChanged: 'Light Cone changed to {name}', toastCharacterSettingsSaved: 'Character settings saved', toastJsonFormatted: 'JSON formatted', toastFileDownloaded: 'Downloaded {file}', toastEndpointSelected: 'Endpoint selected: {url}', toastDefaultEnergySet: 'Default Energy set to {energy}%', toastGlobalSwitchSaved: 'Global toggles saved', toastCreativeModeToggled: '{title}: {status}'
+  },
+  'zh-CN': {
+    toastRelicUnequippedSlot: '已卸下{slot}位遗器', toastRelicUnequipped: '已卸下遗器', toastRelicEquipped: '已装备{name}！', toastSubstatsSaved: '已保存{name}的副词条修改', toastLightConeEquipped: '已为{character}装备{lightcone}', toastLightConeUnequipped: '已卸下{character}的光锥', toastAllCharactersE0S1: '已将所有角色设为 E0S1 并装备专属光锥', toastLocalRankUpdated: '已将{name}设为 E{rank}（仅保存在本机）',
+    toastErrorMessage: '发生错误：{message}', toastClipboardCopyFailed: '复制到剪贴板失败', toastCardExporting: '正在生成 PNG 配装卡片…', toastCardDownloaded: '已下载 PNG 配装卡片', toastPopupRequired: '请允许弹出窗口以打印或保存图片', toastTeamE0S1: '已将队伍中的角色设为 E0S1', toastTeamRecommendedRelics: '已为全队装备推荐遗器和位面饰品', toastInventoryLightConeUpdated: '已更新{lightcone}的装备角色', confirmDeleteLightCone: '确定要从 FreeSR 背包删除{name}吗？', confirmDeleteRelic: '确定要从 FreeSR 背包删除{name}吗？',
+    toastDataSavedServer: '已将{file}保存到服务器和缓存', toastDataCacheOnlyFailure: '已将{file}保存到缓存，但保存到服务器失败：{error}', toastDataSavedOffline: '已将{file}保存到缓存（离线模式）', toastNoEquippedRelics: '当前没有已装备的遗器', toastLightConeChanged: '光锥已更换为{name}', toastCharacterSettingsSaved: '已保存角色设置', toastJsonFormatted: '已格式化 JSON', toastFileDownloaded: '已下载{file}', toastEndpointSelected: '已选择端点：{url}', toastDefaultEnergySet: '默认能量已设为 {energy}%', toastGlobalSwitchSaved: '已保存全局开关', toastCreativeModeToggled: '{title}：{status}'
+  },
+  'zh-TW': {
+    toastRelicUnequippedSlot: '已卸下{slot}部位遺器', toastRelicUnequipped: '已卸下遺器', toastRelicEquipped: '已裝備{name}！', toastSubstatsSaved: '已儲存{name}的副詞條修改', toastLightConeEquipped: '已為{character}裝備{lightcone}', toastLightConeUnequipped: '已卸下{character}的光錐', toastAllCharactersE0S1: '已將所有角色設為 E0S1 並裝備專屬光錐', toastLocalRankUpdated: '已將{name}設為 E{rank}（僅儲存在本機）',
+    toastErrorMessage: '發生錯誤：{message}', toastClipboardCopyFailed: '複製到剪貼簿失敗', toastCardExporting: '正在建立 PNG 配裝卡片…', toastCardDownloaded: '已下載 PNG 配裝卡片', toastPopupRequired: '請允許彈出視窗以列印或儲存圖片', toastTeamE0S1: '已將隊伍中的角色設為 E0S1', toastTeamRecommendedRelics: '已為全隊裝備推薦遺器和位面飾品', toastInventoryLightConeUpdated: '已更新{lightcone}的裝備角色', confirmDeleteLightCone: '確定要從 FreeSR 背包刪除{name}嗎？', confirmDeleteRelic: '確定要從 FreeSR 背包刪除{name}嗎？',
+    toastDataSavedServer: '已將{file}儲存至伺服器和快取', toastDataCacheOnlyFailure: '已將{file}儲存至快取，但儲存至伺服器失敗：{error}', toastDataSavedOffline: '已將{file}儲存至快取（離線模式）', toastNoEquippedRelics: '目前沒有已裝備的遺器', toastLightConeChanged: '光錐已更換為{name}', toastCharacterSettingsSaved: '已儲存角色設定', toastJsonFormatted: '已格式化 JSON', toastFileDownloaded: '已下載{file}', toastEndpointSelected: '已選擇端點：{url}', toastDefaultEnergySet: '預設能量已設為 {energy}%', toastGlobalSwitchSaved: '已儲存全域開關', toastCreativeModeToggled: '{title}：{status}'
+  },
+  ja: {
+    toastRelicUnequippedSlot: '{slot}の遺物を外しました', toastRelicUnequipped: '遺物を外しました', toastRelicEquipped: '{name}を装備しました！', toastSubstatsSaved: '{name}のサブステータスを保存しました', toastLightConeEquipped: '{character}に{lightcone}を装備しました', toastLightConeUnequipped: '{character}の光円錐を外しました', toastAllCharactersE0S1: '全キャラクターをE0S1にし、モチーフ光円錐を装備しました', toastLocalRankUpdated: '{name}をE{rank}に設定しました（ローカル保存）',
+    toastErrorMessage: 'エラー：{message}', toastClipboardCopyFailed: 'クリップボードにコピーできませんでした', toastCardExporting: 'PNGビルドカードを作成中…', toastCardDownloaded: 'PNGビルドカードをダウンロードしました', toastPopupRequired: '画像の印刷または保存にはポップアップを許可してください', toastTeamE0S1: 'チーム全員をE0S1に設定しました', toastTeamRecommendedRelics: 'チーム全員におすすめの遺物と次元界オーナメントを装備しました', toastInventoryLightConeUpdated: '{lightcone}の装備キャラクターを更新しました', confirmDeleteLightCone: 'FreeSRの所持品から{name}を削除しますか？', confirmDeleteRelic: 'FreeSRの所持品から{name}を削除しますか？',
+    toastDataSavedServer: '{file}をサーバーとキャッシュに保存しました', toastDataCacheOnlyFailure: '{file}をキャッシュに保存しましたが、サーバーへの保存に失敗しました：{error}', toastDataSavedOffline: '{file}をキャッシュに保存しました（オフライン）', toastNoEquippedRelics: '装備中の遺物はありません', toastLightConeChanged: '光円錐を{name}に変更しました', toastCharacterSettingsSaved: 'キャラクター設定を保存しました', toastJsonFormatted: 'JSONを整形しました', toastFileDownloaded: '{file}をダウンロードしました', toastEndpointSelected: 'エンドポイントを選択：{url}', toastDefaultEnergySet: '初期EPを{energy}%に設定しました', toastGlobalSwitchSaved: 'グローバル設定を保存しました', toastCreativeModeToggled: '{title}：{status}'
+  },
+  ko: {
+    toastRelicUnequippedSlot: '{slot} 유물을 해제했습니다', toastRelicUnequipped: '유물을 해제했습니다', toastRelicEquipped: '{name} 장착 완료!', toastSubstatsSaved: '{name}의 부옵션 변경을 저장했습니다', toastLightConeEquipped: '{character}에게 {lightcone} 장착 완료', toastLightConeUnequipped: '{character}의 광추를 해제했습니다', toastAllCharactersE0S1: '모든 캐릭터를 E0S1로 설정하고 전용 광추를 장착했습니다', toastLocalRankUpdated: '{name}을(를) E{rank}(으)로 설정했습니다(로컬 저장)',
+    toastErrorMessage: '오류: {message}', toastClipboardCopyFailed: '클립보드에 복사하지 못했습니다', toastCardExporting: 'PNG 빌드 카드를 만드는 중…', toastCardDownloaded: 'PNG 빌드 카드를 다운로드했습니다', toastPopupRequired: '이미지를 인쇄하거나 저장하려면 팝업을 허용하세요', toastTeamE0S1: '팀 전체를 E0S1로 설정했습니다', toastTeamRecommendedRelics: '팀 전체에 추천 유물과 차원 장신구를 장착했습니다', toastInventoryLightConeUpdated: '{lightcone}의 장착 캐릭터를 업데이트했습니다', confirmDeleteLightCone: 'FreeSR 보관함에서 {name}을(를) 삭제할까요?', confirmDeleteRelic: 'FreeSR 보관함에서 {name}을(를) 삭제할까요?',
+    toastDataSavedServer: '{file}을(를) 서버와 캐시에 저장했습니다', toastDataCacheOnlyFailure: '{file}을(를) 캐시에 저장했지만 서버 저장에 실패했습니다: {error}', toastDataSavedOffline: '{file}을(를) 캐시에 저장했습니다(오프라인 모드)', toastNoEquippedRelics: '장착된 유물이 없습니다', toastLightConeChanged: '광추를 {name}(으)로 변경했습니다', toastCharacterSettingsSaved: '캐릭터 설정을 저장했습니다', toastJsonFormatted: 'JSON 형식을 정리했습니다', toastFileDownloaded: '{file}을(를) 다운로드했습니다', toastEndpointSelected: '엔드포인트 선택: {url}', toastDefaultEnergySet: '기본 에너지를 {energy}%로 설정했습니다', toastGlobalSwitchSaved: '글로벌 스위치를 저장했습니다', toastCreativeModeToggled: '{title}: {status}'
+  },
+  vi: {
+    toastRelicUnequippedSlot: 'Đã tháo di vật ở vị trí {slot}', toastRelicUnequipped: 'Đã tháo di vật', toastRelicEquipped: 'Đã trang bị {name}!', toastSubstatsSaved: 'Đã lưu chỉ số phụ của {name}', toastLightConeEquipped: 'Đã trang bị {lightcone} cho {character}', toastLightConeUnequipped: 'Đã tháo nón ánh sáng của {character}', toastAllCharactersE0S1: 'Đã đặt mọi nhân vật thành E0S1 và trang bị nón ánh sáng đặc trưng', toastLocalRankUpdated: 'Đã đặt {name} thành E{rank} (lưu trên máy)',
+    toastErrorMessage: 'Lỗi: {message}', toastClipboardCopyFailed: 'Không thể sao chép vào bộ nhớ tạm', toastCardExporting: 'Đang tạo thẻ build PNG…', toastCardDownloaded: 'Đã tải thẻ build PNG', toastPopupRequired: 'Hãy cho phép cửa sổ bật lên để in hoặc lưu ảnh', toastTeamE0S1: 'Đã đặt cả đội thành E0S1', toastTeamRecommendedRelics: 'Đã trang bị di vật và phụ kiện vị diện đề xuất cho cả đội', toastInventoryLightConeUpdated: 'Đã cập nhật nhân vật trang bị {lightcone}', confirmDeleteLightCone: 'Xóa {name} khỏi kho FreeSR?', confirmDeleteRelic: 'Xóa {name} khỏi kho FreeSR?',
+    toastDataSavedServer: 'Đã lưu {file} lên máy chủ và bộ nhớ đệm', toastDataCacheOnlyFailure: 'Đã lưu {file} vào bộ nhớ đệm nhưng không lưu được lên máy chủ: {error}', toastDataSavedOffline: 'Đã lưu {file} vào bộ nhớ đệm (ngoại tuyến)', toastNoEquippedRelics: 'Hiện không có di vật nào được trang bị', toastLightConeChanged: 'Đã đổi nón ánh sáng thành {name}', toastCharacterSettingsSaved: 'Đã lưu cài đặt nhân vật', toastJsonFormatted: 'Đã định dạng JSON', toastFileDownloaded: 'Đã tải {file}', toastEndpointSelected: 'Đã chọn Endpoint: {url}', toastDefaultEnergySet: 'Đã đặt năng lượng mặc định thành {energy}%', toastGlobalSwitchSaved: 'Đã lưu công tắc toàn máy chủ', toastCreativeModeToggled: '{title}: {status}'
+  },
+  id: {
+    toastRelicUnequippedSlot: 'Relik slot {slot} dilepas', toastRelicUnequipped: 'Relik dilepas', toastRelicEquipped: '{name} dipasang!', toastSubstatsSaved: 'Perubahan substat {name} disimpan', toastLightConeEquipped: '{lightcone} dipasang pada {character}', toastLightConeUnequipped: 'Light Cone {character} dilepas', toastAllCharactersE0S1: 'Semua karakter diatur ke E0S1 dengan Light Cone khasnya', toastLocalRankUpdated: '{name} diatur ke E{rank} (disimpan lokal)',
+    toastErrorMessage: 'Terjadi kesalahan: {message}', toastClipboardCopyFailed: 'Gagal menyalin ke clipboard', toastCardExporting: 'Membuat kartu build PNG…', toastCardDownloaded: 'Kartu build PNG diunduh', toastPopupRequired: 'Izinkan pop-up untuk mencetak atau menyimpan gambar', toastTeamE0S1: 'Seluruh tim diatur ke E0S1', toastTeamRecommendedRelics: 'Relik dan Ornamen Planar rekomendasi dipasang untuk seluruh tim', toastInventoryLightConeUpdated: 'Pemakai {lightcone} diperbarui', confirmDeleteLightCone: 'Hapus {name} dari inventaris FreeSR?', confirmDeleteRelic: 'Hapus {name} dari inventaris FreeSR?',
+    toastDataSavedServer: '{file} disimpan ke server dan cache', toastDataCacheOnlyFailure: '{file} disimpan ke cache, tetapi gagal disimpan ke server: {error}', toastDataSavedOffline: '{file} disimpan ke cache (mode luring)', toastNoEquippedRelics: 'Tidak ada relik yang sedang dipakai', toastLightConeChanged: 'Light Cone diubah menjadi {name}', toastCharacterSettingsSaved: 'Pengaturan karakter disimpan', toastJsonFormatted: 'JSON dirapikan', toastFileDownloaded: '{file} diunduh', toastEndpointSelected: 'Endpoint dipilih: {url}', toastDefaultEnergySet: 'Energi awal diatur ke {energy}%', toastGlobalSwitchSaved: 'Sakelar global disimpan', toastCreativeModeToggled: '{title}: {status}'
+  },
+  es: {
+    toastRelicUnequippedSlot: 'Se quitó la reliquia de {slot}', toastRelicUnequipped: 'Se quitó la reliquia', toastRelicEquipped: '¡Se equipó {name}!', toastSubstatsSaved: 'Se guardaron los subatributos de {name}', toastLightConeEquipped: 'Se equipó {lightcone} en {character}', toastLightConeUnequipped: 'Se quitó el cono de luz de {character}', toastAllCharactersE0S1: 'Todos los personajes están en E0S1 con su cono de luz característico', toastLocalRankUpdated: '{name} se estableció en E{rank} (guardado localmente)',
+    toastErrorMessage: 'Error: {message}', toastClipboardCopyFailed: 'No se pudo copiar al portapapeles', toastCardExporting: 'Creando la tarjeta de build PNG…', toastCardDownloaded: 'Tarjeta de build PNG descargada', toastPopupRequired: 'Permite las ventanas emergentes para imprimir o guardar la imagen', toastTeamE0S1: 'Todo el equipo se estableció en E0S1', toastTeamRecommendedRelics: 'Se equiparon reliquias y ornamentos planares recomendados al equipo', toastInventoryLightConeUpdated: 'Se actualizó el personaje que lleva {lightcone}', confirmDeleteLightCone: '¿Eliminar {name} del inventario de FreeSR?', confirmDeleteRelic: '¿Eliminar {name} del inventario de FreeSR?',
+    toastDataSavedServer: '{file} se guardó en el servidor y la caché', toastDataCacheOnlyFailure: '{file} se guardó en la caché, pero falló el guardado en el servidor: {error}', toastDataSavedOffline: '{file} se guardó en la caché (modo sin conexión)', toastNoEquippedRelics: 'No hay reliquias equipadas', toastLightConeChanged: 'El cono de luz cambió a {name}', toastCharacterSettingsSaved: 'Se guardó la configuración del personaje', toastJsonFormatted: 'JSON formateado', toastFileDownloaded: 'Se descargó {file}', toastEndpointSelected: 'Endpoint seleccionado: {url}', toastDefaultEnergySet: 'Energía inicial establecida en {energy}%', toastGlobalSwitchSaved: 'Se guardaron los interruptores globales', toastCreativeModeToggled: '{title}: {status}'
+  },
+  fr: {
+    toastRelicUnequippedSlot: 'Relique retirée de l’emplacement {slot}', toastRelicUnequipped: 'Relique retirée', toastRelicEquipped: '{name} équipé !', toastSubstatsSaved: 'Sous-stats de {name} enregistrées', toastLightConeEquipped: '{lightcone} équipé sur {character}', toastLightConeUnequipped: 'Cône de lumière retiré de {character}', toastAllCharactersE0S1: 'Tous les personnages sont passés en E0S1 avec leur cône signature', toastLocalRankUpdated: '{name} est passé en E{rank} (enregistré localement)',
+    toastErrorMessage: 'Erreur : {message}', toastClipboardCopyFailed: 'Impossible de copier dans le presse-papiers', toastCardExporting: 'Création de la carte de build PNG…', toastCardDownloaded: 'Carte de build PNG téléchargée', toastPopupRequired: 'Autorisez les fenêtres pop-up pour imprimer ou enregistrer l’image', toastTeamE0S1: 'Toute l’équipe est passée en E0S1', toastTeamRecommendedRelics: 'Reliques et ornements planaires recommandés équipés pour toute l’équipe', toastInventoryLightConeUpdated: 'Porteur de {lightcone} mis à jour', confirmDeleteLightCone: 'Supprimer {name} de l’inventaire FreeSR ?', confirmDeleteRelic: 'Supprimer {name} de l’inventaire FreeSR ?',
+    toastDataSavedServer: '{file} enregistré sur le serveur et dans le cache', toastDataCacheOnlyFailure: '{file} enregistré dans le cache, mais échec de l’enregistrement serveur : {error}', toastDataSavedOffline: '{file} enregistré dans le cache (hors ligne)', toastNoEquippedRelics: 'Aucune relique équipée', toastLightConeChanged: 'Cône de lumière remplacé par {name}', toastCharacterSettingsSaved: 'Paramètres du personnage enregistrés', toastJsonFormatted: 'JSON mis en forme', toastFileDownloaded: '{file} téléchargé', toastEndpointSelected: 'Endpoint sélectionné : {url}', toastDefaultEnergySet: 'Énergie initiale réglée sur {energy} %', toastGlobalSwitchSaved: 'Options globales enregistrées', toastCreativeModeToggled: '{title} : {status}'
+  },
+  de: {
+    toastRelicUnequippedSlot: 'Relikt für {slot} abgelegt', toastRelicUnequipped: 'Relikt abgelegt', toastRelicEquipped: '{name} ausgerüstet!', toastSubstatsSaved: 'Nebenwerte von {name} gespeichert', toastLightConeEquipped: '{lightcone} für {character} ausgerüstet', toastLightConeUnequipped: 'Lichtkegel von {character} abgelegt', toastAllCharactersE0S1: 'Alle Figuren auf E0S1 gesetzt und mit Signatur-Lichtkegeln ausgerüstet', toastLocalRankUpdated: '{name} auf E{rank} gesetzt (lokal gespeichert)',
+    toastErrorMessage: 'Fehler: {message}', toastClipboardCopyFailed: 'Kopieren in die Zwischenablage fehlgeschlagen', toastCardExporting: 'PNG-Buildkarte wird erstellt…', toastCardDownloaded: 'PNG-Buildkarte heruntergeladen', toastPopupRequired: 'Pop-ups zum Drucken oder Speichern des Bildes zulassen', toastTeamE0S1: 'Das ganze Team wurde auf E0S1 gesetzt', toastTeamRecommendedRelics: 'Empfohlene Relikte und Planare Ornamente für das Team ausgerüstet', toastInventoryLightConeUpdated: 'Träger von {lightcone} aktualisiert', confirmDeleteLightCone: '{name} aus dem FreeSR-Inventar löschen?', confirmDeleteRelic: '{name} aus dem FreeSR-Inventar löschen?',
+    toastDataSavedServer: '{file} auf Server und im Cache gespeichert', toastDataCacheOnlyFailure: '{file} im Cache gespeichert, aber Server-Speichern fehlgeschlagen: {error}', toastDataSavedOffline: '{file} im Cache gespeichert (offline)', toastNoEquippedRelics: 'Es sind keine Relikte ausgerüstet', toastLightConeChanged: 'Lichtkegel zu {name} geändert', toastCharacterSettingsSaved: 'Figureneinstellungen gespeichert', toastJsonFormatted: 'JSON formatiert', toastFileDownloaded: '{file} heruntergeladen', toastEndpointSelected: 'Endpoint ausgewählt: {url}', toastDefaultEnergySet: 'Startenergie auf {energy} % gesetzt', toastGlobalSwitchSaved: 'Globale Schalter gespeichert', toastCreativeModeToggled: '{title}: {status}'
+  },
+  ru: {
+    toastRelicUnequippedSlot: 'Реликвия для слота «{slot}» снята', toastRelicUnequipped: 'Реликвия снята', toastRelicEquipped: '«{name}» экипирована!', toastSubstatsSaved: 'Дополнительные характеристики «{name}» сохранены', toastLightConeEquipped: '«{lightcone}» экипирован на персонажа «{character}»', toastLightConeUnequipped: 'Световой конус персонажа «{character}» снят', toastAllCharactersE0S1: 'Все персонажи переведены на E0S1 с сигнатурными световыми конусами', toastLocalRankUpdated: '«{name}» установлен E{rank} (сохранено локально)',
+    toastErrorMessage: 'Ошибка: {message}', toastClipboardCopyFailed: 'Не удалось скопировать в буфер обмена', toastCardExporting: 'Создание PNG-карточки сборки…', toastCardDownloaded: 'PNG-карточка сборки скачана', toastPopupRequired: 'Разрешите всплывающие окна для печати или сохранения изображения', toastTeamE0S1: 'Весь отряд установлен на E0S1', toastTeamRecommendedRelics: 'Отряду экипированы рекомендуемые реликвии и планарные украшения', toastInventoryLightConeUpdated: 'Обновлён персонаж для светового конуса «{lightcone}»', confirmDeleteLightCone: 'Удалить «{name}» из инвентаря FreeSR?', confirmDeleteRelic: 'Удалить «{name}» из инвентаря FreeSR?',
+    toastDataSavedServer: '«{file}» сохранён на сервере и в кэше', toastDataCacheOnlyFailure: '«{file}» сохранён в кэше, но не на сервере: {error}', toastDataSavedOffline: '«{file}» сохранён в кэше (офлайн)', toastNoEquippedRelics: 'Экипированных реликвий нет', toastLightConeChanged: 'Световой конус изменён на «{name}»', toastCharacterSettingsSaved: 'Настройки персонажа сохранены', toastJsonFormatted: 'JSON отформатирован', toastFileDownloaded: 'Файл «{file}» скачан', toastEndpointSelected: 'Выбрана конечная точка: {url}', toastDefaultEnergySet: 'Начальная энергия установлена на {energy}%', toastGlobalSwitchSaved: 'Глобальные переключатели сохранены', toastCreativeModeToggled: '{title}: {status}'
+  },
+  pt: {
+    toastRelicUnequippedSlot: 'Relíquia do espaço {slot} removida', toastRelicUnequipped: 'Relíquia removida', toastRelicEquipped: '{name} equipado!', toastSubstatsSaved: 'Subatributos de {name} salvos', toastLightConeEquipped: '{lightcone} equipado em {character}', toastLightConeUnequipped: 'Cone de luz removido de {character}', toastAllCharactersE0S1: 'Todos os personagens definidos como E0S1 com seus cones de luz característicos', toastLocalRankUpdated: '{name} definido como E{rank} (salvo localmente)',
+    toastErrorMessage: 'Erro: {message}', toastClipboardCopyFailed: 'Não foi possível copiar para a área de transferência', toastCardExporting: 'Criando o cartão de build PNG…', toastCardDownloaded: 'Cartão de build PNG baixado', toastPopupRequired: 'Permita pop-ups para imprimir ou salvar a imagem', toastTeamE0S1: 'Toda a equipe foi definida como E0S1', toastTeamRecommendedRelics: 'Relíquias e ornamentos planares recomendados equipados para a equipe', toastInventoryLightConeUpdated: 'Personagem equipado com {lightcone} atualizado', confirmDeleteLightCone: 'Excluir {name} do inventário FreeSR?', confirmDeleteRelic: 'Excluir {name} do inventário FreeSR?',
+    toastDataSavedServer: '{file} salvo no servidor e no cache', toastDataCacheOnlyFailure: '{file} salvo no cache, mas houve falha ao salvar no servidor: {error}', toastDataSavedOffline: '{file} salvo no cache (modo offline)', toastNoEquippedRelics: 'Nenhuma relíquia equipada', toastLightConeChanged: 'Cone de luz alterado para {name}', toastCharacterSettingsSaved: 'Configurações do personagem salvas', toastJsonFormatted: 'JSON formatado', toastFileDownloaded: '{file} baixado', toastEndpointSelected: 'Endpoint selecionado: {url}', toastDefaultEnergySet: 'Energia inicial definida como {energy}%', toastGlobalSwitchSaved: 'Opções globais salvas', toastCreativeModeToggled: '{title}: {status}'
+  }
+};
+
+const ASSET_AND_ACTION_TRANSLATIONS = {
+  th: { btnManage: 'จัดการ ➔', characterArtwork: 'ภาพตัวละคร', lightConeArtwork: 'ภาพ Light Cone', lightConeArtworkMissing: '🗡️ ไม่มีภาพตัวอย่าง Light Cone', selectedLightConeLabel: '✓ Light Cone ที่เลือก' },
+  en: { btnManage: 'Manage ➔', characterArtwork: 'Character artwork', lightConeArtwork: 'Light Cone artwork', lightConeArtworkMissing: '🗡️ Light Cone preview unavailable', selectedLightConeLabel: '✓ Selected Light Cone' },
+  'zh-CN': { btnManage: '管理 ➔', characterArtwork: '角色立绘', lightConeArtwork: '光锥插图', lightConeArtworkMissing: '🗡️ 暂无光锥预览图', selectedLightConeLabel: '✓ 已选光锥' },
+  'zh-TW': { btnManage: '管理 ➔', characterArtwork: '角色立繪', lightConeArtwork: '光錐插圖', lightConeArtworkMissing: '🗡️ 暫無光錐預覽圖', selectedLightConeLabel: '✓ 已選光錐' },
+  ja: { btnManage: '管理 ➔', characterArtwork: 'キャラクター画像', lightConeArtwork: '光円錐のイラスト', lightConeArtworkMissing: '🗡️ 光円錐のプレビュー画像がありません', selectedLightConeLabel: '✓ 選択中の光円錐' },
+  ko: { btnManage: '관리 ➔', characterArtwork: '캐릭터 아트', lightConeArtwork: '광추 일러스트', lightConeArtworkMissing: '🗡️ 광추 미리보기가 없습니다', selectedLightConeLabel: '✓ 선택한 광추' },
+  vi: { btnManage: 'Quản lý ➔', characterArtwork: 'Ảnh nhân vật', lightConeArtwork: 'Ảnh nón ánh sáng', lightConeArtworkMissing: '🗡️ Không có ảnh xem trước nón ánh sáng', selectedLightConeLabel: '✓ Nón ánh sáng đã chọn' },
+  id: { btnManage: 'Kelola ➔', characterArtwork: 'Ilustrasi karakter', lightConeArtwork: 'Ilustrasi Light Cone', lightConeArtworkMissing: '🗡️ Pratinjau Light Cone tidak tersedia', selectedLightConeLabel: '✓ Light Cone dipilih' },
+  es: { btnManage: 'Gestionar ➔', characterArtwork: 'Ilustración del personaje', lightConeArtwork: 'Ilustración del cono de luz', lightConeArtworkMissing: '🗡️ No hay vista previa del cono de luz', selectedLightConeLabel: '✓ Cono de luz seleccionado' },
+  fr: { btnManage: 'Gérer ➔', characterArtwork: 'Illustration du personnage', lightConeArtwork: 'Illustration du cône de lumière', lightConeArtworkMissing: '🗡️ Aucun aperçu du cône de lumière', selectedLightConeLabel: '✓ Cône de lumière sélectionné' },
+  de: { btnManage: 'Verwalten ➔', characterArtwork: 'Charaktergrafik', lightConeArtwork: 'Lichtkegel-Illustration', lightConeArtworkMissing: '🗡️ Keine Lichtkegel-Vorschau verfügbar', selectedLightConeLabel: '✓ Ausgewählter Lichtkegel' },
+  ru: { btnManage: 'Управление ➔', characterArtwork: 'Изображение персонажа', lightConeArtwork: 'Иллюстрация светового конуса', lightConeArtworkMissing: '🗡️ Нет изображения для просмотра', selectedLightConeLabel: '✓ Выбранный световой конус' },
+  pt: { btnManage: 'Gerenciar ➔', characterArtwork: 'Ilustração do personagem', lightConeArtwork: 'Ilustração do cone de luz', lightConeArtworkMissing: '🗡️ Prévia do cone de luz indisponível', selectedLightConeLabel: '✓ Cone de luz selecionado' }
+};
+
+// Fill a few legacy UI labels that were still left in English in otherwise
+// complete language dictionaries. Keep protocol terms and filenames intact.
+const LAST_MILE_TRANSLATIONS = {
+  th: {
+    inventoryItemId: 'ID ไอเทม', lblApiEndpoint: 'ปลายทาง API Gateway', lblPlaneId: 'ID ระนาบ', lblFloorId: 'ID ชั้น',
+    miniBreakDmg: 'ทำลายจุดอ่อน / ทำลายจุดอ่อนขั้นสูง', analystDmgBreak: '🔨 ทำลายจุดอ่อน / ทำลายจุดอ่อนขั้นสูง',
+    substatPresetCrit: '🎯 อัตราคริติคอล/ความเสียหายคริติคอล', substatPresetBreak: '🔨 ประสิทธิภาพการทำลายจุดอ่อน', substatPresetTank: '🛡️ HP/ป้องกัน'
+  },
+  en: {},
+  'zh-CN': {},
+  'zh-TW': {},
+  ja: {},
+  ko: { exrankToggleSuccess: '{name}：Ex-Rank {status}' },
+  vi: {
+    lblPlaneId: 'ID mặt phẳng', lblFloorId: 'ID tầng', exrankToggleSuccess: 'Ex-Rank của {name}: {status}'
+  },
+  id: {
+    inventoryItemId: 'ID Item', lblPlaneId: 'ID Planar', lblFloorId: 'ID Lantai',
+    paths: { Destruction: 'Pemusnahan', Hunt: 'Perburuan', Erudition: 'Erudisi', Harmony: 'Harmoni', Nihility: 'Nihilitas', Preservation: 'Pelestarian', Abundance: 'Kelimpahan', Remembrance: 'Kenangan', Unknown: 'Tidak Diketahui', Elation: 'Kegembiraan' },
+    persistentTbM7Title: '👤 Perintis & March 7th', tabPersistentFirefly: '👤 Perintis & March 7th',
+    modalTabStatus: '⚙️ Level & Eidolon', modalSkillUltra: 'Serangan Pamungkas', modalTracesTitle: 'Jejak & Teknik',
+    lblLevelRange: 'Level (1–80)', statMaxHp: 'HP Maks.', statCritRate: 'Rasio CRIT', statBreakEffect: 'Efek Break',
+    statHealBoost: 'Bonus Penyembuhan Keluar', statMaxEnergy: 'Energi Maks.', statEnergyRegen: 'Tingkat Pemulihan Energi',
+    statEhr: 'Tingkat Efek Mengenai', statRes: 'RES Efek', statDmgBoost: 'Bonus DMG {element}', modalColLevel: 'Level',
+    roleSupport: '⚡ Dukungan / Debuff', analystShareTotal: 'Total 100%', miniBreakDmg: 'Break / Super Break',
+    analystDmgBreak: '🔨 Break / Super Break', substatPresetCrit: '🎯 Rasio CRIT/DMG CRIT',
+    substatPresetBreak: '🔨 Efek Break', substatPresetTank: '🛡️ HP/DEF',
+    exrankToggleSuccess: 'Status Ex-Rank {name}: {status}'
+  },
+  es: { toastErrorMessage: 'Error: {message}' },
+  fr: { exrankToggleSuccess: 'Ex-Rank de {name} : {status}' },
+  de: { offline: 'Getrennt', exrankToggleSuccess: 'Ex-Rank von {name}: {status}' },
+  ru: { exrankToggleSuccess: 'Ex-Rank персонажа {name}: {status}' },
+  pt: { offline: 'Desconectado', exrankToggleSuccess: 'Ex-Rank de {name}: {status}' }
+};
+
 for (const [language, additions] of Object.entries(ADDITIONAL_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(DAMAGE_ANALYST_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(UI_COMPLETION_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(GLOBAL_UI_LABEL_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(ASSET_AND_ACTION_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(INTERACTION_FEEDBACK_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+for (const [language, additions] of Object.entries(LAST_MILE_TRANSLATIONS)) {
   Object.assign(TRANSLATIONS[language], additions);
 }
 
 let currentLang = 'th';
 if (typeof localStorage !== 'undefined') {
   currentLang = localStorage.getItem('gac_srtool_lang') || 'th';
+}
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = currentLang;
 }
 
 export function getCurrentLanguage() {
@@ -6099,6 +6650,9 @@ export function getCurrentLanguage() {
 export function setLanguage(langCode) {
   if (TRANSLATIONS[langCode]) {
     currentLang = langCode;
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = langCode;
+    }
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem('gac_srtool_lang', langCode);
     }
