@@ -21,3 +21,14 @@ test('historical reports keep recorded order when battle slots are absent', () =
   const result = context.orderBattleReportAvatars([{ avatar_id: 10 }, { avatar_id: 30 }, { avatar_id: 20 }]);
   assert.deepEqual(Array.from(result, a => a.avatar_id), [10, 30, 20]);
 });
+
+test('Other includes unclassified and missing category damage exactly once', () => {
+  const result = context.damageBreakdownForAvatar({ total_damage: 1000, total_break_damage: 100,
+    attack_type_damage: { Normal: 100, BPSkill: 200, Ultra: 100, Insert: 50, TrueDamage: 150 } });
+  assert.equal(result.other, 500);
+  assert.equal(result.normal + result.skill + result.ultimate + result.breakDamage + result.other, 1000);
+});
+
+test('Other never becomes negative when the native breakdown overlaps', () => {
+  assert.equal(context.damageBreakdownForAvatar({total_damage: 10, attack_type_damage: {Normal: 20}}).other, 0);
+});

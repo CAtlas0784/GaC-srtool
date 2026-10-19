@@ -8391,6 +8391,18 @@ function orderBattleReportAvatars(avatars) {
   return avatars;
 }
 
+function damageBreakdownForAvatar(avatar) {
+  const damage = avatar.attack_type_damage || {};
+  const normal = Number(damage.Normal) || 0;
+  const skill = Number(damage.BPSkill ?? damage.Skill) || 0;
+  const ultimate = Number(damage.Ultra ?? damage.Ultimate) || 0;
+  const breakDamage = Number(avatar.total_break_damage || damage.BreakDamage) || 0;
+  // Aggregate totals can include damage without an attack-type entry. Keep it
+  // visible without counting named subcategories a second time.
+  const other = Math.max(0, (Number(avatar.total_damage) || 0) - normal - skill - ultimate - breakDamage);
+  return { normal, skill, ultimate, breakDamage, other };
+}
+
 function renderDamageAnalyst() {
   const report = analystState.currentReport;
   if (!report) {
@@ -8506,10 +8518,7 @@ function renderDamageAnalyst() {
           }
         }
 
-        const dNormal = a.attack_type_damage?.Normal || 0;
-        const dSkill = a.attack_type_damage?.BPSkill || a.attack_type_damage?.Skill || 0;
-        const dUlt = a.attack_type_damage?.Ultra || a.attack_type_damage?.Ultimate || 0;
-        const dBreak = a.total_break_damage || a.attack_type_damage?.BreakDamage || 0;
+        const { normal: dNormal, skill: dSkill, ultimate: dUlt, breakDamage: dBreak, other: dOther } = damageBreakdownForAvatar(a);
         const dFollowup = (a.attack_type_damage?.Insert || 0) + (a.attack_type_damage?.Pursued || 0);
         const dDot = a.attack_type_damage?.DOT || 0;
 
@@ -8550,6 +8559,7 @@ function renderDamageAnalyst() {
               <div>
                 <div style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${t('analystTotalDamage')}</div>
                 <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">${hasAvatarDamage ? formatNumber(a.total_damage) : '—'}</div>
+                ${Number(a.memosprite_damage) > 0 ? `<div style="font-size: 0.7rem; color: var(--text-muted);">Memosprite: ${formatNumber(a.memosprite_damage)} (included)</div>` : ''}
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystMaxHit')}</div>
@@ -8580,6 +8590,10 @@ function renderDamageAnalyst() {
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgBreak')}</span>
                 <span style="font-weight: 700; color: #fbbf24;">${hasDamageBreakdown ? formatNumber(dBreak) : '—'}</span>
+              </div>
+              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
+                <span style="color: var(--text-muted);">Other</span>
+                <span style="font-weight: 700; color: #f472b6;">${hasAvatarDamage ? formatNumber(dOther) : '—'}</span>
               </div>
               ${dFollowup > 0 ? `
                 <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
