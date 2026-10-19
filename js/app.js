@@ -1521,6 +1521,17 @@ function hasAvatarBattleStatsData(avatars) {
   });
 }
 
+function hasAvatarDamageBreakdownData(avatar) {
+  const damageTypes = avatar?.attack_type_damage;
+  return Number(avatar?.total_break_damage) > 0
+    || (damageTypes && Object.keys(damageTypes).length > 0);
+}
+
+function hasAvatarMaxHitData(avatar) {
+  const maxDamage = avatar?.attack_type_max_damage;
+  return Boolean(maxDamage && Object.values(maxDamage).some(value => Number(value) > 0));
+}
+
 function getAvatarDamagePercent(avatar, teamDamage, available) {
   if (!available) return null;
   const reportedPercent = Number(avatar?.damage_percent);
@@ -8368,28 +8379,16 @@ function renderEmptyDamageAnalyst() {
 function orderBattleReportAvatars(avatars) {
   if (!Array.isArray(avatars) || avatars.length < 2) return avatars || [];
 
-  const lineup = state.statusData?.lineups;
-  if (!lineup) return avatars;
-
-  const lineupSlots = Array.isArray(lineup)
-    ? lineup.map((avatarId, slot) => [slot, avatarId])
-    : Object.entries(lineup).sort(([left], [right]) => Number(left) - Number(right));
-  const lineupIds = lineupSlots
-    .map(([, avatarId]) => Number(avatarId))
-    .filter(avatarId => Number.isSafeInteger(avatarId) && avatarId > 0);
-  const reportById = new Map();
-
-  for (const avatar of avatars) {
-    const avatarId = Number(avatar?.avatar_id);
-    if (!Number.isSafeInteger(avatarId) || avatarId <= 0 || reportById.has(avatarId)) {
-      return avatars;
-    }
-    reportById.set(avatarId, avatar);
+  // Battle slots remain stable when the overworld team changes or the native
+  // statistics dictionary enumerates characters in a different order.
+  const slots = avatars.map(avatar => avatar?.slot);
+  if (slots.every(slot => Number.isSafeInteger(slot) && slot >= 0)
+      && new Set(slots).size === avatars.length) {
+    return [...avatars].sort((left, right) => left.slot - right.slot);
   }
 
-  const orderedIds = [...new Set(lineupIds)].filter(avatarId => reportById.has(avatarId));
-  if (orderedIds.length !== avatars.length) return avatars;
-  return orderedIds.map(avatarId => reportById.get(avatarId));
+  // A historical report without battle slots must keep its recorded order.
+  return avatars;
 }
 
 function renderDamageAnalyst() {
@@ -8497,6 +8496,8 @@ function renderDamageAnalyst() {
         const color = colors[idx % colors.length];
         const info = getAvatarInfo(a.avatar_id);
         const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage);
+        const hasDamageBreakdown = hasAvatarDamageBreakdownData(a);
+        const hasMaxHit = hasAvatarMaxHitData(a);
 
         let maxHit = 0;
         if (a.attack_type_max_damage) {
@@ -8552,7 +8553,7 @@ function renderDamageAnalyst() {
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystMaxHit')}</div>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${hasAvatarDamage ? formatNumber(maxHit) : '—'}</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${hasMaxHit ? formatNumber(maxHit) : '—'}</div>
               </div>
             </div>
 
@@ -8566,19 +8567,19 @@ function renderDamageAnalyst() {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 1rem;">
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgNormal')}</span>
-                <span style="font-weight: 700; color: var(--text-main);">${hasAvatarDamage ? formatNumber(dNormal) : '—'}</span>
+                <span style="font-weight: 700; color: var(--text-main);">${hasDamageBreakdown ? formatNumber(dNormal) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgSkill')}</span>
-                <span style="font-weight: 700; color: #38bdf8;">${hasAvatarDamage ? formatNumber(dSkill) : '—'}</span>
+                <span style="font-weight: 700; color: #38bdf8;">${hasDamageBreakdown ? formatNumber(dSkill) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgUlt')}</span>
-                <span style="font-weight: 700; color: #c084fc;">${hasAvatarDamage ? formatNumber(dUlt) : '—'}</span>
+                <span style="font-weight: 700; color: #c084fc;">${hasDamageBreakdown ? formatNumber(dUlt) : '—'}</span>
               </div>
               <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
                 <span style="color: var(--text-muted);">${t('analystDmgBreak')}</span>
-                <span style="font-weight: 700; color: #fbbf24;">${hasAvatarDamage ? formatNumber(dBreak) : '—'}</span>
+                <span style="font-weight: 700; color: #fbbf24;">${hasDamageBreakdown ? formatNumber(dBreak) : '—'}</span>
               </div>
               ${dFollowup > 0 ? `
                 <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
@@ -8592,6 +8593,14 @@ function renderDamageAnalyst() {
                   <span style="font-weight: 700; color: #a78bfa;">${formatNumber(dDot)}</span>
                 </div>
               ` : ''}
+              ${Object.entries(a.attack_type_damage || {})
+                .filter(([type, damage]) => Number(damage) > 0 && !['Normal', 'BPSkill', 'Skill', 'Ultra', 'Ultimate', 'BreakDamage', 'Insert', 'Pursued', 'DOT'].includes(type))
+                .map(([type, damage]) => `
+                  <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.775rem;">
+                    <span style="color: var(--text-muted);">${escapeHtml(type.replace(/([a-z])([A-Z])/g, '$1 $2'))}</span>
+                    <span style="font-weight: 700; color: #f472b6;">${formatNumber(Number(damage))}</span>
+                  </div>
+                `).join('')}
             </div>
 
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted);">

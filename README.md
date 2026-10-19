@@ -122,6 +122,8 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 
 ### บันทึกตัวละครและ Traces
 
+Damage Analyst เรียงการ์ดตาม `report.avatars[].slot` จาก Battle จริง ไม่เปลี่ยนตามทีมหน้าโลก รายงานเก่าที่ไม่มี slot คงลำดับเดิม และแสดงประเภทดาเมจเพิ่มเติมที่ API ส่งมา เช่น Elation Damage / True Damage ทดสอบลำดับด้วย `node --test tests/damage-order.test.cjs` ข้อมูลสดต้องใช้ SDK และ `damage_analyst_live.lua` ฉบับที่อ่าน StatisticsComponent ของ Battle ปัจจุบัน
+
 การบันทึกจากหน้ารายละเอียดส่งข้อมูลตัวละครทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวมถึง `data.skills` และ `data.skills_by_anchor_type` สำหรับ Traces เพื่อไม่ให้ server sync ข้อมูลระดับ/Eidolon ระหว่างทางก่อนข้อมูล Trace จะถูกบันทึก `saveAvatarDetails(closeModal = true)` ยังรองรับการเรียกจากปุ่ม build ที่ไม่ต้องปิดหน้าต่าง ถ้า server ตอบผิดพลาดจะแสดงข้อความบันทึกไม่สำเร็จแทนการแจ้งว่าสำเร็จ
 
 ### ข้อมูล Build และแหล่งที่มา
