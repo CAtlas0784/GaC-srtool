@@ -1,5 +1,9 @@
 # GaC-Srtool 🌌
 
+## Unstuck / แก้ตัวหมุนค้าง
+
+เมื่อเชื่อมต่อ GaC server ใช้ปุ่ม **Unstuck** ใน GM Command Console หรือพิมพ์ `/unstuck` ได้ เว็บจะรอผลตอบรับจากเกมก่อนแสดงว่าสำเร็จ ต้องเปิดเกมและเชื่อมต่อเซิร์ฟเวอร์อยู่ คำสั่งนี้ปลดการบล็อก UI ระหว่างรอแพ็กเก็ตผ่าน heartbeat โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ และไม่แทนการแก้ handler ที่ขาด ต้องใช้ SDK server ที่รองรับ `/api/client/unstuck`
+
 เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaC-hkrpg-go** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
 
 ทำงานแบบ Client-side 100% สามารถเปิดใช้งานผ่านเบราว์เซอร์ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรมเพิ่มเติม
@@ -131,3 +135,21 @@ Damage Analyst เรียงการ์ดตาม `report.avatars[].slot` �
 หน้า **รายละเอียดตัวละคร → แนวทางบิลด์** แสดงอุปกรณ์และออฟหลักที่พบบ่อยในตัวอย่าง Endgame จากข้อมูลที่แสดงบน Prydwen โดยใส่โหมด/จำนวนผู้เล่นและวันที่เก็บ snapshot ไว้กำกับ ตัวเลขเป็นสัดส่วนการใช้งานในกลุ่มตัวอย่าง ไม่ใช่คะแนนจัดอันดับหรือคำแนะนำทางการ ตัวละครที่ snapshot ไม่มีตัวอย่างจะแสดงลิงก์ไปคู่มือของ Prydwen แทนการแสดงข้อมูลสำรองที่อาจทำให้เข้าใจผิด
 
 ข้อมูลที่สร้างไว้ใน `js/build-guides-data.js` ใช้ชุดข้อมูล MIT จาก [LvlUrArti/MocDataProcessed](https://huggingface.co/datasets/LvlUrArti/MocDataProcessed) ซึ่งระบุว่าเป็นข้อมูลที่ประมวลผลจากเว็บไซต์ Prydwen โปรดให้เครดิต LvlUrArti เมื่อเผยแพร่หรือวิเคราะห์ข้อมูลต่อ สามารถอัปเดต snapshot ด้วย `npm run sync-build-guides` ได้ โดยสคริปต์จะเลือกเวอร์ชันล่าสุดที่มีใน dataset และจับคู่ตัวละครตาม ID จาก `js/avatars-data.js`.
+
+### Item Book
+
+The **Item Book** scans the pinned game-data revision for every `ItemConfig`-named table that contains item-definition rows. In this revision, 26 candidate tables were checked and 18 supplied item rows: 5,472 rows resolve to 5,414 unique item IDs. The **GaC supported** badge is derived from the Go server's `InventoryItemConfig.json`; other entries are browse-only.
+
+Click an item's image to open its details, including its ID, source table, type, game description, and a quantity selector. The selected quantity is local to the dialog and does not call the server or add an item. Where the game table defines `PileLimit`, the selector uses it as the maximum.
+
+Names and descriptions come from the pinned game TextMap and StarRailRes indexes for all 13 Srtool languages. At this revision, 5,150 of 5,414 item names have source-localized text; missing source names fall back to English or the item ID. Icons load from the pinned StarRailRes revision: 5,261 entries have a verified image file, while the remaining 153 retain their original game icon paths and show the missing-image state. The installed client stores these missing images inside encrypted `.block` bundles, so they are not extracted by this catalog builder.
+
+Regenerate `assets/item-catalog.json` from the inventory catalog revision used by the Go server:
+
+```bash
+python tools/build-item-catalog.py --inventory-config <path-to-GaC-hkrpg-go>/resources/InventoryItemConfig.json
+```
+
+## CW GM commands
+
+In the connected GM Console: `/cw status`, `/cw gold <total>`, `/cw hp <total>`. Values affect only the active CW run. Changes are queued and applied during Preparation; they wait while fighting. Gold sets the total, rather than adding repeatedly. HP must fit the run limit. Check the server's `CW_GM applied` log or query status to confirm application. Commands are also included in console suggestions and `/help`.

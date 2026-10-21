@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaC-Srtool</title>
   <link rel="stylesheet" href="css/styles.css?v=2.3">
+  <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -240,6 +241,11 @@
             </div>
           </div>
           <p class="card-subtitle" style="margin-bottom: 0.25rem;">Send GM and server commands, with live status and packet logs.</p>
+          <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+            <button type="button" class="btn btn-sm btn-secondary" id="btn-client-unstuck">Unstuck</button>
+            <span id="client-unstuck-description" style="font-size:0.75rem; color:var(--text-muted);">Clear a stuck loading spinner without restarting the game. Keeps saved CW progress.</span>
+          </div>
+          <div id="client-unstuck-status" role="status" aria-live="polite" style="font-size:0.75rem; color:var(--text-muted);"></div>
 
           <!-- Interactive Terminal Screen -->
           <div class="console-terminal-wrapper">
@@ -392,6 +398,43 @@
 
     <!-- Material inventory editor: edits only Client-catalog item quantities. -->
     <section id="tab-inventory" class="tab-content">
+      <div class="inventory-mode-switch" role="tablist" aria-label="Inventory views">
+        <button type="button" id="btn-inventory-catalog" class="inventory-mode-btn active" role="tab" aria-selected="true" aria-controls="item-catalog-panel" data-i18n="itemCatalogTitle">📚 สมุดรวมไอเทม</button>
+        <button type="button" id="btn-inventory-manage" class="inventory-mode-btn" role="tab" aria-selected="false" aria-controls="inventory-manage-panel" data-i18n="inventoryTitle">🎒 จัดการจำนวนไอเทม</button>
+      </div>
+      <div id="item-catalog-panel" class="inventory-mode-panel active" role="tabpanel">
+      <div class="card" style="margin-bottom:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div class="card-title" data-i18n="itemCatalogTitle">📚 สมุดรวมไอเทม</div>
+            <p class="card-subtitle" data-i18n="itemCatalogDescription">ค้นชื่อหรือ ID เพื่อดูรูปและรหัสจากตารางเกม</p>
+          </div>
+          <span id="item-catalog-count" class="badge-super-tag">—</span>
+        </div>
+        <div class="item-catalog-toolbar">
+          <input type="search" id="item-catalog-search" class="form-input" data-i18n-placeholder="itemCatalogSearchPlaceholder" placeholder="ค้นหาชื่อหรือ Item ID...">
+          <select id="item-catalog-filter" class="form-select" aria-label="Filter item catalog">
+            <option value="all" data-i18n="itemCatalogFilterAll">ทั้งหมด</option>
+            <option value="supported" data-i18n="itemCatalogFilterSupported">GaC รองรับ</option>
+            <option value="item" data-i18n="itemCatalogFilterItems">ไอเทม</option>
+            <option value="lightcone" data-i18n="itemCatalogFilterLightCones">กรวยแสง</option>
+            <option value="relic" data-i18n="itemCatalogFilterRelics">รีลิกส์</option>
+          </select>
+        </div>
+        <div id="item-catalog-status" role="status" aria-live="polite" style="font-size:.8rem;color:var(--text-muted);margin-top:.7rem;" data-i18n="itemCatalogLoading">กำลังโหลดสมุดไอเทม...</div>
+      </div>
+      <div class="card" style="padding:1rem 1rem 0;overflow:hidden;">
+        <div id="item-catalog-grid" class="item-catalog-grid">
+          <div class="item-catalog-empty" data-i18n="itemCatalogLoading">กำลังโหลดสมุดไอเทม...</div>
+        </div>
+        <div class="item-catalog-pagination">
+          <button type="button" class="btn btn-sm btn-secondary" id="item-catalog-prev" disabled data-i18n="inventoryPrevious">ก่อนหน้า</button>
+          <span id="item-catalog-page-label" style="font-size:.8rem;color:var(--text-muted);"></span>
+          <button type="button" class="btn btn-sm btn-secondary" id="item-catalog-next" disabled data-i18n="inventoryNext">ถัดไป</button>
+        </div>
+      </div>
+      </div>
+      <div id="inventory-manage-panel" class="inventory-mode-panel" role="tabpanel" hidden>
       <div class="card" style="margin-bottom: 1rem;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
           <div>
@@ -429,6 +472,7 @@
           <span id="inventory-page-label" style="font-size:.8rem;color:var(--text-muted);"></span>
           <button type="button" class="btn btn-sm btn-secondary" id="btn-inventory-next" disabled data-i18n="inventoryNext">ถัดไป</button>
         </div>
+      </div>
       </div>
     </section>
 
@@ -1668,10 +1712,48 @@
     </div>
   </div>
 
+  <dialog id="item-catalog-detail" class="item-catalog-dialog" aria-labelledby="item-catalog-detail-name">
+    <div class="item-catalog-detail-shell">
+      <header class="item-catalog-detail-header">
+        <span data-i18n="itemCatalogDetailTitle">Item Details</span>
+        <button type="button" class="item-catalog-dialog-close" id="item-catalog-detail-close" data-i18n-aria-label="itemCatalogClose" aria-label="Close">×</button>
+      </header>
+      <div class="item-catalog-detail-body">
+        <div class="item-catalog-detail-art" id="item-catalog-detail-art"></div>
+        <div class="item-catalog-detail-copy">
+          <h2 id="item-catalog-detail-name"></h2>
+          <div class="item-catalog-detail-id" id="item-catalog-detail-id"></div>
+          <div class="item-catalog-detail-source"><span data-i18n="itemCatalogSourceTable">Source tables</span>: <span id="item-catalog-detail-source"></span></div>
+          <div class="item-catalog-detail-meta" id="item-catalog-detail-meta"></div>
+          <section class="item-catalog-detail-section">
+            <h3 data-i18n="itemCatalogItemDescription">Description</h3>
+            <div class="item-catalog-detail-description" id="item-catalog-detail-description"></div>
+          </section>
+          <section class="item-catalog-detail-section item-catalog-detail-lore" id="item-catalog-detail-lore-section" hidden>
+            <h3 data-i18n="itemCatalogLore">Background</h3>
+            <div id="item-catalog-detail-lore"></div>
+          </section>
+        </div>
+      </div>
+      <div class="item-catalog-detail-quantity">
+        <label for="item-catalog-detail-amount" data-i18n="itemCatalogQuantity">Quantity</label>
+        <div class="item-catalog-amount-stepper">
+          <button type="button" id="item-catalog-amount-minus" data-i18n-aria-label="itemCatalogDecrease" aria-label="Decrease quantity">−</button>
+          <input type="number" id="item-catalog-detail-amount" inputmode="numeric" min="1" max="1" value="1">
+          <button type="button" id="item-catalog-amount-plus" data-i18n-aria-label="itemCatalogIncrease" aria-label="Increase quantity">+</button>
+        </div>
+        <span id="item-catalog-amount-limit" class="item-catalog-amount-limit"></span>
+      </div>
+      <footer class="item-catalog-detail-footer">
+        <button type="button" class="btn btn-secondary" id="item-catalog-detail-done" data-i18n="itemCatalogClose">Close</button>
+      </footer>
+    </div>
+  </dialog>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=2.9"></script>
+  <script type="module" src="js/app.js?v=3.1"></script>
 </body>
 </html>

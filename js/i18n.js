@@ -6635,6 +6635,181 @@ for (const [language, additions] of Object.entries(LAST_MILE_TRANSLATIONS)) {
   Object.assign(TRANSLATIONS[language], additions);
 }
 
+
+const ITEM_CATALOG_TRANSLATIONS = {
+  th: {
+    tabItemCatalog: '📚 สมุดไอเทม', itemCatalogTitle: '📚 สมุดรวมไอเทม',
+    itemCatalogDescription: 'ค้นชื่อหรือ ID เพื่อดูรูปและรหัสจากตารางเกม รายการที่มีป้าย GaC รองรับใช้จัดการในเครื่องมือกระเป๋าได้ ส่วนรายการอื่นใช้ค้นดู ID เท่านั้น',
+    itemCatalogSearchPlaceholder: 'ค้นหาชื่อหรือ Item ID...', itemCatalogFilterLabel: 'กรองสมุดไอเทม', itemCatalogFilterAll: 'ทั้งหมด',
+    itemCatalogFilterSupported: 'GaC รองรับ', itemCatalogFilterItems: 'ไอเทม',
+    itemCatalogFilterLightCones: 'กรวยแสง', itemCatalogFilterRelics: 'รีลิกส์',
+    itemCatalogSupportedTag: 'GaC รองรับ', itemCatalogBrowseOnlyTag: 'ดูข้อมูลเท่านั้น',
+    itemCatalogUnknownName: 'ไม่มีชื่อในตาราง #{id}', itemCatalogNoImage: 'ไม่มีภาพในข้อมูลเกม',
+    itemCatalogLoading: 'กำลังโหลดสมุดไอเทม...', itemCatalogLoadFailed: 'โหลดสมุดไอเทมไม่สำเร็จ'
+  },
+  en: {
+    tabItemCatalog: '📚 Item Book', itemCatalogTitle: '📚 Item Catalog',
+    itemCatalogDescription: 'Search game table names or IDs and view their icons. Entries marked GaC supported can be managed in the inventory tool; other entries are browse-only.',
+    itemCatalogSearchPlaceholder: 'Search by name or item ID...', itemCatalogFilterLabel: 'Filter item catalog', itemCatalogFilterAll: 'All entries',
+    itemCatalogFilterSupported: 'GaC supported', itemCatalogFilterItems: 'Items',
+    itemCatalogFilterLightCones: 'Light Cones', itemCatalogFilterRelics: 'Relics',
+    itemCatalogSupportedTag: 'GaC supported', itemCatalogBrowseOnlyTag: 'Browse only',
+    itemCatalogUnknownName: 'Unnamed item #{id}', itemCatalogNoImage: 'No icon in game data',
+    itemCatalogLoading: 'Loading item catalog...', itemCatalogLoadFailed: 'Could not load item catalog'
+  },
+  'zh-CN': {
+    tabItemCatalog: '📚 物品图鉴', itemCatalogTitle: '📚 物品目录',
+    itemCatalogDescription: '搜索游戏表格中的名称或 ID 并查看图标。标记为 GaC 支持的条目可在背包工具中管理；其他条目仅供查询。',
+    itemCatalogSearchPlaceholder: '搜索名称或物品 ID...', itemCatalogFilterLabel: '筛选物品目录', itemCatalogFilterAll: '全部条目',
+    itemCatalogFilterSupported: 'GaC 支持', itemCatalogFilterItems: '物品',
+    itemCatalogFilterLightCones: '光锥', itemCatalogFilterRelics: '遗器',
+    itemCatalogSupportedTag: 'GaC 支持', itemCatalogBrowseOnlyTag: '仅供查询',
+    itemCatalogUnknownName: '未命名物品 #{id}', itemCatalogNoImage: '游戏数据未配置图标',
+    itemCatalogLoading: '正在加载物品目录...', itemCatalogLoadFailed: '无法加载物品目录'
+  },
+  'zh-TW': {
+    tabItemCatalog: '📚 物品圖鑑', itemCatalogTitle: '📚 物品目錄',
+    itemCatalogDescription: '搜尋遊戲表格中的名稱或 ID 並查看圖示。標記為 GaC 支援的項目可在背包工具中管理；其他項目僅供查詢。',
+    itemCatalogSearchPlaceholder: '搜尋名稱或物品 ID...', itemCatalogFilterLabel: '篩選物品目錄', itemCatalogFilterAll: '全部項目',
+    itemCatalogFilterSupported: 'GaC 支援', itemCatalogFilterItems: '物品',
+    itemCatalogFilterLightCones: '光錐', itemCatalogFilterRelics: '遺器',
+    itemCatalogSupportedTag: 'GaC 支援', itemCatalogBrowseOnlyTag: '僅供查詢',
+    itemCatalogUnknownName: '未命名物品 #{id}', itemCatalogNoImage: '遊戲資料未設定圖示',
+    itemCatalogLoading: '正在載入物品目錄...', itemCatalogLoadFailed: '無法載入物品目錄'
+  },
+  ja: {
+    tabItemCatalog: '📚 アイテム図鑑', itemCatalogTitle: '📚 アイテム一覧',
+    itemCatalogDescription: 'ゲームデータの名前や ID を検索してアイコンを確認できます。GaC 対応と表示された項目は所持品ツールで管理でき、その他は閲覧のみです。',
+    itemCatalogSearchPlaceholder: '名前またはアイテム ID を検索...', itemCatalogFilterLabel: 'アイテム一覧を絞り込む', itemCatalogFilterAll: 'すべて',
+    itemCatalogFilterSupported: 'GaC 対応', itemCatalogFilterItems: 'アイテム',
+    itemCatalogFilterLightCones: '光円錐', itemCatalogFilterRelics: '遺物',
+    itemCatalogSupportedTag: 'GaC 対応', itemCatalogBrowseOnlyTag: '閲覧のみ',
+    itemCatalogUnknownName: '名前なし #{id}', itemCatalogNoImage: 'ゲームデータに画像なし',
+    itemCatalogLoading: 'アイテム一覧を読み込み中...', itemCatalogLoadFailed: 'アイテム一覧を読み込めませんでした'
+  },
+  ko: {
+    tabItemCatalog: '📚 아이템 도감', itemCatalogTitle: '📚 아이템 목록',
+    itemCatalogDescription: '게임 데이터의 이름이나 ID를 검색해 아이콘을 확인하세요. GaC 지원 표시가 있는 항목은 인벤토리 도구에서 관리할 수 있으며, 나머지는 조회 전용입니다.',
+    itemCatalogSearchPlaceholder: '이름 또는 아이템 ID 검색...', itemCatalogFilterLabel: '아이템 목록 필터', itemCatalogFilterAll: '전체 항목',
+    itemCatalogFilterSupported: 'GaC 지원', itemCatalogFilterItems: '아이템',
+    itemCatalogFilterLightCones: '광추', itemCatalogFilterRelics: '유물',
+    itemCatalogSupportedTag: 'GaC 지원', itemCatalogBrowseOnlyTag: '조회 전용',
+    itemCatalogUnknownName: '이름 없음 #{id}', itemCatalogNoImage: '게임 데이터에 아이콘 없음',
+    itemCatalogLoading: '아이템 목록을 불러오는 중...', itemCatalogLoadFailed: '아이템 목록을 불러오지 못했습니다'
+  },
+  vi: {
+    tabItemCatalog: '📚 Sổ tay vật phẩm', itemCatalogTitle: '📚 Danh mục vật phẩm',
+    itemCatalogDescription: 'Tìm tên hoặc ID trong bảng dữ liệu trò chơi để xem biểu tượng. Mục có nhãn GaC hỗ trợ có thể quản lý trong công cụ túi đồ; mục khác chỉ dùng để tra cứu.',
+    itemCatalogSearchPlaceholder: 'Tìm theo tên hoặc ID vật phẩm...', itemCatalogFilterLabel: 'Lọc danh mục vật phẩm', itemCatalogFilterAll: 'Tất cả mục',
+    itemCatalogFilterSupported: 'GaC hỗ trợ', itemCatalogFilterItems: 'Vật phẩm',
+    itemCatalogFilterLightCones: 'Nón Ánh Sáng', itemCatalogFilterRelics: 'Di Vật',
+    itemCatalogSupportedTag: 'GaC hỗ trợ', itemCatalogBrowseOnlyTag: 'Chỉ tra cứu',
+    itemCatalogUnknownName: 'Vật phẩm chưa có tên #{id}', itemCatalogNoImage: 'Dữ liệu game không có biểu tượng',
+    itemCatalogLoading: 'Đang tải danh mục vật phẩm...', itemCatalogLoadFailed: 'Không tải được danh mục vật phẩm'
+  },
+  id: {
+    tabItemCatalog: '📚 Buku Item', itemCatalogTitle: '📚 Katalog Item',
+    itemCatalogDescription: 'Cari nama atau ID dari tabel game dan lihat ikonnya. Item berlabel didukung GaC dapat dikelola melalui alat inventaris; item lainnya hanya untuk dilihat.',
+    itemCatalogSearchPlaceholder: 'Cari nama atau ID item...', itemCatalogFilterLabel: 'Filter katalog item', itemCatalogFilterAll: 'Semua item',
+    itemCatalogFilterSupported: 'Didukung GaC', itemCatalogFilterItems: 'Item',
+    itemCatalogFilterLightCones: 'Light Cone', itemCatalogFilterRelics: 'Relik',
+    itemCatalogSupportedTag: 'Didukung GaC', itemCatalogBrowseOnlyTag: 'Hanya dilihat',
+    itemCatalogUnknownName: 'Item tanpa nama #{id}', itemCatalogNoImage: 'Tidak ada ikon di data game',
+    itemCatalogLoading: 'Memuat katalog item...', itemCatalogLoadFailed: 'Katalog item gagal dimuat'
+  },
+  es: {
+    tabItemCatalog: '📚 Catálogo', itemCatalogTitle: '📚 Catálogo de objetos',
+    itemCatalogDescription: 'Busca nombres o ID de las tablas del juego y consulta sus iconos. Los elementos compatibles con GaC se pueden gestionar en el inventario; los demás solo se pueden consultar.',
+    itemCatalogSearchPlaceholder: 'Buscar por nombre o ID...', itemCatalogFilterLabel: 'Filtrar catálogo de objetos', itemCatalogFilterAll: 'Todos',
+    itemCatalogFilterSupported: 'Compatible con GaC', itemCatalogFilterItems: 'Objetos',
+    itemCatalogFilterLightCones: 'Conos de luz', itemCatalogFilterRelics: 'Reliquias',
+    itemCatalogSupportedTag: 'Compatible con GaC', itemCatalogBrowseOnlyTag: 'Solo consulta',
+    itemCatalogUnknownName: 'Objeto sin nombre #{id}', itemCatalogNoImage: 'Sin icono en los datos del juego',
+    itemCatalogLoading: 'Cargando catálogo...', itemCatalogLoadFailed: 'No se pudo cargar el catálogo'
+  },
+  fr: {
+    tabItemCatalog: '📚 Catalogue', itemCatalogTitle: '📚 Catalogue des objets',
+    itemCatalogDescription: 'Recherchez les noms ou ID des tables du jeu et consultez leurs icônes. Les éléments compatibles avec GaC peuvent être gérés dans l’inventaire ; les autres sont consultables uniquement.',
+    itemCatalogSearchPlaceholder: 'Rechercher par nom ou ID...', itemCatalogFilterLabel: 'Filtrer le catalogue', itemCatalogFilterAll: 'Tous les éléments',
+    itemCatalogFilterSupported: 'Compatible GaC', itemCatalogFilterItems: 'Objets',
+    itemCatalogFilterLightCones: 'Cônes de lumière', itemCatalogFilterRelics: 'Reliques',
+    itemCatalogSupportedTag: 'Compatible GaC', itemCatalogBrowseOnlyTag: 'Consultation seule',
+    itemCatalogUnknownName: 'Objet sans nom #{id}', itemCatalogNoImage: 'Aucune icône dans les données du jeu',
+    itemCatalogLoading: 'Chargement du catalogue...', itemCatalogLoadFailed: 'Impossible de charger le catalogue'
+  },
+  de: {
+    tabItemCatalog: '📚 Gegenstandsbuch', itemCatalogTitle: '📚 Gegenstandskatalog',
+    itemCatalogDescription: 'Suche nach Namen oder IDs aus den Spieltabellen und sieh dir die Symbole an. GaC-unterstützte Einträge lassen sich im Inventarwerkzeug verwalten; alle anderen dienen nur zum Nachschlagen.',
+    itemCatalogSearchPlaceholder: 'Nach Name oder Gegenstands-ID suchen...', itemCatalogFilterLabel: 'Katalog filtern', itemCatalogFilterAll: 'Alle Einträge',
+    itemCatalogFilterSupported: 'Von GaC unterstützt', itemCatalogFilterItems: 'Gegenstände',
+    itemCatalogFilterLightCones: 'Lichtkegel', itemCatalogFilterRelics: 'Relikte',
+    itemCatalogSupportedTag: 'Von GaC unterstützt', itemCatalogBrowseOnlyTag: 'Nur Nachschlagen',
+    itemCatalogUnknownName: 'Unbenannter Gegenstand #{id}', itemCatalogNoImage: 'Kein Symbol in den Spieldaten',
+    itemCatalogLoading: 'Gegenstandskatalog wird geladen...', itemCatalogLoadFailed: 'Gegenstandskatalog konnte nicht geladen werden'
+  },
+  ru: {
+    tabItemCatalog: '📚 Каталог предметов', itemCatalogTitle: '📚 Каталог предметов',
+    itemCatalogDescription: 'Ищите названия или ID из игровых таблиц и просматривайте значки. Предметы с отметкой GaC можно менять в инструменте инвентаря; остальные доступны только для просмотра.',
+    itemCatalogSearchPlaceholder: 'Поиск по названию или ID...', itemCatalogFilterLabel: 'Фильтр каталога предметов', itemCatalogFilterAll: 'Все записи',
+    itemCatalogFilterSupported: 'Поддерживается GaC', itemCatalogFilterItems: 'Предметы',
+    itemCatalogFilterLightCones: 'Световые конусы', itemCatalogFilterRelics: 'Реликвии',
+    itemCatalogSupportedTag: 'Поддерживается GaC', itemCatalogBrowseOnlyTag: 'Только просмотр',
+    itemCatalogUnknownName: 'Предмет без названия #{id}', itemCatalogNoImage: 'В игровых данных нет значка',
+    itemCatalogLoading: 'Загрузка каталога предметов...', itemCatalogLoadFailed: 'Не удалось загрузить каталог предметов'
+  },
+  pt: {
+    tabItemCatalog: '📚 Catálogo de itens', itemCatalogTitle: '📚 Catálogo de itens',
+    itemCatalogDescription: 'Pesquise nomes ou IDs das tabelas do jogo e veja os ícones. Itens marcados como compatíveis com GaC podem ser gerenciados no inventário; os demais são apenas para consulta.',
+    itemCatalogSearchPlaceholder: 'Pesquisar por nome ou ID...', itemCatalogFilterLabel: 'Filtrar catálogo de itens', itemCatalogFilterAll: 'Todos os itens',
+    itemCatalogFilterSupported: 'Compatível com GaC', itemCatalogFilterItems: 'Itens',
+    itemCatalogFilterLightCones: 'Cones de Luz', itemCatalogFilterRelics: 'Relíquias',
+    itemCatalogSupportedTag: 'Compatível com GaC', itemCatalogBrowseOnlyTag: 'Somente consulta',
+    itemCatalogUnknownName: 'Item sem nome #{id}', itemCatalogNoImage: 'Sem ícone nos dados do jogo',
+    itemCatalogLoading: 'Carregando catálogo de itens...', itemCatalogLoadFailed: 'Não foi possível carregar o catálogo de itens'
+  }
+};
+for (const [language, additions] of Object.entries(ITEM_CATALOG_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+
+const ITEM_CATALOG_DETAIL_TRANSLATIONS = {
+  th: { itemCatalogDetailTitle: 'รายละเอียดไอเทม', itemCatalogItemId: 'Item ID {id}', itemCatalogSourceTable: 'ตารางต้นทาง', itemCatalogItemDescription: 'คำอธิบาย', itemCatalogLore: 'ข้อมูลเพิ่มเติม', itemCatalogNoDescription: 'ไม่มีคำอธิบายในข้อมูลเกม', itemCatalogNoDetails: 'ไม่มีรายละเอียดเพิ่มเติม', itemCatalogOpenDetails: 'ดูรายละเอียด {name}', itemCatalogQuantity: 'จำนวนที่เลือก', itemCatalogMaxQuantity: 'สูงสุด {count}', itemCatalogClose: 'ปิด', itemCatalogDecrease: 'ลดจำนวน', itemCatalogIncrease: 'เพิ่มจำนวน' },
+  en: { itemCatalogDetailTitle: 'Item Details', itemCatalogItemId: 'Item ID {id}', itemCatalogSourceTable: 'Source tables', itemCatalogItemDescription: 'Description', itemCatalogLore: 'Additional Details', itemCatalogNoDescription: 'No description in game data', itemCatalogNoDetails: 'No additional details', itemCatalogOpenDetails: 'View details for {name}', itemCatalogQuantity: 'Selected quantity', itemCatalogMaxQuantity: 'Maximum {count}', itemCatalogClose: 'Close', itemCatalogDecrease: 'Decrease quantity', itemCatalogIncrease: 'Increase quantity' },
+  'zh-CN': { itemCatalogDetailTitle: '物品详情', itemCatalogItemId: '物品 ID {id}', itemCatalogSourceTable: '来源表', itemCatalogItemDescription: '描述', itemCatalogLore: '补充信息', itemCatalogNoDescription: '游戏数据中没有描述', itemCatalogNoDetails: '没有更多信息', itemCatalogOpenDetails: '查看{name}详情', itemCatalogQuantity: '选择数量', itemCatalogMaxQuantity: '最多 {count}', itemCatalogClose: '关闭', itemCatalogDecrease: '减少数量', itemCatalogIncrease: '增加数量' },
+  'zh-TW': { itemCatalogDetailTitle: '物品詳情', itemCatalogItemId: '物品 ID {id}', itemCatalogSourceTable: '來源表', itemCatalogItemDescription: '說明', itemCatalogLore: '補充資訊', itemCatalogNoDescription: '遊戲資料中沒有說明', itemCatalogNoDetails: '沒有更多資訊', itemCatalogOpenDetails: '查看{name}詳情', itemCatalogQuantity: '選擇數量', itemCatalogMaxQuantity: '最多 {count}', itemCatalogClose: '關閉', itemCatalogDecrease: '減少數量', itemCatalogIncrease: '增加數量' },
+  ja: { itemCatalogDetailTitle: 'アイテム詳細', itemCatalogItemId: 'アイテム ID {id}', itemCatalogSourceTable: '参照テーブル', itemCatalogItemDescription: '説明', itemCatalogLore: '補足情報', itemCatalogNoDescription: 'ゲームデータに説明がありません', itemCatalogNoDetails: '追加情報はありません', itemCatalogOpenDetails: '{name}の詳細を見る', itemCatalogQuantity: '選択数', itemCatalogMaxQuantity: '上限 {count}', itemCatalogClose: '閉じる', itemCatalogDecrease: '数量を減らす', itemCatalogIncrease: '数量を増やす' },
+  ko: { itemCatalogDetailTitle: '아이템 상세 정보', itemCatalogItemId: '아이템 ID {id}', itemCatalogSourceTable: '출처 테이블', itemCatalogItemDescription: '설명', itemCatalogLore: '추가 정보', itemCatalogNoDescription: '게임 데이터에 설명이 없습니다', itemCatalogNoDetails: '추가 정보가 없습니다', itemCatalogOpenDetails: '{name} 상세 정보 보기', itemCatalogQuantity: '선택 수량', itemCatalogMaxQuantity: '최대 {count}', itemCatalogClose: '닫기', itemCatalogDecrease: '수량 줄이기', itemCatalogIncrease: '수량 늘리기' },
+  vi: { itemCatalogDetailTitle: 'Chi tiết vật phẩm', itemCatalogItemId: 'ID vật phẩm {id}', itemCatalogSourceTable: 'Bảng nguồn', itemCatalogItemDescription: 'Mô tả', itemCatalogLore: 'Thông tin thêm', itemCatalogNoDescription: 'Dữ liệu game không có mô tả', itemCatalogNoDetails: 'Không có thông tin thêm', itemCatalogOpenDetails: 'Xem chi tiết {name}', itemCatalogQuantity: 'Số lượng đã chọn', itemCatalogMaxQuantity: 'Tối đa {count}', itemCatalogClose: 'Đóng', itemCatalogDecrease: 'Giảm số lượng', itemCatalogIncrease: 'Tăng số lượng' },
+  id: { itemCatalogDetailTitle: 'Detail Item', itemCatalogItemId: 'ID item {id}', itemCatalogSourceTable: 'Tabel sumber', itemCatalogItemDescription: 'Deskripsi', itemCatalogLore: 'Info Tambahan', itemCatalogNoDescription: 'Tidak ada deskripsi di data game', itemCatalogNoDetails: 'Tidak ada info tambahan', itemCatalogOpenDetails: 'Lihat detail {name}', itemCatalogQuantity: 'Jumlah dipilih', itemCatalogMaxQuantity: 'Maksimal {count}', itemCatalogClose: 'Tutup', itemCatalogDecrease: 'Kurangi jumlah', itemCatalogIncrease: 'Tambah jumlah' },
+  es: { itemCatalogDetailTitle: 'Detalles del objeto', itemCatalogItemId: 'ID del objeto {id}', itemCatalogSourceTable: 'Tablas de origen', itemCatalogItemDescription: 'Descripción', itemCatalogLore: 'Información adicional', itemCatalogNoDescription: 'Sin descripción en los datos del juego', itemCatalogNoDetails: 'Sin más detalles', itemCatalogOpenDetails: 'Ver detalles de {name}', itemCatalogQuantity: 'Cantidad seleccionada', itemCatalogMaxQuantity: 'Máximo {count}', itemCatalogClose: 'Cerrar', itemCatalogDecrease: 'Reducir cantidad', itemCatalogIncrease: 'Aumentar cantidad' },
+  fr: { itemCatalogDetailTitle: 'Détails de l’objet', itemCatalogItemId: 'ID de l’objet {id}', itemCatalogSourceTable: 'Tables sources', itemCatalogItemDescription: 'Description', itemCatalogLore: 'Informations supplémentaires', itemCatalogNoDescription: 'Aucune description dans les données du jeu', itemCatalogNoDetails: 'Aucun autre détail', itemCatalogOpenDetails: 'Voir les détails de {name}', itemCatalogQuantity: 'Quantité choisie', itemCatalogMaxQuantity: 'Maximum {count}', itemCatalogClose: 'Fermer', itemCatalogDecrease: 'Diminuer la quantité', itemCatalogIncrease: 'Augmenter la quantité' },
+  de: { itemCatalogDetailTitle: 'Gegenstandsdetails', itemCatalogItemId: 'Gegenstands-ID {id}', itemCatalogSourceTable: 'Quelltabellen', itemCatalogItemDescription: 'Beschreibung', itemCatalogLore: 'Zusätzliche Details', itemCatalogNoDescription: 'Keine Beschreibung in den Spieldaten', itemCatalogNoDetails: 'Keine weiteren Details', itemCatalogOpenDetails: 'Details für {name} anzeigen', itemCatalogQuantity: 'Ausgewählte Menge', itemCatalogMaxQuantity: 'Maximum {count}', itemCatalogClose: 'Schließen', itemCatalogDecrease: 'Menge verringern', itemCatalogIncrease: 'Menge erhöhen' },
+  ru: { itemCatalogDetailTitle: 'Сведения о предмете', itemCatalogItemId: 'ID предмета {id}', itemCatalogSourceTable: 'Исходные таблицы', itemCatalogItemDescription: 'Описание', itemCatalogLore: 'Дополнительная информация', itemCatalogNoDescription: 'В игровых данных нет описания', itemCatalogNoDetails: 'Дополнительных сведений нет', itemCatalogOpenDetails: 'Подробнее: {name}', itemCatalogQuantity: 'Выбранное количество', itemCatalogMaxQuantity: 'Максимум: {count}', itemCatalogClose: 'Закрыть', itemCatalogDecrease: 'Уменьшить количество', itemCatalogIncrease: 'Увеличить количество' },
+  pt: { itemCatalogDetailTitle: 'Detalhes do item', itemCatalogItemId: 'ID do item {id}', itemCatalogSourceTable: 'Tabelas de origem', itemCatalogItemDescription: 'Descrição', itemCatalogLore: 'Informações adicionais', itemCatalogNoDescription: 'Sem descrição nos dados do jogo', itemCatalogNoDetails: 'Sem detalhes adicionais', itemCatalogOpenDetails: 'Ver detalhes de {name}', itemCatalogQuantity: 'Quantidade selecionada', itemCatalogMaxQuantity: 'Máximo {count}', itemCatalogClose: 'Fechar', itemCatalogDecrease: 'Diminuir quantidade', itemCatalogIncrease: 'Aumentar quantidade' }
+};
+for (const [language, additions] of Object.entries(ITEM_CATALOG_DETAIL_TRANSLATIONS)) {
+  Object.assign(TRANSLATIONS[language], additions);
+}
+
+const ITEM_CATALOG_INTERACTION_DESCRIPTIONS = {
+  th: 'ค้นหาชื่อหรือ ID แล้วคลิกรูปเพื่ออ่านรายละเอียดและเลือกจำนวน การเลือกจำนวนในหน้านี้ยังไม่เพิ่มไอเทม รายการที่ GaC รองรับจัดการได้ในแท็บกระเป๋า ส่วนรายการอื่นใช้ดูข้อมูลเท่านั้น',
+  en: 'Search by name or ID, then click an image to read details and select a quantity. Selecting a quantity here does not add the item. GaC-supported entries can be managed in the inventory tab; other entries are for browsing.',
+  'zh-CN': '按名称或 ID 搜索，然后点击图片查看详情并选择数量。在此选择数量不会添加物品。GaC 支持的条目可在背包页管理，其他条目仅供查看。',
+  'zh-TW': '依名稱或 ID 搜尋，再點擊圖片查看詳情並選擇數量。在此選擇數量不會新增物品。GaC 支援的項目可在背包頁管理，其他項目僅供瀏覽。',
+  ja: '名前または ID で検索し、画像をクリックすると詳細を確認して数量を選べます。この画面で数量を選んでもアイテムは追加されません。GaC 対応アイテムは所持品タブで管理でき、その他は閲覧のみです。',
+  ko: '이름 또는 ID를 검색한 뒤 이미지를 클릭하면 상세 정보를 확인하고 수량을 선택할 수 있습니다. 여기서 수량을 선택해도 아이템은 추가되지 않습니다. GaC 지원 항목은 인벤토리 탭에서 관리할 수 있고 나머지는 조회 전용입니다.',
+  vi: 'Tìm theo tên hoặc ID rồi nhấn vào hình để xem chi tiết và chọn số lượng. Việc chọn số lượng ở đây không thêm vật phẩm. Vật phẩm được GaC hỗ trợ có thể quản lý trong tab túi đồ; các mục khác chỉ để tra cứu.',
+  id: 'Cari berdasarkan nama atau ID, lalu klik gambar untuk melihat detail dan memilih jumlah. Memilih jumlah di sini tidak menambahkan item. Item yang didukung GaC dapat dikelola di tab inventaris; item lainnya hanya untuk dilihat.',
+  es: 'Busca por nombre o ID y haz clic en una imagen para consultar los detalles y elegir una cantidad. Elegir una cantidad aquí no añade el objeto. Los elementos compatibles con GaC se gestionan en la pestaña de inventario; los demás son solo de consulta.',
+  fr: 'Recherchez un nom ou un ID, puis cliquez sur une image pour consulter les détails et choisir une quantité. Ce choix n’ajoute pas l’objet. Les éléments compatibles avec GaC se gèrent dans l’inventaire ; les autres sont consultables uniquement.',
+  de: 'Suche nach Name oder ID und klicke auf ein Bild, um Details anzuzeigen und eine Menge auszuwählen. Dadurch wird der Gegenstand nicht hinzugefügt. GaC-unterstützte Einträge lassen sich im Inventar verwalten; die übrigen dienen nur zum Nachschlagen.',
+  ru: 'Найдите предмет по названию или ID, затем нажмите на изображение, чтобы посмотреть сведения и выбрать количество. Выбор количества здесь не добавляет предмет. Предметы с поддержкой GaC можно менять во вкладке инвентаря; остальные доступны только для просмотра.',
+  pt: 'Pesquise por nome ou ID e clique na imagem para ver os detalhes e escolher uma quantidade. Escolher a quantidade aqui não adiciona o item. Itens compatíveis com GaC podem ser gerenciados na aba de inventário; os demais servem apenas para consulta.'
+};
+for (const [language, description] of Object.entries(ITEM_CATALOG_INTERACTION_DESCRIPTIONS)) {
+  TRANSLATIONS[language].itemCatalogDescription = description;
+}
+
 let currentLang = 'th';
 if (typeof localStorage !== 'undefined') {
   currentLang = localStorage.getItem('gac_srtool_lang') || 'th';

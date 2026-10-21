@@ -1,7 +1,9 @@
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
+import { initializeItemCatalog } from './item-catalog.js?v=2';
+import { initializeUnstuck } from './unstuck.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.7';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.8';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -959,6 +961,12 @@ function applyTranslations() {
     if (val) elem.alt = val;
   });
 
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(elem => {
+    const key = elem.getAttribute('data-i18n-aria-label');
+    const val = t(key);
+    if (val) elem.setAttribute('aria-label', val);
+  });
+
   // Update dynamic filter dropdown options
   updateFilterDropdownTranslations();
 
@@ -1601,6 +1609,9 @@ const consoleState = {
 };
 
 const GM_COMMAND_SUGGESTIONS = [
+  { label: '/cw status', insert: '/cw status', description: 'Show saved CW run, gold and HP' },
+  { label: '/cw gold <total>', insert: '/cw gold ', description: 'Set CW gold in Preparation; keeps adventure currency unchanged' },
+  { label: '/cw hp <total>', insert: '/cw hp ', description: 'Set CW HP within the current run limit' },
   { label: '/avatar <id> [level] [rank]', insert: '/avatar ', description: 'Update a character level and Eidolon rank' },
   { label: '/clear lineup', insert: '/clear lineup', description: 'Clear the active lineup' },
   { label: '/give <item_id> [count]', insert: '/give ', description: 'Add an item or currency' },
@@ -1767,6 +1778,7 @@ async function dispatchGMCommand(rawCmd) {
   // Handle local /help command immediately
   if (cmd.toLowerCase() === '/help') {
     logToConsole('Available GM commands:', 'SYS');
+    logToConsole('  /cw status | /cw gold <total> | /cw hp <total> - CW only; applies in Preparation', 'SYS');
     logToConsole('  /heal                         - Restore team HP, SP, and Energy', 'SYS');
     logToConsole('  /max                          - Set all characters to Level 80 and E6', 'SYS');
     logToConsole('  /teleport <plane_id> [floor]  - Teleport to a scene', 'SYS');
@@ -8908,6 +8920,8 @@ async function init() {
   await loadCachedStorageData();
   setupServerModes();
   setupLanguageSelector();
+  initializeItemCatalog();
+  initializeUnstuck({ apiCall, isConnected: () => state.isConnected, showToast });
   setupTabs();
   setupModalSubtabs();
   setupEvents();
