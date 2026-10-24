@@ -3661,16 +3661,17 @@ input:checked + .slider:before {
 .monster-settings-stage-copy strong { color: var(--text-main); font-size: .92rem; line-height: 1.28; overflow-wrap: anywhere; }
 .monster-settings-stage-card.is-boss .monster-settings-stage-meta:first-of-type { color: #fcd34d; }
 .monster-settings-view[hidden] { display: none; }
-.monster-aa-room-control { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; padding: 1rem 1.1rem; border: 1px solid rgba(56, 189, 248, .28); border-radius: 14px; background: linear-gradient(120deg, rgba(14, 165, 233, .1), rgba(15, 23, 42, .72)); }
-.monster-aa-room-header { display: grid; gap: .6rem; min-width: 0; }
-.monster-aa-room-copy h3 { margin: 0; color: var(--text-highlight); font-size: 1rem; }
-.monster-aa-room-copy p { margin: .35rem 0 0; color: var(--text-muted); line-height: 1.5; }
-.monster-aa-room-status { color: var(--text-muted); font-size: .88rem; line-height: 1.45; overflow-wrap: anywhere; }
-.monster-aa-room-status.is-pending { color: #86efac; }
-.monster-aa-room-status.is-error { color: #fda4af; }
-.monster-aa-room-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .6rem; }
-.monster-aa-room-actions .btn { min-height: 42px; white-space: nowrap; }
-.monster-aa-room-actions .btn:disabled { opacity: .55; cursor: not-allowed; }
+.monster-aa-round-control { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr); align-items: center; gap: 1.25rem; padding: 1rem 1.1rem; border: 1px solid rgba(56, 189, 248, .28); border-radius: 14px; background: linear-gradient(120deg, rgba(14, 165, 233, .1), rgba(15, 23, 42, .72)); }
+.monster-aa-round-header { display: grid; gap: .6rem; min-width: 0; }
+.monster-aa-round-copy h3 { margin: 0; color: var(--text-highlight); font-size: 1rem; }
+.monster-aa-round-copy p { margin: .35rem 0 0; color: var(--text-muted); line-height: 1.5; }
+.monster-aa-round-status { color: var(--text-muted); font-size: .88rem; line-height: 1.45; overflow-wrap: anywhere; }
+.monster-aa-round-status.is-pending { color: #86efac; }
+.monster-aa-round-status.is-error { color: #fda4af; }
+.monster-aa-round-picker-wrap { display: grid; gap: .5rem; min-width: 0; }
+.monster-aa-round-picker-label { color: var(--text-muted); font-size: .82rem; font-weight: 800; }
+.monster-aa-round-picker { min-height: 46px; width: 100%; }
+.monster-aa-round-picker:disabled { opacity: .55; cursor: not-allowed; }
 .monster-settings-stage-heading { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
 .monster-settings-stage-heading h3 { margin: 0; color: var(--text-highlight); font-size: 1.1rem; }
 .monster-settings-badge { padding: .25rem .55rem; border: 1px solid rgba(192, 132, 252, .3); border-radius: 999px; color: #d8b4fe; background: rgba(168, 85, 247, .1); font-size: .75rem; font-weight: 700; }
@@ -3731,9 +3732,7 @@ input:checked + .slider:before {
   .monster-settings-wave { flex-direction: column; }
   .monster-settings-monsters { width: 100%; }
   .monster-settings-stage-grid { grid-template-columns: 1fr; }
-  .monster-aa-room-control { align-items: stretch; flex-direction: column; }
-  .monster-aa-room-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-  .monster-aa-room-actions .btn { width: 100%; }
+  .monster-aa-round-control { grid-template-columns: 1fr; align-items: stretch; }
   .monster-custom-toolbar, .monster-custom-save-actions { align-items: stretch; flex-direction: column; }
   .monster-custom-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); }
   .monster-custom-save-actions .btn { width: 100%; }

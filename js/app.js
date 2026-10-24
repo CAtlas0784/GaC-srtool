@@ -51,7 +51,7 @@ const state = {
   inventorySaved: {},
   inventoryDraft: {},
   inventoryPage: 0,
-  monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaSelection: null, aaSelectionLoaded: false, aaSelectionBusy: false, aaSelectionError: '', aaSelectionErrorKey: '' },
+  monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
 };
 
 // UI Elements Map
@@ -6938,47 +6938,60 @@ function monsterStagePreviewNames(stage) {
   return (stage?.monster_ids || []).map(monsterName).filter(Boolean);
 }
 
-function renderAARoomSelection(stage, groups) {
+function renderAARoundSelection(groups) {
   const editor = state.monsterSettings;
-  const section = monsterElement('section', 'monster-aa-room-control');
-  const header = monsterElement('div', 'monster-aa-room-header');
-  const copy = monsterElement('div', 'monster-aa-room-copy');
-  copy.append(monsterElement('h3', '', t('monsterAaRoomTitle')));
-  copy.append(monsterElement('p', '', t('monsterAaRoomDescription')));
+  const section = monsterElement('section', 'monster-aa-round-control');
+  const header = monsterElement('div', 'monster-aa-round-header');
+  const copy = monsterElement('div', 'monster-aa-round-copy');
+  copy.append(monsterElement('h3', '', t('monsterAaRoundTitle')));
+  copy.append(monsterElement('p', '', t('monsterAaRoundDescription')));
   header.append(copy);
 
-  const queued = editor.aaSelection;
-  if (queued) {
-    const queuedStage = groups.flatMap(group => group.stages || []).find(item => Number(item.id) === Number(queued.peak_id));
-    const queuedName = monsterStagePreviewNames(queuedStage).slice(0, 2).join(' / ') || t('monsterSettingsStageTitle', { id: queued.peak_id });
-    const status = monsterElement('div', 'monster-aa-room-status is-pending', t('monsterAaRoomPending', { room: queuedName, id: queued.peak_id }));
+  const selection = editor.aaRoundSelection;
+  if (editor.aaRoundSelectionError) {
+    const status = monsterElement('div', 'monster-aa-round-status is-error', t(editor.aaRoundSelectionErrorKey || 'monsterAaRoundLoadError', { error: editor.aaRoundSelectionError }));
     status.setAttribute('role', 'status');
     header.append(status);
-  } else if (editor.aaSelectionError) {
-    const status = monsterElement('div', 'monster-aa-room-status is-error', t(editor.aaSelectionErrorKey || 'monsterAaRoomLoadError', { error: editor.aaSelectionError }));
+  } else if (editor.aaRoundSelectionBusy) {
+    const status = monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundUpdating'));
     status.setAttribute('role', 'status');
     header.append(status);
-  } else if (!editor.aaSelectionLoaded && state.isConnected && state.serverMode === 'gac') {
-    header.append(monsterElement('div', 'monster-aa-room-status', t('monsterAaRoomLoading')));
+  } else if (!editor.aaRoundSelectionLoaded && state.isConnected && state.serverMode === 'gac') {
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundLoading')));
   } else if (!state.isConnected || state.serverMode !== 'gac') {
-    header.append(monsterElement('div', 'monster-aa-room-status', t('monsterAaRoomConnect')));
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundConnect')));
+  } else if (selection) {
+    const selectedGroup = groups.find(group => Number(group.id) === Number(selection.peak_group_id));
+    const selectedName = monsterLocalizedText(selectedGroup?.names) || t('monsterSettingsGroupOption', { id: selection.peak_group_id, count: selectedGroup?.stages?.length || 0 });
+    const status = monsterElement('div', 'monster-aa-round-status is-pending', t('monsterAaRoundPending', { round: selectedName, id: selection.peak_group_id }));
+    status.setAttribute('role', 'status');
+    header.append(status);
+  } else {
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundDefault')));
   }
 
-  const actions = monsterElement('div', 'monster-aa-room-actions');
-  const selectButton = monsterElement('button', 'btn btn-primary monster-aa-room-select', t('monsterAaRoomUse'));
-  selectButton.type = 'button';
-  selectButton.dataset.aaRoomAction = 'select';
-  selectButton.dataset.aaRoomId = String(stage.id);
-  selectButton.disabled = editor.aaSelectionBusy || !state.isConnected || state.serverMode !== 'gac' || !editor.catalog;
-  actions.append(selectButton);
-  if (queued) {
-    const clearButton = monsterElement('button', 'btn btn-secondary monster-aa-room-clear', t('monsterAaRoomClear'));
-    clearButton.type = 'button';
-    clearButton.dataset.aaRoomAction = 'clear';
-    clearButton.disabled = editor.aaSelectionBusy || !state.isConnected || state.serverMode !== 'gac';
-    actions.append(clearButton);
+  const picker = monsterElement('div', 'monster-aa-round-picker-wrap');
+  const label = monsterElement('label', 'monster-aa-round-picker-label', t('monsterAaRoundSelectLabel'));
+  label.htmlFor = 'monster-aa-round-picker';
+  const select = monsterElement('select', 'form-select monster-aa-round-picker');
+  select.id = 'monster-aa-round-picker';
+  select.dataset.aaRoundPicker = 'true';
+  select.setAttribute('aria-label', t('monsterAaRoundSelectLabel'));
+  select.disabled = editor.aaRoundSelectionBusy || !state.isConnected || state.serverMode !== 'gac' || !editor.catalog;
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = t('monsterAaRoundDefaultOption');
+  select.append(defaultOption);
+  for (const group of groups) {
+    const option = document.createElement('option');
+    option.value = String(group.id);
+    const roundName = monsterLocalizedText(group.names) || t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length });
+    option.textContent = `${roundName} · ${t('monsterAaRoundGroupId', { id: group.id })}`;
+    select.append(option);
   }
-  section.append(header, actions);
+  select.value = selection ? String(selection.peak_group_id) : '';
+  picker.append(label, select);
+  section.append(header, picker);
   return section;
 }
 
@@ -6992,33 +7005,40 @@ function renderMonsterChallengeMode(mode) {
     return;
   }
 
-  const selectedGroup = groups.find(group => String(group.id) === String(state.monsterSettings.groupId)) || groups[0];
+  const preferredGroupId = mode === 'aa'
+    ? (state.monsterSettings.aaRoundSelection?.peak_group_id ?? groups[0].id)
+    : state.monsterSettings.groupId;
+  const selectedGroup = groups.find(group => String(group.id) === String(preferredGroupId)) || groups[0];
   state.monsterSettings.groupId = String(selectedGroup.id);
   const selectedStage = selectedGroup.stages.find(stage => String(stage.id) === String(state.monsterSettings.stageId)) || selectedGroup.stages[0];
   state.monsterSettings.stageId = String(selectedStage.id);
 
-  const groupPicker = monsterElement('section', 'monster-settings-picker-section');
-  groupPicker.append(monsterElement('h3', 'monster-settings-picker-title', t('monsterSettingsGroup')));
-  const groupGrid = monsterElement('div', 'monster-settings-group-grid');
-  for (const group of groups) {
-    const button = monsterElement('button', `monster-settings-group-card${group.id === selectedGroup.id ? ' active' : ''}`);
-    button.type = 'button';
-    button.dataset.monsterGroup = String(group.id);
-    button.setAttribute('aria-pressed', String(group.id === selectedGroup.id));
-    const copy = monsterElement('span', 'monster-settings-group-copy');
-    copy.append(monsterElement('strong', 'monster-settings-group-name', monsterLocalizedText(group.names) || t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
-    copy.append(monsterElement('span', 'monster-settings-group-meta', t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
-    button.append(copy);
-    const bossStage = group.stages.find(stage => stage.is_boss);
-    const bossId = bossStage?.monster_ids?.[0];
-    if (bossId) appendMonsterIdentity(button, bossId, 'group-feature');
-    groupGrid.append(button);
+  if (mode === 'aa') {
+    root.append(renderAARoundSelection(groups));
+  } else {
+    const groupPicker = monsterElement('section', 'monster-settings-picker-section');
+    groupPicker.append(monsterElement('h3', 'monster-settings-picker-title', t('monsterSettingsGroup')));
+    const groupGrid = monsterElement('div', 'monster-settings-group-grid');
+    for (const group of groups) {
+      const button = monsterElement('button', `monster-settings-group-card${group.id === selectedGroup.id ? ' active' : ''}`);
+      button.type = 'button';
+      button.dataset.monsterGroup = String(group.id);
+      button.setAttribute('aria-pressed', String(group.id === selectedGroup.id));
+      const copy = monsterElement('span', 'monster-settings-group-copy');
+      copy.append(monsterElement('strong', 'monster-settings-group-name', monsterLocalizedText(group.names) || t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
+      copy.append(monsterElement('span', 'monster-settings-group-meta', t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
+      button.append(copy);
+      const bossStage = group.stages.find(stage => stage.is_boss);
+      const bossId = bossStage?.monster_ids?.[0];
+      if (bossId) appendMonsterIdentity(button, bossId, 'group-feature');
+      groupGrid.append(button);
+    }
+    groupPicker.append(groupGrid);
+    root.append(groupPicker);
   }
-  groupPicker.append(groupGrid);
-  root.append(groupPicker);
 
   const stagePicker = monsterElement('section', 'monster-settings-picker-section');
-  stagePicker.append(monsterElement('h3', 'monster-settings-picker-title', t('monsterSettingsChallenge')));
+  stagePicker.append(monsterElement('h3', 'monster-settings-picker-title', t(mode === 'aa' ? 'monsterSettingsAARoomPreview' : 'monsterSettingsChallenge')));
   const stageGrid = monsterElement('div', 'monster-settings-stage-grid');
   for (const stage of selectedGroup.stages) {
     const button = monsterElement('button', `monster-settings-stage-card${stage.id === selectedStage.id ? ' active' : ''}${stage.is_boss ? ' is-boss' : ''}`);
@@ -7038,8 +7058,6 @@ function renderMonsterChallengeMode(mode) {
   }
   stagePicker.append(stageGrid);
   root.append(stagePicker);
-
-  if (mode === 'aa') root.append(renderAARoomSelection(selectedStage, groups));
 
   const stageHeader = monsterElement('div', 'monster-settings-stage-heading');
   const stageNames = monsterStagePreviewNames(selectedStage);
@@ -7341,10 +7359,10 @@ async function loadMonsterSettings() {
   editor.ready = false;
   editor.canEdit = false;
   editor.catalog = null;
-  editor.aaSelection = null;
-  editor.aaSelectionLoaded = false;
-  editor.aaSelectionError = '';
-  editor.aaSelectionErrorKey = '';
+  editor.aaRoundSelection = null;
+  editor.aaRoundSelectionLoaded = false;
+  editor.aaRoundSelectionError = '';
+  editor.aaRoundSelectionErrorKey = '';
   setMonsterSettingsStatus('monsterSettingsLoading', 'loading');
 
   let catalogError = null;
@@ -7353,12 +7371,25 @@ async function loadMonsterSettings() {
       editor.catalog = await apiCall('/api/monster-settings/catalog');
     } catch (error) { catalogError = error; }
     try {
-      const result = await apiCall('/api/monster-settings/aa-room');
-      editor.aaSelection = result?.selection || null;
-      editor.aaSelectionLoaded = true;
+      const result = await apiCall('/api/monster-settings/aa-round');
+      editor.aaRoundSelection = result?.selection || null;
+      editor.aaRoundSelectionLoaded = true;
+      if (editor.aaRoundSelection) {
+        const selected = editor.catalog?.modes?.aa?.find(group => Number(group.id) === Number(editor.aaRoundSelection.peak_group_id));
+        if (selected) {
+          editor.groupId = String(selected.id);
+          if (!selected.stages.some(stage => String(stage.id) === String(editor.stageId))) editor.stageId = String(selected.stages[0]?.id || '');
+        }
+      } else {
+        const defaultGroup = editor.catalog?.modes?.aa?.[0];
+        if (defaultGroup) {
+          editor.groupId = String(defaultGroup.id);
+          if (!defaultGroup.stages.some(stage => String(stage.id) === String(editor.stageId))) editor.stageId = String(defaultGroup.stages[0]?.id || '');
+        }
+      }
     } catch (error) {
-      editor.aaSelectionError = error.message;
-      editor.aaSelectionErrorKey = 'monsterAaRoomLoadError';
+      editor.aaRoundSelectionError = error.message;
+      editor.aaRoundSelectionErrorKey = 'monsterAaRoundLoadError';
     }
   }
 
@@ -7410,29 +7441,43 @@ function setupMonsterSettingsEvents() {
     });
   });
   const root = document.getElementById('monster-settings-view');
-  root?.addEventListener('click', async event => {
-    const action = event.target.closest('[data-aa-room-action]');
-    if (!action || action.disabled) return;
+  root?.addEventListener('change', async event => {
+    const picker = event.target.closest('[data-aa-round-picker]');
+    if (!picker || picker.disabled) return;
     const editor = state.monsterSettings;
-    if (editor.aaSelectionBusy) return;
-    editor.aaSelectionBusy = true;
-    editor.aaSelectionError = '';
-    editor.aaSelectionErrorKey = '';
+    if (editor.aaRoundSelectionBusy) return;
+    const peakGroupId = picker.value ? Number(picker.value) : 0;
+    if (peakGroupId) {
+      const selected = editor.catalog?.modes?.aa?.find(group => Number(group.id) === peakGroupId);
+      if (!selected) return;
+      editor.groupId = String(selected.id);
+      editor.stageId = String(selected.stages[0]?.id || '');
+    } else {
+      const defaultGroup = editor.catalog?.modes?.aa?.[0];
+      if (defaultGroup) {
+        editor.groupId = String(defaultGroup.id);
+        editor.stageId = String(defaultGroup.stages[0]?.id || '');
+      }
+    }
+    const previousSelection = editor.aaRoundSelection;
+    editor.aaRoundSelectionBusy = true;
+    editor.aaRoundSelectionError = '';
+    editor.aaRoundSelectionErrorKey = '';
+    editor.aaRoundSelection = peakGroupId ? { peak_group_id: peakGroupId } : null;
     renderMonsterSettings();
     try {
-      const payload = action.dataset.aaRoomAction === 'clear'
-        ? { action: 'clear' }
-        : { peak_id: Number(action.dataset.aaRoomId) };
-      const result = await apiCall('/api/monster-settings/aa-room', 'POST', payload);
-      editor.aaSelection = result?.selection || null;
-      editor.aaSelectionLoaded = true;
-      showToast(t(editor.aaSelection ? 'monsterAaRoomSavedToast' : 'monsterAaRoomClearedToast'), 'success');
+      const payload = peakGroupId ? { peak_group_id: peakGroupId } : { action: 'clear' };
+      const result = await apiCall('/api/monster-settings/aa-round', 'POST', payload);
+      editor.aaRoundSelection = result?.selection || null;
+      editor.aaRoundSelectionLoaded = true;
+      showToast(t(editor.aaRoundSelection ? 'monsterAaRoundSavedToast' : 'monsterAaRoundClearedToast'), 'success');
     } catch (error) {
-      editor.aaSelectionError = error.message;
-      editor.aaSelectionErrorKey = 'monsterAaRoomSaveError';
-      showToast(t('monsterAaRoomSaveError', { error: error.message }), 'error');
+      editor.aaRoundSelection = previousSelection;
+      editor.aaRoundSelectionError = error.message;
+      editor.aaRoundSelectionErrorKey = 'monsterAaRoundSaveError';
+      showToast(t('monsterAaRoundSaveError', { error: error.message }), 'error');
     } finally {
-      editor.aaSelectionBusy = false;
+      editor.aaRoundSelectionBusy = false;
       renderMonsterSettings();
     }
   });
