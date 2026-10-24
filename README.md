@@ -62,6 +62,13 @@
 - การบันทึกแก้เฉพาะจำนวนไอเทมใน `freesr-data.json` ไม่เขียนทับตัวละคร, LC, Relic หรือ Battle Config
 - รองรับเฉพาะ GaC-hkrpg-go ผ่าน `/api/inventory/materials`; บันทึกลงไฟล์ทันทีและต้องเข้าเกมใหม่เพื่อโหลด session พร้อมจำนวนที่แก้แล้ว
 
+### 👾 6.1 Monster Setting
+- แยก Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration เพื่อดูชื่อด่าน/มอนสเตอร์ รูป, level และ wave จาก metadata Nanoka ที่ตรงกับ `client_version` ของเซิร์ฟเวอร์และ resource `challenge_data.json` / `resources/StageConfig.json` (อ่านอย่างเดียว); เมื่อ Client เปลี่ยนเวอร์ชัน API จะดึง metadata ของเวอร์ชันนั้นให้อัตโนมัติ โดยไม่ใช้ข้อมูลจากเวอร์ชันอื่น
+- เปลี่ยนการเลือกกลุ่ม/ด่านเป็นการ์ด และ Custom Enemy ค้นมอนด้วยชื่อหรือ ID พร้อมรูป/ชื่อจาก Nanoka; พิมพ์ ID เองได้ และแสดงรูปตัวอย่างขนาดใหญ่ขึ้น
+- Anomaly Arbitration เป็นโหมด Endgame ที่อ่าน stage จาก resource เช่นเดียวกับโหมดอื่น ไม่ใช่ Custom Enemy; Aha's Help มีแท็บแยกจาก AA
+- แก้ Custom Enemy ได้เฉพาะ Golden / Crimson Calyx และต้องเชื่อมต่อ GaC-Srtool; การกดใช้ stage จาก Client จะล้าง custom waves เพื่อให้กลับไปใช้ resource
+- Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ custom waves จากหน้านี้
+
 ### 💾 7. จัดการไฟล์เซฟ GaC (Persistent & FreeSR Data)
 - **ตั้งค่าตัวเอก (ผู้บุกเบิก):** สลับเพศ (Caelus / Stelle) และเปลี่ยนธาตุ (กายภาพ, ไฟ, จินตภาพ, ความจำ)
 - **สลับพาธ March 7th:** เลือกระหว่างพาธการอนุรักษ์ (น้ำแข็ง) และพาธล่าสังหาร (จินตภาพ)

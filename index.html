@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaC-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.3">
+  <link rel="stylesheet" href="css/styles.css?v=2.15">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -30,8 +30,8 @@
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
           <option value="gac" selected>GaC-hkrpg-go</option>
-          <option value="firefly">FireflyGo</option>
-          <option value="robin">RobinSR</option>
+          <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
+          <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
         </select>
       </div>
 
@@ -57,6 +57,7 @@
     <button class="tab-btn" data-tab="tab-avatars" data-i18n="tabAvatars">👥 ตัวละคร</button>
     <button class="tab-btn" data-tab="tab-equipment" data-i18n="tabEquipment">🗡️ กรวยแสง & รีลิกส์</button>
     <button class="tab-btn" data-tab="tab-inventory" data-i18n="tabInventory">🎒 ไอเทมในกระเป๋า</button>
+    <button class="tab-btn" data-tab="tab-monster-settings" id="tab-btn-monster-settings" data-i18n="tabMonsterSettings">👾 Monster Setting</button>
     <button class="tab-btn" data-tab="tab-damage-analyst" id="tab-btn-damage-analyst" data-i18n="tabDamageAnalyst">💥 Damage Analyst</button>
     <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaC</button>
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
@@ -476,6 +477,56 @@
       </div>
     </section>
 
+    <!-- Monster settings: resource-backed stage inspection plus Calyx-only custom waves. -->
+    <section id="tab-monster-settings" class="tab-content">
+      <div class="card monster-settings-intro">
+        <div class="card-title"><span data-i18n="monsterSettingsTitle">👾 Monster Setting</span></div>
+        <p class="card-subtitle" data-i18n="monsterSettingsDescription">ตรวจสอบข้อมูลด่านและคลื่นมอนจาก resource ของ Client ตามเวอร์ชัน ปรับ custom monster ได้เฉพาะ Golden / Crimson Calyx เท่านั้น</p>
+        <div class="monster-settings-rule" role="note">
+          <span aria-hidden="true">🔒</span>
+          <span data-i18n="monsterSettingsRule">Weekly Boss, Stagnant Shadow, Cavern of Corrosion และ Endgame ใช้ข้อมูลด่านจาก Client และแก้คลื่นมอนผ่าน Srtool ไม่ได้</span>
+        </div>
+      </div>
+
+      <div class="monster-settings-tabs" role="tablist" aria-label="Monster settings modes">
+        <button type="button" class="monster-settings-tab active" role="tab" aria-selected="true" data-monster-mode="moc" data-i18n="monsterModeMoc">Memory of Chaos</button>
+        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="pf" data-i18n="monsterModePf">Pure Fiction</button>
+        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="as" data-i18n="monsterModeAs">Apocalyptic Shadow</button>
+        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="aa" data-i18n="monsterModeAa">Anomaly Arbitration</button>
+        <button type="button" class="monster-settings-tab monster-settings-tab-aha" id="monster-mode-aha" role="tab" aria-selected="false" aria-controls="monster-settings-aha-help" data-monster-mode="aha" data-i18n="ahaHelpTitle">Aha's Help</button>
+        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="custom" data-i18n="monsterModeCustom">Custom Enemy</button>
+        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="su" data-i18n="monsterModeSu">Simulated Universe</button>
+      </div>
+      <div id="monster-settings-status" class="monster-settings-status" role="status" aria-live="polite" data-i18n="monsterSettingsLoading">กำลังอ่าน stage จาก resource ของ Client...</div>
+      <div id="monster-settings-view" class="monster-settings-view" role="tabpanel" aria-live="polite"></div>
+
+      <div id="monster-settings-aha-help" class="monster-settings-aha-help" role="tabpanel" aria-labelledby="monster-mode-aha" hidden>
+        <div class="aha-help-card" id="aha-help-card">
+          <div class="aha-help-heading">
+            <div class="aha-help-emblem" aria-hidden="true">✦</div>
+            <div class="aha-help-heading-copy">
+              <h3 data-i18n="ahaHelpTitle">Aha's Help</h3>
+              <p data-i18n="ahaHelpDescription">Choose the support level for the next battle that includes Voracity Corruption. This setting is separate from Aha Global.</p>
+            </div>
+          </div>
+          <div class="aha-help-options" id="aha-help-options" role="group" aria-label="Aha's Help level" aria-describedby="aha-help-status"></div>
+          <select id="aha-help-level" class="aha-help-native-select" aria-hidden="true" tabindex="-1" disabled>
+            <option value="" data-i18n="ahaHelpLoading">Loading levels…</option>
+          </select>
+          <div class="aha-help-actions">
+            <div class="aha-help-save-state" id="aha-help-status" role="status" aria-live="polite" data-state="loading">
+              <span class="aha-help-state-dot" aria-hidden="true"></span>
+              <span id="aha-help-status-text" data-i18n="ahaHelpLoading">Loading levels…</span>
+            </div>
+            <button type="button" class="btn btn-success aha-help-save-button" id="btn-save-aha-help" disabled>
+              <span aria-hidden="true">💾</span>
+              <span data-i18n="ahaHelpSave">Save Aha's Help</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 3.5. Damage Analyst (In-Game Battle Telemetry & Damage Analysis) -->
     <section id="tab-damage-analyst" class="tab-content">
       <!-- Toolbar & Control Card -->
@@ -659,6 +710,7 @@
           </div>
         </div>
       </div>
+
     </section>
 
     <!-- 5. Ex-Rank Tab -->
@@ -725,8 +777,8 @@
                 <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
                 <select id="setting-server-mode" class="form-select">
                   <option value="gac">GaC-hkrpg-go</option>
-                  <option value="firefly">FireflyGo</option>
-                  <option value="robin">RobinSR</option>
+                  <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
+                  <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
                 </select>
               </div>
 
@@ -1754,6 +1806,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.1"></script>
+  <script type="module" src="js/app.js?v=3.2"></script>
 </body>
 </html>
