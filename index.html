@@ -673,6 +673,17 @@
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
             <div class="ex-switch-card">
               <div>
+                <div style="font-weight: 700;">Freecam / FaceCam</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">เลือกโหมด แล้วกด Tab ในเกมเพื่อเปิดหรือปิดกล้อง</div>
+                <label for="camera-mode">โหมดกล้อง</label>
+                <select id="camera-mode"><option value="freecam">Freecam</option><option value="facecam">FaceCam (ทดลอง)</option></select>
+                <label for="camera-distance">ระยะ FaceCam</label>
+                <input id="camera-distance" type="number" min="0.5" max="5" step="0.1" value="2">
+                <button type="button" class="btn btn-success" id="btn-save-camera">บันทึกกล้อง</button>
+              </div>
+            </div>
+            <div class="ex-switch-card">
+              <div>
                 <div style="font-weight: 700;" data-i18n="globalFeatureSilverWolf">Silver Wolf Global Feature</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="swGlobalDesc">เปิดใช้งานฟังก์ชันพิเศษ SW ทั่วทั้งเซิร์ฟเวอร์</div>
               </div>

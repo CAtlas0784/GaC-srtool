@@ -7614,6 +7614,11 @@ async function loadPersistentSettings() {
     }
     if (!data) return;
 
+    const cameraMode = document.getElementById('camera-mode');
+    const cameraDistance = document.getElementById('camera-distance');
+    if (cameraMode) cameraMode.value = data.camera_settings?.mode || 'freecam';
+    if (cameraDistance) cameraDistance.value = data.camera_settings?.distance ?? 2;
+
     if (data.main_character && el.persistentMcSelect) {
       el.persistentMcSelect.value = data.main_character;
     }
@@ -8422,6 +8427,21 @@ function setupEvents() {
   });
 
   // Persistent Toggles
+  document.getElementById('btn-save-camera')?.addEventListener('click', async () => {
+    const button = document.getElementById('btn-save-camera');
+    const mode = document.getElementById('camera-mode').value;
+    const distance = Number(document.getElementById('camera-distance').value);
+    if (!Number.isFinite(distance) || distance < 0.5 || distance > 5) {
+      showToast('ระยะ FaceCam ต้องอยู่ระหว่าง 0.5 ถึง 5', 'error'); return;
+    }
+    button.disabled = true;
+    try {
+      const saved = await apiCall('/api/camera', 'POST', { mode, distance });
+      if (state.persistentData) state.persistentData.camera_settings = saved;
+      showToast('บันทึกกล้องแล้ว', 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { button.disabled = false; }
+  });
   document.getElementById('btn-save-aha-help')?.addEventListener('click', async () => {
     const select = document.getElementById('aha-help-level');
     const button = document.getElementById('btn-save-aha-help');
