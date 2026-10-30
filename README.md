@@ -1,5 +1,9 @@
 # GaC-Srtool 🌌
 
+ใช้งานเว็บได้ที่ [GaCy Srtool บน Vercel](https://gacy-srtool.vercel.app/) เปิดหน้าตั้งค่าเพื่อเชื่อมต่อ SDK ของเซิร์ฟเวอร์ที่ใช้งานอยู่
+
+ในโหมด GaC หน้า **ตั้งค่าตัวละคร / สวิตช์ระบบพิเศษ** เลือก Freecam หรือ FaceCam และตั้งระยะเริ่มต้นของ FaceCam ได้ หลังบันทึกให้กด Tab ในเกมเพื่อเปิดหรือปิดกล้อง; ลูกกลิ้งปรับระยะชั่วคราวและกลับเป็นค่าที่ตั้งไว้เมื่อเปิดใหม่
+
 เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaC-hkrpg-go** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
 
 ทำงานแบบ Client-side 100% สามารถเปิดใช้งานผ่านเบราว์เซอร์ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรมเพิ่มเติม
@@ -57,6 +61,13 @@
 - ค่าในช่องที่ว่างใช้ค่าที่เซิร์ฟเวอร์สร้างตามปกติ; ล้างค่าที่เคยกำหนดเองเพื่อกลับไปใช้ค่าเริ่มต้นได้
 - การบันทึกแก้เฉพาะจำนวนไอเทมใน `freesr-data.json` ไม่เขียนทับตัวละคร, LC, Relic หรือ Battle Config
 - รองรับเฉพาะ GaC-hkrpg-go ผ่าน `/api/inventory/materials`; บันทึกลงไฟล์ทันทีและต้องเข้าเกมใหม่เพื่อโหลด session พร้อมจำนวนที่แก้แล้ว
+
+### 👾 6.1 Monster Setting
+- แยก Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration เพื่อดูชื่อด่าน/มอนสเตอร์ รูป, level และ wave จาก metadata Nanoka ที่ตรงกับ `client_version` ของเซิร์ฟเวอร์และ resource `challenge_data.json` / `resources/StageConfig.json` (อ่านอย่างเดียว); เมื่อ Client เปลี่ยนเวอร์ชัน API จะดึง metadata ของเวอร์ชันนั้นให้อัตโนมัติ โดยไม่ใช้ข้อมูลจากเวอร์ชันอื่น
+- เปลี่ยนการเลือกกลุ่ม/ด่านเป็นการ์ด และ Custom Enemy ค้นมอนด้วยชื่อหรือ ID พร้อมรูป/ชื่อจาก Nanoka; พิมพ์ ID เองได้ และแสดงรูปตัวอย่างขนาดใหญ่ขึ้น
+- Anomaly Arbitration เป็นโหมด Endgame ที่อ่าน stage จาก resource เช่นเดียวกับโหมดอื่น ไม่ใช่ Custom Enemy; Aha's Help มีแท็บแยกจาก AA
+- แก้ Custom Enemy ได้เฉพาะ Golden / Crimson Calyx และต้องเชื่อมต่อ GaC-Srtool; การกดใช้ stage จาก Client จะล้าง custom waves เพื่อให้กลับไปใช้ resource
+- Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ custom waves จากหน้านี้
 
 ### 💾 7. จัดการไฟล์เซฟ GaC (Persistent & FreeSR Data)
 - **ตั้งค่าตัวเอก (ผู้บุกเบิก):** สลับเพศ (Caelus / Stelle) และเปลี่ยนธาตุ (กายภาพ, ไฟ, จินตภาพ, ความจำ)
@@ -129,3 +140,12 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 หน้า **รายละเอียดตัวละคร → แนวทางบิลด์** แสดงอุปกรณ์และออฟหลักที่พบบ่อยในตัวอย่าง Endgame จากข้อมูลที่แสดงบน Prydwen โดยใส่โหมด/จำนวนผู้เล่นและวันที่เก็บ snapshot ไว้กำกับ ตัวเลขเป็นสัดส่วนการใช้งานในกลุ่มตัวอย่าง ไม่ใช่คะแนนจัดอันดับหรือคำแนะนำทางการ ตัวละครที่ snapshot ไม่มีตัวอย่างจะแสดงลิงก์ไปคู่มือของ Prydwen แทนการแสดงข้อมูลสำรองที่อาจทำให้เข้าใจผิด
 
 ข้อมูลที่สร้างไว้ใน `js/build-guides-data.js` ใช้ชุดข้อมูล MIT จาก [LvlUrArti/MocDataProcessed](https://huggingface.co/datasets/LvlUrArti/MocDataProcessed) ซึ่งระบุว่าเป็นข้อมูลที่ประมวลผลจากเว็บไซต์ Prydwen โปรดให้เครดิต LvlUrArti เมื่อเผยแพร่หรือวิเคราะห์ข้อมูลต่อ สามารถอัปเดต snapshot ด้วย `npm run sync-build-guides` ได้ โดยสคริปต์จะเลือกเวอร์ชันล่าสุดที่มีใน dataset และจับคู่ตัวละครตาม ID จาก `js/avatars-data.js`.
+
+
+## ตัวช่วยคำสั่ง GM
+
+ช่อง Console แสดง preview คำสั่งและอธิบาย argument ที่กำลังพิมพ์ รองรับคำสั่ง GM, `/unstuck`, `/faketime` และคำสั่งย่อย `/cw` ทุกแบบใน SDK ปัจจุบัน ใช้ ↑/↓ เลื่อนรายการ, Tab เติมค่าที่เลือกและไปช่องถัดไป, Shift+Tab ย้อนรายการ และ Esc ปิดรายการ คลิกรายการเพื่อเติมค่าได้; Tab ไม่ส่งคำสั่ง ให้กด Enter หรือ Run เพื่อส่ง
+
+พิมพ์ชื่อหรือ ID เพื่อกรองตัวละคร รายการไอเท็ม/Plane/Floor/ของ CW มาจาก `GET /api/command-completions` ของ SDK จึงต้องเชื่อมต่อ SDK ฉบับที่รองรับก่อน รายการดาวของ CW กรองตาม Role ที่เลือก รองรับการแก้ argument กลางบรรทัดโดยเก็บข้อความช่องอื่นไว้
+
+ตรวจตัวช่วยแบบไม่รันคำสั่งเกม: `node --test tools/command-assistant.test.mjs`

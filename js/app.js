@@ -1,7 +1,8 @@
+import { COMMANDS, usage, inspectCommand, completeCommand } from './command-assistant.mjs';
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.7';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.12';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -48,7 +49,8 @@ const state = {
   inventoryItems: [],
   inventorySaved: {},
   inventoryDraft: {},
-  inventoryPage: 0
+  inventoryPage: 0,
+  monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
 };
 
 // UI Elements Map
@@ -459,8 +461,10 @@ window.addEventListener('pagehide', () => {
 
 // Update connection status UI
 function setConnectionStatus(connected, extraText = '') {
+  const connectionChanged = state.isConnected !== connected;
   if (connected !== toolSessionConnected) syncToolSession(connected);
   state.isConnected = connected;
+  if (connectionChanged && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
   if (connected) {
     el.statusDot.classList.add('connected');
     el.connectionStatusText.textContent = extraText || t('online');
@@ -964,6 +968,7 @@ function applyTranslations() {
 
   // Update connection status text with new language
   setConnectionStatus(state.isConnected);
+  document.getElementById('aha-help-options')?.setAttribute('aria-label', t('ahaHelpTitle'));
 
   // Update server mode badges & labels for current language
   setupServerModes();
@@ -986,6 +991,10 @@ function applyTranslations() {
   }
   updateDashboardBattleBanner();
   updateDocumentTitle();
+  if (state.activeTab === 'tab-monster-settings') {
+    renderMonsterSettings();
+    if (state.monsterSettings.activeMode === 'aha') loadAhaHelpSettings();
+  }
 }
 
 // Setup Language Selector
@@ -1012,8 +1021,13 @@ function setupLanguageSelector() {
 // Server Mode Setup
 function setupServerModes() {
   const updateModeDisplay = (mode) => {
+    if (mode !== 'gac') {
+      mode = 'gac';
+      showToast(t('serverModesPausedNotice'), 'warning');
+    }
     state.serverMode = mode;
     localStorage.setItem('gac_srtool_mode', mode);
+    if (state.activeTab === 'tab-monster-settings') loadMonsterSettings();
     if (el.serverModeSelect) el.serverModeSelect.value = mode;
     if (el.settingServerMode) el.settingServerMode.value = mode;
 
@@ -1589,17 +1603,32 @@ const consoleState = {
   suggestionIndex: -1
 };
 
-const GM_COMMAND_SUGGESTIONS = [
-  { label: '/avatar <id> [level] [rank]', insert: '/avatar ', description: 'Update a character level and Eidolon rank' },
-  { label: '/clear lineup', insert: '/clear lineup', description: 'Clear the active lineup' },
-  { label: '/give <item_id> [count]', insert: '/give ', description: 'Add an item or currency' },
-  { label: '/heal', insert: '/heal', description: 'Restore team HP, SP, and Energy' },
-  { label: '/help', insert: '/help', description: 'Show available commands' },
-  { label: '/item <item_id> [count]', insert: '/item ', description: 'Add an item to inventory' },
-  { label: '/max', insert: '/max', description: 'Set all characters to Level 80 and E6' },
-  { label: '/scene <plane_id> [floor_id]', insert: '/scene ', description: 'Teleport to a scene' },
-  { label: '/teleport <plane_id> [floor_id]', insert: '/teleport ', description: 'Teleport to a scene' }
-];
+let consoleCatalogs = {};
+let consoleCatalogRequest = null;
+async function loadConsoleCommandCatalogs() {
+  if (!state.isConnected || consoleCatalogRequest) return consoleCatalogRequest;
+  consoleCatalogRequest = (async () => {
+    try {
+      const result = await apiCall('/api/command-completions');
+      consoleCatalogs = result?.choices || {};
+    } catch (err) { consoleCatalogRequest = null; }
+    if (document.activeElement === el.consoleCmdInput) renderGMCommandSuggestions();
+  })();
+  return consoleCatalogRequest;
+}
+function consoleCommandModel() {
+  const catalogs = { ...consoleCatalogs, avatars: Object.keys(AVATAR_METADATA).map(id => ({ value:id, label:getAvatarInfo(id).name })) };
+  if (catalogs.cw_roles) catalogs.cw_roles = catalogs.cw_roles.map(c => ({ ...c, label:`${getAvatarInfo(c.avatar).name} · Role ${c.value} · ${c.star}★` }));
+  return inspectCommand(el.consoleCmdInput?.value || '', el.consoleCmdInput?.selectionStart ?? 0, catalogs);
+}
+function renderGMCommandPreview(model = consoleCommandModel()) {
+  const preview = document.getElementById('console-command-preview');
+  const hint = document.getElementById('console-command-argument');
+  if (preview) preview.textContent = model.preview;
+  if (hint) hint.textContent = model.hint;
+  const description = document.getElementById('console-command-description');
+  if (description) description.textContent = model.command?.description || 'เลือกคำสั่งเพื่อดูตัวอย่างและช่องที่ต้องใส่';
+}
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -1611,21 +1640,6 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function findGMCommandSuggestions(value) {
-  const query = String(value || '').trimStart().toLowerCase();
-  if (!query) return [];
-
-  const normalizedQuery = query.replace(/^\/+/, '');
-  if (!normalizedQuery) return GM_COMMAND_SUGGESTIONS.slice(0, 6);
-
-  return GM_COMMAND_SUGGESTIONS
-    .filter(({ label }) => {
-      const normalizedLabel = label.toLowerCase().replace(/^\/+/, '');
-      if (/\s/.test(normalizedQuery)) return normalizedLabel.startsWith(normalizedQuery);
-      return normalizedLabel.split(/[\s<]/, 1)[0].startsWith(normalizedQuery);
-    })
-    .slice(0, 6);
-}
 
 function hideGMCommandSuggestions() {
   consoleState.suggestions = [];
@@ -1639,7 +1653,9 @@ function hideGMCommandSuggestions() {
 
 function renderGMCommandSuggestions() {
   if (!el.consoleSuggestions || !el.consoleSuggestionOptions) return;
-  consoleState.suggestions = findGMCommandSuggestions(el.consoleCmdInput?.value);
+  consoleState.model = consoleCommandModel();
+  renderGMCommandPreview(consoleState.model);
+  consoleState.suggestions = consoleState.model.suggestions;
   consoleState.suggestionIndex = -1;
 
   if (consoleState.suggestions.length === 0) {
@@ -1658,7 +1674,7 @@ function renderGMCommandSuggestions() {
 
     const command = document.createElement('span');
     command.className = 'console-suggestion-command';
-    command.textContent = suggestion.label;
+    command.textContent = `${suggestion.value}${suggestion.label && suggestion.label !== suggestion.value ? " · " + suggestion.label : ""}`;
     option.appendChild(command);
 
     const description = document.createElement('span');
@@ -1679,11 +1695,12 @@ function selectGMCommandSuggestion(index) {
   const suggestion = consoleState.suggestions[index];
   if (!suggestion || !el.consoleCmdInput) return false;
 
-  el.consoleCmdInput.value = suggestion.insert;
-  hideGMCommandSuggestions();
+  const completed = completeCommand(el.consoleCmdInput.value, consoleState.model, suggestion);
+  el.consoleCmdInput.value = completed.value;
   consoleState.historyIndex = -1;
   el.consoleCmdInput.focus();
-  el.consoleCmdInput.setSelectionRange(suggestion.insert.length, suggestion.insert.length);
+  el.consoleCmdInput.setSelectionRange(completed.caret, completed.caret);
+  renderGMCommandSuggestions();
   return true;
 }
 
@@ -1700,12 +1717,14 @@ function moveGMCommandSuggestion(direction) {
   options.forEach((option, index) => {
     const selected = index === consoleState.suggestionIndex;
     option.setAttribute('aria-selected', String(selected));
-    if (selected) el.consoleCmdInput?.setAttribute('aria-activedescendant', `console-command-option-${index}`);
+    if (selected) { el.consoleCmdInput?.setAttribute('aria-activedescendant', `console-command-option-${index}`); option.scrollIntoView({block:'nearest'}); }
     option.id = `console-command-option-${index}`;
   });
   if (el.consoleSuggestionCount) {
     el.consoleSuggestionCount.textContent = `‹ ${consoleState.suggestionIndex + 1}/${count} ›`;
   }
+  const candidate = completeCommand(el.consoleCmdInput.value, consoleState.model, consoleState.suggestions[consoleState.suggestionIndex]);
+  renderGMCommandPreview(inspectCommand(candidate.value, candidate.caret, consoleCatalogs));
   return true;
 }
 
@@ -1756,15 +1775,7 @@ async function dispatchGMCommand(rawCmd) {
   // Handle local /help command immediately
   if (cmd.toLowerCase() === '/help') {
     logToConsole('Available GM commands:', 'SYS');
-    logToConsole('  /heal                         - Restore team HP, SP, and Energy', 'SYS');
-    logToConsole('  /max                          - Set all characters to Level 80 and E6', 'SYS');
-    logToConsole('  /teleport <plane_id> [floor]  - Teleport to a scene', 'SYS');
-    logToConsole('  /scene <plane_id> [floor]     - Teleport to a scene (alias)', 'SYS');
-    logToConsole('  /clear lineup                 - Clear the active lineup', 'SYS');
-    logToConsole('  /avatar <id> [level] [rank]   - Add or update a character', 'SYS');
-    logToConsole('  /give <item_id> [count]       - Add an item or currency', 'SYS');
-    logToConsole('  /item <item_id> [count]       - Add an item (alias)', 'SYS');
-    logToConsole('  /help                         - Show this command list', 'SYS');
+    COMMANDS.forEach(c => logToConsole(`${usage(c)} — ${c.description}`, 'SYS'));
     return;
   }
 
@@ -1879,11 +1890,11 @@ function setupGMConsoleEvents() {
     el.formConsoleCmd.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!el.consoleCmdInput) return;
-      if (consoleState.suggestionIndex >= 0 && selectGMCommandSuggestion(consoleState.suggestionIndex)) return;
       const cmd = el.consoleCmdInput.value.trim();
       if (!cmd) return;
       hideGMCommandSuggestions();
       el.consoleCmdInput.value = '';
+      renderGMCommandPreview();
       dispatchGMCommand(cmd);
     });
   }
@@ -1894,7 +1905,12 @@ function setupGMConsoleEvents() {
       renderGMCommandSuggestions();
     });
 
+    el.consoleCmdInput.addEventListener('focus', () => { renderGMCommandSuggestions(); loadConsoleCommandCatalogs(); });
+    el.consoleCmdInput.addEventListener('click', renderGMCommandSuggestions);
+    el.consoleCmdInput.addEventListener('keyup', e => { if (['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) renderGMCommandSuggestions(); });
     el.consoleCmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && consoleState.suggestionIndex >= 0) { e.preventDefault(); selectGMCommandSuggestion(consoleState.suggestionIndex); return; }
+
       if (e.key === 'Escape' && consoleState.suggestions.length > 0) {
         e.preventDefault();
         hideGMCommandSuggestions();
@@ -1903,7 +1919,8 @@ function setupGMConsoleEvents() {
 
       if (e.key === 'Tab' && consoleState.suggestions.length > 0) {
         e.preventDefault();
-        selectGMCommandSuggestion(consoleState.suggestionIndex >= 0 ? consoleState.suggestionIndex : 0);
+        if (e.shiftKey) moveGMCommandSuggestion(-1);
+        else selectGMCommandSuggestion(consoleState.suggestionIndex >= 0 ? consoleState.suggestionIndex : 0);
         return;
       }
 
@@ -1939,6 +1956,7 @@ function setupGMConsoleEvents() {
   }
 
   if (el.consoleSuggestionOptions) {
+    el.consoleSuggestionOptions.addEventListener('mousedown', e => e.preventDefault());
     el.consoleSuggestionOptions.addEventListener('click', (e) => {
       const option = e.target.closest('[data-suggestion-index]');
       if (!option) return;
@@ -1967,6 +1985,7 @@ function setupGMConsoleEvents() {
     });
   }
 
+  renderGMCommandPreview();
   logToConsole('GaC server console ready. Type /help for available commands.', 'SYS');
 }
 
@@ -6740,6 +6759,800 @@ async function handleAddRelicSubmit(e) {
   showToast(t('toastRelicAdded'), 'success');
 }
 
+async function loadAhaHelpSettings() {
+  const select = document.getElementById('aha-help-level');
+  const save = document.getElementById('btn-save-aha-help');
+  if (!select || !save) return;
+  const options = document.getElementById('aha-help-options');
+  const status = document.getElementById('aha-help-status');
+  const statusText = document.getElementById('aha-help-status-text');
+  const canRenderOptions = typeof options?.replaceChildren === 'function';
+  const setStatus = (stateName, message, vars) => {
+    if (status?.dataset) status.dataset.state = stateName;
+    if (statusText) statusText.textContent = t(message, vars);
+  };
+  const renderOptions = (levels, legacyEnabled) => {
+    if (!canRenderOptions) return;
+    const choices = [
+      {
+        value: '',
+        title: t('ahaHelpLegacyTitle'),
+        detail: t('ahaHelpLegacyDescription', { status: t(legacyEnabled ? 'enabled' : 'disabled') }),
+        type: 'legacy'
+      },
+      {
+        value: '0',
+        title: t('ahaHelpOffTitle'),
+        detail: t('ahaHelpOffDescription'),
+        type: 'off'
+      },
+      ...levels.map(row => ({
+        value: String(row.BuffLevel),
+        title: `LV ${row.BuffLevel}`,
+        detail: t('ahaHelpProgress', { percent: Math.round(Number(row.ProgressPercent) * 100) }),
+        type: 'level'
+      }))
+    ];
+    options.replaceChildren();
+    for (const choice of choices) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'aha-help-option';
+      button.dataset.value = choice.value;
+      button.dataset.kind = choice.type;
+      button.setAttribute('aria-pressed', 'false');
+      const title = document.createElement('span');
+      title.className = 'aha-help-option-title';
+      title.textContent = choice.title;
+      const detail = document.createElement('span');
+      detail.className = 'aha-help-option-detail';
+      detail.textContent = choice.detail;
+      const selectedMark = document.createElement('span');
+      selectedMark.className = 'aha-help-option-check';
+      selectedMark.setAttribute('aria-hidden', 'true');
+      selectedMark.textContent = '✓';
+      button.append(title, detail, selectedMark);
+      options.append(button);
+    }
+    const syncSelection = () => {
+      for (const button of options.querySelectorAll('.aha-help-option')) {
+        const selected = button.dataset.value === select.value;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      }
+    };
+    options.setAttribute('aria-label', t('ahaHelpTitle'));
+    syncSelection();
+    options.onclick = event => {
+      const button = event.target.closest('.aha-help-option');
+      if (!button || select.disabled) return;
+      select.value = button.dataset.value;
+      syncSelection();
+      if (select.value === select.dataset.savedValue) setStatus('saved', 'ahaHelpStatusSaved');
+      else setStatus('unsaved', 'ahaHelpStatusUnsaved');
+    };
+  };
+  select.disabled = true;
+  save.disabled = true;
+  if (canRenderOptions) options.replaceChildren();
+  if (state.serverMode !== 'gac' || !state.isConnected) {
+    select.replaceChildren(new Option(t('ahaHelpConnect'), ''));
+    setStatus('unavailable', 'ahaHelpConnect');
+    return;
+  }
+  select.replaceChildren(new Option(t('ahaHelpLoading'), ''));
+  setStatus('loading', 'ahaHelpLoading');
+  try {
+    const result = await apiCall('/api/aha-help');
+    if (!Array.isArray(result.levels) || result.levels.length === 0) throw new Error(t('ahaHelpNoLevels'));
+    const legacyLabel = t('ahaHelpLegacyTitle');
+    select.replaceChildren(new Option(legacyLabel, ''), new Option(t('ahaHelpOffTitle'), '0'));
+    for (const row of result.levels) select.add(new Option(`LV ${row.BuffLevel}`, String(row.BuffLevel)));
+    select.value = result.level == null ? '' : String(result.level);
+    select.dataset.savedValue = select.value;
+    select.disabled = false;
+    save.disabled = false;
+    renderOptions(result.levels, result.legacy_enabled === true);
+    setStatus('saved', 'ahaHelpStatusSaved');
+  } catch (err) {
+    select.replaceChildren(new Option(t('ahaHelpLoadError', { error: err.message }), ''));
+    setStatus('error', 'ahaHelpLoadError', { error: err.message });
+    console.warn('Aha help loading error:', err);
+  }
+}
+
+function setMonsterSettingsStatus(key, status = 'info', vars) {
+  const node = document.getElementById('monster-settings-status');
+  if (!node) return;
+  node.dataset.state = status;
+  state.monsterSettings.statusKey = key;
+  state.monsterSettings.statusVars = vars;
+  state.monsterSettings.statusState = status;
+  node.textContent = t(key, vars);
+}
+
+function monsterElement(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function monsterLocalizedText(names) {
+  if (!names || typeof names !== 'object') return '';
+  const current = String(getCurrentLanguage() || 'en');
+  const locale = current.startsWith('zh') ? 'zh' : ['en', 'ja', 'ko'].includes(current) ? current : 'en';
+  return String(names[locale] || names.en || names.zh || names.ja || names.ko || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function monsterName(monsterId) {
+  const metadata = state.monsterSettings.catalog?.monsters?.[String(monsterId)];
+  return monsterLocalizedText(metadata?.names) || `Monster ${monsterId}`;
+}
+
+function makeMonsterIdentity(monsterId, variant = '') {
+  const metadata = state.monsterSettings.catalog?.monsters?.[String(monsterId)];
+  const item = monsterElement('span', `monster-settings-monster${variant ? ` ${variant}` : ''}`);
+  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '👾');
+  if (metadata?.icon_url) {
+    const image = document.createElement('img');
+    image.src = metadata.icon_url;
+    image.alt = '';
+    image.loading = 'lazy';
+    image.referrerPolicy = 'no-referrer';
+    image.addEventListener('error', () => image.remove(), { once: true });
+    portrait.append(image);
+  }
+  const copy = monsterElement('span', 'monster-settings-monster-copy');
+  copy.append(monsterElement('strong', '', monsterName(monsterId)));
+  copy.append(monsterElement('code', '', String(monsterId)));
+  item.append(portrait, copy);
+  return item;
+}
+
+function appendMonsterIdentity(container, monsterId, variant = '') {
+  container.append(makeMonsterIdentity(monsterId, variant));
+}
+
+function monsterStagePreviewNames(stage) {
+  return (stage?.monster_ids || []).map(monsterName).filter(Boolean);
+}
+
+function renderAARoundSelection(groups) {
+  const editor = state.monsterSettings;
+  const section = monsterElement('section', 'monster-aa-round-control');
+  const header = monsterElement('div', 'monster-aa-round-header');
+  const copy = monsterElement('div', 'monster-aa-round-copy');
+  copy.append(monsterElement('h3', '', t('monsterAaRoundTitle')));
+  copy.append(monsterElement('p', '', t('monsterAaRoundDescription')));
+  header.append(copy);
+
+  const selection = editor.aaRoundSelection;
+  if (editor.aaRoundSelectionError) {
+    const status = monsterElement('div', 'monster-aa-round-status is-error', t(editor.aaRoundSelectionErrorKey || 'monsterAaRoundLoadError', { error: editor.aaRoundSelectionError }));
+    status.setAttribute('role', 'status');
+    header.append(status);
+  } else if (editor.aaRoundSelectionBusy) {
+    const status = monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundUpdating'));
+    status.setAttribute('role', 'status');
+    header.append(status);
+  } else if (!editor.aaRoundSelectionLoaded && state.isConnected && state.serverMode === 'gac') {
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundLoading')));
+  } else if (!state.isConnected || state.serverMode !== 'gac') {
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundConnect')));
+  } else if (selection) {
+    const selectedGroup = groups.find(group => Number(group.id) === Number(selection.peak_group_id));
+    const selectedName = monsterLocalizedText(selectedGroup?.names) || t('monsterSettingsGroupOption', { id: selection.peak_group_id, count: selectedGroup?.stages?.length || 0 });
+    const status = monsterElement('div', 'monster-aa-round-status is-pending', t('monsterAaRoundPending', { round: selectedName, id: selection.peak_group_id }));
+    status.setAttribute('role', 'status');
+    header.append(status);
+  } else {
+    header.append(monsterElement('div', 'monster-aa-round-status', t('monsterAaRoundDefault')));
+  }
+
+  const picker = monsterElement('div', 'monster-aa-round-picker-wrap');
+  const label = monsterElement('label', 'monster-aa-round-picker-label', t('monsterAaRoundSelectLabel'));
+  label.htmlFor = 'monster-aa-round-picker';
+  const select = monsterElement('select', 'form-select monster-aa-round-picker');
+  select.id = 'monster-aa-round-picker';
+  select.dataset.aaRoundPicker = 'true';
+  select.setAttribute('aria-label', t('monsterAaRoundSelectLabel'));
+  select.disabled = editor.aaRoundSelectionBusy || !state.isConnected || state.serverMode !== 'gac' || !editor.catalog;
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = t('monsterAaRoundDefaultOption');
+  select.append(defaultOption);
+  for (const group of groups) {
+    const option = document.createElement('option');
+    option.value = String(group.id);
+    const roundName = monsterLocalizedText(group.names) || t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length });
+    option.textContent = `${roundName} · ${t('monsterAaRoundGroupId', { id: group.id })}`;
+    select.append(option);
+  }
+  select.value = selection ? String(selection.peak_group_id) : '';
+  picker.append(label, select);
+  section.append(header, picker);
+  return section;
+}
+
+function renderMonsterChallengeMode(mode) {
+  const root = document.getElementById('monster-settings-view');
+  const catalog = state.monsterSettings.catalog;
+  const groups = catalog?.modes?.[mode] || [];
+  root.replaceChildren();
+  if (!groups.length) {
+    root.append(monsterElement('div', 'monster-settings-empty', t(catalog ? 'monsterSettingsNoStages' : 'monsterSettingsReadOnly')));
+    return;
+  }
+
+  const selectedGroup = groups.find(group => String(group.id) === String(state.monsterSettings.groupId)) || groups[0];
+  state.monsterSettings.groupId = String(selectedGroup.id);
+  const selectedStage = selectedGroup.stages.find(stage => String(stage.id) === String(state.monsterSettings.stageId)) || selectedGroup.stages[0];
+  state.monsterSettings.stageId = String(selectedStage.id);
+
+  if (mode === 'aa') {
+    root.append(renderAARoundSelection(groups));
+  } else {
+    const groupPicker = monsterElement('section', 'monster-settings-picker-section');
+    groupPicker.append(monsterElement('h3', 'monster-settings-picker-title', t('monsterSettingsGroup')));
+    const groupGrid = monsterElement('div', 'monster-settings-group-grid');
+    for (const group of groups) {
+      const button = monsterElement('button', `monster-settings-group-card${group.id === selectedGroup.id ? ' active' : ''}`);
+      button.type = 'button';
+      button.dataset.monsterGroup = String(group.id);
+      button.setAttribute('aria-pressed', String(group.id === selectedGroup.id));
+      const copy = monsterElement('span', 'monster-settings-group-copy');
+      copy.append(monsterElement('strong', 'monster-settings-group-name', monsterLocalizedText(group.names) || t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
+      copy.append(monsterElement('span', 'monster-settings-group-meta', t('monsterSettingsGroupOption', { id: group.id, count: group.stages.length })));
+      button.append(copy);
+      const bossStage = group.stages.find(stage => stage.is_boss);
+      const bossId = bossStage?.monster_ids?.[0];
+      if (bossId) appendMonsterIdentity(button, bossId, 'group-feature');
+      groupGrid.append(button);
+    }
+    groupPicker.append(groupGrid);
+    root.append(groupPicker);
+  }
+
+  const stagePicker = monsterElement('section', 'monster-settings-picker-section');
+  stagePicker.append(monsterElement('h3', 'monster-settings-picker-title', t(mode === 'aa' ? 'monsterSettingsAARoomPreview' : 'monsterSettingsChallenge')));
+  const stageGrid = monsterElement('div', 'monster-settings-stage-grid');
+  for (const stage of selectedGroup.stages) {
+    const button = monsterElement('button', `monster-settings-stage-card${stage.id === selectedStage.id ? ' active' : ''}${stage.is_boss ? ' is-boss' : ''}`);
+    button.type = 'button';
+    button.dataset.monsterStage = String(stage.id);
+    button.setAttribute('aria-pressed', String(stage.id === selectedStage.id));
+    const monsterId = stage.monster_ids?.[0] || stage.battles?.[0]?.waves?.[0]?.[0];
+    if (monsterId) button.append(makeMonsterIdentity(monsterId, 'stage-feature'));
+    const copy = monsterElement('span', 'monster-settings-stage-copy');
+    const stageNames = monsterStagePreviewNames(stage);
+    copy.append(monsterElement('strong', '', stageNames.length ? stageNames.slice(0, 2).join(' / ') : t('monsterSettingsStageTitle', { id: stage.id })));
+    copy.append(monsterElement('span', 'monster-settings-stage-meta', t('monsterSettingsStageOption', { id: stage.id, boss: stage.is_boss ? ' · ' + t('monsterSettingsBoss') : '' })));
+    const battleCount = (stage.battles || []).reduce((count, battle) => count + (battle.waves || []).length, 0);
+    if (battleCount) copy.append(monsterElement('span', 'monster-settings-stage-meta', t('monsterSettingsWaveCount', { count: battleCount })));
+    button.append(copy);
+    stageGrid.append(button);
+  }
+  stagePicker.append(stageGrid);
+  root.append(stagePicker);
+
+  const stageHeader = monsterElement('div', 'monster-settings-stage-heading');
+  const stageNames = monsterStagePreviewNames(selectedStage);
+  stageHeader.append(monsterElement('h3', '', stageNames.length ? stageNames.slice(0, 2).join(' / ') : t('monsterSettingsStageTitle', { id: selectedStage.id })));
+  if (stageNames.length) stageHeader.append(monsterElement('span', 'monster-settings-badge', t('monsterSettingsStageTitle', { id: selectedStage.id })));
+  if (selectedStage.is_boss) stageHeader.append(monsterElement('span', 'monster-settings-badge', t('monsterSettingsBoss')));
+  if (selectedStage.default_buff_id) stageHeader.append(monsterElement('span', 'monster-settings-badge', t('monsterSettingsDefaultBuff', { id: selectedStage.default_buff_id })));
+  root.append(stageHeader);
+
+  for (const battle of selectedStage.battles || []) {
+    const card = monsterElement('article', 'monster-settings-battle');
+    const firstWaveIds = battle.waves?.[0] || [];
+    const featuredMonsterIds = selectedStage.monster_ids?.length ? selectedStage.monster_ids : firstWaveIds;
+    const encounterNames = featuredMonsterIds.slice(0, 2).map(monsterName);
+    const heading = monsterElement('div', 'monster-settings-encounter-heading');
+    heading.append(monsterElement('h4', '', encounterNames.length ? encounterNames.join(' / ') : t('monsterSettingsEncounterTitle', { id: battle.stage_id })));
+    if (encounterNames.length) heading.append(monsterElement('span', 'monster-settings-id-badge', t('monsterSettingsEncounterTitle', { id: battle.stage_id })));
+    card.append(heading);
+    const meta = monsterElement('div', 'monster-settings-meta');
+    meta.append(monsterElement('span', '', t('monsterSettingsLevel', { level: battle.level })));
+    meta.append(monsterElement('span', '', t('monsterSettingsWaveCount', { count: (battle.waves || []).length })));
+    card.append(meta);
+    (battle.waves || []).forEach((wave, index) => {
+      const waveRow = monsterElement('div', 'monster-settings-wave');
+      waveRow.append(monsterElement('strong', '', t('monsterSettingsWave', { number: index + 1 })));
+      const monsters = monsterElement('div', 'monster-settings-monsters');
+      for (const monsterId of wave) appendMonsterIdentity(monsters, monsterId);
+      waveRow.append(monsters);
+      card.append(waveRow);
+    });
+    root.append(card);
+  }
+}
+
+function setMonsterEditorStatus(key, status = 'saved', vars) {
+  const node = document.getElementById('monster-custom-status');
+  if (!node) return;
+  node.dataset.state = status;
+  node.textContent = t(key, vars);
+}
+
+function readMonsterWaves(waves) {
+  if (!Array.isArray(waves)) return [];
+  return waves.map(wave => Array.isArray(wave) ? wave.map(monster => ({
+    monster_id: monster?.monster_id == null ? '' : String(monster.monster_id),
+    level: monster?.level == null ? '' : String(monster.level),
+    max_hp: !monster?.max_hp ? '' : String(monster.max_hp)
+  })) : []);
+}
+
+function monsterWavesFingerprint() {
+  return JSON.stringify(state.monsterSettings.waves);
+}
+
+function updateMonsterEditorControls() {
+  const editor = state.monsterSettings;
+  const enabled = editor.canEdit && editor.ready;
+  const save = document.getElementById('monster-custom-save');
+  const add = document.getElementById('monster-custom-add-wave');
+  const reset = document.getElementById('monster-custom-reset');
+  if (save) save.disabled = !enabled || monsterWavesFingerprint() === editor.savedFingerprint;
+  if (add) add.disabled = !enabled;
+  if (reset) reset.disabled = !enabled || editor.waves.length === 0;
+}
+
+function renderMonsterCustomWaves() {
+  const editor = state.monsterSettings;
+  const list = document.getElementById('monster-custom-wave-list');
+  if (!list) return;
+  list.replaceChildren();
+  if (editor.waves.length === 0) list.append(monsterElement('div', 'monster-settings-empty', t('monsterCustomEmpty')));
+
+  const makeInput = (waveIndex, monsterIndex, field, labelKey, value, options = {}) => {
+    const wrapper = monsterElement(field === 'monster_id' ? 'div' : 'label', 'monster-custom-field');
+    wrapper.append(monsterElement('span', '', t(labelKey)));
+    const input = document.createElement('input');
+    input.type = field === 'monster_id' ? 'text' : 'number';
+    if (field === 'monster_id') {
+      input.inputMode = 'numeric';
+      input.autocomplete = 'off';
+      input.placeholder = t('monsterCustomSearch');
+      input.setAttribute('role', 'combobox');
+      input.setAttribute('aria-autocomplete', 'list');
+      input.setAttribute('aria-expanded', 'false');
+    }
+    input.min = options.min || '1';
+    input.max = '4294967295';
+    input.step = '1';
+    input.value = value;
+    input.disabled = !editor.canEdit || !editor.ready;
+    input.dataset.customField = field;
+    input.dataset.waveIndex = String(waveIndex);
+    input.dataset.monsterIndex = String(monsterIndex);
+    input.setAttribute('aria-label', t(labelKey));
+    if (options.list && field !== 'monster_id') input.setAttribute('list', options.list);
+    if (options.placeholder) input.placeholder = t(options.placeholder);
+    if (field === 'monster_id') {
+      const monster = state.monsterSettings.waves[waveIndex]?.[monsterIndex];
+      const picker = monsterElement('div', 'monster-custom-picker');
+      const preview = monsterElement('div', 'monster-custom-monster-preview');
+      const results = monsterElement('div', 'monster-custom-picker-results');
+      results.id = `monster-custom-results-${waveIndex}-${monsterIndex}`;
+      results.setAttribute('role', 'listbox');
+      results.hidden = true;
+      input.setAttribute('aria-controls', results.id);
+      const updatePreview = () => {
+        preview.replaceChildren();
+        const id = Number(monster?.monster_id);
+        if (Number.isInteger(id) && id > 0) appendMonsterIdentity(preview, id, 'compact');
+      };
+      const matchingIDs = () => {
+        const query = input.value.trim().toLocaleLowerCase();
+        if (!query) return [];
+        return (state.monsterSettings.catalog?.monster_ids || []).filter(id => {
+          const names = Object.values(state.monsterSettings.catalog?.monsters?.[String(id)]?.names || {}).join(' ').toLocaleLowerCase();
+          return String(id).includes(query) || names.includes(query);
+        }).slice(0, 30);
+      };
+      const closeResults = () => {
+        results.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+      };
+      const chooseMonster = id => {
+        input.value = String(id);
+        if (monster) monster.monster_id = String(id);
+        closeResults();
+        updatePreview();
+        const unchanged = monsterWavesFingerprint() === state.monsterSettings.savedFingerprint;
+        setMonsterEditorStatus(unchanged ? 'monsterCustomSaved' : 'monsterCustomUnsaved', unchanged ? 'saved' : 'unsaved');
+        updateMonsterEditorControls();
+      };
+      const renderResults = () => {
+        results.replaceChildren();
+        const matches = matchingIDs();
+        for (const id of matches) {
+          const option = monsterElement('button', 'monster-custom-picker-option');
+          option.type = 'button';
+          option.setAttribute('role', 'option');
+          option.setAttribute('aria-selected', String(String(id) === monster?.monster_id));
+          option.append(makeMonsterIdentity(id, 'picker-option'));
+          option.addEventListener('mousedown', event => event.preventDefault());
+          option.addEventListener('click', () => chooseMonster(id));
+          results.append(option);
+        }
+        results.hidden = matches.length === 0;
+        input.setAttribute('aria-expanded', String(matches.length > 0));
+      };
+      input.addEventListener('input', event => {
+        event.stopPropagation();
+        const raw = input.value.trim();
+        if ((raw === '' || /^\d+$/.test(raw)) && monster) {
+          monster.monster_id = raw;
+          updatePreview();
+          const unchanged = monsterWavesFingerprint() === state.monsterSettings.savedFingerprint;
+          setMonsterEditorStatus(unchanged ? 'monsterCustomSaved' : 'monsterCustomUnsaved', unchanged ? 'saved' : 'unsaved');
+          updateMonsterEditorControls();
+        }
+        renderResults();
+      });
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeResults();
+        if (event.key === 'Enter') {
+          const first = matchingIDs()[0];
+          if (first) {
+            event.preventDefault();
+            chooseMonster(first);
+          }
+        }
+      });
+      input.addEventListener('blur', () => {
+        window.setTimeout(() => {
+          if (!results.contains(document.activeElement)) closeResults();
+          if (!/^\d+$/.test(input.value.trim())) input.value = monster?.monster_id || '';
+        }, 0);
+      });
+      wrapper.classList.add('monster-custom-monster-field');
+      picker.append(input, results);
+      wrapper.append(picker);
+      updatePreview();
+      wrapper.append(preview);
+    } else {
+      wrapper.append(input);
+    }
+    return wrapper;
+  };
+
+  editor.waves.forEach((wave, waveIndex) => {
+    const section = monsterElement('section', 'monster-custom-wave');
+    const heading = monsterElement('div', 'monster-custom-wave-heading');
+    heading.append(monsterElement('strong', '', t('monsterSettingsWave', { number: waveIndex + 1 })));
+    const removeWave = monsterElement('button', 'btn btn-sm btn-secondary');
+    removeWave.type = 'button';
+    removeWave.textContent = '× ' + t('monsterCustomRemoveWave');
+    removeWave.dataset.customAction = 'remove-wave';
+    removeWave.dataset.waveIndex = String(waveIndex);
+    removeWave.disabled = !editor.canEdit || !editor.ready;
+    heading.append(removeWave);
+    section.append(heading);
+
+    const rows = monsterElement('div', 'monster-custom-rows');
+    wave.forEach((monster, monsterIndex) => {
+      const row = monsterElement('div', 'monster-custom-row');
+      row.append(
+        makeInput(waveIndex, monsterIndex, 'monster_id', 'monsterCustomId', monster.monster_id),
+        makeInput(waveIndex, monsterIndex, 'level', 'monsterCustomLevel', monster.level, { list: 'monster-level-options' }),
+        makeInput(waveIndex, monsterIndex, 'max_hp', 'monsterCustomMaxHP', monster.max_hp, { min: '0', placeholder: 'monsterCustomNaturalHP' })
+      );
+      const remove = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-remove', '×');
+      remove.type = 'button';
+      remove.dataset.customAction = 'remove-monster';
+      remove.dataset.waveIndex = String(waveIndex);
+      remove.dataset.monsterIndex = String(monsterIndex);
+      remove.disabled = !editor.canEdit || !editor.ready;
+      remove.setAttribute('aria-label', t('monsterCustomRemoveEnemy'));
+      row.append(remove);
+      rows.append(row);
+    });
+    section.append(rows);
+    const addEnemy = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-add-enemy', '＋ ' + t('monsterCustomAddEnemy'));
+    addEnemy.type = 'button';
+    addEnemy.dataset.customAction = 'add-monster';
+    addEnemy.dataset.waveIndex = String(waveIndex);
+    addEnemy.disabled = !editor.canEdit || !editor.ready;
+    section.append(addEnemy);
+    list.append(section);
+  });
+  updateMonsterEditorControls();
+}
+
+function renderMonsterCustomEditor() {
+  const root = document.getElementById('monster-settings-view');
+  const editor = state.monsterSettings;
+  root.replaceChildren();
+  const card = monsterElement('div', 'card monster-custom-card');
+  card.append(monsterElement('h3', '', t('monsterCustomTitle')));
+  card.append(monsterElement('p', 'card-subtitle', t('monsterCustomDescription')));
+  card.append(monsterElement('div', 'monster-settings-rule', t('monsterCustomCalyxOnly')));
+  card.append(monsterElement('div', 'monster-settings-source', t(state.isConnected ? 'monsterCustomConnected' : 'monsterCustomConnect')));
+  const list = monsterElement('div', 'monster-custom-wave-list');
+  list.id = 'monster-custom-wave-list';
+  card.append(list);
+  const levels = document.createElement('datalist');
+  levels.id = 'monster-level-options';
+  for (const value of editor.catalog?.levels || []) {
+    const option = document.createElement('option'); option.value = String(value); levels.append(option);
+  }
+  card.append(levels);
+  const toolbar = monsterElement('div', 'monster-custom-toolbar');
+  const actions = monsterElement('div', 'monster-custom-actions');
+  const add = monsterElement('button', 'btn btn-secondary', '＋ ' + t('monsterCustomAddWave'));
+  add.type = 'button'; add.id = 'monster-custom-add-wave';
+  const reset = monsterElement('button', 'btn btn-secondary', '↺ ' + t('monsterCustomUseClient'));
+  reset.type = 'button'; reset.id = 'monster-custom-reset';
+  actions.append(add, reset);
+  const saveActions = monsterElement('div', 'monster-custom-save-actions');
+  const status = monsterElement('div', 'monster-settings-status');
+  const dirty = monsterWavesFingerprint() !== editor.savedFingerprint;
+  status.id = 'monster-custom-status'; status.dataset.state = dirty ? 'unsaved' : editor.canEdit ? 'saved' : 'unavailable';
+  status.textContent = t(dirty ? 'monsterCustomUnsaved' : editor.canEdit ? 'monsterCustomSaved' : 'monsterCustomConnect');
+  const save = monsterElement('button', 'btn btn-success', '💾 ' + t('monsterCustomSave'));
+  save.type = 'button'; save.id = 'monster-custom-save';
+  saveActions.append(status, save);
+  toolbar.append(actions, saveActions);
+  card.append(toolbar);
+  root.append(card);
+  renderMonsterCustomWaves();
+}
+
+function renderMonsterSettings() {
+  const root = document.getElementById('monster-settings-view');
+  const help = document.getElementById('monster-settings-aha-help');
+  const status = document.getElementById('monster-settings-status');
+  if (!root) return;
+  const mode = state.monsterSettings.activeMode;
+  document.querySelector('.monster-settings-tabs')?.setAttribute('aria-label', t('monsterSettingsTitle'));
+  document.querySelectorAll('[data-monster-mode]').forEach(button => {
+    const selected = button.dataset.monsterMode === mode;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-selected', String(selected));
+  });
+  if (help) help.hidden = mode !== 'aha';
+  root.hidden = mode === 'aha';
+  if (status) status.hidden = mode === 'aha';
+  if (mode === 'aha') {
+    if (!state.monsterSettings.ahaLoaded) {
+      state.monsterSettings.ahaLoaded = true;
+      loadAhaHelpSettings();
+    }
+  } else if (mode === 'custom') renderMonsterCustomEditor();
+  else if (mode === 'su') {
+    root.replaceChildren(monsterElement('div', 'monster-settings-empty', t('monsterSettingsSuReadOnly')));
+  } else renderMonsterChallengeMode(mode);
+  if (state.monsterSettings.statusKey) setMonsterSettingsStatus(state.monsterSettings.statusKey, state.monsterSettings.statusState, state.monsterSettings.statusVars);
+}
+
+async function loadMonsterSettings() {
+  const editor = state.monsterSettings;
+  if (!document.getElementById('monster-settings-view')) return;
+  editor.ready = false;
+  editor.canEdit = false;
+  editor.catalog = null;
+  editor.aaRoundSelection = null;
+  editor.aaRoundSelectionLoaded = false;
+  editor.aaRoundSelectionError = '';
+  editor.aaRoundSelectionErrorKey = '';
+  setMonsterSettingsStatus('monsterSettingsLoading', 'loading');
+
+  let catalogError = null;
+  if (state.isConnected && state.serverMode === 'gac') {
+    try {
+      editor.catalog = await apiCall('/api/monster-settings/catalog');
+    } catch (error) { catalogError = error; }
+    try {
+      const result = await apiCall('/api/monster-settings/aa-round');
+      editor.aaRoundSelection = result?.selection || null;
+      editor.aaRoundSelectionLoaded = true;
+      if (editor.aaRoundSelection) {
+        const selected = editor.catalog?.modes?.aa?.find(group => Number(group.id) === Number(editor.aaRoundSelection.peak_group_id));
+        if (selected) {
+          editor.groupId = String(selected.id);
+          if (!selected.stages.some(stage => String(stage.id) === String(editor.stageId))) editor.stageId = String(selected.stages[0]?.id || '');
+        }
+      } else {
+        const defaultGroup = editor.catalog?.modes?.aa?.[0];
+        if (defaultGroup) {
+          editor.groupId = String(defaultGroup.id);
+          if (!defaultGroup.stages.some(stage => String(stage.id) === String(editor.stageId))) editor.stageId = String(defaultGroup.stages[0]?.id || '');
+        }
+      }
+    } catch (error) {
+      editor.aaRoundSelectionError = error.message;
+      editor.aaRoundSelectionErrorKey = 'monsterAaRoundLoadError';
+    }
+  }
+
+  let data = null;
+  let loadedFromServer = false;
+  if (state.isConnected && state.serverMode === 'gac') {
+    try {
+      const result = await apiCall('/api/freesr');
+      if (!result?.data || typeof result.data !== 'object') throw new Error(t('monsterSettingsDataUnavailable'));
+      data = result.data;
+      state.fullFreesrData = data;
+      await saveFreesrCache(data);
+      loadedFromServer = true;
+    } catch (error) {
+      console.warn('Monster settings data loading error:', error);
+    }
+  }
+  if (!data && state.fullFreesrData) data = state.fullFreesrData;
+  if (!data) {
+    try {
+      data = await idbGet('gac_srtool_freesr_cache') || null;
+      if (!data) {
+        const cached = localStorage.getItem('gac_srtool_freesr_cache');
+        if (cached) data = JSON.parse(cached);
+      }
+    } catch (_) { /* Keep the view read-only when no cache exists. */ }
+  }
+  editor.waves = readMonsterWaves(data?.battle_config?.monsters);
+  editor.savedFingerprint = monsterWavesFingerprint();
+  editor.canEdit = loadedFromServer && state.serverMode === 'gac' && state.isConnected;
+  editor.ready = Boolean(data);
+
+  if (editor.activeMode === 'aha' && editor.ahaLoaded) loadAhaHelpSettings();
+  renderMonsterSettings();
+  if (catalogError) setMonsterSettingsStatus('monsterSettingsCatalogError', 'error', { error: catalogError.message });
+  else if (!editor.canEdit) setMonsterSettingsStatus('monsterSettingsReadOnly', 'unavailable');
+  else {
+    let sources = (editor.catalog?.sources || []).join(', ') || t('monsterSettingsClientResources');
+    if (editor.catalog?.metadata_error) sources += ', Nanoka metadata unavailable';
+    setMonsterSettingsStatus('monsterSettingsLoaded', 'saved', { source: sources });
+  }
+}
+
+function setupMonsterSettingsEvents() {
+  document.querySelectorAll('[data-monster-mode]').forEach(button => {
+    button.addEventListener('click', () => {
+      state.monsterSettings.activeMode = button.dataset.monsterMode;
+      renderMonsterSettings();
+    });
+  });
+  const root = document.getElementById('monster-settings-view');
+  root?.addEventListener('change', async event => {
+    const picker = event.target.closest('[data-aa-round-picker]');
+    if (!picker || picker.disabled) return;
+    const editor = state.monsterSettings;
+    if (editor.aaRoundSelectionBusy) return;
+    const peakGroupId = picker.value ? Number(picker.value) : 0;
+    if (peakGroupId) {
+      const selected = editor.catalog?.modes?.aa?.find(group => Number(group.id) === peakGroupId);
+      if (!selected) return;
+      editor.groupId = String(selected.id);
+      editor.stageId = String(selected.stages[0]?.id || '');
+    } else {
+      const defaultGroup = editor.catalog?.modes?.aa?.[0];
+      if (defaultGroup) {
+        editor.groupId = String(defaultGroup.id);
+        editor.stageId = String(defaultGroup.stages[0]?.id || '');
+      }
+    }
+    const previousSelection = editor.aaRoundSelection;
+    editor.aaRoundSelectionBusy = true;
+    editor.aaRoundSelectionError = '';
+    editor.aaRoundSelectionErrorKey = '';
+    editor.aaRoundSelection = peakGroupId ? { peak_group_id: peakGroupId } : null;
+    renderMonsterSettings();
+    try {
+      const payload = peakGroupId ? { peak_group_id: peakGroupId } : { action: 'clear' };
+      const result = await apiCall('/api/monster-settings/aa-round', 'POST', payload);
+      editor.aaRoundSelection = result?.selection || null;
+      editor.aaRoundSelectionLoaded = true;
+      showToast(t(editor.aaRoundSelection ? 'monsterAaRoundSavedToast' : 'monsterAaRoundClearedToast'), 'success');
+    } catch (error) {
+      editor.aaRoundSelection = previousSelection;
+      editor.aaRoundSelectionError = error.message;
+      editor.aaRoundSelectionErrorKey = 'monsterAaRoundSaveError';
+      showToast(t('monsterAaRoundSaveError', { error: error.message }), 'error');
+    } finally {
+      editor.aaRoundSelectionBusy = false;
+      renderMonsterSettings();
+    }
+  });
+  root?.addEventListener('click', event => {
+    const groupCard = event.target.closest('[data-monster-group]');
+    if (groupCard) {
+      state.monsterSettings.groupId = groupCard.dataset.monsterGroup;
+      state.monsterSettings.stageId = '';
+      renderMonsterSettings();
+      return;
+    }
+    const stageCard = event.target.closest('[data-monster-stage]');
+    if (stageCard) {
+      state.monsterSettings.stageId = stageCard.dataset.monsterStage;
+      renderMonsterSettings();
+    }
+  });
+  root?.addEventListener('input', event => {
+    const input = event.target.closest('[data-custom-field]');
+    if (!input) return;
+    const monster = state.monsterSettings.waves[Number(input.dataset.waveIndex)]?.[Number(input.dataset.monsterIndex)];
+    if (!monster) return;
+    monster[input.dataset.customField] = input.value;
+    setMonsterEditorStatus(monsterWavesFingerprint() === state.monsterSettings.savedFingerprint ? 'monsterCustomSaved' : 'monsterCustomUnsaved',
+      monsterWavesFingerprint() === state.monsterSettings.savedFingerprint ? 'saved' : 'unsaved');
+    updateMonsterEditorControls();
+  });
+  root?.addEventListener('click', event => {
+    const button = event.target.closest('[data-custom-action]');
+    if (!button || button.disabled) return;
+    const editor = state.monsterSettings;
+    const waveIndex = Number(button.dataset.waveIndex);
+    if (button.dataset.customAction === 'remove-wave') editor.waves.splice(waveIndex, 1);
+    if (button.dataset.customAction === 'add-monster' && editor.waves[waveIndex]) editor.waves[waveIndex].push({ monster_id: '', level: '', max_hp: '' });
+    if (button.dataset.customAction === 'remove-monster' && editor.waves[waveIndex]) editor.waves[waveIndex].splice(Number(button.dataset.monsterIndex), 1);
+    renderMonsterCustomEditor();
+    setMonsterEditorStatus(monsterWavesFingerprint() === editor.savedFingerprint ? 'monsterCustomSaved' : 'monsterCustomUnsaved',
+      monsterWavesFingerprint() === editor.savedFingerprint ? 'saved' : 'unsaved');
+  });
+  root?.addEventListener('click', async event => {
+    const button = event.target.closest('#monster-custom-add-wave, #monster-custom-reset, #monster-custom-save');
+    if (!button || button.disabled) return;
+    const editor = state.monsterSettings;
+    if (button.id === 'monster-custom-add-wave') {
+      editor.waves.push([]);
+      renderMonsterCustomEditor();
+      setMonsterEditorStatus('monsterCustomUnsaved', 'unsaved');
+      return;
+    }
+    if (button.id === 'monster-custom-reset') {
+      editor.waves = [];
+      renderMonsterCustomEditor();
+      setMonsterEditorStatus('monsterCustomUnsaved', 'unsaved');
+      return;
+    }
+    if (!state.fullFreesrData) return;
+    const normalized = [];
+    for (let waveIndex = 0; waveIndex < editor.waves.length; waveIndex++) {
+      const wave = editor.waves[waveIndex];
+      if (!wave.length) { setMonsterEditorStatus('monsterCustomEmptyWave', 'error', { number: waveIndex + 1 }); return; }
+      const monsters = [];
+      for (const monster of wave) {
+        const monsterId = Number(monster.monster_id);
+        const level = Number(monster.level);
+        const maxHP = monster.max_hp === '' ? 0 : Number(monster.max_hp);
+        if (!Number.isInteger(monsterId) || monsterId <= 0 || monsterId > 4294967295
+          || !Number.isInteger(level) || level <= 0 || level > 4294967295
+          || !Number.isInteger(maxHP) || maxHP < 0 || maxHP > 4294967295) {
+          setMonsterEditorStatus('monsterCustomInvalidEntry', 'error'); return;
+        }
+        monsters.push({ monster_id: monsterId, level, max_hp: maxHP });
+      }
+      normalized.push(monsters);
+    }
+    const config = state.fullFreesrData.battle_config || (state.fullFreesrData.battle_config = {});
+    const previous = config.monsters;
+    config.monsters = normalized;
+    button.disabled = true;
+    try {
+      await saveFreesrChangesToServer();
+      editor.waves = readMonsterWaves(normalized);
+      editor.savedFingerprint = monsterWavesFingerprint();
+      renderMonsterCustomEditor();
+      setMonsterEditorStatus('monsterCustomSaved', 'saved');
+      showToast(t('monsterCustomSaveSuccess'), 'success');
+    } catch (error) {
+      if (previous === undefined) delete config.monsters;
+      else config.monsters = previous;
+      await saveFreesrCache(state.fullFreesrData).catch(() => {});
+      setMonsterEditorStatus('monsterCustomSaveError', 'error', { error: error.message });
+      showToast(t('toastErrorMessage', { message: error.message }), 'error');
+    } finally { updateMonsterEditorControls(); }
+  });
+}
+
 // Load Persistent / Character Path Settings (GaC persistent vs Firefly data-in-game)
 async function loadPersistentSettings() {
   if (state.serverMode === 'robin') return;
@@ -6765,8 +7578,8 @@ async function loadPersistentSettings() {
     let data = state.persistentData;
     if (state.isConnected) {
       const res = await apiCall('/api/persistent');
-      if (res && res.data) {
-        data = res.data;
+      if (res && (res.persistent || res.data)) {
+        data = res.persistent || res.data;
         state.persistentData = data;
         savePersistentCache(data);
       }
@@ -6780,6 +7593,11 @@ async function loadPersistentSettings() {
       }
     }
     if (!data) return;
+
+    const cameraMode = document.getElementById('camera-mode');
+    const cameraDistance = document.getElementById('camera-distance');
+    if (cameraMode) cameraMode.value = data.camera_settings?.mode || 'freecam';
+    if (cameraDistance) cameraDistance.value = data.camera_settings?.distance ?? 2;
 
     if (data.main_character && el.persistentMcSelect) {
       el.persistentMcSelect.value = data.main_character;
@@ -7156,6 +7974,8 @@ function setupTabs() {
           loadEquipment();
         } else if (targetId === 'tab-inventory') {
           loadMaterialsInventory();
+        } else if (targetId === 'tab-monster-settings') {
+          loadMonsterSettings();
         } else if (targetId === 'tab-persistent') {
           loadPersistentSettings();
         } else if (targetId === 'tab-json') {
@@ -7587,6 +8407,48 @@ function setupEvents() {
   });
 
   // Persistent Toggles
+  document.getElementById('btn-save-camera')?.addEventListener('click', async () => {
+    const button = document.getElementById('btn-save-camera');
+    const mode = document.getElementById('camera-mode').value;
+    const distance = Number(document.getElementById('camera-distance').value);
+    if (!Number.isFinite(distance) || distance < 0.5 || distance > 5) {
+      showToast('ระยะ FaceCam ต้องอยู่ระหว่าง 0.5 ถึง 5', 'error'); return;
+    }
+    button.disabled = true;
+    try {
+      const saved = await apiCall('/api/camera', 'POST', { mode, distance });
+      if (state.persistentData) state.persistentData.camera_settings = saved;
+      showToast('บันทึกกล้องแล้ว', 'success');
+    } catch (err) { showToast(err.message, 'error'); }
+    finally { button.disabled = false; }
+  });
+  document.getElementById('btn-save-aha-help')?.addEventListener('click', async () => {
+    const select = document.getElementById('aha-help-level');
+    const button = document.getElementById('btn-save-aha-help');
+    if (!select || !button || select.disabled) return;
+    button.disabled = true;
+    try {
+      await apiCall('/api/aha-help', 'POST', { level: select.value === '' ? null : Number(select.value) });
+      select.dataset.savedValue = select.value;
+      const status = document.getElementById('aha-help-status');
+      const statusText = document.getElementById('aha-help-status-text');
+      if (status?.dataset) status.dataset.state = 'saved';
+      if (statusText) statusText.textContent = t('ahaHelpStatusSaved');
+      document.querySelectorAll('#aha-help-options .aha-help-option').forEach(option => {
+        const selected = option.dataset.value === select.value;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-pressed', String(selected));
+      });
+      showToast(t('ahaHelpSavedToast'), 'success');
+    } catch (err) {
+      const status = document.getElementById('aha-help-status');
+      const statusText = document.getElementById('aha-help-status-text');
+      if (status?.dataset) status.dataset.state = 'error';
+      if (statusText) statusText.textContent = t('ahaHelpStatusSaveError', { error: err.message });
+      showToast(t('toastErrorMessage', { message: err.message }), 'error');
+    } finally { button.disabled = select.disabled; }
+  });
+  setupMonsterSettingsEvents();
   el.btnSavePersistentToggles.addEventListener('click', async () => {
     const sw = el.toggleSwGlobal.checked;
     const castorice = el.toggleCastoriceGlobal.checked;
@@ -8075,6 +8937,7 @@ function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
     'tab-avatars': `👥 ${t('tabAvatars')} | GaC-Srtool`,
     'tab-equipment': `🗡️ ${t('tabEquipment')} | GaC-Srtool`,
     'tab-inventory': `🎒 ${t('tabInventory')} | GaC-Srtool`,
+    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaC-Srtool`,
     'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaC-Srtool`,
     'tab-persistent': `💾 ${t('tabPersistent')} | GaC-Srtool`,
     'tab-exrank': `⚡ ${t('tabExrank')} | GaC-Srtool`,
