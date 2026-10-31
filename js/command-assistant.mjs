@@ -16,6 +16,7 @@ export const COMMANDS = [
   spec('/cw help', 'แสดงวิธีใช้คำสั่ง CW'), spec('/cw status', 'ดูเงิน HP เลเวล และสถานะรอบ CW'),
   spec('/cw list', 'แสดงรายการ ID ของ CW', [arg('category', 'เลือกชนิดข้อมูล', ['role','equip','orb','consumable','forge'])]),
   ...['gold','hp','exp'].map(p => spec('/cw '+p, p === 'exp' ? 'เพิ่ม EXP ในรอบ CW' : 'ตั้งค่า '+p+' ในรอบ CW', [arg(p === 'exp' ? 'gain' : 'total', p === 'hp' ? 'HP 1 ถึงเพดานของรอบปัจจุบัน' : 'จำนวนเต็มไม่ติดลบ (เป็นยอดรวม ยกเว้น exp ที่เป็นจำนวนเพิ่ม)', ['1','10','100','1000'])])),
+  ...['tbpower','tb','trailblaze'].map(p => spec('/cw '+p, 'ตั้งค่าพลังบุกเบิก (Trailblaze Power / เหรียญร้านรถไฟ) ในรอบ CW', [arg('total', 'จำนวนพลังบุกเบิก เช่น 10, 50, 100', ['10','50','100','500'])])),
   spec('/cw role', 'เพิ่มตัวละคร CW (ใช้ได้ใน Preparation)', [arg('roleID', 'เลือก Role ID ของ CW', 'cw_roles'), arg('star', 'ดาวที่มีข้อมูลรองรับสำหรับ Role นี้', 'cw_stars'), quantity()]),
   ...['equip','orb','consumable','forge'].map(p => spec('/cw '+p, 'เพิ่ม '+p+' ในรอบ CW (Preparation)', [arg('itemID', 'เลือก ID จากข้อมูล CW ของ Client', 'cw_'+p), quantity()])),
 ];

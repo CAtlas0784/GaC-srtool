@@ -1484,7 +1484,7 @@ function renderMiniBattleSummary() {
     const elemColor = ELEMENT_COLORS[meta.element] || '#38bdf8';
     const pct = getAvatarDamagePercent(av, report.team_total_damage || 0, hasAvatarDamage);
     const iconUrl = getAvatarIconUrl(av.avatar_id);
-    const rankStr = av.rank !== undefined ? `E${av.rank}` : '';
+    const rankStr = report.is_currency_wars ? (av.rank ? `${av.rank}★` : '1★') : (av.rank !== undefined ? `E${av.rank}` : '');
     const lvlStr = av.level ? `Lv.${av.level}` : '';
     const metaSub = [lvlStr, rankStr, translatePath(meta.path)].filter(Boolean).join(' • ');
 
@@ -9230,6 +9230,7 @@ function renderEmptyDamageAnalyst() {
 
 function orderBattleReportAvatars(avatars) {
   if (!Array.isArray(avatars) || avatars.length < 2) return avatars || [];
+  if (analystState.currentReport?.is_currency_wars || avatars.length > 4) return avatars;
 
   const lineup = state.statusData?.lineups;
   if (!lineup) return avatars;
@@ -9309,7 +9310,10 @@ function renderDamageAnalyst() {
     }
   }
 
-  const colors = ['#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899'];
+  const colors = [
+    '#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899',
+    '#f97316', '#14b8a6', '#a855f7', '#06b6d4', '#eab308', '#f43f5e'
+  ];
 
   // Team Share Bar
   if (el.analystShareBarContainer) {
@@ -9394,7 +9398,7 @@ function renderDamageAnalyst() {
                 <div>
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.45rem;">
                     <span>${info.name}</span>
-                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} E${a.rank !== undefined ? a.rank : 0}</span>
+                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} ${report.is_currency_wars ? `${a.rank || 1}★` : `E${a.rank !== undefined ? a.rank : 0}`}</span>
                   </div>
                   <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
                     ${translatePath(info.path)} • ${translateElement(info.element)}

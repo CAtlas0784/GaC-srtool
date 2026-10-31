@@ -2079,6 +2079,20 @@ export const AVATAR_METADATA = {
     "element": "Lightning",
     "rarity": 5,
     "hasExRank": false
+  },
+  "6042": {
+    "names": {
+      "th": "King Pom-Pom",
+      "en": "King Pom-Pom",
+      "zh-CN": "帕姆大王",
+      "zh-TW": "帕姆大王",
+      "ja": "パム大王",
+      "ko": "폼폼 대왕"
+    },
+    "path": "Elation",
+    "element": "Physical",
+    "rarity": 5,
+    "hasExRank": false
   }
 };
 
