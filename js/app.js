@@ -5579,21 +5579,18 @@ async function exportShowcaseImage(avatarId) {
 
   if (typeof html2canvas !== 'undefined') {
     try {
-      const origWidth = showcaseEl.style.width;
-      const origMinWidth = showcaseEl.style.minWidth;
-      showcaseEl.style.width = '1050px';
-      showcaseEl.style.minWidth = '1050px';
+      const fullWidth = showcaseEl.scrollWidth || showcaseEl.offsetWidth;
+      const fullHeight = showcaseEl.scrollHeight || showcaseEl.offsetHeight;
 
       const canvas = await html2canvas(showcaseEl, {
         useCORS: true,
         allowTaint: true,
         scale: 2,
         backgroundColor: '#0c1222',
-        windowWidth: 1280
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth
       });
-
-      showcaseEl.style.width = origWidth;
-      showcaseEl.style.minWidth = origMinWidth;
 
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');

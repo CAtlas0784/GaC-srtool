@@ -1556,7 +1556,7 @@ input:checked + .slider:before {
    Modal Avatar Detail Widescreen Expansion
    ========================================================================== */
 #modal-avatar-detail .modal-content {
-  max-width: 980px !important;
+  max-width: 1120px !important;
   width: 96% !important;
   max-height: 92vh !important;
   overflow-y: auto !important;
@@ -3759,3 +3759,19 @@ input:checked + .slider:before {
 .console-suggestion-command { min-width:0; overflow-wrap:anywhere; }
 .console-suggestion-description { max-width:55%; }
 @media(max-width:640px) { .console-suggestion-option { flex-wrap:wrap; gap:.2rem .5rem; } .console-suggestion-description { display:block; width:100%; max-width:100%; margin-left:1.1rem; } }
+
+/* การ์ดกว้างตามเนื้อหาจริง ไม่ล็อก 1050px และไม่ตัดขอบ */
+.showcase-card-layout {
+  width: max-content;       /* เดิม: width/min-width 1050px */
+  min-width: 0;
+  overflow: visible;        /* เดิม: hidden ทำให้ส่วนเกินโดนตัด */
+  grid-template-columns: 360px 340px max-content;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.showcase-splash-col { width: 360px; }
+
+/* คอลัมน์รีลิกส์ขยายตามชื่อเซ็ตและ main stat ที่ยาวที่สุด */
+.showcase-relics-col { min-width: 420px; }
+.showcase-relic-card:hover { transform: none; }
