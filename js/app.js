@@ -1,3 +1,4 @@
+import { COMMANDS, usage, inspectCommand, completeCommand } from './command-assistant.mjs';
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { initializeItemCatalog } from './item-catalog.js?v=2';
@@ -1039,7 +1040,7 @@ function setupServerModes() {
     if (el.settingServerMode) el.settingServerMode.value = mode;
 
     if (mode === 'gac') {
-      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaC-hkrpg-go';
+      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaCy GO';
       if (el.tabBtnPersistent) {
         el.tabBtnPersistent.style.display = '';
         el.tabBtnPersistent.textContent = t('tabPersistentGaC');
@@ -1491,7 +1492,7 @@ function renderMiniBattleSummary() {
     const elemColor = ELEMENT_COLORS[meta.element] || '#38bdf8';
     const pct = getAvatarDamagePercent(av, report.team_total_damage || 0, hasAvatarDamage);
     const iconUrl = getAvatarIconUrl(av.avatar_id);
-    const rankStr = av.rank !== undefined ? `E${av.rank}` : '';
+    const rankStr = report.is_currency_wars ? (av.rank ? `${av.rank}★` : '1★') : (av.rank !== undefined ? `E${av.rank}` : '');
     const lvlStr = av.level ? `Lv.${av.level}` : '';
     const metaSub = [lvlStr, rankStr, translatePath(meta.path)].filter(Boolean).join(' • ');
 
@@ -1621,20 +1622,32 @@ const consoleState = {
   suggestionIndex: -1
 };
 
-const GM_COMMAND_SUGGESTIONS = [
-  { label: '/cw status', insert: '/cw status', description: 'Show saved CW run, gold and HP' },
-  { label: '/cw gold <total>', insert: '/cw gold ', description: 'Set CW gold in Preparation; keeps adventure currency unchanged' },
-  { label: '/cw hp <total>', insert: '/cw hp ', description: 'Set CW HP within the current run limit' },
-  { label: '/avatar <id> [level] [rank]', insert: '/avatar ', description: 'Update a character level and Eidolon rank' },
-  { label: '/clear lineup', insert: '/clear lineup', description: 'Clear the active lineup' },
-  { label: '/give <item_id> [count]', insert: '/give ', description: 'Add an item or currency' },
-  { label: '/heal', insert: '/heal', description: 'Restore team HP, SP, and Energy' },
-  { label: '/help', insert: '/help', description: 'Show available commands' },
-  { label: '/item <item_id> [count]', insert: '/item ', description: 'Add an item to inventory' },
-  { label: '/max', insert: '/max', description: 'Set all characters to Level 80 and E6' },
-  { label: '/scene <plane_id> [floor_id]', insert: '/scene ', description: 'Teleport to a scene' },
-  { label: '/teleport <plane_id> [floor_id]', insert: '/teleport ', description: 'Teleport to a scene' }
-];
+let consoleCatalogs = {};
+let consoleCatalogRequest = null;
+async function loadConsoleCommandCatalogs() {
+  if (!state.isConnected || consoleCatalogRequest) return consoleCatalogRequest;
+  consoleCatalogRequest = (async () => {
+    try {
+      const result = await apiCall('/api/command-completions');
+      consoleCatalogs = result?.choices || {};
+    } catch (err) { consoleCatalogRequest = null; }
+    if (document.activeElement === el.consoleCmdInput) renderGMCommandSuggestions();
+  })();
+  return consoleCatalogRequest;
+}
+function consoleCommandModel() {
+  const catalogs = { ...consoleCatalogs, avatars: Object.keys(AVATAR_METADATA).map(id => ({ value:id, label:getAvatarInfo(id).name })) };
+  if (catalogs.cw_roles) catalogs.cw_roles = catalogs.cw_roles.map(c => ({ ...c, label:`${getAvatarInfo(c.avatar).name} · Role ${c.value} · ${c.star}★` }));
+  return inspectCommand(el.consoleCmdInput?.value || '', el.consoleCmdInput?.selectionStart ?? 0, catalogs);
+}
+function renderGMCommandPreview(model = consoleCommandModel()) {
+  const preview = document.getElementById('console-command-preview');
+  const hint = document.getElementById('console-command-argument');
+  if (preview) preview.textContent = model.preview;
+  if (hint) hint.textContent = model.hint;
+  const description = document.getElementById('console-command-description');
+  if (description) description.textContent = model.command?.description || 'เลือกคำสั่งเพื่อดูตัวอย่างและช่องที่ต้องใส่';
+}
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -1646,21 +1659,6 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function findGMCommandSuggestions(value) {
-  const query = String(value || '').trimStart().toLowerCase();
-  if (!query) return [];
-
-  const normalizedQuery = query.replace(/^\/+/, '');
-  if (!normalizedQuery) return GM_COMMAND_SUGGESTIONS.slice(0, 6);
-
-  return GM_COMMAND_SUGGESTIONS
-    .filter(({ label }) => {
-      const normalizedLabel = label.toLowerCase().replace(/^\/+/, '');
-      if (/\s/.test(normalizedQuery)) return normalizedLabel.startsWith(normalizedQuery);
-      return normalizedLabel.split(/[\s<]/, 1)[0].startsWith(normalizedQuery);
-    })
-    .slice(0, 6);
-}
 
 function hideGMCommandSuggestions() {
   consoleState.suggestions = [];
@@ -1674,7 +1672,9 @@ function hideGMCommandSuggestions() {
 
 function renderGMCommandSuggestions() {
   if (!el.consoleSuggestions || !el.consoleSuggestionOptions) return;
-  consoleState.suggestions = findGMCommandSuggestions(el.consoleCmdInput?.value);
+  consoleState.model = consoleCommandModel();
+  renderGMCommandPreview(consoleState.model);
+  consoleState.suggestions = consoleState.model.suggestions;
   consoleState.suggestionIndex = -1;
 
   if (consoleState.suggestions.length === 0) {
@@ -1693,7 +1693,7 @@ function renderGMCommandSuggestions() {
 
     const command = document.createElement('span');
     command.className = 'console-suggestion-command';
-    command.textContent = suggestion.label;
+    command.textContent = `${suggestion.value}${suggestion.label && suggestion.label !== suggestion.value ? " · " + suggestion.label : ""}`;
     option.appendChild(command);
 
     const description = document.createElement('span');
@@ -1714,11 +1714,12 @@ function selectGMCommandSuggestion(index) {
   const suggestion = consoleState.suggestions[index];
   if (!suggestion || !el.consoleCmdInput) return false;
 
-  el.consoleCmdInput.value = suggestion.insert;
-  hideGMCommandSuggestions();
+  const completed = completeCommand(el.consoleCmdInput.value, consoleState.model, suggestion);
+  el.consoleCmdInput.value = completed.value;
   consoleState.historyIndex = -1;
   el.consoleCmdInput.focus();
-  el.consoleCmdInput.setSelectionRange(suggestion.insert.length, suggestion.insert.length);
+  el.consoleCmdInput.setSelectionRange(completed.caret, completed.caret);
+  renderGMCommandSuggestions();
   return true;
 }
 
@@ -1735,12 +1736,14 @@ function moveGMCommandSuggestion(direction) {
   options.forEach((option, index) => {
     const selected = index === consoleState.suggestionIndex;
     option.setAttribute('aria-selected', String(selected));
-    if (selected) el.consoleCmdInput?.setAttribute('aria-activedescendant', `console-command-option-${index}`);
+    if (selected) { el.consoleCmdInput?.setAttribute('aria-activedescendant', `console-command-option-${index}`); option.scrollIntoView({block:'nearest'}); }
     option.id = `console-command-option-${index}`;
   });
   if (el.consoleSuggestionCount) {
     el.consoleSuggestionCount.textContent = `‹ ${consoleState.suggestionIndex + 1}/${count} ›`;
   }
+  const candidate = completeCommand(el.consoleCmdInput.value, consoleState.model, consoleState.suggestions[consoleState.suggestionIndex]);
+  renderGMCommandPreview(inspectCommand(candidate.value, candidate.caret, consoleCatalogs));
   return true;
 }
 
@@ -1791,16 +1794,7 @@ async function dispatchGMCommand(rawCmd) {
   // Handle local /help command immediately
   if (cmd.toLowerCase() === '/help') {
     logToConsole('Available GM commands:', 'SYS');
-    logToConsole('  /cw status | /cw gold <total> | /cw hp <total> - CW only; applies in Preparation', 'SYS');
-    logToConsole('  /heal                         - Restore team HP, SP, and Energy', 'SYS');
-    logToConsole('  /max                          - Set all characters to Level 80 and E6', 'SYS');
-    logToConsole('  /teleport <plane_id> [floor]  - Teleport to a scene', 'SYS');
-    logToConsole('  /scene <plane_id> [floor]     - Teleport to a scene (alias)', 'SYS');
-    logToConsole('  /clear lineup                 - Clear the active lineup', 'SYS');
-    logToConsole('  /avatar <id> [level] [rank]   - Add or update a character', 'SYS');
-    logToConsole('  /give <item_id> [count]       - Add an item or currency', 'SYS');
-    logToConsole('  /item <item_id> [count]       - Add an item (alias)', 'SYS');
-    logToConsole('  /help                         - Show this command list', 'SYS');
+    COMMANDS.forEach(c => logToConsole(`${usage(c)} — ${c.description}`, 'SYS'));
     return;
   }
 
@@ -1915,11 +1909,11 @@ function setupGMConsoleEvents() {
     el.formConsoleCmd.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!el.consoleCmdInput) return;
-      if (consoleState.suggestionIndex >= 0 && selectGMCommandSuggestion(consoleState.suggestionIndex)) return;
       const cmd = el.consoleCmdInput.value.trim();
       if (!cmd) return;
       hideGMCommandSuggestions();
       el.consoleCmdInput.value = '';
+      renderGMCommandPreview();
       dispatchGMCommand(cmd);
     });
   }
@@ -1930,7 +1924,12 @@ function setupGMConsoleEvents() {
       renderGMCommandSuggestions();
     });
 
+    el.consoleCmdInput.addEventListener('focus', () => { renderGMCommandSuggestions(); loadConsoleCommandCatalogs(); });
+    el.consoleCmdInput.addEventListener('click', renderGMCommandSuggestions);
+    el.consoleCmdInput.addEventListener('keyup', e => { if (['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) renderGMCommandSuggestions(); });
     el.consoleCmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && consoleState.suggestionIndex >= 0) { e.preventDefault(); selectGMCommandSuggestion(consoleState.suggestionIndex); return; }
+
       if (e.key === 'Escape' && consoleState.suggestions.length > 0) {
         e.preventDefault();
         hideGMCommandSuggestions();
@@ -1939,7 +1938,8 @@ function setupGMConsoleEvents() {
 
       if (e.key === 'Tab' && consoleState.suggestions.length > 0) {
         e.preventDefault();
-        selectGMCommandSuggestion(consoleState.suggestionIndex >= 0 ? consoleState.suggestionIndex : 0);
+        if (e.shiftKey) moveGMCommandSuggestion(-1);
+        else selectGMCommandSuggestion(consoleState.suggestionIndex >= 0 ? consoleState.suggestionIndex : 0);
         return;
       }
 
@@ -1975,6 +1975,7 @@ function setupGMConsoleEvents() {
   }
 
   if (el.consoleSuggestionOptions) {
+    el.consoleSuggestionOptions.addEventListener('mousedown', e => e.preventDefault());
     el.consoleSuggestionOptions.addEventListener('click', (e) => {
       const option = e.target.closest('[data-suggestion-index]');
       if (!option) return;
@@ -2003,6 +2004,7 @@ function setupGMConsoleEvents() {
     });
   }
 
+  renderGMCommandPreview();
   logToConsole('GaC server console ready. Type /help for available commands.', 'SYS');
 }
 
@@ -8953,18 +8955,18 @@ let currentGitBranch = '';
 function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
   const branchPrefix = currentGitBranch ? `[${currentGitBranch}] ` : '';
   const tabNames = {
-    'tab-dashboard': `GaC-Srtool — ${t('appSubtitle')}`,
-    'tab-avatars': `👥 ${t('tabAvatars')} | GaC-Srtool`,
-    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaC-Srtool`,
-    'tab-inventory': `🎒 ${t('tabInventory')} | GaC-Srtool`,
-    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaC-Srtool`,
-    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaC-Srtool`,
-    'tab-persistent': `💾 ${t('tabPersistent')} | GaC-Srtool`,
-    'tab-exrank': `⚡ ${t('tabExrank')} | GaC-Srtool`,
-    'tab-json': `📝 ${t('tabJson')} | GaC-Srtool`,
-    'tab-settings': `⚙️ ${t('tabSettings')} | GaC-Srtool`
+    'tab-dashboard': `GaCy-Srtool — ${t('appSubtitle')}`,
+    'tab-avatars': `👥 ${t('tabAvatars')} | GaCy-Srtool`,
+    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaCy-Srtool`,
+    'tab-inventory': `🎒 ${t('tabInventory')} | GaCy-Srtool`,
+    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaCy-Srtool`,
+    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaCy-Srtool`,
+    'tab-persistent': `💾 ${t('tabPersistent')} | GaCy-Srtool`,
+    'tab-exrank': `⚡ ${t('tabExrank')} | GaCy-Srtool`,
+    'tab-json': `📝 ${t('tabJson')} | GaCy-Srtool`,
+    'tab-settings': `⚙️ ${t('tabSettings')} | GaCy-Srtool`
   };
-  const titleBody = tabNames[tabId] || `GaC-Srtool — ${t('appSubtitle')}`;
+  const titleBody = tabNames[tabId] || `GaCy-Srtool — ${t('appSubtitle')}`;
   document.title = `${branchPrefix}${titleBody}`;
 }
 
@@ -9250,6 +9252,7 @@ function renderEmptyDamageAnalyst() {
 
 function orderBattleReportAvatars(avatars) {
   if (!Array.isArray(avatars) || avatars.length < 2) return avatars || [];
+  if ((typeof analystState !== 'undefined' && analystState.currentReport?.is_currency_wars) || avatars.length > 4) return avatars;
 
   // Battle slots remain stable when the overworld team changes or the native
   // statistics dictionary enumerates characters in a different order.
@@ -9329,7 +9332,10 @@ function renderDamageAnalyst() {
     }
   }
 
-  const colors = ['#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899'];
+  const colors = [
+    '#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899',
+    '#f97316', '#14b8a6', '#a855f7', '#06b6d4', '#eab308', '#f43f5e'
+  ];
 
   // Team Share Bar
   if (el.analystShareBarContainer) {
@@ -9413,7 +9419,7 @@ function renderDamageAnalyst() {
                 <div>
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.45rem;">
                     <span>${info.name}</span>
-                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} E${a.rank !== undefined ? a.rank : 0}</span>
+                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} ${report.is_currency_wars ? `${a.rank || 1}★` : `E${a.rank !== undefined ? a.rank : 0}`}</span>
                   </div>
                   <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
                     ${translatePath(info.path)} • ${translateElement(info.element)}

@@ -4,7 +4,7 @@ const strings = {
   en: {
     button: 'Unstuck',
     description: 'Clear a stuck loading spinner without restarting the game. Keeps saved CW progress.',
-    offline: 'Connect to the GaC server first.',
+    offline: 'Connect to the GaCy GO server first.',
     queued: 'Recovery queued. Waiting for the game…',
     completed: 'The game cleared its network wait. Try closing or retrying the page.',
     delayed: 'No acknowledgement from the game yet. Recovery is still queued; the game must be connected.',
@@ -14,7 +14,7 @@ const strings = {
   th: {
     button: 'Unstuck / แก้ค้าง',
     description: 'ปลดตัวหมุนค้างโดยไม่ต้องออกเกม และเก็บเซฟรอบ CW ไว้',
-    offline: 'เชื่อมต่อเซิร์ฟเวอร์ GaC ก่อน',
+    offline: 'เชื่อมต่อเซิร์ฟเวอร์ GaCy GO ก่อน',
     queued: 'ส่งคำสั่งแล้ว กำลังรอเกมตอบกลับ…',
     completed: 'เกมปลดการรอแพ็กเก็ตแล้ว ลองปิดหน้าต่างหรือกดใหม่ได้',
     delayed: 'เกมยังไม่ตอบรับ คำสั่งยังอยู่ในคิวและต้องเชื่อมต่อเกมไว้',

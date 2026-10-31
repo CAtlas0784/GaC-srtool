@@ -1,7 +1,7 @@
 {
   "name": "gac-srtool",
   "version": "1.0.0",
-  "description": "Companion Web Management Dashboard & FreeSR Tool for GaC-hkrpg-go",
+  "description": "Companion Web Management Dashboard & FreeSR Tool for GaCy GO",
   "main": "index.html",
   "scripts": {
     "sync-branch": "node scripts/sync-branch.js",
