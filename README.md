@@ -4,6 +4,10 @@
 
 ในโหมด GaC หน้า **ตั้งค่าตัวละคร / สวิตช์ระบบพิเศษ** เลือก Freecam หรือ FaceCam และตั้งระยะเริ่มต้นของ FaceCam ได้ หลังบันทึกให้กด Tab ในเกมเพื่อเปิดหรือปิดกล้อง; ลูกกลิ้งปรับระยะชั่วคราวและกลับเป็นค่าที่ตั้งไว้เมื่อเปิดใหม่
 
+## Unstuck / แก้ตัวหมุนค้าง
+
+เมื่อเชื่อมต่อ GaC server ใช้ปุ่ม **Unstuck** ใน GM Command Console หรือพิมพ์ `/unstuck` ได้ เว็บจะรอผลตอบรับจากเกมก่อนแสดงว่าสำเร็จ ต้องเปิดเกมและเชื่อมต่อเซิร์ฟเวอร์อยู่ คำสั่งนี้ปลดการบล็อก UI ระหว่างรอแพ็กเก็ตผ่าน heartbeat โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ และไม่แทนการแก้ handler ที่ขาด ต้องใช้ SDK server ที่รองรับ `/api/client/unstuck`
+
 เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaC-hkrpg-go** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
 
 ทำงานแบบ Client-side 100% สามารถเปิดใช้งานผ่านเบราว์เซอร์ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรมเพิ่มเติม
@@ -133,6 +137,8 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 
 ### บันทึกตัวละครและ Traces
 
+Damage Analyst เรียงการ์ดตาม `report.avatars[].slot` จาก Battle จริง ไม่เปลี่ยนตามทีมหน้าโลก รายงานเก่าที่ไม่มี slot คงลำดับเดิม และแสดงประเภทดาเมจเพิ่มเติมที่ API ส่งมา เช่น Elation Damage / True Damage ทดสอบลำดับด้วย `node --test tests/damage-order.test.cjs` ข้อมูลสดต้องใช้ SDK และ `damage_analyst_live.lua` ฉบับที่อ่าน StatisticsComponent ของ Battle ปัจจุบัน
+
 การบันทึกจากหน้ารายละเอียดส่งข้อมูลตัวละครทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวมถึง `data.skills` และ `data.skills_by_anchor_type` สำหรับ Traces เพื่อไม่ให้ server sync ข้อมูลระดับ/Eidolon ระหว่างทางก่อนข้อมูล Trace จะถูกบันทึก `saveAvatarDetails(closeModal = true)` ยังรองรับการเรียกจากปุ่ม build ที่ไม่ต้องปิดหน้าต่าง ถ้า server ตอบผิดพลาดจะแสดงข้อความบันทึกไม่สำเร็จแทนการแจ้งว่าสำเร็จ
 
 ### ข้อมูล Build และแหล่งที่มา
@@ -141,6 +147,23 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 
 ข้อมูลที่สร้างไว้ใน `js/build-guides-data.js` ใช้ชุดข้อมูล MIT จาก [LvlUrArti/MocDataProcessed](https://huggingface.co/datasets/LvlUrArti/MocDataProcessed) ซึ่งระบุว่าเป็นข้อมูลที่ประมวลผลจากเว็บไซต์ Prydwen โปรดให้เครดิต LvlUrArti เมื่อเผยแพร่หรือวิเคราะห์ข้อมูลต่อ สามารถอัปเดต snapshot ด้วย `npm run sync-build-guides` ได้ โดยสคริปต์จะเลือกเวอร์ชันล่าสุดที่มีใน dataset และจับคู่ตัวละครตาม ID จาก `js/avatars-data.js`.
 
+### Item Book
+
+The **Item Book** scans the pinned game-data revision for every `ItemConfig`-named table that contains item-definition rows. In this revision, 26 candidate tables were checked and 18 supplied item rows: 5,472 rows resolve to 5,414 unique item IDs. The **GaC supported** badge is derived from the Go server's `InventoryItemConfig.json`; other entries are browse-only.
+
+Click an item's image to open its details, including its ID, source table, type, game description, and a quantity selector. The selected quantity is local to the dialog and does not call the server or add an item. Where the game table defines `PileLimit`, the selector uses it as the maximum.
+
+Names and descriptions come from the pinned game TextMap and StarRailRes indexes for all 13 Srtool languages. At this revision, 5,150 of 5,414 item names have source-localized text; missing source names fall back to English or the item ID. Icons load from the pinned StarRailRes revision: 5,261 entries have a verified image file, while the remaining 153 retain their original game icon paths and show the missing-image state. The installed client stores these missing images inside encrypted `.block` bundles, so they are not extracted by this catalog builder.
+
+Regenerate `assets/item-catalog.json` from the inventory catalog revision used by the Go server:
+
+```bash
+python tools/build-item-catalog.py --inventory-config <path-to-GaC-hkrpg-go>/resources/InventoryItemConfig.json
+```
+
+## CW GM commands
+
+In the connected GM Console: `/cw status`, `/cw gold <total>`, `/cw hp <total>`. Values affect only the active CW run. Changes are queued and applied during Preparation; they wait while fighting. Gold sets the total, rather than adding repeatedly. HP must fit the run limit. Check the server's `CW_GM applied` log or query status to confirm application. Commands are also included in console suggestions and `/help`.
 
 ## ตัวช่วยคำสั่ง GM
 
@@ -149,3 +172,4 @@ GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-h
 พิมพ์ชื่อหรือ ID เพื่อกรองตัวละคร รายการไอเท็ม/Plane/Floor/ของ CW มาจาก `GET /api/command-completions` ของ SDK จึงต้องเชื่อมต่อ SDK ฉบับที่รองรับก่อน รายการดาวของ CW กรองตาม Role ที่เลือก รองรับการแก้ argument กลางบรรทัดโดยเก็บข้อความช่องอื่นไว้
 
 ตรวจตัวช่วยแบบไม่รันคำสั่งเกม: `node --test tools/command-assistant.test.mjs`
+
