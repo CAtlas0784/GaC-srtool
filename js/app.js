@@ -1040,7 +1040,7 @@ function setupServerModes() {
     if (el.settingServerMode) el.settingServerMode.value = mode;
 
     if (mode === 'gac') {
-      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaC-hkrpg-go';
+      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaCy GO';
       if (el.tabBtnPersistent) {
         el.tabBtnPersistent.style.display = '';
         el.tabBtnPersistent.textContent = t('tabPersistentGaC');
@@ -8955,18 +8955,18 @@ let currentGitBranch = '';
 function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
   const branchPrefix = currentGitBranch ? `[${currentGitBranch}] ` : '';
   const tabNames = {
-    'tab-dashboard': `GaC-Srtool — ${t('appSubtitle')}`,
-    'tab-avatars': `👥 ${t('tabAvatars')} | GaC-Srtool`,
-    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaC-Srtool`,
-    'tab-inventory': `🎒 ${t('tabInventory')} | GaC-Srtool`,
-    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaC-Srtool`,
-    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaC-Srtool`,
-    'tab-persistent': `💾 ${t('tabPersistent')} | GaC-Srtool`,
-    'tab-exrank': `⚡ ${t('tabExrank')} | GaC-Srtool`,
-    'tab-json': `📝 ${t('tabJson')} | GaC-Srtool`,
-    'tab-settings': `⚙️ ${t('tabSettings')} | GaC-Srtool`
+    'tab-dashboard': `GaCy-Srtool — ${t('appSubtitle')}`,
+    'tab-avatars': `👥 ${t('tabAvatars')} | GaCy-Srtool`,
+    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaCy-Srtool`,
+    'tab-inventory': `🎒 ${t('tabInventory')} | GaCy-Srtool`,
+    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaCy-Srtool`,
+    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaCy-Srtool`,
+    'tab-persistent': `💾 ${t('tabPersistent')} | GaCy-Srtool`,
+    'tab-exrank': `⚡ ${t('tabExrank')} | GaCy-Srtool`,
+    'tab-json': `📝 ${t('tabJson')} | GaCy-Srtool`,
+    'tab-settings': `⚙️ ${t('tabSettings')} | GaCy-Srtool`
   };
-  const titleBody = tabNames[tabId] || `GaC-Srtool — ${t('appSubtitle')}`;
+  const titleBody = tabNames[tabId] || `GaCy-Srtool — ${t('appSubtitle')}`;
   document.title = `${branchPrefix}${titleBody}`;
 }
 

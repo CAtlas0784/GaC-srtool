@@ -1,14 +1,14 @@
-# GaC-Srtool 🌌
+# GaCy-Srtool 🌌
 
 ใช้งานเว็บได้ที่ [GaCy Srtool บน Vercel](https://gacy-srtool.vercel.app/) เปิดหน้าตั้งค่าเพื่อเชื่อมต่อ SDK ของเซิร์ฟเวอร์ที่ใช้งานอยู่
 
-ในโหมด GaC หน้า **ตั้งค่าตัวละคร / สวิตช์ระบบพิเศษ** เลือก Freecam หรือ FaceCam และตั้งระยะเริ่มต้นของ FaceCam ได้ หลังบันทึกให้กด Tab ในเกมเพื่อเปิดหรือปิดกล้อง; ลูกกลิ้งปรับระยะชั่วคราวและกลับเป็นค่าที่ตั้งไว้เมื่อเปิดใหม่
+ในโหมด GaCy หน้า **ตั้งค่าตัวละคร / สวิตช์ระบบพิเศษ** เลือก Freecam หรือ FaceCam และตั้งระยะเริ่มต้นของ FaceCam ได้ หลังบันทึกให้กด Tab ในเกมเพื่อเปิดหรือปิดกล้อง; ลูกกลิ้งปรับระยะชั่วคราวและกลับเป็นค่าที่ตั้งไว้เมื่อเปิดใหม่
 
 ## Unstuck / แก้ตัวหมุนค้าง
 
-เมื่อเชื่อมต่อ GaC server ใช้ปุ่ม **Unstuck** ใน GM Command Console หรือพิมพ์ `/unstuck` ได้ เว็บจะรอผลตอบรับจากเกมก่อนแสดงว่าสำเร็จ ต้องเปิดเกมและเชื่อมต่อเซิร์ฟเวอร์อยู่ คำสั่งนี้ปลดการบล็อก UI ระหว่างรอแพ็กเก็ตผ่าน heartbeat โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ และไม่แทนการแก้ handler ที่ขาด ต้องใช้ SDK server ที่รองรับ `/api/client/unstuck`
+เมื่อเชื่อมต่อเซิร์ฟเวอร์ GaCy GO ใช้ปุ่ม **Unstuck** ใน GM Command Console หรือพิมพ์ `/unstuck` ได้ เว็บจะรอผลตอบรับจากเกมก่อนแสดงว่าสำเร็จ ต้องเปิดเกมและเชื่อมต่อเซิร์ฟเวอร์อยู่ คำสั่งนี้ปลดการบล็อก UI ระหว่างรอแพ็กเก็ตผ่าน heartbeat โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ และไม่แทนการแก้ handler ที่ขาด ต้องใช้ SDK server ที่รองรับ `/api/client/unstuck`
 
-เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaC-hkrpg-go** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
+เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaCy GO** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
 
 ทำงานแบบ Client-side 100% สามารถเปิดใช้งานผ่านเบราว์เซอร์ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรมเพิ่มเติม
 
@@ -64,16 +64,16 @@
 - ค้นหารายการจาก Item ID ใน catalog ของ Client ที่เซิร์ฟเวอร์กำลังใช้ พร้อมแก้จำนวนได้หลายรายการก่อนบันทึกครั้งเดียว
 - ค่าในช่องที่ว่างใช้ค่าที่เซิร์ฟเวอร์สร้างตามปกติ; ล้างค่าที่เคยกำหนดเองเพื่อกลับไปใช้ค่าเริ่มต้นได้
 - การบันทึกแก้เฉพาะจำนวนไอเทมใน `freesr-data.json` ไม่เขียนทับตัวละคร, LC, Relic หรือ Battle Config
-- รองรับเฉพาะ GaC-hkrpg-go ผ่าน `/api/inventory/materials`; บันทึกลงไฟล์ทันทีและต้องเข้าเกมใหม่เพื่อโหลด session พร้อมจำนวนที่แก้แล้ว
+- รองรับเฉพาะ GaCy GO ผ่าน `/api/inventory/materials`; บันทึกลงไฟล์ทันทีและต้องเข้าเกมใหม่เพื่อโหลด session พร้อมจำนวนที่แก้แล้ว
 
 ### 👾 6.1 Monster Setting
 - แยก Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration เพื่อดูชื่อด่าน/มอนสเตอร์ รูป, level และ wave จาก metadata Nanoka ที่ตรงกับ `client_version` ของเซิร์ฟเวอร์และ resource `challenge_data.json` / `resources/StageConfig.json` (อ่านอย่างเดียว); เมื่อ Client เปลี่ยนเวอร์ชัน API จะดึง metadata ของเวอร์ชันนั้นให้อัตโนมัติ โดยไม่ใช้ข้อมูลจากเวอร์ชันอื่น
 - เปลี่ยนการเลือกกลุ่ม/ด่านเป็นการ์ด และ Custom Enemy ค้นมอนด้วยชื่อหรือ ID พร้อมรูป/ชื่อจาก Nanoka; พิมพ์ ID เองได้ และแสดงรูปตัวอย่างขนาดใหญ่ขึ้น
 - Anomaly Arbitration เป็นโหมด Endgame ที่อ่าน stage จาก resource เช่นเดียวกับโหมดอื่น ไม่ใช่ Custom Enemy; Aha's Help มีแท็บแยกจาก AA
-- แก้ Custom Enemy ได้เฉพาะ Golden / Crimson Calyx และต้องเชื่อมต่อ GaC-Srtool; การกดใช้ stage จาก Client จะล้าง custom waves เพื่อให้กลับไปใช้ resource
+- แก้ Custom Enemy ได้เฉพาะ Golden / Crimson Calyx และต้องเชื่อมต่อ GaCy-Srtool; การกดใช้ stage จาก Client จะล้าง custom waves เพื่อให้กลับไปใช้ resource
 - Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ custom waves จากหน้านี้
 
-### 💾 7. จัดการไฟล์เซฟ GaC (Persistent & FreeSR Data)
+### 💾 7. จัดการไฟล์เซฟ GaCy (Persistent & FreeSR Data)
 - **ตั้งค่าตัวเอก (ผู้บุกเบิก):** สลับเพศ (Caelus / Stelle) และเปลี่ยนธาตุ (กายภาพ, ไฟ, จินตภาพ, ความจำ)
 - **สลับพาธ March 7th:** เลือกระหว่างพาธการอนุรักษ์ (น้ำแข็ง) และพาธล่าสังหาร (จินตภาพ)
 - **สวิตช์ระบบพิเศษ Ex-Rank:** จัดการเปิด/ปิดความสามารถพิเศษ Ex-Rank สำหรับตัวละครเฉพาะ (เช่น Jing Yuan, Dan Heng • IL, Acheron)
@@ -117,9 +117,9 @@
 
 ---
 
-## 🔗 การเชื่อมต่อกับเซิร์ฟเวอร์ GaC-hkrpg-go
+## 🔗 การเชื่อมต่อกับเซิร์ฟเวอร์ GaCy GO
 
-GaC-Srtool สื่อสารกับเซิร์ฟเวอร์ GaC-hkrpg-go ผ่าน REST API:
+GaCy-Srtool สื่อสารกับเซิร์ฟเวอร์ GaCy GO ผ่าน REST API:
 
 | Endpoint | Method | คำอธิบาย |
 | --- | --- | --- |
@@ -149,7 +149,7 @@ Damage Analyst เรียงการ์ดตาม `report.avatars[].slot` �
 
 ### Item Book
 
-The **Item Book** scans the pinned game-data revision for every `ItemConfig`-named table that contains item-definition rows. In this revision, 26 candidate tables were checked and 18 supplied item rows: 5,472 rows resolve to 5,414 unique item IDs. The **GaC supported** badge is derived from the Go server's `InventoryItemConfig.json`; other entries are browse-only.
+The **Item Book** scans the pinned game-data revision for every `ItemConfig`-named table that contains item-definition rows. In this revision, 26 candidate tables were checked and 18 supplied item rows: 5,472 rows resolve to 5,414 unique item IDs. The **GaCy supported** badge is derived from the Go server's `InventoryItemConfig.json`; other entries are browse-only.
 
 Click an item's image to open its details, including its ID, source table, type, game description, and a quantity selector. The selected quantity is local to the dialog and does not call the server or add an item. Where the game table defines `PileLimit`, the selector uses it as the maximum.
 

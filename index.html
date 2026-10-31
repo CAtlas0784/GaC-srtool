@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GaC-Srtool</title>
+  <title>GaCy-Srtool</title>
   <link rel="stylesheet" href="css/styles.css?v=2.16">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
@@ -14,10 +14,10 @@
   <!-- App Header -->
   <header class="app-header">
     <div class="brand">
-      <img src="assets/logo.png" alt="GaC Logo" class="brand-logo-img">
+      <img src="assets/logo.png" alt="GaCy Logo" class="brand-logo-img">
       <div>
         <div class="brand-title" style="display: flex; align-items: center; gap: 0.5rem;">
-          <span>GaC-Srtool</span>
+          <span>GaCy-Srtool</span>
           <span class="badge-branch" id="header-branch-badge" style="display: none;"></span>
         </div>
         <div class="brand-subtitle" data-i18n="appSubtitle">Star Rail FreeSR & Server Controller</div>
@@ -29,7 +29,7 @@
       <div class="server-mode-badge" title="โหมดการเชื่อมต่อเซิร์ฟเวอร์" data-i18n-title="lblServerModeActive">
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
-          <option value="gac" selected>GaC-hkrpg-go</option>
+          <option value="gac" selected>GaCy GO</option>
           <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
           <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
         </select>
@@ -59,7 +59,7 @@
     <button class="tab-btn" data-tab="tab-inventory" data-i18n="tabInventory">🎒 ไอเทมในกระเป๋า</button>
     <button class="tab-btn" data-tab="tab-monster-settings" id="tab-btn-monster-settings" data-i18n="tabMonsterSettings">👾 Monster Setting</button>
     <button class="tab-btn" data-tab="tab-damage-analyst" id="tab-btn-damage-analyst" data-i18n="tabDamageAnalyst">💥 Damage Analyst</button>
-    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaC</button>
+    <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaCy</button>
     <button class="tab-btn" data-tab="tab-exrank" id="tab-btn-exrank" data-i18n="tabExrank">⚡ สกิลพิเศษ Ex-Rank</button>
     <button class="tab-btn" data-tab="tab-json" data-i18n="tabJson">📝 จัดการไฟล์ JSON</button>
     <button class="tab-btn" data-tab="tab-settings" data-i18n="tabSettings">⚙️ ตั้งค่า</button>
@@ -254,7 +254,7 @@
               <span class="terminal-dot dot-red"></span>
               <span class="terminal-dot dot-yellow"></span>
               <span class="terminal-dot dot-green"></span>
-              <span class="terminal-title">GaC-hkrpg-go Console Session (Interactive GM Dispatcher)</span>
+              <span class="terminal-title">GaCy GO Console Session (Interactive GM Dispatcher)</span>
             </div>
             <div class="console-terminal-log" id="console-terminal-log">
               <!-- Logs rendered here -->
@@ -675,7 +675,7 @@
 
         <!-- Global Features & Toggles -->
         <div class="card" id="card-persistent-global">
-          <div class="card-title" data-i18n="persistentGlobalTitle">⚙️ สวิตช์ระบบพิเศษของ GaC</div>
+          <div class="card-title" data-i18n="persistentGlobalTitle">⚙️ สวิตช์ระบบพิเศษของ GaCy</div>
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
             <div class="ex-switch-card">
               <div>
@@ -793,7 +793,7 @@
               <div class="form-group">
                 <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
                 <select id="setting-server-mode" class="form-select">
-                  <option value="gac">GaC-hkrpg-go</option>
+                  <option value="gac">GaCy GO</option>
                   <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
                   <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
                 </select>
