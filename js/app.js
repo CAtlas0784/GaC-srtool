@@ -1125,6 +1125,8 @@ function setupServerModes() {
 
 // Initialize Avatars Database: Populates all known avatars from metadata
 function initAvatarsList(force = false) {
+  // Prune any non-playable or CW-only avatars that might have been loaded
+  state.avatarsList = state.avatarsList.filter(a => AVATAR_METADATA[a.avatar_id]);
   if (state.avatarsList.length > 0 && !force) {
     let missing = false;
     for (const aidStr in AVATAR_METADATA) {

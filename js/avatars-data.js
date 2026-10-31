@@ -2079,7 +2079,10 @@ export const AVATAR_METADATA = {
     "element": "Lightning",
     "rarity": 5,
     "hasExRank": false
-  },
+  }
+};
+
+export const CW_ROLE_METADATA = {
   "6042": {
     "names": {
       "th": "King Pom-Pom",
@@ -2098,7 +2101,7 @@ export const AVATAR_METADATA = {
 
 export function getAvatarInfo(avatarId, langOverride = null) {
   const lang = langOverride || getCurrentLanguage();
-  const meta = AVATAR_METADATA[avatarId];
+  const meta = AVATAR_METADATA[avatarId] || CW_ROLE_METADATA[avatarId];
 
   if (!meta) {
     return {
