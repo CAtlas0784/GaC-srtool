@@ -173,3 +173,23 @@ The console input field includes a real-time command preview and argument hint s
 Filter characters by typing names or numeric IDs. Items, Maps, Planes, Floors, and CW assets are fetched dynamically from SDK's `GET /api/command-completions`. CW star options dynamically filter based on the chosen Role.
 
 Run headless verification tests: `node --test tools/command-assistant.test.mjs`
+
+
+---
+
+## 📜 License & Attribution Notice
+
+This project is made available in accordance with the **Apache License 2.0** and **GNU General Public License v3 (GPL-3.0)** frameworks, strictly enforcing **Attribution** and **State Changes Notices**.
+
+If you use, fork, modify, redistribute, or create derivative works from any part of this repository, you **MUST** strictly comply with the following conditions:
+
+1. **Mandatory Attribution (Credit the Original Source):**
+   - You must provide prominent credit and include a direct link back to this original repository.
+   - You must retain all existing copyright notices, developer credits, and original license headers in all copies or substantial portions of the software.
+
+2. **Explicit State Changes Requirement (Document All Modifications):**
+   - In accordance with Section 4(b) of Apache 2.0 and Section 5(a) of GPL v3, any files that you modify **must carry prominent notices stating clearly that you changed the files, what modifications were made, and the date of modification**.
+   - You must not claim modified versions as wholly original works, nor remove attribution to obscure the software origin.
+
+3. **Non-Commercial Educational Purpose:**
+   - This project is provided strictly for academic research, protocol analysis, and educational purposes. Commercial exploitation, sale, or paywalling of this project or its derivatives is strictly prohibited.

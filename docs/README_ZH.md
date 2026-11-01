@@ -158,3 +158,23 @@ python tools/build-item-catalog.py --inventory-config <path-to-GaC-hkrpg-go>/res
 输入角色名称或数字 ID 即可模糊检索对应角色。物品清单、大地图 Plane 与 Floor 索引以及 CW 专属数据均实时拉取自 SDK 的 `GET /api/command-completions` 接口。CW 角色星级也会根据已选定的 Role 动态收窄过滤范围。
 
 无游戏运行时单元测试命令：`node --test tools/command-assistant.test.mjs`
+
+
+---
+
+## 📜 许可证与修改声明要求 (License & Attribution Notice)
+
+本项目遵循 **Apache License 2.0** 与 **GNU General Public License v3 (GPL-3.0)** 许可证规范，严格执行 **原始出处署名 (Attribution)** 与 **修改内容声明 (State Changes Notice)** 要求。
+
+任何个人或组织若引用、Fork、修改、二次开发或重新分发本项目的任何代码、脚本或工具组件，**必须严格遵守以下条款**：
+
+1. **强制保留原作者署名与原始出处 (Attribution)：**
+   - 必须在项目显著位置明确注明本项目名称，并附带指向本原始仓库的有效链接。
+   - 必须在源码及所有副本中完整保留原有的版权声明、作者名单及原始许可证声明文件。
+
+2. **必须明确注明修改内容与变更记录 (State Changes Notice)：**
+   - 依照 Apache-2.0 第 4(b) 条及 GPL-3.0 第 5(a) 条之规定，**凡对原有文件或代码进行过任何修改、增删、重构或补充的部分，必须在相关文件中附带显著的修改通知（Prominent Notice），明确说明修改了哪些内容及修改时间**。
+   - 严禁隐瞒原作者出处、抹除原作者信息或谎称修改后的衍生版本为独立原创作品。
+
+3. **非商业用途与免责声明 (Non-Commercial Purpose)：**
+   - 本项目仅供网络协议逆向、学术研究与个人学习交流使用，严禁用于任何商业牟利、付费打包或转售行为。
