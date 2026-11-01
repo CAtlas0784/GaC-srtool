@@ -1,4 +1,4 @@
-import { getCurrentLanguage, translateElement, translatePath } from "./i18n.js";
+import { getCurrentLanguage, translateElement, translatePath } from "./i18n.js?v=2.16";
 
 export const AVATAR_METADATA = {
   "1001": {
@@ -2079,7 +2079,10 @@ export const AVATAR_METADATA = {
     "element": "Lightning",
     "rarity": 5,
     "hasExRank": false
-  },
+  }
+};
+
+export const CW_ROLE_METADATA = {
   "6042": {
     "names": {
       "th": "King Pom-Pom",
@@ -2096,9 +2099,26 @@ export const AVATAR_METADATA = {
   }
 };
 
+// Localized defaults used when a Trailblazer entry stores the {NICKNAME} placeholder.
+const TRAILBLAZER_DEFAULT_NAMES = {
+  th: 'ผู้บุกเบิก (Trailblazer)',
+  en: 'Trailblazer',
+  'zh-CN': '开拓者',
+  'zh-TW': '開拓者',
+  ja: '開拓者',
+  ko: '개척자',
+  ru: 'Первопроходец',
+  vi: 'Nhà Khai Phá',
+  id: 'Trailblazer',
+  es: 'El Emisario',
+  fr: 'Le Pionnier',
+  de: 'Der Bahnbrecher',
+  pt: 'O Desbravador'
+};
+
 export function getAvatarInfo(avatarId, langOverride = null) {
   const lang = langOverride || getCurrentLanguage();
-  const meta = AVATAR_METADATA[avatarId];
+  const meta = AVATAR_METADATA[avatarId] || CW_ROLE_METADATA[avatarId];
 
   if (!meta) {
     return {
@@ -2110,9 +2130,9 @@ export function getAvatarInfo(avatarId, langOverride = null) {
     };
   }
 
-  let localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Avatar ${avatarId}`;
+  let localizedName = meta.names?.[lang] || meta.names?.en || meta.names?.th || `Avatar ${avatarId}`;
   if (localizedName.includes('{NICKNAME}')) {
-    const tbName = lang === 'th' ? 'ผู้บุกเบิก (Trailblazer)' : 'Trailblazer';
+    const tbName = TRAILBLAZER_DEFAULT_NAMES[lang] || TRAILBLAZER_DEFAULT_NAMES.en;
     localizedName = localizedName.replace(/\{NICKNAME\}/g, tbName).trim();
     if (!localizedName) localizedName = tbName;
   }

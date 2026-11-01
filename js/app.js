@@ -1,10 +1,10 @@
-import { COMMANDS, usage, inspectCommand, completeCommand } from './command-assistant.mjs';
+import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
 import { initializeItemCatalog } from './item-catalog.js?v=2';
 import { initializeUnstuck } from './unstuck.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.13';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.16';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -551,6 +551,13 @@ function getElementIconHtml(element, size = 20) {
   </span>`;
 }
 
+// Official in-game property icons (same set used by the overview tab)
+const STAT_PROPERTY_ICON_CDN = 'https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/property';
+function getStatIconHtml(iconName, size = 15, alt = '') {
+  if (!iconName) return '';
+  return `<img class="showcase-stat-icon" src="${STAT_PROPERTY_ICON_CDN}/${iconName}.png" alt="${alt}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;">`;
+}
+
 // Render Path Icon HTML (Official Star Rail Game Icon)
 function getPathIconHtml(path, size = 20) {
   if (!path) return '';
@@ -941,6 +948,7 @@ async function loadCachedStorageData() {
 
 // Apply multi-language translations across UI
 function applyTranslations() {
+  setCommandLanguage(getCurrentLanguage());
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     const val = t(key);
@@ -999,10 +1007,59 @@ function applyTranslations() {
   }
   updateDashboardBattleBanner();
   updateDocumentTitle();
+  renderGMCommandPreview();
   if (state.activeTab === 'tab-monster-settings') {
     renderMonsterSettings();
     if (state.monsterSettings.activeMode === 'aha') loadAhaHelpSettings();
   }
+  refreshOpenAvatarDetailModal();
+}
+
+// Re-localize the character detail modal while it is open so that names and
+// dynamic content follow a language switch instead of keeping the old strings.
+function refreshOpenAvatarDetailModal() {
+  const modal = document.getElementById('modal-avatar-detail');
+  if (!modal || !modal.classList.contains('active') || !state.selectedAvatarDetail) return;
+
+  const aid = state.selectedAvatarDetail.avatar_id;
+  const meta = getAvatarInfo(aid);
+
+  if (el.modalCharTitle) el.modalCharTitle.textContent = `${t('modalTitleCharEdit')}: ${meta.name} (ID: ${aid})`;
+  if (el.modalCharName) el.modalCharName.textContent = meta.name;
+  if (el.modalCharMeta) {
+    el.modalCharMeta.innerHTML = `
+      ${getElementIconHtml(meta.element, 24)}
+      ${getPathIconHtml(meta.path, 24)}
+      <span class="avatar-badge-rarity rarity-${meta.rarity}" style="position: static;">★ ${meta.rarity}</span>
+    `;
+  }
+
+  renderModalSwitcher(aid);
+
+  const activeBtn = document.querySelector('.modal-subtab-btn.active');
+  const activeTab = activeBtn?.getAttribute('data-modaltab') || 'modaltab-overview';
+  const activeContent = document.getElementById(activeTab);
+  const contentScroll = modal.querySelector('.modal-content')?.scrollTop ?? 0;
+  const tabScroll = activeContent?.scrollTop ?? 0;
+
+  // Lightcone section lives outside the sub-tabs, so refresh it explicitly.
+  const equippedLc = (state.fullFreesrData?.lightcones || []).find(lc => lc.equip_avatar === aid);
+  const activeLcId = equippedLc?.item_id || SIGNATURE_LIGHTCONES[aid] || 21001;
+  populateModalChangeLcDropdown(meta.path);
+  updateModalLcFullView(activeLcId, selectedLcRank || equippedLc?.rank || 5, equippedLc?.level || 80);
+
+  // Re-render every sub-tab so hidden tabs never keep strings from the old language.
+  renderModalOverviewTab(aid);
+  renderModalRelicsTab(aid);
+  renderModalSkillsTab(aid);
+  renderShowcaseCard(aid);
+  renderCharacterBuildGuide(aid);
+
+  switchModalSubtab(activeTab);
+
+  const modalContent = modal.querySelector('.modal-content');
+  if (modalContent) modalContent.scrollTop = contentScroll;
+  if (activeContent) activeContent.scrollTop = tabScroll;
 }
 
 // Setup Language Selector
@@ -1125,6 +1182,8 @@ function setupServerModes() {
 
 // Initialize Avatars Database: Populates all known avatars from metadata
 function initAvatarsList(force = false) {
+  // Prune any non-playable or CW-only avatars that might have been loaded
+  state.avatarsList = state.avatarsList.filter(a => AVATAR_METADATA[a.avatar_id]);
   if (state.avatarsList.length > 0 && !force) {
     let missing = false;
     for (const aidStr in AVATAR_METADATA) {
@@ -1646,7 +1705,7 @@ function renderGMCommandPreview(model = consoleCommandModel()) {
   if (preview) preview.textContent = model.preview;
   if (hint) hint.textContent = model.hint;
   const description = document.getElementById('console-command-description');
-  if (description) description.textContent = model.command?.description || 'เลือกคำสั่งเพื่อดูตัวอย่างและช่องที่ต้องใส่';
+  if (description) description.textContent = model.command?.description || t('consoleDescriptionHint');
 }
 
 function escapeHtml(str) {
@@ -1794,7 +1853,7 @@ async function dispatchGMCommand(rawCmd) {
   // Handle local /help command immediately
   if (cmd.toLowerCase() === '/help') {
     logToConsole('Available GM commands:', 'SYS');
-    COMMANDS.forEach(c => logToConsole(`${usage(c)} — ${c.description}`, 'SYS'));
+    COMMANDS.forEach(c => logToConsole(`${usage(c)} - ${describeCommand(c)}`, 'SYS'));
     return;
   }
 
@@ -2865,7 +2924,11 @@ function updateLcRankPips(rank) {
 function getLightconePassiveDesc(lcId, rank = 5) {
   const id = parseInt(lcId, 10);
   const r = Math.max(1, Math.min(5, rank));
+  const meta = LIGHTCONE_METADATA[id];
 
+  // The rank-scaled descriptions below are authored in Thai. Other locales use
+  // the localized description shipped with the lightcone metadata instead.
+  if (getCurrentLanguage() === 'th') {
   const passives = {
     21001: `ทำให้ DEF ของผู้สวมใส่เพิ่มขึ้น <strong>${16 + (r - 1) * 2}%</strong> หลังจากเข้าสู่การต่อสู้ จะทำให้ความต้านทานทุกประเภทของตัวละครฝ่ายเราทั้งหมดเพิ่มขึ้น <strong>${8 + (r - 1)}%</strong> โดยสกิลชนิดเดียวกันจะไม่สามารถซ้อนทับได้`,
     23024: `ทำให้ CRIT DMG ของผู้สวมใส่เพิ่มขึ้น <strong>${36 + (r - 1) * 6}%</strong> เมื่อโจมตีโดนเป้าหมาย จะติดสถานะ Mirage Fizzle ทำให้ได้รับความเสียหายเพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong> และความเสียหายท่าไม้ตายเพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong>`,
@@ -2888,11 +2951,12 @@ function getLightconePassiveDesc(lcId, rank = 5) {
   };
 
   if (passives[id]) return passives[id];
+  }
 
-  const meta = LIGHTCONE_METADATA[id];
-  if (meta?.desc) return meta.desc;
-  const pathName = meta ? translatePath(meta.path) : "สายต่อสู้";
-  return `เพิ่มค่าสถานะพื้นฐานตามสาย <strong>${pathName}</strong> และเพิ่มประสิทธิภาพความเสียหายและการสนับสนุน <strong>${12 + (r - 1) * 3}%</strong> เมื่อเข้าสู่การต่อสู้`;
+  const metaDesc = meta?.desc;
+  if (metaDesc) return metaDesc;
+  const pathName = meta ? translatePath(meta.path) : translatePath('Unknown');
+  return t('lcPassiveFallback', { path: pathName, value: 12 + (r - 1) * 3 });
 }
 
 // Update Modal Lightcone Full Artwork and Details (Matching srtools / Firefly)
@@ -2901,10 +2965,10 @@ function updateModalLcFullView(lcId, rank = 5, level = 80) {
   if (!id || !LIGHTCONE_METADATA[id]) {
     if (el.modalLcFullImg) el.modalLcFullImg.style.display = 'none';
     if (el.modalLcNoArt) el.modalLcNoArt.style.display = 'block';
-    if (el.modalLcNameDisplay) el.modalLcNameDisplay.textContent = 'ยังไม่ได้สวมใส่ Light Cone';
+    if (el.modalLcNameDisplay) el.modalLcNameDisplay.textContent = t('lcNoneEquipped');
     if (el.modalLcMetaDisplay) el.modalLcMetaDisplay.innerHTML = '';
     if (el.modalLcRankBadge) el.modalLcRankBadge.textContent = '-';
-    if (el.modalLcPassiveDesc) el.modalLcPassiveDesc.innerHTML = 'กรุณาเลือก Light Cone ที่ต้องการสวมใส่';
+    if (el.modalLcPassiveDesc) el.modalLcPassiveDesc.innerHTML = t('lcSelectPrompt');
     return;
   }
 
@@ -2975,10 +3039,10 @@ function populateModalChangeLcDropdown(avatarPath) {
   });
 
   const samePathGroup = document.createElement('optgroup');
-  samePathGroup.label = `⭐ Light Cones สาย ${avatarPath}`;
+  samePathGroup.label = t('lcSamePathGroup', { path: avatarPath });
 
   const otherPathGroup = document.createElement('optgroup');
-  otherPathGroup.label = `🗡️ Light Cones สายอื่นๆ`;
+  otherPathGroup.label = t('lcOtherPathGroup');
 
   allIds.forEach(id => {
     const meta = LIGHTCONE_METADATA[id];
@@ -3002,13 +3066,20 @@ function populateModalChangeLcDropdown(avatarPath) {
 
 // Slot full definitions for relics
 const SLOT_NAMES_FULL = {
-  1: { name: "ส่วนหัว (Head)", icon: "🧢", defaultStat: "HP (Flat)" },
-  2: { name: "ส่วนมือ (Hands)", icon: "🧤", defaultStat: "ATK (Flat)" },
-  3: { name: "ส่วนลำตัว (Body)", icon: "🦺", defaultStat: "CRIT Rate / DMG" },
-  4: { name: "ส่วนเท้า (Feet)", icon: "👢", defaultStat: "SPD / ATK%" },
-  5: { name: "ลูกแก้ว (Planar Sphere)", icon: "🔮", defaultStat: "Elemental DMG%" },
-  6: { name: "สร้อยเชื่อม (Link Rope)", icon: "🔗", defaultStat: "ERR / Break / ATK%" }
+  1: { nameKey: 'relicSlotHead', shortKey: 'slotHeadShort', icon: "🧢", defaultStat: "HP (Flat)" },
+  2: { nameKey: 'relicSlotHands', shortKey: 'slotHandsShort', icon: "🧤", defaultStat: "ATK (Flat)" },
+  3: { nameKey: 'relicSlotBody', shortKey: 'slotBodyShort', icon: "🦺", defaultStat: "CRIT Rate / DMG" },
+  4: { nameKey: 'relicSlotFeet', shortKey: 'slotFeetShort', icon: "👢", defaultStat: "SPD / ATK%" },
+  5: { nameKey: 'relicSlotSphere', shortKey: 'slotSphereShort', icon: "🔮", defaultStat: "Elemental DMG%" },
+  6: { nameKey: 'relicSlotRope', shortKey: 'slotRopeShort', icon: "🔗", defaultStat: "ERR / Break / ATK%" }
 };
+
+function getSlotInfo(slot) {
+  const info = SLOT_NAMES_FULL[slot];
+  if (!info) return { name: `${t('slot')} ${slot}`, short: `${t('slot')} ${slot}`, icon: '🛡️', defaultStat: '' };
+  const name = t(info.nameKey);
+  return { ...info, name, short: t(info.shortKey) };
+}
 
 function getRelicMainAffixName(slot, affixId) {
   const affixesBySlot = {
@@ -3118,9 +3189,15 @@ async function loadCharacterSkillsData(lang = null) {
 
 function formatSkillDesc(descTemplate, paramsArray, level) {
   if (!descTemplate) return '';
+  // StarRailRes keeps gender-dependent wording as {M#...}{F#...} spans. Resolve
+  // them with the Trailblazer gender from the persistent settings panel so the
+  // description reads naturally instead of showing the raw markup.
+  const isFemaleTb = (document.getElementById('persistent-mc-select')?.value || '').startsWith('Female');
+  let formatted = descTemplate
+    .replace(/\{M#([^{}]*)\}\{F#([^{}]*)\}/g, (_, male, female) => (isFemaleTb ? female : male))
+    .replace(/\{[MF]#([^{}]*)\}/g, '$1');
   const lvlIndex = Math.max(0, Math.min(level - 1, (paramsArray?.length || 1) - 1));
   const lvlParams = paramsArray?.[lvlIndex] || [];
-  let formatted = descTemplate;
   lvlParams.forEach((param, idx) => {
     const pNum = idx + 1;
     const isPercent = formatted.includes(`#${pNum}[i]%`) || formatted.includes(`#${pNum}[f1]%`) || formatted.includes(`#${pNum}[f2]%`);
@@ -3222,7 +3299,7 @@ function renderModalOverviewTab(avatarId) {
 
   if (el.overviewRelicsSummary) {
     if (activeSetBadges.length === 0) {
-      el.overviewRelicsSummary.innerHTML = `<span style="color: var(--text-muted);">${relics.length}/6 ชิ้นสวมใส่ (ยังไม่มีโบนัสเซ็ต)</span>`;
+      el.overviewRelicsSummary.innerHTML = `<span style="color: var(--text-muted);">${t('overviewRelicCount', { count: relics.length })}</span>`;
     } else {
       el.overviewRelicsSummary.innerHTML = activeSetBadges.map(b => 
         `<div style="display: flex; justify-content: space-between; align-items: center; color: var(--accent-cyan); font-weight: 700;">
@@ -3560,7 +3637,7 @@ function renderModalRelicsTab(avatarId) {
   });
 
   for (let slot = 1; slot <= 6; slot++) {
-    const slotInfo = SLOT_NAMES_FULL[slot];
+    const slotInfo = getSlotInfo(slot);
     const equipped = equippedRelics.find(r => (r.relic_id % 10) === slot);
 
     const box = document.createElement('div');
@@ -3576,14 +3653,14 @@ function renderModalRelicsTab(avatarId) {
             const rolls = s.count || s.cnt || 1;
             return `${sName} (+${rolls})`;
           }).join(' • ')
-        : '4 ออปชั่นรอง (คลิกเพื่อปรับแต่ง)';
+        : t('relicSubstatFallback');
 
       box.className = 'relic-slot-box equipped';
       box.innerHTML = `
         <div class="relic-slot-icon-wrap">
           <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png"
                onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
-          <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.name.split(' ')[0]}</span>
+          <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.short}</span>
         </div>
         <div class="relic-slot-content">
           <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5rem;">
@@ -3595,7 +3672,7 @@ function renderModalRelicsTab(avatarId) {
             ${subsSnippetHtml}
           </div>
         </div>
-        <button type="button" class="btn-slot-unequip-corner" title="ถอดชิ้นนี้">✕</button>
+        <button type="button" class="btn-slot-unequip-corner" title="${t('relicSlotUnequip')}">✕</button>
       `;
 
       box.addEventListener('click', () => {
@@ -3620,8 +3697,8 @@ function renderModalRelicsTab(avatarId) {
         </div>
         <div class="relic-slot-content">
           <div class="relic-slot-title" style="color: var(--text-muted);">${slotInfo.name}</div>
-          <div class="relic-slot-main" style="color: var(--text-muted); font-size: 0.775rem;">ยังไม่ได้สวมใส่</div>
-          <div class="relic-slot-subs" style="color: var(--accent-cyan); font-size: 0.725rem;">+ คลิกเพื่อเลือกหรือสร้าง (แนะนำ: ${slotInfo.defaultStat})</div>
+          <div class="relic-slot-main" style="color: var(--text-muted); font-size: 0.775rem;">${t('relicSlotNotEquipped')}</div>
+          <div class="relic-slot-subs" style="color: var(--accent-cyan); font-size: 0.725rem;">${t('relicSlotCreateHint', { stat: slotInfo.defaultStat })}</div>
         </div>
       `;
 
@@ -3640,14 +3717,14 @@ function renderModalRelicsTab(avatarId) {
       const cnt = setCountMap[sId];
       const sInfo = getRelicSetInfo(sId);
       if (cnt >= 4) {
-        activeSets.push(`🌟 <strong>${sInfo.name} (4-Piece Set)</strong>: ${sInfo.desc4 || 'เปิดใช้งานเอฟเฟกต์ครบ 4 ชิ้น'}`);
+        activeSets.push(`🌟 <strong>${sInfo.name} (4-Piece Set)</strong>: ${sInfo.desc4 || t('relicSet4Fallback')}`);
       } else if (cnt >= 2) {
-        activeSets.push(`✨ <strong>${sInfo.name} (2-Piece Set)</strong>: ${sInfo.desc2 || 'เปิดใช้งานเอฟเฟกต์ 2 ชิ้น'}`);
+        activeSets.push(`✨ <strong>${sInfo.name} (2-Piece Set)</strong>: ${sInfo.desc2 || t('relicSet2Fallback')}`);
       }
     });
 
     if (activeSets.length === 0) {
-      el.modalRelicsActiveSets.innerHTML = `<span style="color: var(--text-muted);">ยังไม่มีเอฟเฟกต์เซ็ตทำงาน (ต้องใส่เซ็ตเดียวกันอย่างน้อย 2 หรือ 4 ชิ้น)</span>`;
+      el.modalRelicsActiveSets.innerHTML = `<span style="color: var(--text-muted);">${t('relicSetNoBonus')}</span>`;
     } else {
       el.modalRelicsActiveSets.innerHTML = activeSets.map(s => `<div>${s}</div>`).join('');
     }
@@ -3683,7 +3760,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
   const slot = state.slotPickerSlot;
   const meta = getAvatarInfo(aid);
   const rec = getOptimalBuildForAvatar(aid);
-  const slotInfo = SLOT_NAMES_FULL[slot] || { name: `Slot ${slot}` };
+  const slotInfo = getSlotInfo(slot);
 
   const modal = document.getElementById('modal-select-relic-slot');
   if (!modal) return;
@@ -3697,15 +3774,15 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
   if (slotPickerTargetRelic) {
     const curSetId = Math.floor((slotPickerTargetRelic.relic_id % 10000) / 10);
     const curSetInfo = getRelicSetInfo(curSetId);
-    if (titleEl) titleEl.textContent = `🔧 แก้ไขรีลิกส์: ${curSetInfo.name} (${slotInfo.name}) - ${meta.name}`;
-    if (subtitleEl) subtitleEl.textContent = `ปรับแต่งเซ็ต สเตตัสหลัก และออฟรองของรีลิกส์ชิ้นนี้ (#${slotPickerTargetRelic.internal_uid})`;
-    if (editModeIndicator) editModeIndicator.innerHTML = `✏️ กำลังแก้ไขรีลิกส์ <strong>#${slotPickerTargetRelic.internal_uid}</strong>`;
-    if (btnConfirmCustom) btnConfirmCustom.textContent = `💾 บันทึกการแก้ไขออฟรองชิ้นนี้`;
+    if (titleEl) titleEl.textContent = t('relicPickerEditTitle', { set: curSetInfo.name, slot: slotInfo.name, name: meta.name });
+    if (subtitleEl) subtitleEl.textContent = t('relicPickerEditSubtitle', { id: slotPickerTargetRelic.internal_uid });
+    if (editModeIndicator) editModeIndicator.innerHTML = t('relicPickerEditing', { id: slotPickerTargetRelic.internal_uid });
+    if (btnConfirmCustom) btnConfirmCustom.textContent = t('relicPickerSaveChanges');
   } else {
-    if (titleEl) titleEl.textContent = `${t('relicPickerTitle').replace('{slot}', slotInfo.name)} - ${meta.name}`;
+    if (titleEl) titleEl.textContent = `${t('relicPickerTitle', { slot: slotInfo.name })} - ${meta.name}`;
     if (subtitleEl) subtitleEl.textContent = t('quickGenRecDesc');
     if (editModeIndicator) editModeIndicator.textContent = '';
-    if (btnConfirmCustom) btnConfirmCustom.textContent = `⚡ สวมใส่ชิ้นนี้ทันที (+15 5★ ออฟที่เลือก)`;
+    if (btnConfirmCustom) btnConfirmCustom.textContent = t('relicPickerEquipNow');
   }
 
   // Current Equipped Relic Banner
@@ -3735,7 +3812,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
           <div style="min-width: 0;">
             <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
               <span style="font-size: 0.75rem; color: var(--accent-gold); font-weight: 700;">
-                ${currentRelic.equip_avatar ? t('currentEquipped') : 'ชิ้นในคลัง'} (+${currentRelic.level || 15})
+                ${currentRelic.equip_avatar ? t('currentEquipped') : t('relicPickerInInventory')} (+${currentRelic.level || 15})
               </span>
               <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 800;">
                 ✦ ${curMainAffixName}
@@ -3751,8 +3828,8 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
         </div>
         <div style="display: flex; gap: 0.4rem; align-items: center;">
           ${!slotPickerTargetRelic ? `
-            <button type="button" class="btn btn-sm btn-warning" id="btn-slot-picker-edit-curr" style="padding: 0.45rem 0.85rem; font-weight: 700;" title="โหลดข้อมูลชิ้นนี้ลงมาแก้ไขออฟรอง">
-              ✏️ แก้ไขออฟรองชิ้นนี้
+            <button type="button" class="btn btn-sm btn-warning" id="btn-slot-picker-edit-curr" style="padding: 0.45rem 0.85rem; font-weight: 700;" title="${t('relicPickerEditThisTitle')}">
+              ${t('relicPickerEditThis')}
             </button>
           ` : ''}
           ${currentRelic.equip_avatar ? `
@@ -3832,7 +3909,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
             ✦ ${recMainName}
           </div>
           <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-            ออฟรองแนะนำ 4 แถวเทพ ปรับแต่งได้ตามต้องการด้านล่าง
+            ${t('relicPickerRecommended')}
           </div>
         </div>
       </div>
@@ -3955,23 +4032,23 @@ function renderSlotPickerSubstats(slot, mainAffixId) {
       const isChosenElsewhere = slotPickerSubstats.some((s, i) => i !== idx && s.sub_affix_id === stat.id);
       const isSelected = stat.id === sub.sub_affix_id;
       const disabledAttr = (isConflict || (isChosenElsewhere && !isSelected)) ? 'disabled' : '';
-      const conflictTag = isConflict ? ' (ตรงกับ Main Stat)' : (isChosenElsewhere && !isSelected ? ' (เลือกแล้ว)' : '');
+      const conflictTag = isConflict ? t('substatMainConflict') : (isChosenElsewhere && !isSelected ? t('substatAlreadyChosen') : '');
       optsHtml += `<option value="${stat.id}" ${isSelected ? 'selected' : ''} ${disabledAttr}>${stat.icon} ${stat.name}${conflictTag}</option>`;
     });
 
     card.innerHTML = `
       <div class="substat-row-header">
-        <span class="substat-slot-label">ออฟรอง ${idx + 1}</span>
-        <span class="substat-preview-badge" id="substat-preview-${idx}">+${sVal} (${sub.count} โรล)</span>
+        <span class="substat-slot-label">${t('substatSlotLabel', { n: idx + 1 })}</span>
+        <span class="substat-preview-badge" id="substat-preview-${idx}">${t('substatRolls', { value: sVal, count: sub.count })}</span>
       </div>
       <div class="substat-row-controls">
         <select class="form-select substat-select" data-idx="${idx}">
           ${optsHtml}
         </select>
         <div class="substat-stepper">
-          <button type="button" class="btn-substat-step minus" data-idx="${idx}" title="ลดโรล">−</button>
+          <button type="button" class="btn-substat-step minus" data-idx="${idx}" title="${t('substatDecreaseRoll')}">−</button>
           <input type="number" class="substat-count-input" data-idx="${idx}" min="1" max="25" value="${sub.count}">
-          <button type="button" class="btn-substat-step plus" data-idx="${idx}" title="เพิ่มโรล">+</button>
+          <button type="button" class="btn-substat-step plus" data-idx="${idx}" title="${t('substatIncreaseRoll')}">+</button>
         </div>
       </div>
     `;
@@ -4022,7 +4099,7 @@ function updateSubstatCardPreview(idx) {
   const input = document.querySelector(`.substat-count-input[data-idx="${idx}"]`);
   if (badge) {
     const sVal = formatRelicSubstatValue(sub.sub_affix_id, sub.count);
-    badge.textContent = `+${sVal} (${sub.count} โรล)`;
+    badge.textContent = t('substatRolls', { value: sVal, count: sub.count });
   }
   if (input) {
     input.value = sub.count;
@@ -4229,9 +4306,9 @@ function renderSlotPickerInventoryGrid(aid, slot) {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">
         <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
-        <div style="font-size: 1rem; font-weight: 700; color: #fff;">ไม่มีรีลิกส์สำหรับช่องนี้ในคลัง</div>
+        <div style="font-size: 1rem; font-weight: 700; color: #fff;">${t('relicEmptyInventoryTitle')}</div>
         <div style="font-size: 0.8rem; margin-top: 0.25rem;">
-          สามารถสลับไปที่แท็บ <strong>"⚡ สวมใส่ / สร้างชิ้นแนะนำ"</strong> เพื่อสร้างชิ้นใหม่ได้ทันที!
+          ${t('relicEmptyInventoryHint')}
         </div>
       </div>
     `;
@@ -4278,12 +4355,12 @@ function renderSlotPickerInventoryGrid(aid, slot) {
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
         <div style="font-size: 0.75rem;">
-          ${isCurrent ? '<span style="color: var(--accent-gold); font-weight: 800;">(กำลังสวมใส่อยู่)</span>' :
-            wearerMeta ? `<span style="color: var(--accent-cyan); font-weight: 700;">(สวมใส่โดย: ${wearerMeta.name})</span>` :
-            '<span style="color: #4ade80; font-weight: 700;">(ว่างในคลัง)</span>'}
+          ${isCurrent ? `<span style="color: var(--accent-gold); font-weight: 800;">(${t('relicEquippedNow')})</span>` :
+            wearerMeta ? `<span style="color: var(--accent-cyan); font-weight: 700;">(${t('relicWornBy', { name: wearerMeta.name })})</span>` :
+            `<span style="color: #4ade80; font-weight: 700;">(${t('relicFreeInInventory')})</span>`}
         </div>
         <button type="button" class="btn btn-sm ${isCurrent ? 'btn-gold' : 'btn-primary'}" style="font-size: 0.75rem; padding: 0.35rem 0.85rem;">
-          ${isCurrent ? 'ใช้งานอยู่' : 'เลือกชิ้นนี้'}
+          ${isCurrent ? t('relicInUse') : t('relicSelectThis')}
         </button>
       </div>
     `;
@@ -4424,7 +4501,7 @@ function openLightconePicker(avatarId) {
 
   const titleEl = document.getElementById('modal-lc-picker-title');
   if (titleEl) {
-    titleEl.textContent = `🗡️ เลือกสวมใส่กรวยแสง: ${meta.name}`;
+    titleEl.textContent = t('lcSelectTitle', { name: meta.name });
   }
 
   const sigLcId = SIGNATURE_LIGHTCONES[aid];
@@ -4501,7 +4578,7 @@ function renderLightconePickerGrid() {
   });
 
   if (filtered.length === 0) {
-    listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบกรวยแสงตามเงื่อนไขที่ค้นหา</div>`;
+    listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">${t('lcNoResults')}</div>`;
     return;
   }
 
@@ -4516,9 +4593,9 @@ function renderLightconePickerGrid() {
 
     let badgeHtml = '';
     if (isCurrent) {
-      badgeHtml = `<span style="font-size: 0.65rem; background: var(--accent-gold); color: #000; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">สวมใส่อยู่</span>`;
+      badgeHtml = `<span style="font-size: 0.65rem; background: var(--accent-gold); color: #000; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">${t('lcEquippedBadge')}</span>`;
     } else if (isSig) {
-      badgeHtml = `<span style="font-size: 0.65rem; background: rgba(251, 191, 36, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">ประจำตัว</span>`;
+      badgeHtml = `<span style="font-size: 0.65rem; background: rgba(251, 191, 36, 0.2); border: 1px solid var(--accent-gold); color: var(--accent-gold); font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 4px;">${t('lcSignatureBadge')}</span>`;
     }
 
     card.innerHTML = `
@@ -4720,6 +4797,10 @@ async function renderModalSkillsTab(avatarId) {
 
   const { skills, trees } = await loadCharacterSkillsData(currentLang);
 
+  // A newer language switch may have started another render while this one was
+  // still fetching; drop the stale result so the tab never keeps the old language.
+  if ((getCurrentLanguage() || 'th') !== currentLang) return;
+
   const avatarSkills = Object.values(skills || {}).filter(s => String(s.id).startsWith(aid));
   const basicSkill = avatarSkills.find(s => s.type === 'Normal') || avatarSkills[0];
   const combatSkill = avatarSkills.find(s => s.type === 'BPSkill') || avatarSkills[1];
@@ -4773,17 +4854,17 @@ async function renderModalSkillsTab(avatarId) {
   // Traces
   if (a2Node) {
     if (el.traceIconA2) el.traceIconA2.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a2Node.icon}`;
-    if (el.traceNameA2) el.traceNameA2.textContent = `🌟 ${a2Node.name || 'ร่องรอย A2'}`;
+    if (el.traceNameA2) el.traceNameA2.textContent = `🌟 ${a2Node.name || t('traceFallbackA2')}`;
     if (el.traceDescA2) el.traceDescA2.innerHTML = formatSkillDesc(a2Node.desc, a2Node.params, 1);
   }
   if (a4Node) {
     if (el.traceIconA4) el.traceIconA4.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a4Node.icon}`;
-    if (el.traceNameA4) el.traceNameA4.textContent = `🌟 ${a4Node.name || 'ร่องรอย A4'}`;
+    if (el.traceNameA4) el.traceNameA4.textContent = `🌟 ${a4Node.name || t('traceFallbackA4')}`;
     if (el.traceDescA4) el.traceDescA4.innerHTML = formatSkillDesc(a4Node.desc, a4Node.params, 1);
   }
   if (a6Node) {
     if (el.traceIconA6) el.traceIconA6.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a6Node.icon}`;
-    if (el.traceNameA6) el.traceNameA6.textContent = `🌟 ${a6Node.name || 'ร่องรอย A6'}`;
+    if (el.traceNameA6) el.traceNameA6.textContent = `🌟 ${a6Node.name || t('traceFallbackA6')}`;
     if (el.traceDescA6) el.traceDescA6.innerHTML = formatSkillDesc(a6Node.desc, a6Node.params, 1);
   }
 }
@@ -5297,7 +5378,7 @@ function renderShowcaseCard(avatarId) {
   activeSetBadges.forEach(sb => {
     setsHtml += `
       <div class="showcase-set-item">
-        <span style="color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${sb.name}">${sb.name}</span>
+        <span style="color: #e2e8f0; flex: 1; min-width: 0; margin-right: 0.5rem; overflow-wrap: anywhere;" title="${sb.name}">${sb.name}</span>
         <span class="showcase-set-badge">${sb.count}-PC</span>
       </div>
     `;
@@ -5305,12 +5386,12 @@ function renderShowcaseCard(avatarId) {
 
   // Relic cards (Slots 1 to 6)
   const slotNames = {
-    1: { name: "ส่วนหัว", stat: "HP 706" },
-    2: { name: "ส่วนมือ", stat: "ATK 353" },
-    3: { name: "ลำตัว", stat: canonPath === 'Preservation' ? "DEF 54.0%" : (canonPath === 'Hunt' ? "CRIT Rate 32.4%" : "HP 43.2%") },
-    4: { name: "รองเท้า", stat: "SPD 25.0" },
-    5: { name: "ลูกแก้ว", stat: `${translateElement(canonElem)} 38.8%` },
-    6: { name: "สร้อย", stat: canonPath === 'Preservation' || canonPath === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
+    1: { name: t('slotHeadShort'), stat: "HP 706" },
+    2: { name: t('slotHandsShort'), stat: "ATK 353" },
+    3: { name: t('slotBodyShort'), stat: canonPath === 'Preservation' ? "DEF 54.0%" : (canonPath === 'Hunt' ? "CRIT Rate 32.4%" : "HP 43.2%") },
+    4: { name: t('slotFeetShort'), stat: "SPD 25.0" },
+    5: { name: t('slotSphereShort'), stat: `${translateElement(canonElem)} 38.8%` },
+    6: { name: t('slotRopeShort'), stat: canonPath === 'Preservation' || canonPath === 'Harmony' ? "ERR 19.4%" : "ATK 43.2%" }
   };
 
   const showRolls = localStorage.getItem('gac_srtool_showcase_rolls') !== 'false';
@@ -5355,7 +5436,7 @@ function renderShowcaseCard(avatarId) {
         </div>
         <div class="showcase-relic-info">
           <div class="showcase-relic-main-stat">
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${rInfo.name}">${rInfo.name}</span>
+            <span style="overflow-wrap: anywhere; flex: 1; min-width: 0; margin-right: 0.5rem;" title="${rInfo.name}">${rInfo.name}</span>
             <span style="color: var(--accent-cyan); font-weight: 800; flex-shrink: 0;">✦ ${mainStatDisplay}</span>
           </div>
           <div class="showcase-relic-subs">
@@ -5369,6 +5450,12 @@ function renderShowcaseCard(avatarId) {
   const primaryPortrait = getAvatarSplashSrc(aid);
   const fallbackPortrait = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${aid}.png`;
   const lcArtThumb = getLightconeArtSrc(lcId);
+
+  // Use the same official property icons as the character overview tab.
+  const elemStatIconName = `Icon${canonElem === 'Lightning' ? 'Thunder' : canonElem}AddedRatio`;
+  const propIcon = (name, alt, size = 15) => getStatIconHtml(name, size, alt);
+  const inlineStat = (iconName, alt, value, size = 13) =>
+    `<span class="showcase-inline-stat">${propIcon(iconName, alt, size)} ${value}</span>`;
 
   el.showcaseCardContainer.innerHTML = `
     <!-- 1. Left Splash Art Column -->
@@ -5393,44 +5480,44 @@ function renderShowcaseCard(avatarId) {
       <div class="showcase-lc-box">
         <img class="showcase-lc-thumb" src="${lcArtThumb}" onerror="handleLcImgError(this, ${lcId})" alt="${lcInfo.name}">
         <div style="flex: 1; min-width: 0;">
-          <div style="font-weight: 800; font-size: 0.95rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lcInfo.name}</div>
+          <div style="font-weight: 800; font-size: 0.95rem; color: #fff; overflow-wrap: anywhere; line-height: 1.25;">${lcInfo.name}</div>
           <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.2rem;">
             <span style="color: var(--accent-gold); font-weight: 800;">S${lcRank}</span> • Lv. ${lcLevel}/80
           </div>
           <div style="font-size: 0.725rem; color: var(--text-muted); margin-top: 0.3rem; display: flex; gap: 0.6rem;">
-            <span>❤️ ${lcHp}</span>
-            <span>⚔️ ${lcAtk}</span>
-            <span>🛡️ ${lcDef}</span>
+            ${inlineStat('IconMaxHP', 'HP', lcHp)}
+            ${inlineStat('IconAttack', 'ATK', lcAtk)}
+            ${inlineStat('IconDefence', 'DEF', lcDef)}
           </div>
         </div>
       </div>
 
       <!-- Set Bonuses -->
       <div class="showcase-sets-box">
-        <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px;">Active Set Bonuses</div>
+        <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px;">${t('showcaseActiveSets')}</div>
         ${setsHtml}
       </div>
 
       <!-- Combat Stats List -->
       <div class="showcase-stats-list">
-        <div class="showcase-stat-row"><span class="showcase-stat-label">❤️ HP</span><span class="showcase-stat-val">${totalHp}</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">⚔️ ATK</span><span class="showcase-stat-val">${totalAtk}</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">🛡️ DEF</span><span class="showcase-stat-val">${totalDef}</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">👟 SPD</span><span class="showcase-stat-val">${totalSpd}</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">🎯 CRIT Rate</span><span class="showcase-stat-val">${critRate}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">💥 CRIT DMG</span><span class="showcase-stat-val">${critDmg}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">⚡ Break Eff</span><span class="showcase-stat-val">${breakEffect}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">🛡️ Eff RES</span><span class="showcase-stat-val">${effectRes}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">🌀 ERR</span><span class="showcase-stat-val">${err}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">🎯 Eff Hit</span><span class="showcase-stat-val">${ehr}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">💚 Healing</span><span class="showcase-stat-val">${healing}%</span></div>
-        <div class="showcase-stat-row"><span class="showcase-stat-label">✨ ${meta.element}</span><span class="showcase-stat-val">${elemDmg}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconMaxHP', 'HP')} ${t('statMaxHp')}</span><span class="showcase-stat-val">${totalHp}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconAttack', 'ATK')} ${t('statAtk')}</span><span class="showcase-stat-val">${totalAtk}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconDefence', 'DEF')} ${t('statDef')}</span><span class="showcase-stat-val">${totalDef}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconSpeed', 'SPD')} ${t('statSpd')}</span><span class="showcase-stat-val">${totalSpd}</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconCriticalChance', 'CRIT Rate')} ${t('statCritRate')}</span><span class="showcase-stat-val">${critRate}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconCriticalDamage', 'CRIT DMG')} ${t('statCritDmg')}</span><span class="showcase-stat-val">${critDmg}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconBreakUp', 'Break Effect')} ${t('statBreakEffect')}</span><span class="showcase-stat-val">${breakEffect}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconStatusResistance', 'Effect RES')} ${t('statRes')}</span><span class="showcase-stat-val">${effectRes}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconEnergyRecovery', 'Energy Regen')} ${t('statEnergyRegen')}</span><span class="showcase-stat-val">${err}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconStatusProbability', 'Effect Hit Rate')} ${t('statEhr')}</span><span class="showcase-stat-val">${ehr}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon('IconHealRatio', 'Healing')} ${t('statHealBoost')}</span><span class="showcase-stat-val">${healing}%</span></div>
+        <div class="showcase-stat-row"><span class="showcase-stat-label">${propIcon(elemStatIconName, translateElement(canonElem))} ${t('statDmgBoost', { element: translateElement(canonElem) })}</span><span class="showcase-stat-val">${elemDmg}%</span></div>
       </div>
     </div>
 
     <!-- 3. Right Column: 6 Equipped Relics -->
     <div class="showcase-relics-col">
-      <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: -0.2rem;">Equipped Relics (+15)</div>
+      <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: -0.2rem;">${t('showcaseEquippedRelics')}</div>
       ${relicsHtml}
     </div>
   `;
@@ -5556,17 +5643,70 @@ function copyShowcaseText(avatarId) {
   const lc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === avatarId);
   const lcInfo = lc ? getLightconeInfo(lc.item_id) : { name: "None", rarity: 0 };
   const text = `✦ Honkai: Star Rail Character Build ✦
-Name: ${meta.name} (ID: ${avatarId})
-Path: ${meta.path} | Element: ${meta.element}
-Level: 80 | Eidolon: E${rank}
-Light Cone: ${lcInfo.name} (Lv. ${lc?.level || 80} / S${lc?.rank || 1})
-Generated via GaC-Srtool`;
+${t('copyCardName')}: ${meta.name} (ID: ${avatarId})
+${t('copyCardPath')}: ${meta.path} | ${t('copyCardElement')}: ${meta.element}
+${t('copyCardLevel')}: 80 | ${t('copyCardEidolon')}: E${rank}
+${t('copyCardLightCone')}: ${lcInfo.name} (Lv. ${lc?.level || 80} / S${lc?.rank || 1})
+${t('copyCardGenerated')}`;
 
   navigator.clipboard.writeText(text).then(() => {
     showToast(t('toastShowcaseCopied'), 'success');
   }).catch(() => {
     showToast(t('toastClipboardCopyFailed'), 'warning');
   });
+}
+
+// html2canvas ignores object-fit, so pre-render the splash art with the same
+// "cover" crop the card uses on screen. Without this the portrait gets
+// stretched (squeezed) to fill the tall column in the exported PNG.
+async function prepareExportSplashCover(clone) {
+  const img = clone.querySelector('.showcase-splash-img');
+  if (!img || img.tagName !== 'IMG') return;
+
+  const src = img.currentSrc || img.src;
+  if (!src) return;
+
+  const box = img.getBoundingClientRect();
+  const boxW = Math.round(box.width);
+  const boxH = Math.round(box.height);
+  if (boxW <= 0 || boxH <= 0) return;
+
+  const image = await new Promise(resolve => {
+    const loader = new Image();
+    loader.crossOrigin = 'anonymous';
+    loader.onload = () => resolve(loader);
+    loader.onerror = () => resolve(null);
+    loader.src = src;
+  });
+  if (!image || !image.naturalWidth || !image.naturalHeight) return;
+
+  // Match the html2canvas scale so the cropped art stays sharp.
+  const scaleFactor = 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(boxW * scaleFactor);
+  canvas.height = Math.round(boxH * scaleFactor);
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const cover = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+  const drawW = image.naturalWidth * cover;
+  const drawH = image.naturalHeight * cover;
+  const drawX = (canvas.width - drawW) / 2;
+  const drawY = (canvas.height - drawH) * 0.25; // object-position: center 25%
+
+  try {
+    ctx.drawImage(image, drawX, drawY, drawW, drawH);
+    // toDataURL throws when the source image is not CORS-clean; in that case
+    // keep the plain <img> so the export still succeeds (just without the crop).
+    const cropped = document.createElement('img');
+    cropped.src = canvas.toDataURL('image/png');
+    cropped.alt = img.alt || '';
+    cropped.className = 'showcase-splash-img';
+    cropped.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:fill;display:block;';
+    img.replaceWith(cropped);
+  } catch (err) {
+    console.warn('Splash cover pre-render skipped:', err);
+  }
 }
 
 // Export Showcase Card as high-res PNG image using html2canvas
@@ -5578,32 +5718,114 @@ async function exportShowcaseImage(avatarId) {
   showToast(t('toastCardExporting'), 'info');
 
   if (typeof html2canvas !== 'undefined') {
+    let holder = null;
     try {
-      const fullWidth = showcaseEl.scrollWidth || showcaseEl.offsetWidth;
-      const fullHeight = showcaseEl.scrollHeight || showcaseEl.offsetHeight;
+      // Render a detached copy at a fixed width so the exported PNG always uses
+      // the full three-column layout. Capturing the live element made html2canvas
+      // clip the canvas when the on-screen card was narrower than its content.
+      const exportWidth = 1200;
+      holder = document.createElement('div');
+      holder.setAttribute('aria-hidden', 'true');
+      holder.style.cssText = `position:fixed;top:0;left:0;width:${exportWidth}px;z-index:-1;pointer-events:none;background:transparent;`;
+      const clone = showcaseEl.cloneNode(true);
+      clone.classList.add('showcase-export-mode');
+      clone.style.width = `${exportWidth}px`;
+      clone.style.maxWidth = 'none';
+      clone.style.margin = '0';
+      holder.appendChild(clone);
+      document.body.appendChild(holder);
 
-      const canvas = await html2canvas(showcaseEl, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: '#0c1222',
-        width: fullWidth,
-        height: fullHeight,
-        windowWidth: fullWidth
-      });
+      // html2canvas ignores object-fit, so bake the splash "cover" crop in first.
+      await prepareExportSplashCover(clone);
+
+      // Give the cloned artwork a moment to load before painting the canvas.
+      const images = Array.from(clone.querySelectorAll('img'));
+      await Promise.race([
+        Promise.all(images.map(img => img.complete ? Promise.resolve() :
+          new Promise(resolve => {
+            img.addEventListener('load', resolve, { once: true });
+            img.addEventListener('error', resolve, { once: true });
+          }))),
+        new Promise(resolve => setTimeout(resolve, 3000))
+      ]);
+
+      // Let web fonts settle too; fallback metrics can reflow the clone taller.
+      try {
+        await document.fonts?.ready;
+      } catch (err) { /* font loading API unavailable */ }
+
+      // Yield a moment so the cloned layout settles. setTimeout is used instead of
+      // requestAnimationFrame so exporting still works when the tab is backgrounded.
+      await new Promise(resolve => setTimeout(resolve, 120));
+
+      const measureExportClone = (el) => {
+        const rect = el.getBoundingClientRect();
+        let height = rect.height;
+        for (const child of el.children) {
+          height = Math.max(height, child.getBoundingClientRect().bottom - rect.top);
+        }
+        return {
+          width: Math.ceil(Math.max(rect.width, el.scrollWidth)),
+          height: Math.ceil(Math.max(height, el.scrollHeight))
+        };
+      };
+
+      // html2canvas paints a *cloned* document inside its own iframe. That iframe
+      // can lay the card out taller than the on-screen clone (different media
+      // query state / font metrics), which used to cut the bottom off the PNG
+      // while the canvas still reported the on-screen size. So measure inside the
+      // clone on every pass and re-render when the painted size differs.
+      let exportSize = measureExportClone(clone);
+      let canvas = null;
+      for (let pass = 0; pass < 3; pass++) {
+        let paintedSize = null;
+        canvas = await html2canvas(clone, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+          // Transparent canvas: the card has rounded corners, so a solid
+          // background would show up as dark wedges in the four corners.
+          backgroundColor: null,
+          width: exportSize.width,
+          height: exportSize.height,
+          windowWidth: Math.max(window.innerWidth, exportWidth + 200),
+          windowHeight: Math.max(window.innerHeight, exportSize.height + 200),
+          scrollX: 0,
+          scrollY: 0,
+          onclone: (doc, el) => {
+            // Pin the root/body font sizes so the cloned iframe keeps the exact
+            // metrics of the live page instead of reflowing from its own defaults.
+            try {
+              doc.documentElement.style.fontSize = getComputedStyle(document.documentElement).fontSize;
+              doc.body.style.fontSize = getComputedStyle(document.body).fontSize;
+            } catch (err) { /* ignore */ }
+            paintedSize = measureExportClone(el);
+          }
+        });
+        if (!paintedSize) break;
+        if (Math.abs(paintedSize.width - exportSize.width) <= 1 &&
+            Math.abs(paintedSize.height - exportSize.height) <= 1) break;
+        exportSize = paintedSize;
+      }
 
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      const cleanName = meta.name.replace(/[^a-zA-Z0-9ก-๙_-]/g, '_');
+      // Keep letters from every script (Thai, CJK, Cyrillic, ...) in the file name.
+      const cleanName = (meta.name || 'Showcase')
+        .normalize('NFC')
+        .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+        .replace(/^_+|_+$/g, '') || 'Showcase';
       a.download = `${cleanName}_Build_${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    showToast(t('toastCardDownloaded'), 'success');
+      showToast(t('toastCardDownloaded'), 'success');
       return;
     } catch (err) {
       console.warn('html2canvas failed, falling back to print view:', err);
+    } finally {
+      holder?.remove();
     }
   }
 
@@ -5647,8 +5869,8 @@ async function exportShowcaseImage(avatarId) {
     </head>
     <body>
       <div class="print-btn-bar">
-        <button onclick="window.print()">🖨️ พิมพ์ / บันทึกเป็น PDF หรือรูปภาพ</button>
-        <button onclick="window.close()" style="background: #334155; color: #fff;">✕ ปิดหน้าต่าง</button>
+        <button onclick="window.print()">🖨️ ${t('printSavePdf')}</button>
+        <button onclick="window.close()" style="background: #334155; color: #fff;">✕ ${t('printClose')}</button>
       </div>
       <div style="max-width: 960px; width: 100%;">
         ${showcaseEl.outerHTML}
@@ -6036,12 +6258,12 @@ async function saveFreesrChangesToServer() {
 // Equipment Sub-tab & Filter Helpers (Matching srtools neonteam)
 const ROMAN_RANKS = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' };
 const RELIC_SLOT_NAMES = {
-  1: "ส่วนหัว",
-  2: "ส่วนมือ",
-  3: "ลำตัว",
-  4: "รองเท้า",
-  5: "ลูกแก้ว",
-  6: "สร้อย"
+  1: "slotHeadShort",
+  2: "slotHandsShort",
+  3: "slotBodyShort",
+  4: "slotFeetShort",
+  5: "slotSphereShort",
+  6: "slotRopeShort"
 };
 
 // Load Equipment (Lightcones & Relics)
@@ -6131,7 +6353,7 @@ function renderLightconesGrid() {
     card.title = `${meta.name} (★${meta.rarity} ${meta.path || ''})`;
 
     const wearerBadgeHtml = lc.equip_avatar ? `
-      <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(lc.equip_avatar).name}">
+      <div class="eq-tile-wearer-badge" title="${t('equippedBy')}: ${getAvatarInfo(lc.equip_avatar).name}">
         <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(lc.equip_avatar)}" onerror="handleAvatarImgError(this, ${lc.equip_avatar})" alt="Wearer">
       </div>
     ` : '';
@@ -6190,7 +6412,7 @@ function renderRelicsGrid() {
     const slotNum = (r.relic_id % 10) || 1;
     const setId = Math.floor((r.relic_id % 10000) / 10);
     const rInfo = getRelicSetInfo(setId);
-    const slotName = RELIC_SLOT_NAMES[slotNum] || `Slot ${slotNum}`;
+    const slotName = RELIC_SLOT_NAMES[slotNum] ? t(RELIC_SLOT_NAMES[slotNum]) : `${t('slot')} ${slotNum}`;
 
     const card = document.createElement('div');
     card.className = 'eq-tile-card rarity-5';
@@ -6198,7 +6420,7 @@ function renderRelicsGrid() {
     card.title = `${rInfo.name} (${slotName})`;
 
     const wearerBadgeHtml = r.equip_avatar ? `
-      <div class="eq-tile-wearer-badge" title="สวมใส่โดย: ${getAvatarInfo(r.equip_avatar).name}">
+      <div class="eq-tile-wearer-badge" title="${t('equippedBy')}: ${getAvatarInfo(r.equip_avatar).name}">
         <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(r.equip_avatar)}" onerror="handleAvatarImgError(this, ${r.equip_avatar})" alt="Wearer">
       </div>
     ` : '';
@@ -6284,20 +6506,20 @@ function showLcInspector(lc) {
 
     <!-- Passive Skill -->
     <div class="eq-inspector-ability">
-      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">${lcMeta.skill_name || 'สกิลพิเศษประจำกรวยแสง'}</div>
-      <div>${lcMeta.desc || 'เพิ่มพลังต่อสู้และเสริมกลไกเฉพาะสายของตัวละครเมื่อติดตั้ง'}</div>
+      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">${lcMeta.skill_name || t('eqSkillFallbackTitle')}</div>
+      <div>${lcMeta.desc || t('eqSkillFallbackDesc')}</div>
     </div>
 
     <!-- Wearer Form & Actions -->
     <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
-      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">ผู้สวมใส่ (Equipped By):</label>
+      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">${t('eqEquippedByLabel')}</label>
       <select id="sel-inspector-wearer" class="form-select">
         ${avatarOpts}
       </select>
 
       <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
-        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">💾 บันทึกสวมใส่</button>
-        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="ลบออกจากคลัง">🗑️ ลบ</button>
+        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">${t('eqSaveWearer')}</button>
+        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="${t('eqDeleteTitle')}">${t('eqDelete')}</button>
       </div>
     </div>
   `;
@@ -6345,7 +6567,7 @@ function showRelicInspector(relic) {
   const slotNum = (relic.relic_id % 10) || 1;
   const setId = Math.floor((relic.relic_id % 10000) / 10);
   const rInfo = getRelicSetInfo(setId);
-  const slotName = RELIC_SLOT_NAMES[slotNum] || `ชิ้นที่ ${slotNum}`;
+  const slotName = RELIC_SLOT_NAMES[slotNum] ? t(RELIC_SLOT_NAMES[slotNum]) : t('eqSlotN', { n: slotNum });
 
   let avatarOpts = `<option value="0">${t('unassigned')}</option>`;
   const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
@@ -6379,11 +6601,11 @@ function showRelicInspector(relic) {
     <!-- Real Stats Box -->
     <div class="eq-inspector-stats">
       <div class="eq-inspector-stat-row" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem; margin-bottom: 0.35rem;">
-        <span style="color: var(--text-highlight); font-weight: 700;">สเตตัสหลัก (Main Stat)</span>
+        <span style="color: var(--text-highlight); font-weight: 700;">${t('eqMainStatLabel')}</span>
         <strong style="color: var(--accent-cyan); font-family: monospace;">✦ ${mainAffixName}</strong>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">
-        ออฟรอง (Substats):
+        ${t('eqSubstatsLabel')}
       </div>
       ${(relic.sub_affixes && relic.sub_affixes.length > 0) ? relic.sub_affixes.map(s => {
         const sName = getRelicSubAffixName(s.sub_affix_id);
@@ -6397,30 +6619,30 @@ function showRelicInspector(relic) {
             </strong>
           </div>
         `;
-      }).join('') : '<div style="color: var(--text-muted); font-size: 0.75rem;">ไม่มีข้อมูลออฟรอง</div>'}
+      }).join('') : `<div style="color: var(--text-muted); font-size: 0.75rem;">${t('eqNoSubstats')}</div>`}
     </div>
 
     <!-- Edit Substats Action Button -->
     <button type="button" class="btn btn-warning" id="btn-inspector-edit-subs" style="margin-top: 0.35rem; font-weight: 800; font-size: 0.825rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
-      🔧 ปรับแต่งออฟรอง / สเตตัส (Edit Substats)
+      ${t('eqEditSubstats')}
     </button>
 
     <!-- Set Description -->
     <div class="eq-inspector-ability" style="margin-top: 0.4rem;">
       <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">Set Bonus (${rInfo.name})</div>
-      <div>2-Piece: ${rInfo.desc2 || 'เพิ่มประสิทธิภาพตามเซ็ตที่กำหนด'}<br>4-Piece: ${rInfo.desc4 || 'ปลดล็อกเอฟเฟกต์ต่อสู้ขั้นสูง'}</div>
+      <div>2-Piece: ${rInfo.desc2 || t('eqSet2Fallback')}<br>4-Piece: ${rInfo.desc4 || t('eqSet4Fallback')}</div>
     </div>
 
     <!-- Wearer Form & Actions -->
     <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.25rem;">
-      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">ผู้สวมใส่ (Equipped By):</label>
+      <label class="form-label" style="margin-bottom: 0.2rem; font-size: 0.8rem;">${t('eqEquippedByLabel')}</label>
       <select id="sel-inspector-wearer" class="form-select">
         ${avatarOpts}
       </select>
 
       <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
-        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">💾 บันทึกสวมใส่</button>
-        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="ลบออกจากคลัง">🗑️ ลบ</button>
+        <button type="button" class="btn btn-primary" id="btn-inspector-save-wearer" style="flex: 1;">${t('eqSaveWearer')}</button>
+        <button type="button" class="btn btn-danger" id="btn-inspector-delete" title="${t('eqDeleteTitle')}">${t('eqDelete')}</button>
       </div>
     </div>
   `;
@@ -6581,7 +6803,7 @@ function renderAddLcVisualGrid() {
   });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบกรวยแสงตามเงื่อนไขที่ค้นหา</div>`;
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">${t('lcNoResults')}</div>`;
     return;
   }
 
@@ -7638,7 +7860,7 @@ function renderExRanks(exList) {
   if (!el.exrankList) return;
   el.exrankList.innerHTML = '';
   if (!exList || exList.length === 0) {
-    el.exrankList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 2rem;">ไม่มีข้อมูล Ex-Rank</div>';
+    el.exrankList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 2rem;">${t('exRankNoData')}</div>`;
     return;
   }
 
@@ -7675,7 +7897,7 @@ function renderExRanks(exList) {
         <button class="btn btn-sm ${ex.unlocked ? 'btn-success' : 'btn-secondary'} btn-toggle-ex"
                 data-avatar="${ex.avatar_id}"
                 data-unlocked="${ex.unlocked}">
-          ${ex.unlocked ? '⚡ เปิดใช้งานแล้ว' : '🔒 ปิดการใช้งาน'}
+          ${ex.unlocked ? `⚡ ${t('exRankEnabled')}` : `🔒 ${t('exRankDisabled')}`}
         </button>
       </div>
     `;
@@ -7710,26 +7932,26 @@ async function loadJsonData(mode) {
     el.btnSelectFreesr.className = 'btn btn-sm btn-primary active';
     if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = 'กำลังโหลด freesr-data.json...';
+    el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'freesr-data.json' });
     try {
       if (state.fullFreesrData) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
-        el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากหน่วยความจำ/แคช)';
+        el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/freesr');
         state.fullFreesrData = res.data;
         saveFreesrCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
-        el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากเซิร์ฟเวอร์)';
+        el.jsonStatusInfo.textContent = t('jsonStatusServer', { file: 'freesr-data.json' });
       } else {
         const cached = localStorage.getItem('gac_srtool_freesr_cache');
         if (cached) {
           const parsed = JSON.parse(cached);
           state.fullFreesrData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากแคชของเบราว์เซอร์)';
+          el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'freesr-data.json' });
         } else {
-          el.jsonStatusInfo.textContent = 'Offline: ไม่มีแคช สามารถอัปโหลดหรือพิมพ์ JSON เองได้';
+          el.jsonStatusInfo.textContent = t('jsonOfflineNoCache');
           if (!el.jsonEditor.value) {
             el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
           }
@@ -7742,10 +7964,10 @@ async function loadJsonData(mode) {
           const parsed = JSON.parse(cached);
           state.fullFreesrData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'freesr-data.json (โหลดจากแคชของเบราว์เซอร์)';
+          el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'freesr-data.json' });
         } catch (e) {}
       } else {
-        el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+        el.jsonStatusInfo.textContent = t('jsonOfflinePaste');
         if (!el.jsonEditor.value) {
           el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
         }
@@ -7755,11 +7977,11 @@ async function loadJsonData(mode) {
     el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
     if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-primary active';
-    el.jsonStatusInfo.textContent = 'กำลังโหลด data-in-game.json...';
+    el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'data-in-game.json' });
     try {
       if (state.dataGameData) {
         el.jsonEditor.value = JSON.stringify(state.dataGameData, null, 2);
-        el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากหน่วยความจำ/แคช)';
+        el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'data-in-game.json' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/data-in-game').catch(() => null);
         if (res && (res.data || res.lineups)) {
@@ -7767,7 +7989,7 @@ async function loadJsonData(mode) {
           state.dataGameData = val;
           saveDataGameCache(val);
           el.jsonEditor.value = JSON.stringify(val, null, 2);
-          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากเซิร์ฟเวอร์)';
+          el.jsonStatusInfo.textContent = t('jsonStatusServer', { file: 'data-in-game.json' });
         } else {
           throw new Error('Not available');
         }
@@ -7777,11 +7999,11 @@ async function loadJsonData(mode) {
           const parsed = JSON.parse(cached);
           state.dataGameData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากแคช)';
+          el.jsonStatusInfo.textContent = t('jsonStatusCache', { file: 'data-in-game.json' });
         } else {
           state.dataGameData = { ...DEFAULT_DATA_GAME };
           el.jsonEditor.value = JSON.stringify(DEFAULT_DATA_GAME, null, 2);
-          el.jsonStatusInfo.textContent = 'data-in-game.json (โครงสร้าง Firefly dump)';
+          el.jsonStatusInfo.textContent = t('jsonStatusDump', { file: 'data-in-game.json' });
         }
       }
     } catch (err) {
@@ -7791,38 +8013,38 @@ async function loadJsonData(mode) {
           const parsed = JSON.parse(cached);
           state.dataGameData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'data-in-game.json (โหลดจากแคช)';
+          el.jsonStatusInfo.textContent = t('jsonStatusCache', { file: 'data-in-game.json' });
         } catch (e) {}
       } else {
         state.dataGameData = { ...DEFAULT_DATA_GAME };
         el.jsonEditor.value = JSON.stringify(DEFAULT_DATA_GAME, null, 2);
-        el.jsonStatusInfo.textContent = 'data-in-game.json (โครงสร้าง Firefly dump)';
+        el.jsonStatusInfo.textContent = t('jsonStatusDump', { file: 'data-in-game.json' });
       }
     }
   } else {
     el.btnSelectFreesr.className = 'btn btn-sm btn-secondary';
     if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-primary active';
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
-    el.jsonStatusInfo.textContent = 'กำลังโหลด persistent...';
+    el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'persistent' });
     try {
       if (state.persistentData) {
         el.jsonEditor.value = JSON.stringify(state.persistentData, null, 2);
-        el.jsonStatusInfo.textContent = 'persistent (โหลดจากหน่วยความจำ/แคช)';
+        el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'persistent' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/persistent');
         state.persistentData = res.data;
         savePersistentCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
-        el.jsonStatusInfo.textContent = 'persistent (โหลดจากเซิร์ฟเวอร์)';
+        el.jsonStatusInfo.textContent = t('jsonStatusServer', { file: 'persistent' });
       } else {
         const cached = localStorage.getItem('gac_srtool_persistent_cache');
         if (cached) {
           const parsed = JSON.parse(cached);
           state.persistentData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'persistent (โหลดจากแคชของเบราว์เซอร์)';
+          el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'persistent' });
         } else {
-          el.jsonStatusInfo.textContent = 'Offline: ไม่มีแคช สามารถอัปโหลดหรือพิมพ์ JSON เองได้';
+          el.jsonStatusInfo.textContent = t('jsonOfflineNoCache');
           if (!el.jsonEditor.value) {
             el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
           }
@@ -7835,10 +8057,10 @@ async function loadJsonData(mode) {
           const parsed = JSON.parse(cached);
           state.persistentData = parsed;
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
-          el.jsonStatusInfo.textContent = 'persistent (โหลดจากแคชของเบราว์เซอร์)';
+          el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'persistent' });
         } catch (e) {}
       } else {
-        el.jsonStatusInfo.textContent = `Offline: สามารถพิมพ์หรือวาง JSON เองได้`;
+        el.jsonStatusInfo.textContent = t('jsonOfflinePaste');
         if (!el.jsonEditor.value) {
           el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
         }
@@ -7966,7 +8188,7 @@ function updateCacheUsageDisplay() {
     const kb = (displayBytes / 1024).toFixed(1);
     el.lblCacheUsage.textContent = `${kb} KB (IndexedDB + Storage)`;
   } catch (err) {
-    el.lblCacheUsage.textContent = 'ไม่สามารถตรวจสอบได้';
+    el.lblCacheUsage.textContent = t('jsonCacheUnavailable');
   }
 }
 
@@ -8431,13 +8653,13 @@ function setupEvents() {
     const mode = document.getElementById('camera-mode').value;
     const distance = Number(document.getElementById('camera-distance').value);
     if (!Number.isFinite(distance) || distance < 0.5 || distance > 5) {
-      showToast('ระยะ FaceCam ต้องอยู่ระหว่าง 0.5 ถึง 5', 'error'); return;
+      showToast(t('cameraDistanceError'), 'error'); return;
     }
     button.disabled = true;
     try {
       const saved = await apiCall('/api/camera', 'POST', { mode, distance });
       if (state.persistentData) state.persistentData.camera_settings = saved;
-      showToast('บันทึกกล้องแล้ว', 'success');
+      showToast(t('cameraSaved'), 'success');
     } catch (err) { showToast(err.message, 'error'); }
     finally { button.disabled = false; }
   });
