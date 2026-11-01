@@ -14,7 +14,19 @@ test('4.6 equipment metadata and bundled artwork are available', async () => {
     const relic = RELIC_SET_METADATA[id];
     assert.equal(getRelicSetInfo(id, 'en').name, name);
     assert.ok(getRelicSetInfo(id, 'en').desc2);
-    assert.equal(relic.creationAvailable, false);
+    assert.notEqual(relic.creationAvailable, false);
     for (const slot of [5, 6]) assert.ok(fs.existsSync(path.resolve(__dirname, '..', relic.images[slot])));
+  }
+});
+
+test('captured relic templates reference matching client affix properties', () => {
+  const capture = require('../assets/relic-client-capture.json');
+  assert.deepEqual(capture.relics.map(row => row.ID), [63295, 63296, 63305, 63306]);
+  for (const relic of capture.relics) {
+    const main = capture.main_affixes.filter(row => row.GroupID === relic.MainAffixGroup);
+    const sub = capture.sub_affixes.filter(row => row.GroupID === relic.SubAffixGroup);
+    assert.equal(main.length, relic.Type === 5 ? 10 : 5);
+    assert.equal(sub.length, 12);
+    assert.ok(main.every(row => sub.filter(item => item.Property !== row.Property).length >= 4));
   }
 });

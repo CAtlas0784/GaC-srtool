@@ -173,6 +173,7 @@ const el = {
   addLcPromotion: document.getElementById('add-lc-promotion'),
   addLcRank: document.getElementById('add-lc-rank'),
   addLcAvatar: document.getElementById('add-lc-avatar'),
+  addLcAvatarBtn: document.getElementById('add-lc-avatar-btn'),
   btnOpenAddRelic: document.getElementById('btn-open-add-relic'),
   modalAddRelic: document.getElementById('modal-add-relic'),
   btnCloseAddRelicModal: document.getElementById('btn-close-add-relic-modal'),
@@ -183,6 +184,7 @@ const el = {
   addRelicLevel: document.getElementById('add-relic-level'),
   addRelicMainAffix: document.getElementById('add-relic-main-affix'),
   addRelicAvatar: document.getElementById('add-relic-avatar'),
+  addRelicAvatarBtn: document.getElementById('add-relic-avatar-btn'),
 
   // Persistent Tab
   tabBtnPersistent: document.getElementById('tab-btn-persistent'),
@@ -369,6 +371,17 @@ const el = {
   pickerSearch: document.getElementById('picker-search'),
   pickerAvatarsGrid: document.getElementById('picker-avatars-grid'),
 
+  // Avatar Assignment Picker (Add Relic / Add Light Cone)
+  modalAvatarAssign: document.getElementById('modal-avatar-assign'),
+  modalAssignTitle: document.getElementById('modal-assign-title'),
+  modalAssignSubtitle: document.getElementById('modal-assign-subtitle'),
+  assignPickerSearch: document.getElementById('assign-picker-search'),
+  assignPickerGrid: document.getElementById('assign-picker-grid'),
+  assignPickerCurrentValue: document.getElementById('assign-picker-current-value'),
+  btnCloseAssignPicker: document.getElementById('btn-close-assign-picker'),
+  btnCancelAssignPicker: document.getElementById('btn-cancel-assign-picker'),
+  btnConfirmAssignPicker: document.getElementById('btn-confirm-assign-picker'),
+
   toastContainer: document.getElementById('toast-container')
 };
 
@@ -549,6 +562,44 @@ function getElementIconHtml(element, size = 20) {
          style="width: ${size}px; height: ${size}px;"
          onerror="if(this.src.indexOf('StarRailRes')===-1){this.src='https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/element/${canonical === 'Lightning' ? 'Thunder' : canonical}.png';}">
   </span>`;
+}
+
+// A set without captured affix groups remains browse-only.
+let relicClientCapture = null;
+const relicCaptureReady = fetch('./assets/relic-client-capture.json')
+  .then(response => response.ok ? response.json() : null)
+  .then(data => { relicClientCapture = data; })
+  .catch(error => console.warn('Client relic capture unavailable', error));
+function canCreateRelicSet(setId) {
+  const meta = RELIC_SET_METADATA[setId];
+  if (meta?.clientCaptureRequired) {
+    const rows = relicClientCapture?.relics?.filter(row => Number(row.SetID) === Number(setId)) || [];
+    return [5, 6].every(slot => rows.some(row => Number(row.Type) === slot &&
+      relicClientCapture.main_affixes?.some(affix => affix.GroupID === row.MainAffixGroup) &&
+      relicClientCapture.sub_affixes?.some(affix => affix.GroupID === row.SubAffixGroup)));
+  }
+  return meta?.creationAvailable !== false;
+}
+function isCapturedMainAffixValid(setId, slot, mainAffixId) {
+  if (!RELIC_SET_METADATA[setId]?.clientCaptureRequired) return true;
+  const relic = relicClientCapture?.relics?.find(row => Number(row.SetID) === Number(setId) && Number(row.Type) === Number(slot));
+  return !!relic && relicClientCapture.main_affixes.some(row => row.GroupID === relic.MainAffixGroup && row.AffixID === Number(mainAffixId));
+}
+
+function areCapturedSubAffixesValid(setId, slot, mainAffixId, subAffixes) {
+  if (!RELIC_SET_METADATA[setId]?.clientCaptureRequired) return true;
+  const relic = relicClientCapture?.relics?.find(row => Number(row.SetID) === Number(setId) && Number(row.Type) === Number(slot));
+  if (!relic) return false;
+  const main = relicClientCapture.main_affixes.find(row => row.GroupID === relic.MainAffixGroup && row.AffixID === Number(mainAffixId));
+  if (!main) return false;
+  const ids = new Set();
+  return subAffixes.every(sub => {
+    const id = Number(sub.sub_affix_id);
+    const row = relicClientCapture.sub_affixes.find(entry => entry.GroupID === relic.SubAffixGroup && entry.AffixID === id);
+    if (!row || row.Property === main.Property || ids.has(id)) return false;
+    ids.add(id);
+    return true;
+  });
 }
 
 // Official in-game property icons (same set used by the overview tab)
@@ -3768,7 +3819,8 @@ export function openSlotPickerForRelic(relic) {
 }
 window.openSlotPickerForRelic = openSlotPickerForRelic;
 
-function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
+async function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
+  await relicCaptureReady;
   state.slotPickerAvatarId = parseInt(avatarId, 10);
   state.slotPickerSlot = parseInt(slotNum, 10);
   slotPickerTargetRelic = targetRelicToEdit || null;
@@ -4008,7 +4060,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
   // Confirm Custom Button
   if (btnConfirmCustom) {
     btnConfirmCustom.onclick = async () => {
-      if (RELIC_SET_METADATA[slotPickerSelectedSetId]?.creationAvailable === false) {
+      if (!canCreateRelicSet(slotPickerSelectedSetId) || !isCapturedMainAffixValid(slotPickerSelectedSetId, slot, slotPickerSelectedMainAffix) || !areCapturedSubAffixesValid(slotPickerSelectedSetId, slot, slotPickerSelectedMainAffix, slotPickerSubstats)) {
         showToast('Requires matching server relic and main affix data.', 'warning');
         return;
       }
@@ -4047,40 +4099,34 @@ function renderSlotPickerSubstats(slot, mainAffixId) {
 
     const sVal = formatRelicSubstatValue(sub.sub_affix_id, sub.count);
 
-    let optsHtml = '';
-    RELIC_SUBSTATS_CONFIG.forEach(stat => {
-      const isConflict = stat.id === conflictSub;
-      const isChosenElsewhere = slotPickerSubstats.some((s, i) => i !== idx && s.sub_affix_id === stat.id);
-      const isSelected = stat.id === sub.sub_affix_id;
-      const disabledAttr = (isConflict || (isChosenElsewhere && !isSelected)) ? 'disabled' : '';
-      const conflictTag = isConflict ? t('substatMainConflict') : (isChosenElsewhere && !isSelected ? t('substatAlreadyChosen') : '');
-      optsHtml += `<option value="${stat.id}" ${isSelected ? 'selected' : ''} ${disabledAttr}>${stat.name}${conflictTag}</option>`;
-    });
-
+    const selectedStat = RELIC_SUBSTATS_CONFIG.find(stat => stat.id === sub.sub_affix_id);
+    const options = RELIC_SUBSTATS_CONFIG.map(stat => {
+      const conflict = stat.id === conflictSub;
+      const used = slotPickerSubstats.some((other, i) => i !== idx && other.sub_affix_id === stat.id);
+      const reason = conflict ? t('substatMainConflict') : (used ? t('substatAlreadyChosen') : '');
+      return `<button type="button" class="substat-option" data-stat-id="${stat.id}" ${conflict || used ? 'disabled' : ''}>
+        ${getStatIconHtml(stat.icon, 18, '')}<span>${stat.name}${reason}</span></button>`;
+    }).join('');
     card.innerHTML = `
       <div class="substat-row-header">
         <span class="substat-slot-label">${t('substatSlotLabel', { n: idx + 1 })}</span>
         <span class="substat-preview-badge" id="substat-preview-${idx}">${t('substatRolls', { value: sVal, count: sub.count })}</span>
       </div>
       <div class="substat-row-controls">
-        ${getStatIconHtml(RELIC_SUBSTATS_CONFIG.find(stat => stat.id === sub.sub_affix_id)?.icon, 20, "")}
-        <select class="form-select substat-select" data-idx="${idx}">
-          ${optsHtml}
-        </select>
+        <details class="substat-menu">
+          <summary class="substat-choice">${getStatIconHtml(selectedStat?.icon, 18, '')}<span>${selectedStat?.name || ''}</span></summary>
+          <div class="substat-options">${options}</div>
+        </details>
         <div class="substat-stepper">
           <button type="button" class="btn-substat-step minus" data-idx="${idx}" title="${t('substatDecreaseRoll')}">−</button>
           <input type="number" class="substat-count-input" data-idx="${idx}" min="1" max="25" value="${sub.count}">
           <button type="button" class="btn-substat-step plus" data-idx="${idx}" title="${t('substatIncreaseRoll')}">+</button>
         </div>
-      </div>
-    `;
-
-    // Dropdown change
-    card.querySelector('.substat-select')?.addEventListener('change', (e) => {
-      const newId = parseInt(e.target.value, 10);
-      slotPickerSubstats[idx].sub_affix_id = newId;
+      </div>`;
+    card.querySelectorAll('.substat-option').forEach(button => button.addEventListener('click', () => {
+      slotPickerSubstats[idx].sub_affix_id = Number(button.dataset.statId);
       renderSlotPickerSubstats(slot, slotPickerSelectedMainAffix);
-    });
+    }));
 
     // Stepper buttons
     card.querySelector('.btn-substat-step.minus')?.addEventListener('click', () => {
@@ -4234,7 +4280,7 @@ function renderSlotPickerSetGrid(slot, recSetId) {
       ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">⭐ ${t('recommendedBadge')}</span>` : ''}
     `;
 
-    if (RELIC_SET_METADATA[sId].creationAvailable === false) {
+    if (!canCreateRelicSet(sId)) {
       card.style.opacity = '0.5';
       card.title = 'Requires matching server relic and main affix data';
       card.setAttribute('aria-disabled', 'true');
@@ -6867,8 +6913,51 @@ function renderAddLcVisualGrid() {
   });
 }
 
+function renderAddRelicSetGrid() {
+  const grid = document.getElementById('add-relic-set-grid');
+  const query = document.getElementById('add-relic-search')?.value.trim().toLowerCase() || '';
+  if (!grid) return;
+  grid.replaceChildren();
+  for (const option of el.addRelicSet.options) {
+    const id = Number(option.value);
+    const info = getRelicSetInfo(id);
+    if (query && !`${info.name} ${id}`.toLowerCase().includes(query)) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'add-relic-set-card' + (el.addRelicSet.value === option.value ? ' selected' : '');
+    button.disabled = option.disabled;
+    button.setAttribute('aria-pressed', String(el.addRelicSet.value === option.value));
+    button.title = option.disabled ? 'Requires matching server relic and main affix data' : info.name;
+    const image = document.createElement('img');
+    image.src = getRelicImage(id, id >= 300 ? 5 : 1);
+    image.alt = '';
+    image.onerror = () => { image.onerror = null; image.src = './assets/logo.png'; };
+    const label = document.createElement('span');
+    label.textContent = info.name;
+    const tag = document.createElement('small');
+    tag.textContent = option.disabled ? 'Requires server data' : `#${id}`;
+    button.append(image, label, tag);
+    button.addEventListener('click', () => {
+      el.addRelicSet.value = option.value;
+      syncAddRelicSlot();
+      renderAddRelicSetGrid();
+    });
+    grid.appendChild(button);
+  }
+}
+
+function syncAddRelicSlot() {
+  const isPlanar = Number(el.addRelicSet.value) >= 300;
+  for (const option of el.addRelicSlot.options) {
+    option.disabled = isPlanar ? Number(option.value) < 5 : Number(option.value) >= 5;
+  }
+  if (el.addRelicSlot.selectedOptions[0]?.disabled) el.addRelicSlot.value = isPlanar ? '5' : '1';
+  updateRelicMainAffixes(el.addRelicSlot.value);
+}
+
 // Open Add Relic Modal
-function openAddRelicModal() {
+async function openAddRelicModal() {
+  await relicCaptureReady;
   if (!el.modalAddRelic) return;
   el.addRelicSet.innerHTML = '';
   const setIds = Object.keys(RELIC_SET_METADATA).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
@@ -6876,7 +6965,7 @@ function openAddRelicModal() {
     const meta = getRelicSetInfo(setId);
     const opt = document.createElement('option');
     opt.value = setId;
-    opt.disabled = RELIC_SET_METADATA[setId].creationAvailable === false;
+    opt.disabled = !canCreateRelicSet(setId);
     opt.textContent = `${meta.name} (Set ID: ${setId})${opt.disabled ? ' — requires server data' : ''}`;
     el.addRelicSet.appendChild(opt);
   });
@@ -6891,9 +6980,14 @@ function openAddRelicModal() {
     el.addRelicAvatar.appendChild(opt);
   });
 
+  const firstAvailable = Array.from(el.addRelicSet.options).find(option => !option.disabled);
+  if (firstAvailable) el.addRelicSet.value = firstAvailable.value;
   el.addRelicSlot.value = "1";
   el.addRelicLevel.value = 15;
-  updateRelicMainAffixes("1");
+  const search = document.getElementById('add-relic-search');
+  if (search) search.value = '';
+  syncAddRelicSlot();
+  renderAddRelicSetGrid();
 
   el.modalAddRelic.classList.add('active');
 }
@@ -6988,6 +7082,10 @@ async function handleAddRelicSubmit(e) {
   const mainAffixId = parseInt(el.addRelicMainAffix.value, 10) || 1;
   const equipAvatar = parseInt(el.addRelicAvatar.value, 10) || 0;
 
+  if (!canCreateRelicSet(setId) || !isCapturedMainAffixValid(setId, slot, mainAffixId)) {
+    showToast('Relic main affix data is unavailable for this set.', 'warning');
+    return;
+  }
   const relicId = 60000 + (setId * 10) + slot;
 
   if (!state.fullFreesrData) {
@@ -6997,6 +7095,22 @@ async function handleAddRelicSubmit(e) {
     state.fullFreesrData.relics = [];
   }
 
+  const maxUid = state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0);
+  const newRelic = {
+    level,
+    relic_id: relicId,
+    main_affix_id: mainAffixId,
+    // Exclude the main property's sub-affix from the same slot group.
+    sub_affixes: RELIC_SUBSTATS_CONFIG.filter(stat => stat.id !== getConflictingSubstat(slot, mainAffixId))
+      .slice(0, 4).map(stat => ({ sub_affix_id: stat.id, cnt: 1, count: 1, step: 0 })),
+    internal_uid: maxUid + 1,
+    equip_avatar: equipAvatar
+  };
+
+  if (!areCapturedSubAffixesValid(setId, slot, mainAffixId, newRelic.sub_affixes)) {
+    showToast('Relic sub-affix data is invalid for this set.', 'warning');
+    return;
+  }
   if (equipAvatar !== 0) {
     state.fullFreesrData.relics.forEach(r => {
       if (r.equip_avatar === equipAvatar && (r.relic_id % 10 === slot)) {
@@ -7004,21 +7118,6 @@ async function handleAddRelicSubmit(e) {
       }
     });
   }
-
-  const maxUid = state.fullFreesrData.relics.reduce((m, r) => Math.max(m, r.internal_uid || 0), 0);
-  const newRelic = {
-    level,
-    relic_id: relicId,
-    main_affix_id: mainAffixId,
-    sub_affixes: [
-      { sub_affix_id: 1, cnt: 2, count: 2, step: 1 },
-      { sub_affix_id: 2, cnt: 2, count: 2, step: 1 },
-      { sub_affix_id: 3, cnt: 3, count: 3, step: 2 },
-      { sub_affix_id: 4, cnt: 4, count: 4, step: 2 }
-    ],
-    internal_uid: maxUid + 1,
-    equip_avatar: equipAvatar
-  };
 
   state.fullFreesrData.relics.unshift(newRelic);
   await saveFreesrChangesToServer();
@@ -8763,6 +8862,7 @@ function setupEvents() {
   if (el.btnCancelAddRelic) {
     el.btnCancelAddRelic.addEventListener('click', () => el.modalAddRelic.classList.remove('active'));
   }
+  document.getElementById('add-relic-search')?.addEventListener('input', renderAddRelicSetGrid);
   if (el.addRelicSlot) {
     el.addRelicSlot.addEventListener('change', (e) => updateRelicMainAffixes(e.target.value));
   }

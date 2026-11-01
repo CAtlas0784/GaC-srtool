@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.23">
+  <link rel="stylesheet" href="css/styles.css?v=2.24">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1552,10 +1552,12 @@
           </div>
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" data-i18n="lblEquipAvatar" style="font-size: 0.75rem;">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
-            <select id="add-lc-avatar" class="form-select">
-              <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
-              <!-- Injected by JS -->
+            <select id="add-lc-avatar" class="sr-only-select" tabindex="-1" aria-hidden="true">
+              <option value="0" selected>0</option>
             </select>
+            <button type="button" class="equip-target is-empty" id="add-lc-avatar-btn" aria-haspopup="dialog">
+              <!-- Rendered by JS -->
+            </button>
           </div>
         </div>
 
@@ -1570,7 +1572,7 @@
 
   <!-- Add Relic Modal -->
   <div class="modal-overlay" id="modal-add-relic">
-    <div class="modal-content" style="max-width: 580px;">
+    <div class="modal-content add-relic-modal">
       <div class="modal-header">
         <h3 style="font-weight: 800;" data-i18n="modalAddRelicTitle">🛡️ เพิ่มรีลิกส์ลง FreeSR</h3>
         <button type="button" class="btn btn-sm btn-secondary" id="btn-close-add-relic-modal">✕</button>
@@ -1578,9 +1580,9 @@
       <form id="form-add-relic">
         <div class="form-group">
           <label class="form-label" data-i18n="lblSelectRelicSet">เลือกเซ็ตรีลิกส์</label>
-          <select id="add-relic-set" class="form-select" required>
-            <!-- Injected by JS -->
-          </select>
+          <input id="add-relic-search" class="form-input add-relic-search" type="search" placeholder="Search / ค้นหา" aria-label="Search relic sets">
+          <div class="add-relic-set-grid" id="add-relic-set-grid" role="group" aria-label="Relic sets"></div>
+          <select id="add-relic-set" class="sr-only-select" tabindex="-1" aria-hidden="true" required></select>
         </div>
         <div class="grid-2" style="gap: 0.75rem; margin-bottom: 1rem;">
           <div class="form-group" style="margin-bottom: 0;">
@@ -1607,10 +1609,12 @@
         </div>
         <div class="form-group">
           <label class="form-label" data-i18n="lblEquipAvatar">สวมใส่ให้ตัวละคร (ถ้าต้องการ)</label>
-          <select id="add-relic-avatar" class="form-select">
-            <option value="0" data-i18n="unassigned">-- ยังไม่สวมใส่ (เก็บในคลัง) --</option>
-            <!-- Injected by JS -->
+          <select id="add-relic-avatar" class="sr-only-select" tabindex="-1" aria-hidden="true">
+            <option value="0" selected>0</option>
           </select>
+          <button type="button" class="equip-target is-empty" id="add-relic-avatar-btn" aria-haspopup="dialog">
+            <!-- Rendered by JS -->
+          </button>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
           <button type="button" class="btn btn-secondary" id="btn-cancel-add-relic" data-i18n="btnCancel">ยกเลิก</button>
@@ -1620,12 +1624,43 @@
     </div>
   </div>
 
+  <!-- Avatar Assignment Picker (Add Relic / Add Light Cone) -->
+  <div class="modal-overlay" id="modal-avatar-assign">
+    <div class="modal-content assign-picker-modal" role="dialog" aria-modal="true" aria-labelledby="modal-assign-title">
+      <div class="modal-header assign-picker-header">
+        <div class="assign-picker-heading">
+          <h3 id="modal-assign-title" style="font-weight: 800; margin: 0; font-size: 1.15rem;">สวมใส่ให้ตัวละคร</h3>
+          <div id="modal-assign-subtitle" class="assign-picker-subtitle"></div>
+        </div>
+        <button type="button" class="btn btn-sm btn-secondary" id="btn-close-assign-picker">✕</button>
+      </div>
+
+      <input type="search" id="assign-picker-search" class="form-input assign-picker-search"
+             data-i18n-placeholder="assignPickerSearch" placeholder="🔍 ค้นหาชื่อหรือ ID ตัวละคร..." autocomplete="off">
+
+      <div id="assign-picker-grid" class="picker-grid-container assign-picker-grid">
+        <!-- Injected by JS -->
+      </div>
+
+      <div class="assign-picker-footer">
+        <div class="assign-picker-current">
+          <span class="assign-current-label" data-i18n="assignCurrent">เลือกอยู่:</span>
+          <span id="assign-picker-current-value" class="assign-current-value">—</span>
+        </div>
+        <div class="assign-picker-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-assign-picker" data-i18n="btnCancel">ยกเลิก</button>
+          <button type="button" class="btn btn-primary" id="btn-confirm-assign-picker" data-i18n="assignConfirm">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Select Relic for Specific Slot (Large, Spacious & Easy to Use) -->
   <div class="modal-overlay" id="modal-select-relic-slot">
     <div class="modal-content relic-picker-modal-content">
       <div class="modal-header" style="margin-bottom: 0.75rem;">
         <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <img id="modal-slot-picker-icon" src="" alt="Slot" data-i18n-alt="slot" style="width: 28px; height: 28px; object-fit: contain;">
+
           <div>
             <h3 id="modal-slot-picker-title" style="font-weight: 800; font-size: 1.15rem; margin: 0;" data-i18n="slotPickerTitle">
               🛡️ เลือกสวมใส่รีลิกส์
@@ -1823,6 +1858,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.15"></script>
+  <script type="module" src="js/app.js?v=3.16"></script>
 </body>
 </html>
