@@ -583,7 +583,7 @@ function updateEquipmentFilterExtraOptions() {
       return `<option value="${id}">${id} - ${t(key)}</option>`;
     }).join('')}`;
   } else {
-    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance'];
+    const paths = ['Destruction', 'Hunt', 'Erudition', 'Harmony', 'Nihility', 'Preservation', 'Abundance', 'Remembrance', 'Elation'];
     el.eqFilterExtra.innerHTML = `<option value="all">${t('filterAllTypes')}</option>${paths.map(path => `<option value="${path}">${translatePath(path)}</option>`).join('')}`;
   }
   if (Array.from(el.eqFilterExtra.options).some(option => option.value === selected)) {

@@ -1,4 +1,4 @@
-// Multi-language (i18n) definitions for GaC-srtool
+// Multi-language (i18n) definitions for GaCy-srtool
 // Covers all 13 official languages supported by Honkai: Star Rail
 
 export const SUPPORTED_LANGUAGES = [
@@ -222,7 +222,7 @@ export const TRANSLATIONS = {
     "equippedBy": "สวมใส่โดย",
     "noLcData": "ยังไม่มีข้อมูลกรวยแสง",
     "noRelicData": "ยังไม่มีข้อมูลรีลิกส์",
-    "persistentTitle": "💾 จัดการไฟล์เซฟ GaC",
+    "persistentTitle": "💾 จัดการไฟล์เซฟ GaCy",
     "persistentBadge": "เซิร์ฟเวอร์ของเราเอง",
     "persistentSubtitle": "ไฟล์ persistent เก็บการตั้งค่าสถานะผู้เล่นเฉพาะของเซิร์ฟเวอร์ GaCy GO เช่น เพศ/ธาตุตัวเอก, สเตตัส March 7th, สวิตช์ฟังก์ชัน Global ต่างๆ",
     "persistentTbM7Title": "👤 ผู้บุกเบิก & March 7th",
@@ -2482,7 +2482,7 @@ export const TRANSLATIONS = {
     "lblTbGenderElement": "Giới tính & Thuộc tính nhân vật chính",
     "lblM7Path": "Dạng Vận Mệnh của March 7th",
     "btnSaveCharSettings": "💾 Lưu cài đặt nhân vật",
-    "persistentGlobalTitle": "⚙️ Công tắc tính năng đặc biệt GaC",
+    "persistentGlobalTitle": "⚙️ Công tắc tính năng đặc biệt GaCy",
     "swGlobalDesc": "Bật cơ chế Silver Wolf toàn máy chủ",
     "castoriceGlobalDesc": "Bật cơ chế Castorice toàn máy chủ",
     "btnSaveGlobalSwitch": "💾 Lưu công tắc toàn cục",
@@ -2832,7 +2832,7 @@ export const TRANSLATIONS = {
     "lblTbGenderElement": "Gender & Elemen Trailblazer",
     "lblM7Path": "Path March 7th",
     "btnSaveCharSettings": "💾 Simpan Pengaturan Karakter",
-    "persistentGlobalTitle": "⚙️ Saklar Fitur Khusus GaC",
+    "persistentGlobalTitle": "⚙️ Saklar Fitur Khusus GaCy",
     "swGlobalDesc": "Aktifkan fungsi khusus Silver Wolf di seluruh server",
     "castoriceGlobalDesc": "Aktifkan fungsi khusus Castorice di seluruh server",
     "btnSaveGlobalSwitch": "💾 Simpan Saklar Global",
@@ -3182,7 +3182,7 @@ export const TRANSLATIONS = {
     "lblTbGenderElement": "Género y elemento del Trazacaminos",
     "lblM7Path": "Vía de Siete de Marzo",
     "btnSaveCharSettings": "💾 Guardar ajustes de personaje",
-    "persistentGlobalTitle": "⚙️ Funciones especiales de GaC",
+    "persistentGlobalTitle": "⚙️ Funciones especiales de GaCy",
     "swGlobalDesc": "Activar función global de Silver Wolf en todo el servidor",
     "castoriceGlobalDesc": "Activar función global de Castorice en todo el servidor",
     "btnSaveGlobalSwitch": "💾 Guardar interruptores globales",
@@ -3527,12 +3527,12 @@ export const TRANSLATIONS = {
     "noRelicData": "Aucune donnée de relique",
     "persistentTitle": "💾 Gestionnaire de sauvegarde GaCy",
     "persistentBadge": "Serveur personnalisé",
-    "persistentSubtitle": "Le fichier persistent stocke les paramètres GaC spécifiques comme le sexe/élément du Pionnier, la voie de March 7th et les options globales",
+    "persistentSubtitle": "Le fichier persistent stocke les paramètres GaCy spécifiques comme le sexe/élément du Pionnier, la voie de March 7th et les options globales",
     "persistentTbM7Title": "👤 Pionnier et March 7th",
     "lblTbGenderElement": "Sexe et élément du Pionnier",
     "lblM7Path": "Voie de March 7th",
     "btnSaveCharSettings": "💾 Enregistrer les réglages du personnage",
-    "persistentGlobalTitle": "⚙️ Fonctions spéciales GaC",
+    "persistentGlobalTitle": "⚙️ Fonctions spéciales GaCy",
     "swGlobalDesc": "Activer la fonction globale de Silver Wolf sur tout le serveur",
     "castoriceGlobalDesc": "Activer la fonction globale de Castorice sur tout le serveur",
     "btnSaveGlobalSwitch": "💾 Enregistrer les options globales",
@@ -3882,7 +3882,7 @@ export const TRANSLATIONS = {
     "lblTbGenderElement": "Geschlecht & Element des Trailblazers",
     "lblM7Path": "Pfad von 7. März",
     "btnSaveCharSettings": "💾 Charaktereinstellungen speichern",
-    "persistentGlobalTitle": "⚙️ GaC-Sonderfunktionsschalter",
+    "persistentGlobalTitle": "⚙️ GaCy-Sonderfunktionsschalter",
     "swGlobalDesc": "Serverweite Silver Wolf-Spezialmechanik aktivieren",
     "castoriceGlobalDesc": "Serverweite Castorice-Spezialmechanik aktivieren",
     "btnSaveGlobalSwitch": "💾 Globale Schalter speichern",
@@ -4117,7 +4117,7 @@ export const TRANSLATIONS = {
     "consoleLogCopyFailed": "❌ Fehler beim Kopieren der Protokolle",
     "consoleLogCleared": "Terminalprotokoll gelöscht",
     "btnGachabaseSync": "🌐 Gachabase synchronisieren",
-    "tabPersistentGaC": "💾 GaC-Speicherverwaltung",
+    "tabPersistentGaC": "💾 GaCy-Speicherverwaltung",
     "tabPersistentFirefly": "👤 Trailblazer & March 7th",
     "badgePersistenceGaC": "GaCy: persistent.json (/api/persistent)",
     "badgePersistenceFirefly": "FireflyGo: data-in-game.json & freesr-data.json",
@@ -4179,7 +4179,7 @@ export const TRANSLATIONS = {
     "tabDashboard": "📊 Панель и отряд",
     "tabAvatars": "👥 Персонажи",
     "tabEquipment": "🗡️ Световые конусы и реликвии",
-    "tabPersistent": "💾 Управление сохранениями GaC",
+    "tabPersistent": "💾 Управление сохранениями GaCy",
     "tabExrank": "⚡ Особые навыки Ex-Rank",
     "tabJson": "📝 Управление JSON",
     "tabSettings": "⚙️ Настройки",
@@ -4225,14 +4225,14 @@ export const TRANSLATIONS = {
     "equippedBy": "Экипировано на",
     "noLcData": "Нет данных о конусах",
     "noRelicData": "Нет данных о реликвиях",
-    "persistentTitle": "💾 Управление сохранениями GaC",
+    "persistentTitle": "💾 Управление сохранениями GaCy",
     "persistentBadge": "Наш собственный сервер",
-    "persistentSubtitle": "Файл persistent хранит уникальные настройки GaC: пол/путь Первопроходца, путь Март 7 и глобальные переключатели",
+    "persistentSubtitle": "Файл persistent хранит уникальные настройки GaCy: пол/путь Первопроходца, путь Март 7 и глобальные переключатели",
     "persistentTbM7Title": "👤 Первопроходец и Март 7",
     "lblTbGenderElement": "Пол и путь Первопроходца",
     "lblM7Path": "Путь Март 7",
     "btnSaveCharSettings": "💾 Сохранить настройки персонажей",
-    "persistentGlobalTitle": "⚙️ Особые функции GaC",
+    "persistentGlobalTitle": "⚙️ Особые функции GaCy",
     "swGlobalDesc": "Включить особую механику Серебряного Волка на всем сервере",
     "castoriceGlobalDesc": "Включить особую механику Castorice на всем сервере",
     "btnSaveGlobalSwitch": "💾 Сохранить глобальные переключатели",
@@ -4467,7 +4467,7 @@ export const TRANSLATIONS = {
     "consoleLogCopyFailed": "❌ Не удалось скопировать логи",
     "consoleLogCleared": "Журнал терминала очищен",
     "btnGachabaseSync": "🌐 Синхронизация Gachabase",
-    "tabPersistentGaC": "💾 Управление сохранениями GaC",
+    "tabPersistentGaC": "💾 Управление сохранениями GaCy",
     "tabPersistentFirefly": "👤 Первопроходец и Март 7",
     "badgePersistenceGaC": "GaCy: persistent.json (/api/persistent)",
     "badgePersistenceFirefly": "FireflyGo: data-in-game.json & freesr-data.json",
@@ -4529,7 +4529,7 @@ export const TRANSLATIONS = {
     "tabDashboard": "📊 Painel e Equipe",
     "tabAvatars": "👥 Personagens",
     "tabEquipment": "🗡️ Cones de Luz e Relíquias",
-    "tabPersistent": "💾 Gerenciador de Salvamento GaC",
+    "tabPersistent": "💾 Gerenciador de Salvamento GaCy",
     "tabExrank": "⚡ Habilidades Ex-Rank",
     "tabJson": "📝 Gerenciamento de JSON",
     "tabSettings": "⚙️ Configurações",
@@ -4575,14 +4575,14 @@ export const TRANSLATIONS = {
     "equippedBy": "Equipado por",
     "noLcData": "Nenhum dado de cone de luz disponível",
     "noRelicData": "Nenhum dado de relíquia disponível",
-    "persistentTitle": "💾 Gerenciador de Salvamento GaC",
+    "persistentTitle": "💾 Gerenciador de Salvamento GaCy",
     "persistentBadge": "Nosso Servidor Personalizado",
     "persistentSubtitle": "O arquivo persistent armazena configurações específicas do GaCy, como gênero/elemento do Desbravador, caminho de 7 de Março e opções globais",
     "persistentTbM7Title": "👤 Desbravador e 7 de Março",
     "lblTbGenderElement": "Gênero e Elemento do Desbravador",
     "lblM7Path": "Caminho de 7 de Março",
     "btnSaveCharSettings": "💾 Salvar Configurações de Personagem",
-    "persistentGlobalTitle": "⚙️ Recursos Especiais do GaC",
+    "persistentGlobalTitle": "⚙️ Recursos Especiais do GaCy",
     "swGlobalDesc": "Ativar recurso global da Silver Wolf em todo o servidor",
     "castoriceGlobalDesc": "Ativar recurso global da Castorice em todo o servidor",
     "btnSaveGlobalSwitch": "💾 Salvar Interruptores Globais",
@@ -4817,7 +4817,7 @@ export const TRANSLATIONS = {
     "consoleLogCopyFailed": "❌ Falha ao copiar logs",
     "consoleLogCleared": "Log do terminal limpo",
     "btnGachabaseSync": "🌐 Sincronizar Gachabase",
-    "tabPersistentGaC": "💾 Gerenciador de Saves GaC",
+    "tabPersistentGaC": "💾 Gerenciador de Saves GaCy",
     "tabPersistentFirefly": "👤 Desbravador e March 7th",
     "badgePersistenceGaC": "GaCy: persistent.json (/api/persistent)",
     "badgePersistenceFirefly": "FireflyGo: data-in-game.json & freesr-data.json",
@@ -4958,7 +4958,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 星穹列车",
     "quickCmdClearLineup": "🧹 清空队伍",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "GaC 服务器控制台已就绪（输入 /help 查看命令）",
+    "consoleReady": "GaCy 服务器控制台已就绪（输入 /help 查看命令）",
     "filterSamePath": "相同命途"
   },
   "zh-TW": {
@@ -5070,7 +5070,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 星穹列車",
     "quickCmdClearLineup": "🧹 清空隊伍",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "GaC 伺服器主控台已就緒（輸入 /help 查看指令）",
+    "consoleReady": "GaCy 伺服器主控台已就緒（輸入 /help 查看指令）",
     "filterSamePath": "相同命途"
   },
   "ja": {
@@ -5182,7 +5182,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 星穹列車",
     "quickCmdClearLineup": "🧹 編成をクリア",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "GaC サーバーコンソールの準備ができました（コマンド一覧は /help）",
+    "consoleReady": "GaCy サーバーコンソールの準備ができました（コマンド一覧は /help）",
     "filterSamePath": "同じ運命"
   },
   "ko": {
@@ -5294,7 +5294,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 아스트랄 익스프레스",
     "quickCmdClearLineup": "🧹 파티 비우기",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "GaC 서버 콘솔을 사용할 수 있습니다 (/help 입력 시 명령어 표시)",
+    "consoleReady": "GaCy 서버 콘솔을 사용할 수 있습니다 (/help 입력 시 명령어 표시)",
     "filterSamePath": "같은 운명의 길"
   },
   "vi": {
@@ -5406,7 +5406,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Astral Express",
     "quickCmdClearLineup": "🧹 Xóa đội hình",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "Bảng điều khiển máy chủ GaC đã sẵn sàng (nhập /help để xem lệnh)",
+    "consoleReady": "Bảng điều khiển máy chủ GaCy đã sẵn sàng (nhập /help để xem lệnh)",
     "filterSamePath": "Cùng Vận Mệnh"
   },
   "id": {
@@ -5518,7 +5518,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Astral Express",
     "quickCmdClearLineup": "🧹 Kosongkan Tim",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "Konsol server GaC siap digunakan (ketik /help untuk melihat perintah)",
+    "consoleReady": "Konsol server GaCy siap digunakan (ketik /help untuk melihat perintah)",
     "filterSamePath": "Path yang sama"
   },
   "es": {
@@ -5630,7 +5630,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Expreso Astral",
     "quickCmdClearLineup": "🧹 Vaciar equipo",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "La consola del servidor GaC está lista (escribe /help para ver los comandos)",
+    "consoleReady": "La consola del servidor GaCy está lista (escribe /help para ver los comandos)",
     "filterSamePath": "Vía igual"
   },
   "fr": {
@@ -5742,7 +5742,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Express astral",
     "quickCmdClearLineup": "🧹 Vider l’équipe",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "La console du serveur GaC est prête (saisissez /help pour afficher les commandes)",
+    "consoleReady": "La console du serveur GaCy est prête (saisissez /help pour afficher les commandes)",
     "filterSamePath": "Même Voie"
   },
   "de": {
@@ -5854,7 +5854,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Astralexpress",
     "quickCmdClearLineup": "🧹 Team leeren",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "Die GaC-Serverkonsole ist bereit (mit /help werden Befehle angezeigt)",
+    "consoleReady": "Die GaCy-Serverkonsole ist bereit (mit /help werden Befehle angezeigt)",
     "filterSamePath": "Gleicher Pfad"
   },
   "ru": {
@@ -5966,7 +5966,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Звёздный экспресс",
     "quickCmdClearLineup": "🧹 Очистить отряд",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "Консоль сервера GaC готова (введите /help, чтобы увидеть команды)",
+    "consoleReady": "Консоль сервера GaCy готова (введите /help, чтобы увидеть команды)",
     "filterSamePath": "Тот же Путь"
   },
   "pt": {
@@ -6078,7 +6078,7 @@ const ADDITIONAL_TRANSLATIONS = {
     "quickCmdExpress": "🚂 Expresso Astral",
     "quickCmdClearLineup": "🧹 Limpar equipe",
     "quickCmdHelp": "❓ /help",
-    "consoleReady": "O console do servidor GaC está pronto (digite /help para ver os comandos)",
+    "consoleReady": "O console do servidor GaCy está pronto (digite /help para ver os comandos)",
     "filterSamePath": "Mesmo Caminho"
   }
 };
@@ -6096,7 +6096,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "มาตรฐาน MoC / PF / AS",
     "analystExportEmpty": "ไม่มีรายงานการต่อสู้ให้ส่งออก",
     "analystExportSuccess": "ส่งออก {file} เรียบร้อยแล้ว",
-    "analystImportInvalid": "ไฟล์ JSON ไม่ใช่รายงาน GaC Battle Report หรือ Firefly-Sranalysis",
+    "analystImportInvalid": "ไฟล์ JSON ไม่ใช่รายงาน GaCy Battle Report หรือ Firefly-Sranalysis",
     "analystImportFailed": "ไฟล์ JSON ผิดพลาด: {message}",
     "analystDpsShareLabel": "สัดส่วนดาเมจ",
     "analystMonsterName": "มอนสเตอร์ #{id}",
@@ -6115,7 +6115,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS standard",
     "analystExportEmpty": "There is no battle report to export",
     "analystExportSuccess": "Exported {file} successfully",
-    "analystImportInvalid": "JSON must be a GaC Battle Report or Firefly-Sranalysis report",
+    "analystImportInvalid": "JSON must be a GaCy Battle Report or Firefly-Sranalysis report",
     "analystImportFailed": "Invalid JSON file: {message}",
     "analystDpsShareLabel": "DAMAGE SHARE",
     "analystMonsterName": "Monster #{id}",
@@ -6134,7 +6134,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS 标准",
     "analystExportEmpty": "没有可导出的战斗报告",
     "analystExportSuccess": "已成功导出 {file}",
-    "analystImportInvalid": "JSON 必须是 GaC Battle Report 或 Firefly-Sranalysis 报告",
+    "analystImportInvalid": "JSON 必须是 GaCy Battle Report 或 Firefly-Sranalysis 报告",
     "analystImportFailed": "JSON 文件无效：{message}",
     "analystDpsShareLabel": "伤害占比",
     "analystMonsterName": "怪物 #{id}",
@@ -6153,7 +6153,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS 標準",
     "analystExportEmpty": "沒有可匯出的戰鬥報告",
     "analystExportSuccess": "已成功匯出 {file}",
-    "analystImportInvalid": "JSON 必須是 GaC Battle Report 或 Firefly-Sranalysis 報告",
+    "analystImportInvalid": "JSON 必須是 GaCy Battle Report 或 Firefly-Sranalysis 報告",
     "analystImportFailed": "JSON 檔案無效：{message}",
     "analystDpsShareLabel": "傷害佔比",
     "analystMonsterName": "怪物 #{id}",
@@ -6172,7 +6172,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS 標準",
     "analystExportEmpty": "エクスポートする戦闘レポートがありません",
     "analystExportSuccess": "{file} をエクスポートしました",
-    "analystImportInvalid": "JSON は GaC Battle Report または Firefly-Sranalysis のレポートである必要があります",
+    "analystImportInvalid": "JSON は GaCy Battle Report または Firefly-Sranalysis のレポートである必要があります",
     "analystImportFailed": "JSON ファイルが無効です：{message}",
     "analystDpsShareLabel": "ダメージ割合",
     "analystMonsterName": "モンスター #{id}",
@@ -6191,7 +6191,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS 표준",
     "analystExportEmpty": "내보낼 전투 보고서가 없습니다",
     "analystExportSuccess": "{file} 내보내기 완료",
-    "analystImportInvalid": "JSON은 GaC Battle Report 또는 Firefly-Sranalysis 보고서여야 합니다",
+    "analystImportInvalid": "JSON은 GaCy Battle Report 또는 Firefly-Sranalysis 보고서여야 합니다",
     "analystImportFailed": "JSON 파일이 올바르지 않습니다: {message}",
     "analystDpsShareLabel": "피해 비중",
     "analystMonsterName": "몬스터 #{id}",
@@ -6210,7 +6210,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Tiêu chuẩn MoC / PF / AS",
     "analystExportEmpty": "Không có báo cáo chiến đấu để xuất",
     "analystExportSuccess": "Đã xuất {file}",
-    "analystImportInvalid": "JSON phải là báo cáo GaC Battle Report hoặc Firefly-Sranalysis",
+    "analystImportInvalid": "JSON phải là báo cáo GaCy Battle Report hoặc Firefly-Sranalysis",
     "analystImportFailed": "Tệp JSON không hợp lệ: {message}",
     "analystDpsShareLabel": "Tỷ lệ sát thương",
     "analystMonsterName": "Quái #{id}",
@@ -6229,7 +6229,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Standar MoC / PF / AS",
     "analystExportEmpty": "Tidak ada laporan pertarungan untuk diekspor",
     "analystExportSuccess": "Berhasil mengekspor {file}",
-    "analystImportInvalid": "JSON harus berupa laporan GaC Battle Report atau Firefly-Sranalysis",
+    "analystImportInvalid": "JSON harus berupa laporan GaCy Battle Report atau Firefly-Sranalysis",
     "analystImportFailed": "File JSON tidak valid: {message}",
     "analystDpsShareLabel": "Porsi Damage",
     "analystMonsterName": "Monster #{id}",
@@ -6248,7 +6248,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Estándar de MoC / PF / AS",
     "analystExportEmpty": "No hay ningún informe de combate para exportar",
     "analystExportSuccess": "Se exportó {file}",
-    "analystImportInvalid": "El JSON debe ser un informe de GaC Battle Report o Firefly-Sranalysis",
+    "analystImportInvalid": "El JSON debe ser un informe de GaCy Battle Report o Firefly-Sranalysis",
     "analystImportFailed": "El archivo JSON no es válido: {message}",
     "analystDpsShareLabel": "Porcentaje de daño",
     "analystMonsterName": "Monstruo n.º {id}",
@@ -6267,7 +6267,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Standard MoC / PF / AS",
     "analystExportEmpty": "Aucun rapport de combat à exporter",
     "analystExportSuccess": "{file} exporté",
-    "analystImportInvalid": "Le JSON doit être un rapport GaC Battle Report ou Firefly-Sranalysis",
+    "analystImportInvalid": "Le JSON doit être un rapport GaCy Battle Report ou Firefly-Sranalysis",
     "analystImportFailed": "Fichier JSON invalide : {message}",
     "analystDpsShareLabel": "Part des dégâts",
     "analystMonsterName": "Monstre nº {id}",
@@ -6286,7 +6286,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "MoC / PF / AS Standard",
     "analystExportEmpty": "Kein Kampfbericht zum Exportieren vorhanden",
     "analystExportSuccess": "{file} erfolgreich exportiert",
-    "analystImportInvalid": "JSON muss ein GaC Battle Report oder ein Firefly-Sranalysis-Bericht sein",
+    "analystImportInvalid": "JSON muss ein GaCy Battle Report oder ein Firefly-Sranalysis-Bericht sein",
     "analystImportFailed": "Ungültige JSON-Datei: {message}",
     "analystDpsShareLabel": "Schadensanteil",
     "analystMonsterName": "Monster Nr. {id}",
@@ -6305,7 +6305,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Стандарт MoC / PF / AS",
     "analystExportEmpty": "Нет отчёта о бое для экспорта",
     "analystExportSuccess": "Отчёт {file} успешно экспортирован",
-    "analystImportInvalid": "JSON должен быть отчётом GaC Battle Report или Firefly-Sranalysis",
+    "analystImportInvalid": "JSON должен быть отчётом GaCy Battle Report или Firefly-Sranalysis",
     "analystImportFailed": "Некорректный JSON-файл: {message}",
     "analystDpsShareLabel": "Доля урона",
     "analystMonsterName": "Монстр №{id}",
@@ -6324,7 +6324,7 @@ const DAMAGE_ANALYST_TRANSLATIONS = {
     "analystCyclesNote": "Padrão MoC / PF / AS",
     "analystExportEmpty": "Não há relatório de combate para exportar",
     "analystExportSuccess": "{file} exportado com sucesso",
-    "analystImportInvalid": "O JSON precisa ser um relatório GaC Battle Report ou Firefly-Sranalysis",
+    "analystImportInvalid": "O JSON precisa ser um relatório GaCy Battle Report ou Firefly-Sranalysis",
     "analystImportFailed": "Arquivo JSON inválido: {message}",
     "analystDpsShareLabel": "Participação no dano",
     "analystMonsterName": "Monstro nº {id}",
@@ -6439,19 +6439,19 @@ const GLOBAL_UI_LABEL_TRANSLATIONS = {
   },
   en: {
     apiSettingsTooltip: 'Click to configure the API connection', languageSelectorTitle: 'Choose language', branchTooltip: 'Active Git branch', apiLive: 'API Live',
-    persistentDescription: 'GaC stores the lineup in persistent.json (including Creative Mode) • FireflyGo stores it in freesr-data.json', languageChanged: 'Language changed to {language}'
+    persistentDescription: 'GaCy stores the lineup in persistent.json (including Creative Mode) • FireflyGo stores it in freesr-data.json', languageChanged: 'Language changed to {language}'
   },
   'zh-CN': {
     apiSettingsTooltip: '点击设置 API 连接', languageSelectorTitle: '选择语言', branchTooltip: '当前 Git 分支', apiLive: 'API 运行中',
-    persistentDescription: 'GaC 将队伍保存在 persistent.json（支持创意模式）• FireflyGo 将数据保存在 freesr-data.json', languageChanged: '语言已切换为{language}'
+    persistentDescription: 'GaCy 将队伍保存在 persistent.json（支持创意模式）• FireflyGo 将数据保存在 freesr-data.json', languageChanged: '语言已切换为{language}'
   },
   'zh-TW': {
     apiSettingsTooltip: '點擊設定 API 連線', languageSelectorTitle: '選擇語言', branchTooltip: '目前 Git 分支', apiLive: 'API 運作中',
-    persistentDescription: 'GaC 將隊伍儲存在 persistent.json（支援創意模式）• FireflyGo 將資料儲存在 freesr-data.json', languageChanged: '語言已切換為{language}'
+    persistentDescription: 'GaCy 將隊伍儲存在 persistent.json（支援創意模式）• FireflyGo 將資料儲存在 freesr-data.json', languageChanged: '語言已切換為{language}'
   },
   ja: {
     apiSettingsTooltip: 'クリックして API 接続を設定', languageSelectorTitle: '言語を選択', branchTooltip: '現在の Git ブランチ', apiLive: 'API 稼働中',
-    persistentDescription: 'GaC はチームを persistent.json に保存します（クリエイティブモード対応）• FireflyGo は freesr-data.json に保存します', languageChanged: '言語を{language}に変更しました'
+    persistentDescription: 'GaCy はチームを persistent.json に保存します（クリエイティブモード対応）• FireflyGo は freesr-data.json に保存します', languageChanged: '言語を{language}に変更しました'
   },
   ko: {
     apiSettingsTooltip: '클릭하여 API 연결 설정', languageSelectorTitle: '언어 선택', branchTooltip: '현재 Git 브랜치', apiLive: 'API 실행 중',
@@ -6459,31 +6459,31 @@ const GLOBAL_UI_LABEL_TRANSLATIONS = {
   },
   vi: {
     apiSettingsTooltip: 'Nhấn để cấu hình kết nối API', languageSelectorTitle: 'Chọn ngôn ngữ', branchTooltip: 'Nhánh Git hiện tại', apiLive: 'API đang hoạt động',
-    persistentDescription: 'GaC lưu đội hình trong persistent.json (hỗ trợ Chế độ Sáng tạo) • FireflyGo lưu dữ liệu trong freesr-data.json', languageChanged: 'Đã chuyển ngôn ngữ sang {language}'
+    persistentDescription: 'GaCy lưu đội hình trong persistent.json (hỗ trợ Chế độ Sáng tạo) • FireflyGo lưu dữ liệu trong freesr-data.json', languageChanged: 'Đã chuyển ngôn ngữ sang {language}'
   },
   id: {
     apiSettingsTooltip: 'Klik untuk mengatur koneksi API', languageSelectorTitle: 'Pilih bahasa', branchTooltip: 'Branch Git aktif', apiLive: 'API aktif',
-    persistentDescription: 'GaC menyimpan susunan tim di persistent.json (mendukung Mode Kreatif) • FireflyGo menyimpan data di freesr-data.json', languageChanged: 'Bahasa diubah ke {language}'
+    persistentDescription: 'GaCy menyimpan susunan tim di persistent.json (mendukung Mode Kreatif) • FireflyGo menyimpan data di freesr-data.json', languageChanged: 'Bahasa diubah ke {language}'
   },
   es: {
     apiSettingsTooltip: 'Haz clic para configurar la conexión API', languageSelectorTitle: 'Elegir idioma', branchTooltip: 'Rama Git activa', apiLive: 'API activa',
-    persistentDescription: 'GaC guarda el equipo en persistent.json (incluido el modo creativo) • FireflyGo guarda los datos en freesr-data.json', languageChanged: 'Idioma cambiado a {language}'
+    persistentDescription: 'GaCy guarda el equipo en persistent.json (incluido el modo creativo) • FireflyGo guarda los datos en freesr-data.json', languageChanged: 'Idioma cambiado a {language}'
   },
   fr: {
     apiSettingsTooltip: 'Cliquez pour configurer la connexion API', languageSelectorTitle: 'Choisir la langue', branchTooltip: 'Branche Git active', apiLive: 'API active',
-    persistentDescription: 'GaC enregistre l’équipe dans persistent.json (mode créatif inclus) • FireflyGo enregistre les données dans freesr-data.json', languageChanged: 'Langue changée : {language}'
+    persistentDescription: 'GaCy enregistre l’équipe dans persistent.json (mode créatif inclus) • FireflyGo enregistre les données dans freesr-data.json', languageChanged: 'Langue changée : {language}'
   },
   de: {
     apiSettingsTooltip: 'Klicken, um die API-Verbindung einzurichten', languageSelectorTitle: 'Sprache auswählen', branchTooltip: 'Aktiver Git-Branch', apiLive: 'API aktiv',
-    persistentDescription: 'GaC speichert das Team in persistent.json (mit Kreativmodus) • FireflyGo speichert die Daten in freesr-data.json', languageChanged: 'Sprache auf {language} umgestellt'
+    persistentDescription: 'GaCy speichert das Team in persistent.json (mit Kreativmodus) • FireflyGo speichert die Daten in freesr-data.json', languageChanged: 'Sprache auf {language} umgestellt'
   },
   ru: {
     apiSettingsTooltip: 'Нажмите, чтобы настроить подключение к API', languageSelectorTitle: 'Выбрать язык', branchTooltip: 'Текущая ветка Git', apiLive: 'API работает',
-    persistentDescription: 'GaC сохраняет отряд в persistent.json (включая творческий режим) • FireflyGo сохраняет данные в freesr-data.json', languageChanged: 'Язык изменён: {language}'
+    persistentDescription: 'GaCy сохраняет отряд в persistent.json (включая творческий режим) • FireflyGo сохраняет данные в freesr-data.json', languageChanged: 'Язык изменён: {language}'
   },
   pt: {
     apiSettingsTooltip: 'Clique para configurar a conexão com a API', languageSelectorTitle: 'Escolher idioma', branchTooltip: 'Branch Git ativa', apiLive: 'API ativa',
-    persistentDescription: 'GaC salva a equipe em persistent.json (incluindo o Modo Criativo) • FireflyGo salva os dados em freesr-data.json', languageChanged: 'Idioma alterado para {language}'
+    persistentDescription: 'GaCy salva a equipe em persistent.json (incluindo o Modo Criativo) • FireflyGo salva os dados em freesr-data.json', languageChanged: 'Idioma alterado para {language}'
   }
 };
 
@@ -6828,17 +6828,17 @@ for (const [language, label] of Object.entries(MONSTER_PICKER_TRANSLATIONS)) {
 const SERVER_MODE_AVAILABILITY_TRANSLATIONS = {
   th: { serverModeFireflyPaused: 'FireflyGo — กำลังพัฒนา', serverModeRobinPaused: 'RobinSR — กำลังพัฒนา', serverModesPausedNotice: 'FireflyGo และ RobinSR ปิดใช้งานชั่วคราวระหว่างพัฒนา จึงกลับไปใช้ GaC' },
   en: { serverModeFireflyPaused: 'FireflyGo — Under development', serverModeRobinPaused: 'RobinSR — Under development', serverModesPausedNotice: 'FireflyGo and RobinSR are temporarily disabled during development. Switched back to GaC.' },
-  'zh-CN': { serverModeFireflyPaused: 'FireflyGo — 开发中', serverModeRobinPaused: 'RobinSR — 开发中', serverModesPausedNotice: 'FireflyGo 和 RobinSR 正在开发中，暂时停用。已切回 GaC。' },
-  'zh-TW': { serverModeFireflyPaused: 'FireflyGo — 開發中', serverModeRobinPaused: 'RobinSR — 開發中', serverModesPausedNotice: 'FireflyGo 和 RobinSR 正在開發中，暫時停用。已切回 GaC。' },
-  ja: { serverModeFireflyPaused: 'FireflyGo — 開発中', serverModeRobinPaused: 'RobinSR — 開発中', serverModesPausedNotice: 'FireflyGo と RobinSR は開発中のため一時停止しています。GaC に切り替えました。' },
-  ko: { serverModeFireflyPaused: 'FireflyGo — 개발 중', serverModeRobinPaused: 'RobinSR — 개발 중', serverModesPausedNotice: 'FireflyGo와 RobinSR은 개발 중이라 일시적으로 비활성화되었습니다. GaC로 전환했습니다.' },
-  vi: { serverModeFireflyPaused: 'FireflyGo — Đang phát triển', serverModeRobinPaused: 'RobinSR — Đang phát triển', serverModesPausedNotice: 'FireflyGo và RobinSR đang được phát triển nên tạm thời bị tắt. Đã chuyển về GaC.' },
-  id: { serverModeFireflyPaused: 'FireflyGo — Sedang dikembangkan', serverModeRobinPaused: 'RobinSR — Sedang dikembangkan', serverModesPausedNotice: 'FireflyGo dan RobinSR dinonaktifkan sementara selama pengembangan. Kembali ke GaC.' },
-  es: { serverModeFireflyPaused: 'FireflyGo — En desarrollo', serverModeRobinPaused: 'RobinSR — En desarrollo', serverModesPausedNotice: 'FireflyGo y RobinSR están desactivados temporalmente durante su desarrollo. Se cambió a GaC.' },
-  fr: { serverModeFireflyPaused: 'FireflyGo — En développement', serverModeRobinPaused: 'RobinSR — En développement', serverModesPausedNotice: 'FireflyGo et RobinSR sont temporairement désactivés pendant leur développement. Retour à GaC.' },
-  de: { serverModeFireflyPaused: 'FireflyGo — In Entwicklung', serverModeRobinPaused: 'RobinSR — In Entwicklung', serverModesPausedNotice: 'FireflyGo und RobinSR sind während der Entwicklung vorübergehend deaktiviert. Zu GaC gewechselt.' },
-  ru: { serverModeFireflyPaused: 'FireflyGo — В разработке', serverModeRobinPaused: 'RobinSR — В разработке', serverModesPausedNotice: 'FireflyGo и RobinSR временно отключены на время разработки. Выполнен переход на GaC.' },
-  pt: { serverModeFireflyPaused: 'FireflyGo — Em desenvolvimento', serverModeRobinPaused: 'RobinSR — Em desenvolvimento', serverModesPausedNotice: 'FireflyGo e RobinSR estão temporariamente desativados durante o desenvolvimento. Voltou para GaC.' }
+  'zh-CN': { serverModeFireflyPaused: 'FireflyGo — 开发中', serverModeRobinPaused: 'RobinSR — 开发中', serverModesPausedNotice: 'FireflyGo 和 RobinSR 正在开发中，暂时停用。已切回 GaCy。' },
+  'zh-TW': { serverModeFireflyPaused: 'FireflyGo — 開發中', serverModeRobinPaused: 'RobinSR — 開發中', serverModesPausedNotice: 'FireflyGo 和 RobinSR 正在開發中，暫時停用。已切回 GaCy。' },
+  ja: { serverModeFireflyPaused: 'FireflyGo — 開発中', serverModeRobinPaused: 'RobinSR — 開発中', serverModesPausedNotice: 'FireflyGo と RobinSR は開発中のため一時停止しています。GaCy に切り替えました。' },
+  ko: { serverModeFireflyPaused: 'FireflyGo — 개발 중', serverModeRobinPaused: 'RobinSR — 개발 중', serverModesPausedNotice: 'FireflyGo와 RobinSR은 개발 중이라 일시적으로 비활성화되었습니다. GaCy로 전환했습니다.' },
+  vi: { serverModeFireflyPaused: 'FireflyGo — Đang phát triển', serverModeRobinPaused: 'RobinSR — Đang phát triển', serverModesPausedNotice: 'FireflyGo và RobinSR đang được phát triển nên tạm thời bị tắt. Đã chuyển về GaCy.' },
+  id: { serverModeFireflyPaused: 'FireflyGo — Sedang dikembangkan', serverModeRobinPaused: 'RobinSR — Sedang dikembangkan', serverModesPausedNotice: 'FireflyGo dan RobinSR dinonaktifkan sementara selama pengembangan. Kembali ke GaCy.' },
+  es: { serverModeFireflyPaused: 'FireflyGo — En desarrollo', serverModeRobinPaused: 'RobinSR — En desarrollo', serverModesPausedNotice: 'FireflyGo y RobinSR están desactivados temporalmente durante su desarrollo. Se cambió a GaCy.' },
+  fr: { serverModeFireflyPaused: 'FireflyGo — En développement', serverModeRobinPaused: 'RobinSR — En développement', serverModesPausedNotice: 'FireflyGo et RobinSR sont temporairement désactivés pendant leur développement. Retour à GaCy.' },
+  de: { serverModeFireflyPaused: 'FireflyGo — In Entwicklung', serverModeRobinPaused: 'RobinSR — In Entwicklung', serverModesPausedNotice: 'FireflyGo und RobinSR sind während der Entwicklung vorübergehend deaktiviert. Zu GaCy gewechselt.' },
+  ru: { serverModeFireflyPaused: 'FireflyGo — В разработке', serverModeRobinPaused: 'RobinSR — В разработке', serverModesPausedNotice: 'FireflyGo и RobinSR временно отключены на время разработки. Выполнен переход на GaCy.' },
+  pt: { serverModeFireflyPaused: 'FireflyGo — Em desenvolvimento', serverModeRobinPaused: 'RobinSR — Em desenvolvimento', serverModesPausedNotice: 'FireflyGo e RobinSR estão temporariamente desativados durante o desenvolvimento. Voltou para GaCy.' }
 };
 
 for (const [language, additions] of Object.entries(ADDITIONAL_TRANSLATIONS)) {
@@ -6943,7 +6943,7 @@ const ITEM_CATALOG_TRANSLATIONS = {
   },
   id: {
     tabItemCatalog: '📚 Buku Item', itemCatalogTitle: '📚 Katalog Item',
-    itemCatalogDescription: 'Cari nama atau ID dari tabel game dan lihat ikonnya. Item berlabel didukung GaC dapat dikelola melalui alat inventaris; item lainnya hanya untuk dilihat.',
+    itemCatalogDescription: 'Cari nama atau ID dari tabel game dan lihat ikonnya. Item berlabel didukung GaCy dapat dikelola melalui alat inventaris; item lainnya hanya untuk dilihat.',
     itemCatalogSearchPlaceholder: 'Cari nama atau ID item...', itemCatalogFilterLabel: 'Filter katalog item', itemCatalogFilterAll: 'Semua item',
     itemCatalogFilterSupported: 'Didukung GaCy', itemCatalogFilterItems: 'Item',
     itemCatalogFilterLightCones: 'Light Cone', itemCatalogFilterRelics: 'Relik',
@@ -6953,7 +6953,7 @@ const ITEM_CATALOG_TRANSLATIONS = {
   },
   es: {
     tabItemCatalog: '📚 Catálogo', itemCatalogTitle: '📚 Catálogo de objetos',
-    itemCatalogDescription: 'Busca nombres o ID de las tablas del juego y consulta sus iconos. Los elementos compatibles con GaC se pueden gestionar en el inventario; los demás solo se pueden consultar.',
+    itemCatalogDescription: 'Busca nombres o ID de las tablas del juego y consulta sus iconos. Los elementos compatibles con GaCy se pueden gestionar en el inventario; los demás solo se pueden consultar.',
     itemCatalogSearchPlaceholder: 'Buscar por nombre o ID...', itemCatalogFilterLabel: 'Filtrar catálogo de objetos', itemCatalogFilterAll: 'Todos',
     itemCatalogFilterSupported: 'Compatible con GaCy', itemCatalogFilterItems: 'Objetos',
     itemCatalogFilterLightCones: 'Conos de luz', itemCatalogFilterRelics: 'Reliquias',
@@ -6993,7 +6993,7 @@ const ITEM_CATALOG_TRANSLATIONS = {
   },
   pt: {
     tabItemCatalog: '📚 Catálogo de itens', itemCatalogTitle: '📚 Catálogo de itens',
-    itemCatalogDescription: 'Pesquise nomes ou IDs das tabelas do jogo e veja os ícones. Itens marcados como compatíveis com GaC podem ser gerenciados no inventário; os demais são apenas para consulta.',
+    itemCatalogDescription: 'Pesquise nomes ou IDs das tabelas do jogo e veja os ícones. Itens marcados como compatíveis com GaCy podem ser gerenciados no inventário; os demais são apenas para consulta.',
     itemCatalogSearchPlaceholder: 'Pesquisar por nome ou ID...', itemCatalogFilterLabel: 'Filtrar catálogo de itens', itemCatalogFilterAll: 'Todos os itens',
     itemCatalogFilterSupported: 'Compatível com GaCy', itemCatalogFilterItems: 'Itens',
     itemCatalogFilterLightCones: 'Cones de Luz', itemCatalogFilterRelics: 'Relíquias',
@@ -7033,12 +7033,12 @@ const ITEM_CATALOG_INTERACTION_DESCRIPTIONS = {
   ja: '名前または ID で検索し、画像をクリックすると詳細を確認して数量を選べます。この画面で数量を選んでもアイテムは追加されません。GaCy 対応アイテムは所持品タブで管理でき、その他は閲覧のみです。',
   ko: '이름 또는 ID를 검색한 뒤 이미지를 클릭하면 상세 정보를 확인하고 수량을 선택할 수 있습니다. 여기서 수량을 선택해도 아이템은 추가되지 않습니다. GaCy 지원 항목은 인벤토리 탭에서 관리할 수 있고 나머지는 조회 전용입니다.',
   vi: 'Tìm theo tên hoặc ID rồi nhấn vào hình để xem chi tiết và chọn số lượng. Việc chọn số lượng ở đây không thêm vật phẩm. Vật phẩm được GaCy hỗ trợ có thể quản lý trong tab túi đồ; các mục khác chỉ để tra cứu.',
-  id: 'Cari berdasarkan nama atau ID, lalu klik gambar untuk melihat detail dan memilih jumlah. Memilih jumlah di sini tidak menambahkan item. Item yang didukung GaC dapat dikelola di tab inventaris; item lainnya hanya untuk dilihat.',
-  es: 'Busca por nombre o ID y haz clic en una imagen para consultar los detalles y elegir una cantidad. Elegir una cantidad aquí no añade el objeto. Los elementos compatibles con GaC se gestionan en la pestaña de inventario; los demás son solo de consulta.',
+  id: 'Cari berdasarkan nama atau ID, lalu klik gambar untuk melihat detail dan memilih jumlah. Memilih jumlah di sini tidak menambahkan item. Item yang didukung GaCy dapat dikelola di tab inventaris; item lainnya hanya untuk dilihat.',
+  es: 'Busca por nombre o ID y haz clic en una imagen para consultar los detalles y elegir una cantidad. Elegir una cantidad aquí no añade el objeto. Los elementos compatibles con GaCy se gestionan en la pestaña de inventario; los demás son solo de consulta.',
   fr: 'Recherchez un nom ou un ID, puis cliquez sur une image pour consulter les détails et choisir une quantité. Ce choix n’ajoute pas l’objet. Les éléments compatibles avec GaC se gèrent dans l’inventaire ; les autres sont consultables uniquement.',
   de: 'Suche nach Name oder ID und klicke auf ein Bild, um Details anzuzeigen und eine Menge auszuwählen. Dadurch wird der Gegenstand nicht hinzugefügt. GaCy-unterstützte Einträge lassen sich im Inventar verwalten; die übrigen dienen nur zum Nachschlagen.',
-  ru: 'Найдите предмет по названию или ID, затем нажмите на изображение, чтобы посмотреть сведения и выбрать количество. Выбор количества здесь не добавляет предмет. Предметы с поддержкой GaC можно менять во вкладке инвентаря; остальные доступны только для просмотра.',
-  pt: 'Pesquise por nome ou ID e clique na imagem para ver os detalhes e escolher uma quantidade. Escolher a quantidade aqui não adiciona o item. Itens compatíveis com GaC podem ser gerenciados na aba de inventário; os demais servem apenas para consulta.'
+  ru: 'Найдите предмет по названию или ID, затем нажмите на изображение, чтобы посмотреть сведения и выбрать количество. Выбор количества здесь не добавляет предмет. Предметы с поддержкой GaCy можно менять во вкладке инвентаря; остальные доступны только для просмотра.',
+  pt: 'Pesquise por nome ou ID e clique na imagem para ver os detalhes e escolher uma quantidade. Escolher a quantidade aqui não adiciona o item. Itens compatíveis com GaCy podem ser gerenciados na aba de inventário; os demais servem apenas para consulta.'
 };
 for (const [language, description] of Object.entries(ITEM_CATALOG_INTERACTION_DESCRIPTIONS)) {
   TRANSLATIONS[language].itemCatalogDescription = description;
@@ -7145,7 +7145,7 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     copyCardLevel: 'เลเวล',
     copyCardEidolon: 'Eidolon',
     copyCardLightCone: 'กรวยแสง',
-    copyCardGenerated: 'สร้างโดย GaC-Srtool'
+    analystDamageAvPlaceholder: "เฉลี่ยต่อรอบ: -", analystCyclesPlaceholder: "0 รอบ", analystTurnsPlaceholder: "0 เทิร์น", analystAutoTurnsPlaceholder: "เทิร์นอัตโนมัติ: 0", analystDamageAvPlaceholder: "Avg per cycle: -", analystCyclesPlaceholder: "0 Cycles", analystTurnsPlaceholder: "0 Turns", analystAutoTurnsPlaceholder: "Auto Turns: 0", analystDamageAvPlaceholder: "ラウンド平均: -", analystCyclesPlaceholder: "0 ラウンド", analystTurnsPlaceholder: "0 ターン", analystAutoTurnsPlaceholder: "オートターン: 0", analystDamageAvPlaceholder: "라운드당 평균: -", analystCyclesPlaceholder: "0 라운드", analystTurnsPlaceholder: "0 턴", analystAutoTurnsPlaceholder: "자동 턴: 0", analystDamageAvPlaceholder: "Trung bình mỗi vòng: -", analystCyclesPlaceholder: "0 vòng", analystTurnsPlaceholder: "0 lượt", analystAutoTurnsPlaceholder: "Lượt tự động: 0", analystDamageAvPlaceholder: "Rata-rata per siklus: -", analystCyclesPlaceholder: "0 Siklus", analystTurnsPlaceholder: "0 Giliran", analystAutoTurnsPlaceholder: "Giliran otomatis: 0", analystDamageAvPlaceholder: "Promedio por ciclo: -", analystCyclesPlaceholder: "0 ciclos", analystTurnsPlaceholder: "0 turnos", analystAutoTurnsPlaceholder: "Turnos automáticos: 0", analystDamageAvPlaceholder: "Moyenne par cycle : -", analystCyclesPlaceholder: "0 cycle", analystTurnsPlaceholder: "0 tour", analystAutoTurnsPlaceholder: "Tours auto : 0", analystDamageAvPlaceholder: "Durchschnitt pro Zyklus: -", analystCyclesPlaceholder: "0 Zyklen", analystTurnsPlaceholder: "0 Züge", analystAutoTurnsPlaceholder: "Auto-Züge: 0", analystDamageAvPlaceholder: "В среднем за цикл: -", analystCyclesPlaceholder: "0 циклов", analystTurnsPlaceholder: "0 ходов", analystAutoTurnsPlaceholder: "Авто-ходы: 0", analystDamageAvPlaceholder: "Média por ciclo: -", analystCyclesPlaceholder: "0 ciclos", analystTurnsPlaceholder: "0 turnos", analystAutoTurnsPlaceholder: "Turnos automáticos: 0", miniViewFullAnalystTooltip: "เปิดหน้า Damage Analyst ตัวเต็ม", miniViewFullAnalystTooltip: "Open full Damage Analyst", miniViewFullAnalystTooltip: "完全なダメージ分析を開く", miniViewFullAnalystTooltip: "전체 데미지 분석 열기", miniViewFullAnalystTooltip: "Mở Trình phân tích sát thương đầy đủ", miniViewFullAnalystTooltip: "Buka Analis Kerusakan Lengkap", miniViewFullAnalystTooltip: "Abrir analizador de daño completo", miniViewFullAnalystTooltip: "Ouvrir l'analyseur de dégâts complet", miniViewFullAnalystTooltip: "Vollständigen Schadensanalysten öffnen", miniViewFullAnalystTooltip: "Открыть полный анализ урона", miniViewFullAnalystTooltip: "Abrir analisador de dano completo", copyCardGenerated: 'สร้างโดย GaCy-Srtool'
   },
   en: {
     relicSlotNotEquipped: 'Not equipped',
@@ -7244,7 +7244,7 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     copyCardLevel: 'Level',
     copyCardEidolon: 'Eidolon',
     copyCardLightCone: 'Light Cone',
-    copyCardGenerated: 'Generated via GaC-Srtool'
+    copyCardGenerated: 'Generated via GaCy-Srtool'
   }
 };
 for (const [language, additions] of Object.entries(MODAL_AND_TOOL_TRANSLATIONS)) {
@@ -7277,11 +7277,18 @@ export function setLanguage(langCode) {
 
 export function t(key, vars = {}) {
   const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.en || TRANSLATIONS.th;
-  let text = dict[key] || TRANSLATIONS.en[key] || TRANSLATIONS.th[key] || key;
+  let text = dict[key] || TRANSLATIONS.en[key] || TRANSLATIONS.th[key];
+  if (!text && key && key.includes(".")) {
+    const parts = key.split(".");
+    text = parts.reduce((o, i) => o?.[i], dict) ||
+           parts.reduce((o, i) => o?.[i], TRANSLATIONS.en) ||
+           parts.reduce((o, i) => o?.[i], TRANSLATIONS.th);
+  }
+  if (!text) text = key;
 
   // Substitute variables e.g. {id}, {rank}, {name}, {slot}, {mode}, {n}, {count}, {ms}
   for (const [vKey, vVal] of Object.entries(vars)) {
-    text = text.replace(new RegExp(`\\{${vKey}\\}`, 'g'), vVal);
+    text = text.replace(new RegExp(`\\{${vKey}\\}`, "g"), vVal);
   }
   return text;
 }

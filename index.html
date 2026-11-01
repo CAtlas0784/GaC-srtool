@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.21">
+  <link rel="stylesheet" href="css/styles.css?v=2.22">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -42,7 +42,7 @@
       <!-- Connection Pill -->
       <div class="connection-pill" id="btn-open-settings" title="คลิกเพื่อตั้งค่าการเชื่อมต่อ API" data-i18n-title="apiSettingsTooltip">
         <span class="status-dot" id="status-dot"></span>
-        <span id="connection-status-text">กำลังตรวจสอบ...</span>
+        <span id="connection-status-text" data-i18n="checking">กำลังตรวจสอบ...</span>
       </div>
 
       <button class="btn btn-secondary btn-sm" id="btn-quick-ping" title="รีเฟรชการเชื่อมต่อ" data-i18n="refresh" data-i18n-title="refresh">
@@ -125,7 +125,7 @@
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <div>
                 <span class="form-label" data-i18n="lblServerModeActive">โหมดเซิร์ฟเวอร์ที่ใช้งาน</span>
-                <strong id="lbl-active-mode" style="color: var(--accent-cyan);">GaC-hkrpg-go</strong>
+                <strong id="lbl-active-mode" style="color: var(--accent-cyan);">GaCy GO</strong>
               </div>
               <div>
                 <span class="form-label" data-i18n="lblApiEndpoint">API Gateway Endpoint</span>
@@ -159,7 +159,7 @@
                 <span class="badge-super-tag" id="badge-mini-battle-status" data-i18n="miniNoBattleTitle" style="background: rgba(156, 163, 175, 0.12); color: var(--text-muted); font-weight: 800; border: 1px solid rgba(156, 163, 175, 0.25);">
                   ยังไม่มีข้อมูลการต่อสู้
                 </span>
-                <button type="button" class="btn btn-sm btn-secondary" id="btn-mini-view-full-analyst" style="font-size: 0.725rem; padding: 0.2rem 0.55rem; color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.35); font-weight: 700;" title="เปิดหน้า Damage Analyst ตัวเต็ม" data-i18n="miniViewFullAnalyst">
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-mini-view-full-analyst" style="font-size: 0.725rem; padding: 0.2rem 0.55rem; color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.35); font-weight: 700;" title="เปิดหน้า Damage Analyst ตัวเต็ม" data-i18n-title="miniViewFullAnalystTooltip" data-i18n="miniViewFullAnalyst">
                   Damage Analyst →
                 </button>
               </div>
@@ -304,25 +304,25 @@
           </select>
           <select id="avatar-filter-element" class="form-select" style="max-width: 130px;">
             <option value="all" data-i18n="filterAllElements">ทุกธาตุ</option>
-            <option value="Fire">ไฟ</option>
-            <option value="Ice">น้ำแข็ง</option>
-            <option value="Lightning">สายฟ้า</option>
-            <option value="Wind">ลม</option>
-            <option value="Physical">กายภาพ</option>
-            <option value="Quantum">ควอนตัม</option>
-            <option value="Imaginary">จินตภาพ</option>
+            <option value="Fire" data-i18n="Fire">ไฟ</option>
+            <option value="Ice" data-i18n="Ice">น้ำแข็ง</option>
+            <option value="Lightning" data-i18n="Lightning">สายฟ้า</option>
+            <option value="Wind" data-i18n="Wind">ลม</option>
+            <option value="Physical" data-i18n="Physical">กายภาพ</option>
+            <option value="Quantum" data-i18n="Quantum">ควอนตัม</option>
+            <option value="Imaginary" data-i18n="Imaginary">จินตภาพ</option>
           </select>
           <select id="avatar-filter-path" class="form-select" style="max-width: 130px;">
             <option value="all" data-i18n="filterAllPaths">ทุกประเภท</option>
-            <option value="Destruction">ทำลายล้าง</option>
-            <option value="Hunt">ล่าสังหาร</option>
-            <option value="Erudition">ปัญญา</option>
-            <option value="Harmony">ประสาน</option>
-            <option value="Nihility">ลบล้าง</option>
-            <option value="Preservation">อนุรักษ์</option>
-            <option value="Abundance">เฟื่องฟู</option>
-            <option value="Remembrance">ความทรงจำ</option>
-            <option value="Elation">ปีติ</option>
+            <option value="Destruction" data-i18n="Destruction">ทำลายล้าง</option>
+            <option value="Hunt" data-i18n="Hunt">ล่าสังหาร</option>
+            <option value="Erudition" data-i18n="Erudition">ปัญญา</option>
+            <option value="Harmony" data-i18n="Harmony">ประสาน</option>
+            <option value="Nihility" data-i18n="Nihility">ลบล้าง</option>
+            <option value="Preservation" data-i18n="Preservation">อนุรักษ์</option>
+            <option value="Abundance" data-i18n="Abundance">เฟื่องฟู</option>
+            <option value="Remembrance" data-i18n="Remembrance">ความทรงจำ</option>
+            <option value="Elation" data-i18n="Elation">ปีติ</option>
           </select>
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -422,7 +422,7 @@
           <input type="search" id="item-catalog-search" class="form-input" data-i18n-placeholder="itemCatalogSearchPlaceholder" placeholder="ค้นหาชื่อหรือ Item ID...">
           <select id="item-catalog-filter" class="form-select" aria-label="Filter item catalog">
             <option value="all" data-i18n="itemCatalogFilterAll">ทั้งหมด</option>
-            <option value="supported" data-i18n="itemCatalogFilterSupported">GaC รองรับ</option>
+            <option value="supported" data-i18n="itemCatalogFilterSupported">GaCy รองรับ</option>
             <option value="item" data-i18n="itemCatalogFilterItems">ไอเทม</option>
             <option value="lightcone" data-i18n="itemCatalogFilterLightCones">กรวยแสง</option>
             <option value="relic" data-i18n="itemCatalogFilterRelics">รีลิกส์</option>
@@ -541,7 +541,7 @@
           <div>
             <div class="card-title" style="margin-bottom: 0.25rem;">
               <span data-i18n="analystTitle">💥 วิเคราะห์ความเสียหายจากการต่อสู้ (Damage Analyst)</span>
-              <span class="badge-super-tag" id="badge-analyst-status" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">พร้อมรับข้อมูลจากเกม</span>
+              <span class="badge-super-tag" id="badge-analyst-status" data-i18n="analystStatusReady" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">พร้อมรับข้อมูลจากเกม</span>
             </div>
             <p class="card-subtitle" style="margin-bottom: 0;" data-i18n="analystSubtitle">
               ดักจับและวิเคราะห์ดาเมจจากการต่อสู้จริงในเกม Star Rail (ระบบเดียวกับ FireflyGO / Veritas)
@@ -574,19 +574,19 @@
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #ef4444; background: linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(20,20,28,0.7) 100%);">
           <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystTotalDamage">ดาเมจรวมทั้งทีม</div>
           <div style="font-size: 1.85rem; font-weight: 900; color: #f87171; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-team-damage">0</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-damage-av">เฉลี่ยต่อรอบ: -</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-damage-av" data-i18n="analystDamageAvPlaceholder">เฉลี่ยต่อรอบ: -</div>
         </div>
 
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #f59e0b; background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(20,20,28,0.7) 100%);">
           <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystCycles">จำนวนรอบ (Cycles)</div>
-          <div style="font-size: 1.85rem; font-weight: 900; color: #fbbf24; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-cycles">0 รอบ</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #fbbf24; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-cycles" data-i18n="analystCyclesPlaceholder">0 รอบ</div>
           <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-cycles-note" data-i18n="analystCyclesNote">MoC / PF / AS Standard</div>
         </div>
 
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #38bdf8; background: linear-gradient(135deg, rgba(56,189,248,0.06) 0%, rgba(20,20,28,0.7) 100%);">
           <div style="font-size: 0.775rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="analystTurns">เทิร์นทั้งหมด</div>
-          <div style="font-size: 1.85rem; font-weight: 900; color: #38bdf8; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-total-turns">0 เทิร์น</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-auto-turns">เทิร์นอัตโนมัติ: 0</div>
+          <div style="font-size: 1.85rem; font-weight: 900; color: #38bdf8; letter-spacing: -0.5px; margin: 0.25rem 0;" id="analyst-total-turns" data-i18n="analystTurnsPlaceholder">0 เทิร์น</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);" id="analyst-auto-turns" data-i18n="analystAutoTurnsPlaceholder">เทิร์นอัตโนมัติ: 0</div>
         </div>
 
         <div class="card" style="padding: 1.2rem; border-left: 4px solid #34d399; background: linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(20,20,28,0.7) 100%);">
@@ -600,7 +600,7 @@
       <div class="card" style="margin-bottom: 1.25rem;">
         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
           <span data-i18n="analystDpsShare">สัดส่วนดาเมจของทีม (Team DPS Share)</span>
-          <span style="font-size: 0.8rem; color: var(--text-muted);" id="analyst-total-share-label">รวม 100%</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" id="analyst-total-share-label" data-i18n="analystShareTotal">รวม 100%</span>
         </div>
         <!-- Progress Bar Container -->
         <div id="analyst-share-bar-container" style="height: 18px; width: 100%; border-radius: 9px; background: rgba(255,255,255,0.05); overflow: hidden; display: flex; margin-bottom: 0.85rem; border: 1px solid rgba(255,255,255,0.1);">
@@ -628,15 +628,15 @@
       </div>
     </section>
 
-    <!-- 4. Persistent Save Settings (Exclusive to GaC-hkrpg-go) -->
+    <!-- 4. Persistent Save Settings (Exclusive to GaCy GO) -->
     <section id="tab-persistent" class="tab-content">
       <div class="card" style="margin-bottom: 1.5rem;">
         <div class="card-title">
-          <span data-i18n="persistentTitle">💾 จัดการไฟล์เซฟ GaC</span>
+          <span data-i18n="persistentTitle">💾 จัดการไฟล์เซฟ GaCy</span>
           <span class="btn-sm btn-success" data-i18n="persistentBadge">เซิร์ฟเวอร์ของเราเอง</span>
         </div>
         <p class="card-subtitle" data-i18n="persistentSubtitle">
-          ไฟล์ persistent เก็บการตั้งค่าสถานะผู้เล่นเฉพาะของเซิร์ฟเวอร์ GaC เช่น เพศ/ธาตุตัวเอก, สเตตัส March 7th, สวิตช์ฟังก์ชัน Global ต่างๆ
+          ไฟล์ persistent เก็บการตั้งค่าสถานะผู้เล่นเฉพาะของเซิร์ฟเวอร์ GaCy GO เช่น เพศ/ธาตุตัวเอก, สเตตัส March 7th, สวิตช์ฟังก์ชัน Global ต่างๆ
         </p>
       </div>
 
@@ -648,22 +648,22 @@
             <div class="form-group">
               <label class="form-label" data-i18n="lblTbGenderElement">เพศ & ธาตุของตัวเอก</label>
               <select id="persistent-mc-select" class="form-select">
-                <option value="MalePhysical">ผู้บุกเบิกชาย - กายภาพ</option>
-                <option value="FemalePhysical">ผู้บุกเบิกหญิง - กายภาพ</option>
-                <option value="MalePreservation">ผู้บุกเบิกชาย - ไฟ</option>
-                <option value="FemalePreservation">ผู้บุกเบิกหญิง - ไฟ</option>
-                <option value="MaleHarmony">ผู้บุกเบิกชาย - ประสาน</option>
-                <option value="FemaleHarmony">ผู้บุกเบิกหญิง - ประสาน</option>
-                <option value="MaleRemembrance">ผู้บุกเบิกชาย - ความทรงจำ</option>
-                <option value="FemaleRemembrance">ผู้บุกเบิกหญิง - ความทรงจำ</option>
+                <option value="MalePhysical" data-i18n="tbOptions.MalePhysical">ผู้บุกเบิกชาย - กายภาพ</option>
+                <option value="FemalePhysical" data-i18n="tbOptions.FemalePhysical">ผู้บุกเบิกหญิง - กายภาพ</option>
+                <option value="MalePreservation" data-i18n="tbOptions.MalePreservation">ผู้บุกเบิกชาย - ไฟ</option>
+                <option value="FemalePreservation" data-i18n="tbOptions.FemalePreservation">ผู้บุกเบิกหญิง - ไฟ</option>
+                <option value="MaleHarmony" data-i18n="tbOptions.MaleHarmony">ผู้บุกเบิกชาย - ประสาน</option>
+                <option value="FemaleHarmony" data-i18n="tbOptions.FemaleHarmony">ผู้บุกเบิกหญิง - ประสาน</option>
+                <option value="MaleRemembrance" data-i18n="tbOptions.MaleRemembrance">ผู้บุกเบิกชาย - ความทรงจำ</option>
+                <option value="FemaleRemembrance" data-i18n="tbOptions.FemaleRemembrance">ผู้บุกเบิกหญิง - ความทรงจำ</option>
               </select>
             </div>
 
             <div class="form-group">
               <label class="form-label" data-i18n="lblM7Path">สายของ March 7th</label>
               <select id="persistent-march-select" class="form-select">
-                <option value="MarchHunt">March 7th - ล่าสังหาร</option>
-                <option value="MarchPreservation">March 7th - อนุรักษ์</option>
+                <option value="MarchHunt" data-i18n="marchOptions.MarchHunt">March 7th - ล่าสังหาร</option>
+                <option value="MarchPreservation" data-i18n="marchOptions.MarchPreservation">March 7th - อนุรักษ์</option>
               </select>
             </div>
 
@@ -829,10 +829,10 @@
               <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.85rem 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <span style="font-weight: 700; font-size: 0.875rem;" data-i18n="lblPersistenceInfo">ระบบบันทึกทีมและข้อมูล (Lineup Storage)</span>
-                  <span id="badge-persistence-mode" class="badge-super-tag" style="padding: 0.15rem 0.55rem; font-size: 0.75rem;">Persistent API (GaC)</span>
+                  <span id="badge-persistence-mode" class="badge-super-tag" style="padding: 0.15rem 0.55rem; font-size: 0.75rem;" data-i18n="badgePersistenceGaC">GaCy: persistent.json (/api/persistent)</span>
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;" id="desc-persistence-mode" data-i18n="persistentDescription">
-                  GaC Server เก็บทีมใน persistent.json (รองรับโหมดสร้างสรรค์) • สำหรับ FireflyGo เก็บใน freesr-data.json
+                  GaCy Server เก็บทีมใน persistent.json (รองรับโหมดสร้างสรรค์) • สำหรับ FireflyGo เก็บใน freesr-data.json
                 </div>
               </div>
 
@@ -1506,16 +1506,16 @@
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap;">
           <input type="text" id="add-lc-search" class="form-input" data-i18n-placeholder="lightConeSearchPlaceholder" placeholder="🔍 ค้นหากรวยแสง (ชื่อหรือ ID)..." style="flex: 1; min-width: 160px;">
           <select id="add-lc-filter-path" class="form-select" style="max-width: 140px;">
-            <option value="all">ทุกสาย (All)</option>
-            <option value="Destruction">ทำลายล้าง</option>
-            <option value="Hunt">ล่าสังหาร</option>
-            <option value="Erudition">ปัญญา</option>
-            <option value="Harmony">ประสาน</option>
-            <option value="Nihility">ลบล้าง</option>
-            <option value="Preservation">อนุรักษ์</option>
-            <option value="Abundance">เฟื่องฟู</option>
-            <option value="Remembrance">ความทรงจำ</option>
-            <option value="Elation">ปีติ</option>
+            <option value="all" data-i18n="filterAllPaths">ทุกสาย (All)</option>
+            <option value="Destruction" data-i18n="Destruction">ทำลายล้าง</option>
+            <option value="Hunt" data-i18n="Hunt">ล่าสังหาร</option>
+            <option value="Erudition" data-i18n="Erudition">ปัญญา</option>
+            <option value="Harmony" data-i18n="Harmony">ประสาน</option>
+            <option value="Nihility" data-i18n="Nihility">ลบล้าง</option>
+            <option value="Preservation" data-i18n="Preservation">อนุรักษ์</option>
+            <option value="Abundance" data-i18n="Abundance">เฟื่องฟู</option>
+            <option value="Remembrance" data-i18n="Remembrance">ความทรงจำ</option>
+            <option value="Elation" data-i18n="Elation">ปีติ</option>
           </select>
           <select id="add-lc-filter-rarity" class="form-select" style="max-width: 110px;">
             <option value="all" data-i18n="filterAllRarity">ทุกระดับดาว</option>
@@ -1735,17 +1735,17 @@
       <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
         <input type="text" id="lc-picker-search" class="form-input" data-i18n-placeholder="lightConeSearchPlaceholder" placeholder="🔍 ค้นหาชื่อหรือ ID กรวยแสง..." style="flex: 1; min-width: 160px;">
         <select id="lc-picker-filter-path" class="form-select" style="max-width: 140px;">
-          <option value="all">ทุกสาย</option>
-          <option value="same" selected>ตรงสายตัวละคร</option>
-          <option value="Destruction">ทำลายล้าง</option>
-          <option value="Hunt">ล่าสังหาร</option>
-          <option value="Erudition">ปัญญา</option>
-          <option value="Harmony">ประสาน</option>
-          <option value="Nihility">ลบล้าง</option>
-          <option value="Preservation">อนุรักษ์</option>
-          <option value="Abundance">เฟื่องฟู</option>
-          <option value="Remembrance">ความทรงจำ</option>
-          <option value="Elation">ปีติ</option>
+          <option value="all" data-i18n="filterAllPaths">ทุกสาย</option>
+          <option value="same" selected data-i18n="filterSamePath">ตรงสายตัวละคร</option>
+          <option value="Destruction" data-i18n="Destruction">ทำลายล้าง</option>
+          <option value="Hunt" data-i18n="Hunt">ล่าสังหาร</option>
+          <option value="Erudition" data-i18n="Erudition">ปัญญา</option>
+          <option value="Harmony" data-i18n="Harmony">ประสาน</option>
+          <option value="Nihility" data-i18n="Nihility">ลบล้าง</option>
+          <option value="Preservation" data-i18n="Preservation">อนุรักษ์</option>
+          <option value="Abundance" data-i18n="Abundance">เฟื่องฟู</option>
+          <option value="Remembrance" data-i18n="Remembrance">ความทรงจำ</option>
+          <option value="Elation" data-i18n="Elation">ปีติ</option>
         </select>
         <select id="lc-picker-rank" class="form-select" style="max-width: 110px;" data-i18n-title="superimpositionSelectTitle" title="ระดับการขัดเกลาเมื่อสวมใส่">
           <option value="5" selected data-superimposition-rank>ขัดเกลา S5</option>
