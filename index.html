@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.22">
+  <link rel="stylesheet" href="css/styles.css?v=2.23">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1016,7 +1016,7 @@
                   <span style="color: var(--accent-cyan); font-size: 0.7rem;" data-i18n="btnManage">จัดการ ➔</span>
                 </div>
                 <div style="display: flex; gap: 0.65rem; align-items: center;">
-                  <img id="overview-lc-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-color);">
+                  <img id="overview-lc-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: contain; border: 1px solid var(--border-color);">
                   <div style="min-width: 0; flex: 1;">
                     <div id="overview-lc-name" style="font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
                     <div id="overview-lc-rank" style="font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.2rem;">S5 • Lv.80</div>
@@ -1443,7 +1443,7 @@
 
   <!-- Party Member Picker Modal -->
   <div class="modal-overlay" id="modal-lineup-picker">
-    <div class="modal-content" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="modal-content" style="width: min(1100px, 96vw); max-width: 1100px; max-height: 92vh; display: flex; flex-direction: column;">
       <div class="modal-header">
         <h3 id="modal-picker-title" style="font-weight: 800;" data-i18n="pickerTitle">เลือกตัวละครเข้าทีม</h3>
         <button class="btn btn-sm btn-secondary" id="btn-close-picker-modal">✕</button>
@@ -1477,7 +1477,7 @@
 
   <!-- Add Light Cone Modal -->
   <div class="modal-overlay" id="modal-add-lc">
-    <div class="modal-content" style="max-width: 760px; max-height: 88vh; display: flex; flex-direction: column;">
+    <div class="modal-content" style="width: min(1100px, 96vw); max-width: 1100px; max-height: 92vh; display: flex; flex-direction: column;">
       <div class="modal-header" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); margin-bottom: 0.75rem;">
         <h3 style="font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;" data-i18n="modalAddLcTitle">
           🗡️ เพิ่มกรวยแสงลง FreeSR
@@ -1488,7 +1488,7 @@
       <form id="form-add-lc" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
         <!-- 1. Selected Lightcone Preview Strip -->
         <div id="add-lc-preview-banner" style="display: flex; gap: 0.85rem; align-items: center; background: rgba(251, 191, 36, 0.08); border: 1.5px solid var(--accent-gold); border-radius: var(--radius-sm); padding: 0.6rem 0.85rem; margin-bottom: 0.75rem;">
-          <img id="add-lc-preview-thumb" src="" alt="" style="width: 44px; height: 60px; border-radius: 4px; object-fit: cover; border: 1px solid var(--accent-gold); background: #0b0d14; flex-shrink: 0;">
+          <img id="add-lc-preview-thumb" src="" alt="" style="width: clamp(90px, 15vw, 150px); height: 190px; border-radius: 4px; object-fit: contain; border: 1px solid var(--accent-gold); background: #0b0d14; flex-shrink: 0;">
           <div style="flex: 1; min-width: 0;">
             <div style="font-size: 0.7rem; color: var(--accent-gold); font-weight: 800; text-transform: uppercase;">
               <span data-i18n="selectedLightConeLabel">✓ กรวยแสงที่เลือก (Selected)</span>
@@ -1526,7 +1526,7 @@
         </div>
 
         <!-- 3. Visual Grid Container -->
-        <div id="add-lc-visual-grid" class="add-lc-grid-container" style="flex: 1; min-height: 180px; max-height: 280px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; padding: 0.35rem; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
+        <div id="add-lc-visual-grid" class="add-lc-grid-container" style="flex: 1; min-height: 220px; max-height: 45vh; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; padding: 0.35rem; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
           <!-- Dynamically populated by JS -->
         </div>
 
@@ -1723,7 +1723,7 @@
 
   <!-- Modal: Select Lightcone for Avatar -->
   <div class="modal-overlay" id="modal-select-lightcone">
-    <div class="modal-content" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="modal-content" style="width: min(1100px, 96vw); max-width: 1100px; max-height: 92vh; display: flex; flex-direction: column;">
       <div class="modal-header">
         <h3 id="modal-lc-picker-title" style="font-weight: 800;" data-i18n="lcPickerTitle">
           🗡️ เลือกสวมใส่กรวยแสง (Light Cone)
@@ -1823,6 +1823,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.14"></script>
+  <script type="module" src="js/app.js?v=3.15"></script>
 </body>
 </html>

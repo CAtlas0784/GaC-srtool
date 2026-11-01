@@ -3835,3 +3835,15 @@ input:checked + .slider:before {
   }
   .showcase-splash-col { max-width: none; }
 }
+
+/* Keep Light Cone art legible in selection and detail views. */
+.lc-picker-thumb, .add-lc-card-thumb { width: 96px; height: 132px; object-fit: contain; }
+.eq-inspector-hero .eq-inspector-thumb { width: 120px; height: 170px; object-fit: contain; }
+.lc-art-wrapper { width: min(300px, 100%); height: auto; aspect-ratio: 3 / 4; }
+.lc-full-img { object-fit: contain; }
+.lc-art-wrapper:hover .lc-full-img { transform: none; }
+.btn-substat-preset .showcase-stat-icon { vertical-align: middle; margin-right: 3px; }
+@media (max-width: 600px) {
+  #add-lc-preview-thumb { width: 80px !important; height: 112px !important; }
+  .lc-picker-thumb, .add-lc-card-thumb { width: 76px; height: 106px; }
+}

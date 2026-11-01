@@ -1,6 +1,6 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.23';
 import { initializeItemCatalog } from './item-catalog.js?v=2';
 import { initializeUnstuck } from './unstuck.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
@@ -552,6 +552,13 @@ function getElementIconHtml(element, size = 20) {
 }
 
 // Official in-game property icons (same set used by the overview tab)
+function getRelicImage(setId, slot = 5) {
+  return RELIC_SET_METADATA[setId]?.images?.[slot] || RELIC_SET_METADATA[setId]?.images?.[5] || `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png`;
+}
+function getLightconeIconSrc(id) {
+  return LIGHTCONE_METADATA[id]?.images?.thumbnail || `https://static.nanoka.cc/assets/hsr/lightconemediumicon/${id}.webp`;
+}
+
 const STAT_PROPERTY_ICON_CDN = 'https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/property';
 function getStatIconHtml(iconName, size = 15, alt = '') {
   if (!iconName) return '';
@@ -952,7 +959,13 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(elem => {
     const key = elem.getAttribute('data-i18n');
     const val = t(key);
-    if (val && val !== key) elem.textContent = val;
+    if (val && val !== key) {
+      const icons = { substatPresetCrit: ['IconCriticalChance', 'IconCriticalDamage'], substatPresetSpeed: ['IconSpeed'], substatPresetBreak: ['IconBreakUp'], substatPresetTank: ['IconMaxHP', 'IconDefence'] }[key];
+      if (icons) {
+        elem.textContent = val.replace(/^[🎯⚡🔨🛡️\s]+/u, '');
+        icons.slice().reverse().forEach(icon => elem.insertAdjacentHTML('afterbegin', getStatIconHtml(icon, 16, '')));
+      } else elem.textContent = val;
+    }
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(elem => {
@@ -2760,7 +2773,7 @@ function getLightconeArtSrc(lcId) {
   if (id === 23065) {
     return './assets/lightcones/23065.png';
   }
-  return `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/image/light_cone_preview/${id}.png`;
+  return `https://static.nanoka.cc/assets/hsr/lightconemaxfigures/${id}.webp`;
 }
 
 function getLightconeArtFallback(lcId) {
@@ -2925,6 +2938,10 @@ function getLightconePassiveDesc(lcId, rank = 5) {
   const id = parseInt(lcId, 10);
   const r = Math.max(1, Math.min(5, rank));
   const meta = LIGHTCONE_METADATA[id];
+  if (meta?.passive) {
+    const values = meta.passive.values[r - 1];
+    return (meta.passive[getCurrentLanguage()] || meta.passive.en).replace(/\{(\d+)\}/g, (_, index) => values[Number(index)]);
+  }
 
   // The rank-scaled descriptions below are authored in Thai. Other locales use
   // the localized description shipped with the lightcone metadata instead.
@@ -3112,18 +3129,18 @@ function getRelicSubAffixName(affixId) {
 }
 
 export const RELIC_SUBSTATS_CONFIG = [
-  { id: 8, name: "CRIT Rate%", short: "CRIT Rate", icon: "🎯" },
-  { id: 9, name: "CRIT DMG%", short: "CRIT DMG", icon: "💥" },
-  { id: 7, name: "SPD", short: "SPD", icon: "⚡" },
-  { id: 5, name: "ATK%", short: "ATK%", icon: "⚔️" },
-  { id: 4, name: "HP%", short: "HP%", icon: "❤️" },
-  { id: 6, name: "DEF%", short: "DEF%", icon: "🛡️" },
-  { id: 12, name: "Break Effect%", short: "Break", icon: "🔨" },
-  { id: 10, name: "Effect Hit Rate%", short: "EHR", icon: "🎯" },
-  { id: 11, name: "Effect RES%", short: "RES", icon: "🔰" },
-  { id: 2, name: "ATK (Flat)", short: "ATK", icon: "🗡️" },
-  { id: 1, name: "HP (Flat)", short: "HP", icon: "🩸" },
-  { id: 3, name: "DEF (Flat)", short: "DEF", icon: "🧱" }
+  { id: 8, name: "CRIT Rate%", short: "CRIT Rate", icon: "IconCriticalChance" },
+  { id: 9, name: "CRIT DMG%", short: "CRIT DMG", icon: "IconCriticalDamage" },
+  { id: 7, name: "SPD", short: "SPD", icon: "IconSpeed" },
+  { id: 5, name: "ATK%", short: "ATK%", icon: "IconAttack" },
+  { id: 4, name: "HP%", short: "HP%", icon: "IconMaxHP" },
+  { id: 6, name: "DEF%", short: "DEF%", icon: "IconDefence" },
+  { id: 12, name: "Break Effect%", short: "Break", icon: "IconBreakUp" },
+  { id: 10, name: "Effect Hit Rate%", short: "EHR", icon: "IconStatusProbability" },
+  { id: 11, name: "Effect RES%", short: "RES", icon: "IconStatusResistance" },
+  { id: 2, name: "ATK (Flat)", short: "ATK", icon: "IconAttack" },
+  { id: 1, name: "HP (Flat)", short: "HP", icon: "IconMaxHP" },
+  { id: 3, name: "DEF (Flat)", short: "DEF", icon: "IconDefence" }
 ];
 
 export function formatRelicSubstatValue(affixId, rolls = 1) {
@@ -3270,7 +3287,7 @@ function renderModalOverviewTab(avatarId) {
 
   // Equipped LC Card Glance
   if (el.overviewLcThumb) {
-    el.overviewLcThumb.src = getLightconeArtSrc(lcId);
+    el.overviewLcThumb.src = getLightconeIconSrc(lcId);
     el.overviewLcThumb.onerror = function() {
       handleLcImgError(this, lcId);
     };
@@ -3607,7 +3624,7 @@ function renderModalRelicsTab(avatarId) {
   const lcBox = document.getElementById('relics-equipped-lc-box');
 
   if (lcThumbEl) {
-    lcThumbEl.src = getLightconeArtSrc(lcId);
+    lcThumbEl.src = getLightconeIconSrc(lcId);
     lcThumbEl.onerror = function() {
       handleLcImgError(this, lcId);
     };
@@ -3658,7 +3675,7 @@ function renderModalRelicsTab(avatarId) {
       box.className = 'relic-slot-box equipped';
       box.innerHTML = `
         <div class="relic-slot-icon-wrap">
-          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png"
+          <img src="${getRelicImage(setId, slot)}"
                onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
           <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.short}</span>
         </div>
@@ -3806,7 +3823,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
       currentBox.className = 'slot-picker-current-banner';
       currentBox.innerHTML = `
         <div style="display: flex; gap: 0.85rem; align-items: center; min-width: 0; flex: 1;">
-          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${curSetId}.png"
+          <img src="${getRelicImage(curSetId, slot)}"
                onerror="this.src='./assets/logo.png'" alt="Relic"
                style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">
           <div style="min-width: 0;">
@@ -3898,7 +3915,7 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
 
     recHighlight.innerHTML = `
       <div style="display: flex; gap: 0.85rem; align-items: center;">
-        <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${recSetId}.png"
+        <img src="${getRelicImage(recSetId, slot)}"
              onerror="this.src='./assets/logo.png'" alt="Relic"
              style="width: 52px; height: 52px; object-fit: contain;">
         <div>
@@ -3991,6 +4008,10 @@ function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
   // Confirm Custom Button
   if (btnConfirmCustom) {
     btnConfirmCustom.onclick = async () => {
+      if (RELIC_SET_METADATA[slotPickerSelectedSetId]?.creationAvailable === false) {
+        showToast('Requires matching server relic and main affix data.', 'warning');
+        return;
+      }
       if (slotPickerTargetRelic) {
         await saveEditedRelicSubstats(slotPickerTargetRelic, slotPickerSelectedSetId, slotPickerSelectedMainAffix, slotPickerSubstats);
       } else {
@@ -4033,7 +4054,7 @@ function renderSlotPickerSubstats(slot, mainAffixId) {
       const isSelected = stat.id === sub.sub_affix_id;
       const disabledAttr = (isConflict || (isChosenElsewhere && !isSelected)) ? 'disabled' : '';
       const conflictTag = isConflict ? t('substatMainConflict') : (isChosenElsewhere && !isSelected ? t('substatAlreadyChosen') : '');
-      optsHtml += `<option value="${stat.id}" ${isSelected ? 'selected' : ''} ${disabledAttr}>${stat.icon} ${stat.name}${conflictTag}</option>`;
+      optsHtml += `<option value="${stat.id}" ${isSelected ? 'selected' : ''} ${disabledAttr}>${stat.name}${conflictTag}</option>`;
     });
 
     card.innerHTML = `
@@ -4042,6 +4063,7 @@ function renderSlotPickerSubstats(slot, mainAffixId) {
         <span class="substat-preview-badge" id="substat-preview-${idx}">${t('substatRolls', { value: sVal, count: sub.count })}</span>
       </div>
       <div class="substat-row-controls">
+        ${getStatIconHtml(RELIC_SUBSTATS_CONFIG.find(stat => stat.id === sub.sub_affix_id)?.icon, 20, "")}
         <select class="form-select substat-select" data-idx="${idx}">
           ${optsHtml}
         </select>
@@ -4206,12 +4228,19 @@ function renderSlotPickerSetGrid(slot, recSetId) {
     const isSelected = sId === slotPickerSelectedSetId;
     card.className = `slot-picker-set-card ${isSelected ? 'selected' : ''}`;
     card.innerHTML = `
-      <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${sId}.png"
+      <img src="${getRelicImage(sId, slot)}"
            onerror="this.src='./assets/logo.png'" alt="${sInfo.name}">
       <span title="${sInfo.name}">${sInfo.name}</span>
       ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">⭐ ${t('recommendedBadge')}</span>` : ''}
     `;
 
+    if (RELIC_SET_METADATA[sId].creationAvailable === false) {
+      card.style.opacity = '0.5';
+      card.title = 'Requires matching server relic and main affix data';
+      card.setAttribute('aria-disabled', 'true');
+      grid.appendChild(card);
+      return;
+    }
     card.addEventListener('click', () => {
       slotPickerSelectedSetId = sId;
       grid.querySelectorAll('.slot-picker-set-card').forEach(c => c.classList.remove('selected'));
@@ -4327,7 +4356,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
     card.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
         <div style="display: flex; gap: 0.65rem; align-items: center; min-width: 0;">
-          <img src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png"
+          <img src="${getRelicImage(setId, slot)}"
                onerror="this.src='./assets/logo.png'" alt="${rInfo.name}"
                style="width: 40px; height: 40px; object-fit: contain;">
           <div style="min-width: 0;">
@@ -5431,7 +5460,7 @@ function renderShowcaseCard(avatarId) {
     relicsHtml += `
       <div class="showcase-relic-card">
         <div class="showcase-relic-icon-wrap">
-          <img class="showcase-relic-img" src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="Relic">
+          <img class="showcase-relic-img" src="${getRelicImage(setId, slot)}" onerror="this.src='./assets/logo.png'" alt="Relic">
           <span class="showcase-relic-lvl-tag">+15</span>
         </div>
         <div class="showcase-relic-info">
@@ -5449,7 +5478,7 @@ function renderShowcaseCard(avatarId) {
 
   const primaryPortrait = getAvatarSplashSrc(aid);
   const fallbackPortrait = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/${aid}.png`;
-  const lcArtThumb = getLightconeArtSrc(lcId);
+  const lcArtThumb = getLightconeIconSrc(lcId);
 
   // Use the same official property icons as the character overview tab.
   const elemStatIconName = `Icon${canonElem === 'Lightning' ? 'Thunder' : canonElem}AddedRatio`;
@@ -6358,7 +6387,7 @@ function renderLightconesGrid() {
       </div>
     ` : '';
 
-    const primaryImg = getLightconeArtSrc(lc.item_id);
+    const primaryImg = getLightconeIconSrc(lc.item_id);
 
     card.innerHTML = `
       <img class="eq-tile-img" src="${primaryImg}" onerror="handleLcImgError(this, ${lc.item_id})" alt="${meta.name}">
@@ -6425,8 +6454,8 @@ function renderRelicsGrid() {
       </div>
     ` : '';
 
-    const primaryImg = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/icon/relic/${setId}.png`;
-    const fallbackImg = `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png`;
+    const primaryImg = getRelicImage(setId, slotNum);
+    const fallbackImg = './assets/logo.png';
 
     card.innerHTML = `
       <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${rInfo.name}">
@@ -6491,15 +6520,15 @@ function showLcInspector(lc) {
     <!-- Stats Box -->
     <div class="eq-inspector-stats">
       <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">❤️ HP</span>
+        <span style="color: var(--text-muted);">${getStatIconHtml('IconMaxHP', 18, '')} HP</span>
         <strong style="color: #fff; font-family: monospace;">+${hp}</strong>
       </div>
       <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">⚔️ ATK</span>
+        <span style="color: var(--text-muted);">${getStatIconHtml('IconAttack', 18, '')} ATK</span>
         <strong style="color: #fff; font-family: monospace;">+${atk}</strong>
       </div>
       <div class="eq-inspector-stat-row">
-        <span style="color: var(--text-muted);">🛡️ DEF</span>
+        <span style="color: var(--text-muted);">${getStatIconHtml('IconDefence', 18, '')} DEF</span>
         <strong style="color: #fff; font-family: monospace;">+${def}</strong>
       </div>
     </div>
@@ -6507,7 +6536,7 @@ function showLcInspector(lc) {
     <!-- Passive Skill -->
     <div class="eq-inspector-ability">
       <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">${lcMeta.skill_name || t('eqSkillFallbackTitle')}</div>
-      <div>${lcMeta.desc || t('eqSkillFallbackDesc')}</div>
+      <div>${lcMeta.passive ? getLightconePassiveDesc(lc.item_id, lc.rank || 1) : (lcMeta.desc || t('eqSkillFallbackDesc'))}</div>
     </div>
 
     <!-- Wearer Form & Actions -->
@@ -6583,7 +6612,7 @@ function showRelicInspector(relic) {
   el.eqInspectorCard.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div class="eq-inspector-hero">
-        <img class="eq-inspector-thumb" src="https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
+        <img class="eq-inspector-thumb" src="${getRelicImage(setId, slotNum)}" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${rInfo.name}</div>
           <div class="eq-inspector-stars">★★★★★</div>
@@ -6847,7 +6876,8 @@ function openAddRelicModal() {
     const meta = getRelicSetInfo(setId);
     const opt = document.createElement('option');
     opt.value = setId;
-    opt.textContent = `${meta.name} (Set ID: ${setId})`;
+    opt.disabled = RELIC_SET_METADATA[setId].creationAvailable === false;
+    opt.textContent = `${meta.name} (Set ID: ${setId})${opt.disabled ? ' — requires server data' : ''}`;
     el.addRelicSet.appendChild(opt);
   });
 

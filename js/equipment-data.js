@@ -3258,6 +3258,14 @@ export const LIGHTCONE_METADATA = {
   }
 };
 
+// Item data and artwork: nanoka.cc, game data revision 4.6.54.
+LIGHTCONE_METADATA[22009] = {
+  names: { en: "See You at the World's End!" }, rarity: 4, path: 'Elation',
+  hp: 847, atk: 476, def: 397,
+  images: { fullArt: './assets/lightcones/22009-full.webp', thumbnail: './assets/lightcones/22009-icon.webp' },
+  passive: { en: "For every Elation character on the team, increases the wearer's CRIT DMG by {0}%. When Aeon ★ Aha is on the field, the wearer's CRIT DMG additionally increases by {1}%.", values: [[6,12],[7,14],[8,16],[9,18],[10,20]] }
+};
+
 export const RELIC_SET_METADATA = {
   "101": {
     "names": {
@@ -4315,6 +4323,12 @@ export const RELIC_SET_METADATA = {
   }
 };
 
+// Set data and artwork are from the 4.6.54 catalog. Creation needs matching server affix tables.
+Object.assign(RELIC_SET_METADATA, {
+  329: { creationAvailable: false, names: { en: "God's Moment of Joy" }, desc2: "Increases the wearer's SPD by 6%. When the wearer's Elation reaches 40% or higher, the wearer's action advances by 40% immediately when entering combat.", images: { 5: './assets/relics/329-5.webp', 6: './assets/relics/329-6.webp' } },
+  330: { creationAvailable: false, names: { en: 'Subspace ASC Center' }, desc2: "Increases the wearer's SPD by 6%. When the wearer's SPD reaches 145 or higher, increases all allies' Break Effect by 18% after entering combat. This effect cannot stack.", images: { 5: './assets/relics/330-5.webp', 6: './assets/relics/330-6.webp' } }
+});
+
 export function getLightconeInfo(lcId, langOverride = null) {
   const lang = langOverride || getCurrentLanguage();
   const meta = LIGHTCONE_METADATA[lcId];
@@ -4352,6 +4366,8 @@ export function getRelicSetInfo(setIdOrRelicId, langOverride = null) {
   const localizedName = meta.names?.[lang] || meta.names?.en || meta.names?.th || `Relic Set ${setId}`;
   return {
     id: setId,
-    name: localizedName
+    name: localizedName,
+    desc2: meta.desc2,
+    desc4: meta.desc4
   };
 }
