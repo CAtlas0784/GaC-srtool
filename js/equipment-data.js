@@ -1,4 +1,4 @@
-import { getCurrentLanguage, translatePath } from "./i18n.js";
+import { getCurrentLanguage, translatePath } from "./i18n.js?v=2.16";
 
 export const LIGHTCONE_METADATA = {
   "20000": {
@@ -4326,7 +4326,7 @@ export function getLightconeInfo(lcId, langOverride = null) {
       rawPath: "Unknown"
     };
   }
-  const localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Lightcone ${lcId}`;
+  const localizedName = meta.names?.[lang] || meta.names?.en || meta.names?.th || `Lightcone ${lcId}`;
   return {
     name: localizedName,
     rarity: meta.rarity,
@@ -4349,7 +4349,7 @@ export function getRelicSetInfo(setIdOrRelicId, langOverride = null) {
       name: `Relic Set ${setId}`
     };
   }
-  const localizedName = meta.names?.[lang] || meta.names?.th || meta.names?.en || `Relic Set ${setId}`;
+  const localizedName = meta.names?.[lang] || meta.names?.en || meta.names?.th || `Relic Set ${setId}`;
   return {
     id: setId,
     name: localizedName

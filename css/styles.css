@@ -15,6 +15,7 @@
   --accent-gold: #fbbf24;
   --accent-purple: #c084fc;
   --accent-red: #f87171;
+  --accent-blue: #0284c7;
   
   --glow-cyan: 0 0 20px rgba(56, 189, 248, 0.35);
   --glow-gold: 0 0 20px rgba(251, 191, 36, 0.35);
@@ -1556,10 +1557,11 @@ input:checked + .slider:before {
    Modal Avatar Detail Widescreen Expansion
    ========================================================================== */
 #modal-avatar-detail .modal-content {
-  max-width: 1120px !important;
-  width: 96% !important;
+  max-width: min(1280px, 96vw) !important;
+  width: 96vw !important;
   max-height: 92vh !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 /* ==========================================================================
@@ -1838,6 +1840,23 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.showcase-stat-icon {
+  width: 15px;
+  height: 15px;
+  min-width: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+}
+
+.showcase-inline-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .showcase-stat-val {
@@ -3760,18 +3779,59 @@ input:checked + .slider:before {
 .console-suggestion-description { max-width:55%; }
 @media(max-width:640px) { .console-suggestion-option { flex-wrap:wrap; gap:.2rem .5rem; } .console-suggestion-description { display:block; width:100%; max-width:100%; margin-left:1.1rem; } }
 
-/* การ์ดกว้างตามเนื้อหาจริง ไม่ล็อก 1050px และไม่ตัดขอบ */
+/* การ์ดยืดหยุ่นตามพื้นที่จริง ไม่ล็อกความกว้างและไม่เกิด scrollbar แนวนอน */
 .showcase-card-layout {
-  width: max-content;       /* เดิม: width/min-width 1050px */
+  width: 100%;
+  max-width: 1200px;
   min-width: 0;
+  margin: 0 auto;
   overflow: visible;        /* เดิม: hidden ทำให้ส่วนเกินโดนตัด */
-  grid-template-columns: 360px 340px max-content;
+  grid-template-columns: minmax(230px, 360px) minmax(210px, 340px) minmax(240px, 1fr);
   gap: 1.25rem;
   padding: 1.5rem;
 }
 
-.showcase-splash-col { width: 360px; }
+.showcase-scroll-wrapper {
+  overflow-x: visible;
+  max-width: 100%;
+  padding-bottom: 0.5rem;
+}
 
-/* คอลัมน์รีลิกส์ขยายตามชื่อเซ็ตและ main stat ที่ยาวที่สุด */
-.showcase-relics-col { min-width: 420px; }
+.showcase-splash-col { width: 100%; min-width: 0; }
+.showcase-center-col { min-width: 0; }
+.showcase-relics-col { min-width: 0; }
 .showcase-relic-card:hover { transform: none; }
+
+/* Export clone: always use the wide three-column poster layout so a PNG keeps
+   the same composition regardless of the window size it was exported from. */
+.showcase-card-layout.showcase-export-mode {
+  width: 1200px !important;
+  max-width: none !important;
+  margin: 0 !important;
+  /* Pin the poster metrics so the exported layout does not inherit the
+     responsive (2-column / mobile) spacing of the current window size. */
+  padding: 1.5rem !important;
+  gap: 1.25rem !important;
+  grid-template-columns: 360px 340px minmax(240px, 1fr) !important;
+}
+.showcase-card-layout.showcase-export-mode .showcase-splash-col {
+  grid-column: auto !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+@media (max-width: 1100px) {
+  .showcase-card-layout {
+    grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
+  }
+  .showcase-splash-col { grid-column: 1 / -1; max-width: 420px; }
+}
+
+@media (max-width: 720px) {
+  .showcase-card-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .showcase-splash-col { max-width: none; }
+}
