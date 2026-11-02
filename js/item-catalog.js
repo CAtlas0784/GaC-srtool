@@ -1,4 +1,4 @@
-import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.21';
+import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.22';
 
 const CATALOG_URL = new URL('../assets/item-catalog.json?v=2', import.meta.url);
 const PAGE_SIZE = 48;

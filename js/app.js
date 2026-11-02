@@ -4,7 +4,7 @@ import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetIn
 import { initializeItemCatalog } from './item-catalog.js?v=5';
 import { initializeUnstuck } from './unstuck.js?v=4';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.21';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.22';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.32">
-  <link rel="stylesheet" href="css/item-catalog.css?v=2">
+  <link rel="stylesheet" href="css/styles.css?v=2.33">
+  <link rel="stylesheet" href="css/item-catalog.css?v=3">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -346,7 +346,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           
           <!-- Subtab Buttons: Light Cones vs Relics -->
-          <div style="display: flex; gap: 0.4rem; background: var(--bg-card-hover); padding: 0.3rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div class="eq-toolbar-subtabs" style="display: flex; gap: 0.4rem; background: var(--bg-card-hover); padding: 0.3rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
             <button type="button" class="btn btn-sm btn-primary eq-subtab-btn active" id="btn-eq-subtab-lc" data-subtab="lc" style="display: flex; align-items: center; gap: 0.45rem;">
               <span data-i18n="eqLcTitle">🗡️ กรวยแสง (Light Cones)</span>
               <span class="badge-super-tag" id="badge-total-lc" style="padding: 0.05rem 0.4rem; font-size: 0.75rem;">0</span>
@@ -358,7 +358,7 @@
           </div>
 
           <!-- Search & Filter Controls -->
-          <div style="display: flex; gap: 0.4rem; flex: 1; max-width: 620px; flex-wrap: wrap;">
+          <div class="eq-toolbar-filters" style="display: flex; gap: 0.4rem; flex: 1; max-width: 620px; flex-wrap: wrap;">
             <input type="text" id="eq-search" class="form-input" data-i18n-placeholder="equipmentSearchPlaceholder" placeholder="🔍 ค้นหาชื่อหรือ ID อุปกรณ์..." style="flex: 1; min-width: 160px;">
             <select id="eq-filter-rarity" class="form-select" style="max-width: 110px;">
               <option value="all" data-i18n="filterAllRarity">ทุกดาว</option>
@@ -385,7 +385,7 @@
       </div>
 
       <!-- Main Layout: Tiles Grid + Inspector Side Panel -->
-      <div style="display: flex; gap: 1rem; align-items: flex-start;">
+      <div class="eq-layout" style="display: flex; gap: 1rem; align-items: flex-start;">
         <!-- Left: Inventory Tiles Grid -->
         <div style="flex: 1; min-width: 0;">
           <div id="lightcones-grid" class="eq-tiles-grid">
@@ -405,7 +405,7 @@
 
     <!-- Material inventory editor: edits only Client-catalog item quantities. -->
     <section id="tab-inventory" class="tab-content">
-      <div class="inventory-mode-switch" role="tablist" aria-label="Inventory views">
+      <div class="inventory-mode-switch" role="tablist" aria-label="Inventory views" data-i18n-aria-label="inventoryViewsLabel">
         <button type="button" id="btn-inventory-catalog" class="inventory-mode-btn active" role="tab" aria-selected="true" aria-controls="item-catalog-panel" data-i18n="itemCatalogTitle">📚 สมุดรวมไอเทม</button>
         <button type="button" id="btn-inventory-manage" class="inventory-mode-btn" role="tab" aria-selected="false" aria-controls="inventory-manage-panel" data-i18n="inventoryTitle">🎒 จัดการจำนวนไอเทม</button>
       </div>
@@ -1610,8 +1610,8 @@
       <form id="form-add-relic">
         <div class="form-group">
           <label class="form-label" data-i18n="lblSelectRelicSet">เลือกเซ็ตรีลิกส์</label>
-          <input id="add-relic-search" class="form-input add-relic-search" type="search" placeholder="Search / ค้นหา" aria-label="Search relic sets">
-          <div class="add-relic-set-grid" id="add-relic-set-grid" role="group" aria-label="Relic sets"></div>
+          <input id="add-relic-search" class="form-input add-relic-search" type="search" placeholder="Search / ค้นหา" aria-label="Search relic sets" data-i18n-placeholder="relicSetSearchPlaceholder" data-i18n-aria-label="relicSetSearchLabel">
+          <div class="add-relic-set-grid" id="add-relic-set-grid" role="group" aria-label="Relic sets" data-i18n-aria-label="relicSetGridLabel"></div>
           <select id="add-relic-set" class="sr-only-select" tabindex="-1" aria-hidden="true" required></select>
         </div>
         <div class="grid-2" style="gap: 0.75rem; margin-bottom: 1rem;">
@@ -1888,6 +1888,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.26"></script>
+  <script type="module" src="js/app.js?v=3.27"></script>
 </body>
 </html>

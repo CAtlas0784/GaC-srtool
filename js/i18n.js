@@ -7177,6 +7177,10 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     copyCardLevel: 'เลเวล',
     copyCardEidolon: 'Eidolon',
     copyCardLightCone: 'กรวยแสง',
+    inventoryViewsLabel: 'มุมมองกระเป๋าไอเทม',
+    relicSetSearchLabel: 'ค้นหาชุดรีลิกส์',
+    relicSetSearchPlaceholder: '🔍 ค้นหาชุดรีลิกส์...',
+    relicSetGridLabel: 'ชุดรีลิกส์',
     analystDamageAvPlaceholder: "เฉลี่ยต่อรอบ: -", analystCyclesPlaceholder: "0 รอบ", analystTurnsPlaceholder: "0 เทิร์น", analystAutoTurnsPlaceholder: "เทิร์นอัตโนมัติ: 0", analystDamageAvPlaceholder: "Avg per cycle: -", analystCyclesPlaceholder: "0 Cycles", analystTurnsPlaceholder: "0 Turns", analystAutoTurnsPlaceholder: "Auto Turns: 0", analystDamageAvPlaceholder: "ラウンド平均: -", analystCyclesPlaceholder: "0 ラウンド", analystTurnsPlaceholder: "0 ターン", analystAutoTurnsPlaceholder: "オートターン: 0", analystDamageAvPlaceholder: "라운드당 평균: -", analystCyclesPlaceholder: "0 라운드", analystTurnsPlaceholder: "0 턴", analystAutoTurnsPlaceholder: "자동 턴: 0", analystDamageAvPlaceholder: "Trung bình mỗi vòng: -", analystCyclesPlaceholder: "0 vòng", analystTurnsPlaceholder: "0 lượt", analystAutoTurnsPlaceholder: "Lượt tự động: 0", analystDamageAvPlaceholder: "Rata-rata per siklus: -", analystCyclesPlaceholder: "0 Siklus", analystTurnsPlaceholder: "0 Giliran", analystAutoTurnsPlaceholder: "Giliran otomatis: 0", analystDamageAvPlaceholder: "Promedio por ciclo: -", analystCyclesPlaceholder: "0 ciclos", analystTurnsPlaceholder: "0 turnos", analystAutoTurnsPlaceholder: "Turnos automáticos: 0", analystDamageAvPlaceholder: "Moyenne par cycle : -", analystCyclesPlaceholder: "0 cycle", analystTurnsPlaceholder: "0 tour", analystAutoTurnsPlaceholder: "Tours auto : 0", analystDamageAvPlaceholder: "Durchschnitt pro Zyklus: -", analystCyclesPlaceholder: "0 Zyklen", analystTurnsPlaceholder: "0 Züge", analystAutoTurnsPlaceholder: "Auto-Züge: 0", analystDamageAvPlaceholder: "В среднем за цикл: -", analystCyclesPlaceholder: "0 циклов", analystTurnsPlaceholder: "0 ходов", analystAutoTurnsPlaceholder: "Авто-ходы: 0", analystDamageAvPlaceholder: "Média por ciclo: -", analystCyclesPlaceholder: "0 ciclos", analystTurnsPlaceholder: "0 turnos", analystAutoTurnsPlaceholder: "Turnos automáticos: 0", miniViewFullAnalystTooltip: "เปิดหน้า Damage Analyst ตัวเต็ม", miniViewFullAnalystTooltip: "Open full Damage Analyst", miniViewFullAnalystTooltip: "完全なダメージ分析を開く", miniViewFullAnalystTooltip: "전체 데미지 분석 열기", miniViewFullAnalystTooltip: "Mở Trình phân tích sát thương đầy đủ", miniViewFullAnalystTooltip: "Buka Analis Kerusakan Lengkap", miniViewFullAnalystTooltip: "Abrir analizador de daño completo", miniViewFullAnalystTooltip: "Ouvrir l'analyseur de dégâts complet", miniViewFullAnalystTooltip: "Vollständigen Schadensanalysten öffnen", miniViewFullAnalystTooltip: "Открыть полный анализ урона", miniViewFullAnalystTooltip: "Abrir analisador de dano completo", copyCardGenerated: 'สร้างโดย GaCy-Srtool'
   },
   en: {
@@ -7308,6 +7312,10 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     copyCardLevel: 'Level',
     copyCardEidolon: 'Eidolon',
     copyCardLightCone: 'Light Cone',
+    inventoryViewsLabel: 'Inventory views',
+    relicSetSearchLabel: 'Search relic sets',
+    relicSetSearchPlaceholder: '🔍 Search relic sets...',
+    relicSetGridLabel: 'Relic sets',
     copyCardGenerated: 'Generated via GaCy-Srtool'
   }
 };

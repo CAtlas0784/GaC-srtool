@@ -107,6 +107,10 @@
 @media (max-width: 540px) {
   .item-catalog-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
   .item-catalog-toolbar .form-select { flex: 1 1 100%; }
+  /* Keep supporting text legible on phones. */
+  .item-catalog-name { font-size: .88rem; }
+  .item-catalog-details { font-size: .72rem; }
+  .item-catalog-support { font-size: .68rem; }
 }
 .inventory-mode-switch {
   display: flex;
