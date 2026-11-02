@@ -4935,22 +4935,22 @@ input:checked + .slider:before {
 
   .server-mode-badge,
   .connection-pill {
-    min-height: 32px;
+    min-height: 36px;
     padding: 0.22rem 0.5rem;
     font-size: 0.72rem;
   }
 
-  #server-mode-select { min-height: 28px; }
+  #server-mode-select { min-height: 32px; }
 
   #lang-select {
     width: auto;
-    min-height: 32px;
+    min-height: 36px;
     padding: 0.2rem 0.4rem;
     font-size: 0.72rem;
   }
 
   #btn-quick-ping {
-    min-height: 32px;
+    min-height: 36px;
     padding: 0.25rem 0.5rem;
     font-size: 0.72rem;
   }
@@ -4958,15 +4958,45 @@ input:checked + .slider:before {
   .nav-tabs {
     top: 0;
     padding: 0.25rem 0.6rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  /* Keep finger-sized targets even though the header is compressed. */
   .tab-btn {
-    min-height: 34px;
+    min-height: 40px;
     padding: 0.3rem 0.65rem;
     font-size: 0.75rem;
   }
 
+  .btn { min-height: 40px; }
+  .btn-sm { min-height: 36px; }
+
   .main-container { padding: 0.7rem 0.8rem 1.2rem; }
+}
+
+/* Landscape phones in the 700-900px band stack the inspector under a 50vh
+   tile grid, which puts it below the fold on a ~400px tall screen. Reuse the
+   phone bottom sheet so tapping a tile visibly opens the details. */
+@media (max-height: 500px) and (orientation: landscape) and (min-width: 700px) and (max-width: 900px) {
+  #eq-inspector-card {
+    position: fixed !important;
+    top: auto !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    max-height: 82dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 900;
+    border-width: 1px 0 0;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.7);
+  }
 }
 
 
