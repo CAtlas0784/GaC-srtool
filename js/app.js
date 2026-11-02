@@ -1,10 +1,10 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
-import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.23';
-import { initializeItemCatalog } from './item-catalog.js?v=2';
-import { initializeUnstuck } from './unstuck.js?v=1';
+import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.21';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.27';
+import { initializeItemCatalog } from './item-catalog.js?v=5';
+import { initializeUnstuck } from './unstuck.js?v=4';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.17';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.21';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -480,6 +480,7 @@ function setConnectionStatus(connected, extraText = '') {
   if (connected !== toolSessionConnected) syncToolSession(connected);
   state.isConnected = connected;
   if (connectionChanged && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
+  updateCameraSaveStatus();
   if (connected) {
     el.statusDot.classList.add('connected');
     el.connectionStatusText.textContent = extraText || t('online');
@@ -604,7 +605,7 @@ function areCapturedSubAffixesValid(setId, slot, mainAffixId, subAffixes) {
 
 // Official in-game property icons (same set used by the overview tab)
 function getRelicImage(setId, slot = 5) {
-  return RELIC_SET_METADATA[setId]?.images?.[slot] || RELIC_SET_METADATA[setId]?.images?.[5] || `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png`;
+  return RELIC_SET_METADATA[setId]?.setIcon || RELIC_SET_METADATA[setId]?.images?.[slot] || RELIC_SET_METADATA[setId]?.images?.[5] || `https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/icon/relic/${setId}.png`;
 }
 function getLightconeIconSrc(id) {
   return LIGHTCONE_METADATA[id]?.images?.thumbnail || `https://static.nanoka.cc/assets/hsr/lightconemediumicon/${id}.webp`;
@@ -1015,7 +1016,26 @@ function applyTranslations() {
       if (icons) {
         elem.textContent = val.replace(/^[🎯⚡🔨🛡️\s]+/u, '');
         icons.slice().reverse().forEach(icon => elem.insertAdjacentHTML('afterbegin', getStatIconHtml(icon, 16, '')));
-      } else elem.textContent = val;
+      } else {
+        elem.textContent = val;
+        const equipmentIcons = {
+          tabEquipment: './assets/lightcones/22009-icon.webp',
+          modalAddLcTitle: './assets/lightcones/22009-icon.webp',
+          eqLcTitle: './assets/lightcones/22009-icon.webp',
+          overviewEquippedLc: './assets/lightcones/22009-icon.webp',
+          modalAddRelicTitle: './assets/relic-slots/1.png',
+          eqRelicTitle: './assets/relic-slots/1.png',
+          overviewEquippedRelics: './assets/relic-slots/1.png',
+          activeSetEffects: './assets/relic-slots/1.png'
+        };
+        if (equipmentIcons[key]) {
+          const icon = document.createElement('img');
+          icon.src = equipmentIcons[key];
+          icon.alt = '';
+          icon.className = 'game-inline-icon';
+          elem.prepend(icon, ' ');
+        }
+      }
     }
   });
 
@@ -1071,6 +1091,11 @@ function applyTranslations() {
     updateAvatarAssignCurrent();
     renderAvatarAssignGrid();
   }
+
+  // Keep the camera panel (mode cards, distance readout, save state) translated.
+  renderCameraModeOptions();
+  syncCameraUi();
+
   loadEquipment();
   if (analystState.currentReport) {
     renderDamageAnalyst();
@@ -2928,6 +2953,7 @@ const SIGNATURE_LIGHTCONES = {
 // 1: Flat HP, 2: Flat ATK, 3: Flat DEF, 4: HP%, 5: ATK%, 6: DEF%
 // 7: SPD, 8: CRIT Rate%, 9: CRIT DMG%, 10: EHR%, 11: Effect RES%, 12: Break Effect%
 const CHARACTER_OPTIMAL_BUILDS = {
+  1511: { cavern: 133, planar: 329, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 7, 5] }, // Aeon ★ Aha
   1308: { cavern: 117, planar: 313, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Acheron
   1310: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 2, rope: 1, substats: [12, 7, 5, 11] }, // Firefly
   1220: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Feixiao
@@ -3369,17 +3395,17 @@ function populateModalChangeLcDropdown(avatarPath) {
 
 // Slot full definitions for relics
 const SLOT_NAMES_FULL = {
-  1: { nameKey: 'relicSlotHead', shortKey: 'slotHeadShort', icon: "🧢", defaultStat: "HP (Flat)" },
-  2: { nameKey: 'relicSlotHands', shortKey: 'slotHandsShort', icon: "🧤", defaultStat: "ATK (Flat)" },
-  3: { nameKey: 'relicSlotBody', shortKey: 'slotBodyShort', icon: "🦺", defaultStat: "CRIT Rate / DMG" },
-  4: { nameKey: 'relicSlotFeet', shortKey: 'slotFeetShort', icon: "👢", defaultStat: "SPD / ATK%" },
-  5: { nameKey: 'relicSlotSphere', shortKey: 'slotSphereShort', icon: "🔮", defaultStat: "Elemental DMG%" },
-  6: { nameKey: 'relicSlotRope', shortKey: 'slotRopeShort', icon: "🔗", defaultStat: "ERR / Break / ATK%" }
+  1: { nameKey: 'relicSlotHead', shortKey: 'slotHeadShort', icon: './assets/relic-slots/1.png', defaultStat: "HP (Flat)" },
+  2: { nameKey: 'relicSlotHands', shortKey: 'slotHandsShort', icon: './assets/relic-slots/2.png', defaultStat: "ATK (Flat)" },
+  3: { nameKey: 'relicSlotBody', shortKey: 'slotBodyShort', icon: './assets/relic-slots/3.png', defaultStat: "CRIT Rate / DMG" },
+  4: { nameKey: 'relicSlotFeet', shortKey: 'slotFeetShort', icon: './assets/relic-slots/4.png', defaultStat: "SPD / ATK%" },
+  5: { nameKey: 'relicSlotSphere', shortKey: 'slotSphereShort', icon: './assets/relic-slots/5.png', defaultStat: "Elemental DMG%" },
+  6: { nameKey: 'relicSlotRope', shortKey: 'slotRopeShort', icon: './assets/relic-slots/6.png', defaultStat: "ERR / Break / ATK%" }
 };
 
 function getSlotInfo(slot) {
   const info = SLOT_NAMES_FULL[slot];
-  if (!info) return { name: `${t('slot')} ${slot}`, short: `${t('slot')} ${slot}`, icon: '🛡️', defaultStat: '' };
+  if (!info) return { name: `${t('slot')} ${slot}`, short: `${t('slot')} ${slot}`, icon: '', defaultStat: '' };
   const name = t(info.nameKey);
   return { ...info, name, short: t(info.shortKey) };
 }
@@ -3963,7 +3989,7 @@ function renderModalRelicsTab(avatarId) {
         <div class="relic-slot-icon-wrap">
           <img src="${getRelicImage(setId, slot)}"
                onerror="this.src='./assets/logo.png'" alt="Relic" style="width: 100%; height: 100%; object-fit: contain;">
-          <span class="relic-slot-badge">${slotInfo.icon} ${slotInfo.short}</span>
+          <span class="relic-slot-badge" aria-label="${t('relicSlotBadgeLabel', { slot: slotInfo.short })}"><img class="relic-slot-type-icon" src="${slotInfo.icon}" alt=""> ${slotInfo.short}</span>
         </div>
         <div class="relic-slot-content">
           <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5rem;">
@@ -3995,8 +4021,8 @@ function renderModalRelicsTab(avatarId) {
       box.className = 'relic-slot-box empty';
       box.innerHTML = `
         <div class="relic-slot-icon-wrap" style="opacity: 0.4;">
-          <span style="font-size: 1.5rem;">${slotInfo.icon}</span>
-          <span class="relic-slot-badge">${slotInfo.name.split(' ')[0]}</span>
+          <img class="relic-slot-empty-icon" src="${slotInfo.icon}" alt="">
+          <span class="relic-slot-badge" aria-label="${t('relicSlotBadgeLabel', { slot: slotInfo.short })}">${slotInfo.short}</span>
         </div>
         <div class="relic-slot-content">
           <div class="relic-slot-title" style="color: var(--text-muted);">${slotInfo.name}</div>
@@ -4020,9 +4046,9 @@ function renderModalRelicsTab(avatarId) {
       const cnt = setCountMap[sId];
       const sInfo = getRelicSetInfo(sId);
       if (cnt >= 4) {
-        activeSets.push(`🌟 <strong>${sInfo.name} (4-Piece Set)</strong>: ${sInfo.desc4 || t('relicSet4Fallback')}`);
+        activeSets.push(`<img class="game-inline-icon" src="${getRelicImage(sId)}" alt=""> <strong>${sInfo.name} (${t('relicSetPieces', { count: 4 })})</strong>: ${sInfo.desc4 || t('relicSet4Fallback')}`);
       } else if (cnt >= 2) {
-        activeSets.push(`✨ <strong>${sInfo.name} (2-Piece Set)</strong>: ${sInfo.desc2 || t('relicSet2Fallback')}`);
+        activeSets.push(`<img class="game-inline-icon" src="${getRelicImage(sId)}" alt=""> <strong>${sInfo.name} (${t('relicSetPieces', { count: 2 })})</strong>: ${sInfo.desc2 || t('relicSet2Fallback')}`);
       }
     });
 
@@ -5164,17 +5190,17 @@ async function renderModalSkillsTab(avatarId) {
   // Traces
   if (a2Node) {
     if (el.traceIconA2) el.traceIconA2.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a2Node.icon}`;
-    if (el.traceNameA2) el.traceNameA2.textContent = `🌟 ${a2Node.name || t('traceFallbackA2')}`;
+    if (el.traceNameA2) el.traceNameA2.textContent = a2Node.name || t('traceFallbackA2');
     if (el.traceDescA2) el.traceDescA2.innerHTML = formatSkillDesc(a2Node.desc, a2Node.params, 1);
   }
   if (a4Node) {
     if (el.traceIconA4) el.traceIconA4.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a4Node.icon}`;
-    if (el.traceNameA4) el.traceNameA4.textContent = `🌟 ${a4Node.name || t('traceFallbackA4')}`;
+    if (el.traceNameA4) el.traceNameA4.textContent = a4Node.name || t('traceFallbackA4');
     if (el.traceDescA4) el.traceDescA4.innerHTML = formatSkillDesc(a4Node.desc, a4Node.params, 1);
   }
   if (a6Node) {
     if (el.traceIconA6) el.traceIconA6.src = `https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/${a6Node.icon}`;
-    if (el.traceNameA6) el.traceNameA6.textContent = `🌟 ${a6Node.name || t('traceFallbackA6')}`;
+    if (el.traceNameA6) el.traceNameA6.textContent = a6Node.name || t('traceFallbackA6');
     if (el.traceDescA6) el.traceDescA6.innerHTML = formatSkillDesc(a6Node.desc, a6Node.params, 1);
   }
 }
@@ -5657,7 +5683,7 @@ function renderShowcaseCard(avatarId) {
   }
 
   if (activeSetBadges.length === 0) {
-    const rec = RECOMMENDED_RELIC_BUILDS[canonPath] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    const rec = getOptimalBuildForAvatar(aid);
     activeSetBadges.push({ name: getRelicSetInfo(rec.cavern).name, count: 4 });
     activeSetBadges.push({ name: getRelicSetInfo(rec.planar).name, count: 2 });
   }
@@ -5711,7 +5737,7 @@ function renderShowcaseCard(avatarId) {
   let relicsHtml = '';
   for (let slot = 1; slot <= 6; slot++) {
     const equipped = avatarRelics.find(r => (r.relic_id % 10 === slot));
-    const rec = RECOMMENDED_RELIC_BUILDS[canonPath] || RECOMMENDED_RELIC_BUILDS.Preservation;
+    const rec = getOptimalBuildForAvatar(aid);
     const setId = equipped ? Math.floor((equipped.relic_id % 10000) / 10) : (slot <= 4 ? rec.cavern : rec.planar);
     const rInfo = getRelicSetInfo(setId);
     const slotInfo = slotNames[slot];
@@ -8182,10 +8208,7 @@ async function loadPersistentSettings() {
     }
     if (!data) return;
 
-    const cameraMode = document.getElementById('camera-mode');
-    const cameraDistance = document.getElementById('camera-distance');
-    if (cameraMode) cameraMode.value = data.camera_settings?.mode || 'freecam';
-    if (cameraDistance) cameraDistance.value = data.camera_settings?.distance ?? 2;
+    applyCameraSettings(data.camera_settings);
 
     if (data.main_character && el.persistentMcSelect) {
       el.persistentMcSelect.value = data.main_character;
@@ -8200,6 +8223,177 @@ async function loadPersistentSettings() {
   } catch (err) {
     console.warn('Persistent settings loading error:', err);
   }
+}
+
+/**
+ * Freecam / FaceCam settings panel.
+ * The native <select> and range input stay in the DOM as the single source of
+ * truth for the save payload, while the visible controls are custom cards.
+ */
+const cameraSettingsCache = { busy: false, dirty: false, error: false };
+
+function getCameraModeSelect() {
+  return document.getElementById('camera-mode');
+}
+
+function getCameraDistanceInput() {
+  return document.getElementById('camera-distance');
+}
+
+function clampCameraDistance(value) {
+  const numeric = Number(value);
+  const safe = Number.isFinite(numeric) ? numeric : 2;
+  return Math.min(5, Math.max(0.5, Math.round(safe * 10) / 10));
+}
+
+function renderCameraModeOptions() {
+  const container = document.getElementById('camera-mode-options');
+  const select = getCameraModeSelect();
+  if (!container || !select) return;
+
+  const choices = [
+    { value: 'freecam', icon: '🎥', title: t('cameraModeFreecam'), detail: t('cameraModeFreecamDesc') },
+    { value: 'facecam', icon: '🙂', title: t('cameraModeFacecam'), detail: t('cameraModeFacecamDesc') }
+  ];
+
+  container.replaceChildren();
+  for (const choice of choices) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'camera-mode-option';
+    button.dataset.value = choice.value;
+    button.setAttribute('aria-pressed', 'false');
+
+    const icon = document.createElement('span');
+    icon.className = 'camera-mode-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = choice.icon;
+
+    const text = document.createElement('span');
+    text.className = 'camera-mode-text';
+    const title = document.createElement('span');
+    title.className = 'camera-mode-title';
+    title.textContent = choice.title;
+    const detail = document.createElement('span');
+    detail.className = 'camera-mode-detail';
+    detail.textContent = choice.detail;
+    text.append(title, detail);
+
+    const check = document.createElement('span');
+    check.className = 'camera-mode-check';
+    check.setAttribute('aria-hidden', 'true');
+    check.textContent = '✓';
+
+    button.append(icon, text, check);
+    container.append(button);
+  }
+
+  container.setAttribute('aria-label', t('cameraMode'));
+  container.onclick = event => {
+    const button = event.target.closest('.camera-mode-option');
+    if (!button) return;
+    select.value = button.dataset.value;
+    syncCameraUi({ dirty: true });
+  };
+
+  syncCameraModeSelection();
+}
+
+function syncCameraModeSelection() {
+  const container = document.getElementById('camera-mode-options');
+  const select = getCameraModeSelect();
+  if (!container || !select) return;
+  for (const button of container.querySelectorAll('.camera-mode-option')) {
+    const selected = button.dataset.value === select.value;
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  }
+}
+
+function readCameraForm() {
+  const select = getCameraModeSelect();
+  const input = getCameraDistanceInput();
+  return {
+    mode: select?.value === 'facecam' ? 'facecam' : 'freecam',
+    distance: clampCameraDistance(input?.value)
+  };
+}
+
+function setCameraSaveStatus(stateName, messageKey) {
+  const wrapper = document.getElementById('camera-save-state');
+  const text = document.getElementById('camera-save-state-text');
+  if (wrapper) wrapper.dataset.state = stateName;
+  if (text) text.textContent = t(messageKey);
+}
+
+function updateCameraSaveStatus() {
+  const button = document.getElementById('btn-save-camera');
+  const online = state.isConnected && state.serverMode === 'gac';
+
+  if (cameraSettingsCache.busy) {
+    setCameraSaveStatus('saving', 'cameraStatusSaving');
+    if (button) button.disabled = true;
+    return;
+  }
+  if (!online) {
+    setCameraSaveStatus('offline', 'cameraStatusOffline');
+    if (button) button.disabled = true;
+    return;
+  }
+  if (cameraSettingsCache.error) setCameraSaveStatus('error', 'cameraStatusError');
+  else if (cameraSettingsCache.dirty) setCameraSaveStatus('unsaved', 'cameraStatusUnsaved');
+  else if (state.persistentData?.camera_settings) setCameraSaveStatus('saved', 'cameraStatusSaved');
+  else setCameraSaveStatus('idle', 'cameraStatusIdle');
+  if (button) button.disabled = false;
+}
+
+function cameraFormDiffersFromSaved() {
+  const saved = state.persistentData?.camera_settings;
+  if (!saved) return true;
+  const current = readCameraForm();
+  const savedMode = saved.mode === 'facecam' ? 'facecam' : 'freecam';
+  return current.mode !== savedMode
+    || Math.abs(current.distance - clampCameraDistance(saved.distance)) > 0.001;
+}
+
+function syncCameraUi({ dirty = false } = {}) {
+  const distanceInput = getCameraDistanceInput();
+  const distanceValue = document.getElementById('camera-distance-value');
+  const distanceBlock = document.getElementById('camera-distance-block');
+  const distanceNote = document.getElementById('camera-distance-note');
+  if (!distanceInput) return;
+
+  const settings = readCameraForm();
+  if (dirty) {
+    cameraSettingsCache.dirty = cameraFormDiffersFromSaved();
+    cameraSettingsCache.error = false;
+  }
+
+  if (distanceValue) distanceValue.textContent = t('cameraDistanceValue', { value: settings.distance.toFixed(1) });
+  if (distanceBlock) distanceBlock.classList.toggle('is-inactive', settings.mode !== 'facecam');
+  if (distanceNote) {
+    distanceNote.textContent = t(settings.mode === 'facecam' ? 'cameraDistanceHint' : 'cameraDistanceHintFreecam');
+  }
+
+  syncCameraModeSelection();
+  updateCameraSaveStatus();
+}
+
+function applyCameraSettings(settings) {
+  const select = getCameraModeSelect();
+  const distanceInput = getCameraDistanceInput();
+  if (select) select.value = settings?.mode === 'facecam' ? 'facecam' : 'freecam';
+  if (distanceInput) distanceInput.value = String(clampCameraDistance(settings?.distance ?? 2));
+  cameraSettingsCache.dirty = false;
+  cameraSettingsCache.error = false;
+  syncCameraUi();
+}
+
+function initCameraSettings() {
+  if (!getCameraModeSelect()) return;
+  renderCameraModeOptions();
+  getCameraDistanceInput()?.addEventListener('input', () => syncCameraUi({ dirty: true }));
+  syncCameraUi();
 }
 
 // Render Ex-Rank Cards
@@ -8273,19 +8467,30 @@ async function toggleSingleExRank(avatarId, unlock) {
 }
 
 // Load and Switch JSON Tab Data
+let jsonLoadGeneration = 0;
+let jsonLoadPending = false;
 async function loadJsonData(mode) {
+  const generation = ++jsonLoadGeneration;
+  jsonLoadPending = true;
   state.currentJsonMode = mode;
+  // Never leave the previous file visible under the newly selected filename.
+  el.jsonEditor.value = '';
+  el.jsonEditor.readOnly = true;
+  if (el.btnJsonSave) el.btnJsonSave.disabled = true;
+  try {
   if (mode === 'freesr') {
     el.btnSelectFreesr.className = 'btn btn-sm btn-primary active';
     if (el.btnSelectPersistent) el.btnSelectPersistent.className = 'btn btn-sm btn-secondary';
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'freesr-data.json' });
     try {
-      if (state.fullFreesrData) {
+      if (state.fullFreesrData && !state.isConnected) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/freesr');
+        if (generation !== jsonLoadGeneration) return;
+        if (!res.data || typeof res.data !== 'object' || Array.isArray(res.data)) throw new Error('invalid freesr response');
         state.fullFreesrData = res.data;
         saveFreesrCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
@@ -8298,13 +8503,11 @@ async function loadJsonData(mode) {
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
           el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'freesr-data.json' });
         } else {
-          el.jsonStatusInfo.textContent = t('jsonOfflineNoCache');
-          if (!el.jsonEditor.value) {
-            el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
-          }
+          el.jsonStatusInfo.textContent = t('jsonDataUnavailable', { file: 'freesr-data.json' });
         }
       }
     } catch (err) {
+      if (generation !== jsonLoadGeneration) return;
       const cached = localStorage.getItem('gac_srtool_freesr_cache');
       if (cached) {
         try {
@@ -8314,10 +8517,7 @@ async function loadJsonData(mode) {
           el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'freesr-data.json' });
         } catch (e) {}
       } else {
-        el.jsonStatusInfo.textContent = t('jsonOfflinePaste');
-        if (!el.jsonEditor.value) {
-          el.jsonEditor.value = JSON.stringify({ avatars: {}, lightcones: [], relics: [], battle_config: {} }, null, 2);
-        }
+        el.jsonStatusInfo.textContent = t('jsonDataUnavailable', { file: 'freesr-data.json' });
       }
     }
   } else if (mode === 'datagame') {
@@ -8326,11 +8526,12 @@ async function loadJsonData(mode) {
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-primary active';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'data-in-game.json' });
     try {
-      if (state.dataGameData) {
+      if (state.dataGameData && !state.isConnected) {
         el.jsonEditor.value = JSON.stringify(state.dataGameData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'data-in-game.json' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/data-in-game').catch(() => null);
+        if (generation !== jsonLoadGeneration) return;
         if (res && (res.data || res.lineups)) {
           const val = res.data || res;
           state.dataGameData = val;
@@ -8354,6 +8555,7 @@ async function loadJsonData(mode) {
         }
       }
     } catch (err) {
+      if (generation !== jsonLoadGeneration) return;
       const cached = localStorage.getItem('gac_srtool_datagame_cache');
       if (cached) {
         try {
@@ -8374,14 +8576,17 @@ async function loadJsonData(mode) {
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'persistent' });
     try {
-      if (state.persistentData) {
+      if (state.persistentData && !state.isConnected) {
         el.jsonEditor.value = JSON.stringify(state.persistentData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'persistent' });
       } else if (state.isConnected) {
         const res = await apiCall('/api/persistent');
-        state.persistentData = res.data;
-        savePersistentCache(res.data);
-        el.jsonEditor.value = JSON.stringify(res.data, null, 2);
+        if (generation !== jsonLoadGeneration) return;
+        const persistent = res.persistent ?? res.data;
+        if (!persistent || typeof persistent !== 'object' || Array.isArray(persistent)) throw new Error('invalid persistent response');
+        state.persistentData = persistent;
+        savePersistentCache(persistent);
+        el.jsonEditor.value = JSON.stringify(persistent, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusServer', { file: 'persistent' });
       } else {
         const cached = localStorage.getItem('gac_srtool_persistent_cache');
@@ -8391,13 +8596,11 @@ async function loadJsonData(mode) {
           el.jsonEditor.value = JSON.stringify(parsed, null, 2);
           el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'persistent' });
         } else {
-          el.jsonStatusInfo.textContent = t('jsonOfflineNoCache');
-          if (!el.jsonEditor.value) {
-            el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
-          }
+          el.jsonStatusInfo.textContent = t('jsonDataUnavailable', { file: 'persistent' });
         }
       }
     } catch (err) {
+      if (generation !== jsonLoadGeneration) return;
       const cached = localStorage.getItem('gac_srtool_persistent_cache');
       if (cached) {
         try {
@@ -8407,11 +8610,15 @@ async function loadJsonData(mode) {
           el.jsonStatusInfo.textContent = t('jsonStatusBrowserCache', { file: 'persistent' });
         } catch (e) {}
       } else {
-        el.jsonStatusInfo.textContent = t('jsonOfflinePaste');
-        if (!el.jsonEditor.value) {
-          el.jsonEditor.value = JSON.stringify({ lineups: DEFAULT_LINEUP, main_character: "FemaleHarmony", march_type: "MarchHunt" }, null, 2);
-        }
+        el.jsonStatusInfo.textContent = t('jsonDataUnavailable', { file: 'persistent' });
       }
+    }
+  }
+  } finally {
+    if (generation === jsonLoadGeneration) {
+      jsonLoadPending = false;
+      el.jsonEditor.readOnly = false;
+      if (el.btnJsonSave) el.btnJsonSave.disabled = !el.jsonEditor.value.trim();
     }
   }
 }
@@ -9015,18 +9222,46 @@ function setupEvents() {
   // Persistent Toggles
   document.getElementById('btn-save-camera')?.addEventListener('click', async () => {
     const button = document.getElementById('btn-save-camera');
-    const mode = document.getElementById('camera-mode').value;
-    const distance = Number(document.getElementById('camera-distance').value);
+    const select = getCameraModeSelect();
+    const distanceInput = getCameraDistanceInput();
+    if (!button || !select || !distanceInput || cameraSettingsCache.busy) return;
+
+    const mode = select.value === 'facecam' ? 'facecam' : 'freecam';
+    const distance = Number(distanceInput.value);
     if (!Number.isFinite(distance) || distance < 0.5 || distance > 5) {
-      showToast(t('cameraDistanceError'), 'error'); return;
+      showToast(t('cameraDistanceError'), 'error');
+      return;
     }
-    button.disabled = true;
+    if (!state.isConnected || state.serverMode !== 'gac') {
+      showToast(t('cameraSaveOfflineError'), 'error');
+      updateCameraSaveStatus();
+      return;
+    }
+
+    cameraSettingsCache.busy = true;
+    updateCameraSaveStatus();
+    button.textContent = t('cameraSaving');
     try {
       const saved = await apiCall('/api/camera', 'POST', { mode, distance });
-      if (state.persistentData) state.persistentData.camera_settings = saved;
+      const payload = saved?.camera_settings || saved || {};
+      const settings = {
+        mode: payload.mode === 'facecam' ? 'facecam' : (payload.mode === 'freecam' ? 'freecam' : mode),
+        distance: clampCameraDistance(payload.distance ?? distance)
+      };
+      state.persistentData = state.persistentData || {};
+      state.persistentData.camera_settings = settings;
+      savePersistentCache(state.persistentData);
+      applyCameraSettings(settings);
       showToast(t('cameraSaved'), 'success');
-    } catch (err) { showToast(err.message, 'error'); }
-    finally { button.disabled = false; }
+    } catch (err) {
+      cameraSettingsCache.dirty = true;
+      cameraSettingsCache.error = true;
+      showToast(t('toastErrorMessage', { message: err.message }), 'error');
+    } finally {
+      cameraSettingsCache.busy = false;
+      button.textContent = t('cameraSave');
+      updateCameraSaveStatus();
+    }
   });
   document.getElementById('btn-save-aha-help')?.addEventListener('click', async () => {
     const select = document.getElementById('aha-help-level');
@@ -9192,6 +9427,9 @@ function setupEvents() {
   });
 
   el.btnJsonSave.addEventListener('click', saveJsonData);
+  el.jsonEditor.addEventListener('input', () => {
+    if (!jsonLoadPending) el.btnJsonSave.disabled = !el.jsonEditor.value.trim();
+  });
 
   el.btnJsonDownload.addEventListener('click', () => {
     const text = el.jsonEditor.value;
@@ -9211,6 +9449,7 @@ function setupEvents() {
       try {
         const parsed = JSON.parse(event.target.result);
         el.jsonEditor.value = JSON.stringify(parsed, null, 2);
+        if (!jsonLoadPending) el.btnJsonSave.disabled = false;
 
         let recognized = false;
         let isFreesr = false;
@@ -9247,7 +9486,7 @@ function setupEvents() {
         }
 
         // If persistent or has lineups
-        if (parsed.main_character || parsed.march_type || (parsed.lineups && !parsed.avatars)) {
+        if (!isFreesr && (parsed.main_character || parsed.march_type || parsed.lineups)) {
           recognized = true;
           isPersistent = true;
           state.persistentData = parsed;
@@ -10082,9 +10321,9 @@ function renderDamageAnalyst() {
 
             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted);">
               <div>⏱️ ${t('analystTurnsTaken')}: <strong style="color: #fff;">${hasAvatarStats ? a.total_turns || 0 : '—'}</strong> ${hasAvatarStats && a.extra_turns ? `(+${a.extra_turns})` : ''}</div>
-              <div>🛡️ ${t('analystShield')}: <strong style="color: #38bdf8;">${hasAvatarStats ? formatNumber(a.total_shield) : '—'}</strong></div>
-              <div>💚 ${t('analystHealing')}: <strong style="color: #34d399;">${hasAvatarStats ? formatNumber(a.total_heal) : '—'}</strong></div>
-              <div>💔 ${t('analystDamageTaken')}: <strong style="color: #f87171;">${hasAvatarStats ? formatNumber(a.total_damage_taken) : '—'}</strong></div>
+                <div>${getStatIconHtml('IconDefence', 16)} ${t('analystShield')}: <strong style="color: #38bdf8;">${hasAvatarStats ? formatNumber(a.total_shield) : '—'}</strong></div>
+                <div>${getStatIconHtml('IconHealRatio', 16)} ${t('analystHealing')}: <strong style="color: #34d399;">${hasAvatarStats ? formatNumber(a.total_heal) : '—'}</strong></div>
+                <div>${getStatIconHtml('IconMaxHP', 16)} ${t('analystDamageTaken')}: <strong style="color: #f87171;">${hasAvatarStats ? formatNumber(a.total_damage_taken) : '—'}</strong></div>
             </div>
           </div>
         `;
@@ -10376,6 +10615,7 @@ async function init() {
   setupTabs();
   setupModalSubtabs();
   setupEvents();
+  initCameraSettings();
   setupInventoryEvents();
   setupDamageAnalystEvents();
   setupGMConsoleEvents();

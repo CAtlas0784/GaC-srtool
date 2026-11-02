@@ -2,6 +2,8 @@
 
 ## Localization (required)
 
+Every change or addition must include an update to `js/i18n.js`: review and update the translations and localization behavior affected by the change.
+
 Every user-facing string must go through `js/i18n.js`. Never hardcode Thai or English UI text in HTML or JS.
 
 - Use `data-i18n`, `data-i18n-placeholder`, `data-i18n-title`, `data-i18n-alt` or `data-i18n-aria-label` in `index.html`.

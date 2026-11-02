@@ -1,4 +1,4 @@
-import { getCurrentLanguage, translatePath } from "./i18n.js?v=2.17";
+import { getCurrentLanguage, translatePath } from "./i18n.js?v=2.21";
 
 export const LIGHTCONE_METADATA = {
   "20000": {
@@ -4325,8 +4325,8 @@ export const RELIC_SET_METADATA = {
 
 // Set data is backed by the captured Client relic and affix tables documented in the server resources.
 Object.assign(RELIC_SET_METADATA, {
-  329: { clientCaptureRequired: true, names: { en: "God's Moment of Joy" }, desc2: "Increases the wearer's SPD by 6%. When the wearer's Elation reaches 40% or higher, the wearer's action advances by 40% immediately when entering combat.", images: { 5: './assets/relics/329-5.webp', 6: './assets/relics/329-6.webp' } },
-  330: { clientCaptureRequired: true, names: { en: 'Subspace ASC Center' }, desc2: "Increases the wearer's SPD by 6%. When the wearer's SPD reaches 145 or higher, increases all allies' Break Effect by 18% after entering combat. This effect cannot stack.", images: { 5: './assets/relics/330-5.webp', 6: './assets/relics/330-6.webp' } }
+  329: { clientCaptureRequired: true, names: { en: "God's Moment of Joy" }, desc2: "Increases the wearer's SPD by 6%. When the wearer's Elation reaches 40% or higher, the wearer's action advances by 40% immediately when entering combat.", setIcon: './assets/relics/329-set.png', images: { 5: './assets/relics/329-5.webp', 6: './assets/relics/329-6.webp' } },
+  330: { clientCaptureRequired: true, names: { en: 'Subspace ASC Center' }, desc2: "Increases the wearer's SPD by 6%. When the wearer's SPD reaches 145 or higher, increases all allies' Break Effect by 18% after entering combat. This effect cannot stack.", setIcon: './assets/relics/330-set.png', images: { 5: './assets/relics/330-5.webp', 6: './assets/relics/330-6.webp' } }
 });
 
 export function getLightconeInfo(lcId, langOverride = null) {

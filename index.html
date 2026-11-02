@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.29">
+  <link rel="stylesheet" href="css/styles.css?v=2.32">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -677,15 +677,45 @@
         <div class="card" id="card-persistent-global">
           <div class="card-title" data-i18n="persistentGlobalTitle">⚙️ สวิตช์ระบบพิเศษของ GaCy</div>
           <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-            <div class="ex-switch-card">
-              <div>
-                <div style="font-weight: 700;">Freecam / FaceCam</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="cameraHint">เลือกโหมด แล้วกด Tab ในเกมเพื่อเปิดหรือปิดกล้อง</div>
-                <label for="camera-mode" data-i18n="cameraMode">โหมดกล้อง</label>
-                <select id="camera-mode"><option value="freecam">Freecam</option><option value="facecam" data-i18n="cameraFaceCamExperimental">FaceCam (ทดลอง)</option></select>
-                <label for="camera-distance" data-i18n="cameraFaceCamDistance">ระยะ FaceCam</label>
-                <input id="camera-distance" type="number" min="0.5" max="5" step="0.1" value="2">
-                <button type="button" class="btn btn-success" id="btn-save-camera" data-i18n="cameraSave">บันทึกกล้อง</button>
+            <div class="ex-switch-card camera-settings-card">
+              <div class="camera-settings">
+                <div class="camera-settings-head">
+                  <span class="camera-settings-emblem" aria-hidden="true">📷</span>
+                  <div class="camera-settings-copy">
+                    <div class="camera-settings-title">Freecam / FaceCam</div>
+                    <div class="camera-settings-hint" data-i18n="cameraHint">เลือกโหมด แล้วกด Tab ในเกมเพื่อเปิดหรือปิดกล้อง</div>
+                  </div>
+                </div>
+
+                <div id="camera-mode-options" class="camera-mode-options" role="group" data-i18n-aria-label="cameraMode">
+                  <!-- Injected by JS -->
+                </div>
+                <select id="camera-mode" class="camera-native-select" aria-hidden="true" tabindex="-1">
+                  <option value="freecam">Freecam</option>
+                  <option value="facecam" data-i18n="cameraFaceCamExperimental">FaceCam (ทดลอง)</option>
+                </select>
+
+                <div class="camera-distance-block" id="camera-distance-block">
+                  <div class="camera-distance-head">
+                    <label class="camera-field-label" for="camera-distance" data-i18n="cameraFaceCamDistance">ระยะ FaceCam</label>
+                    <output class="camera-distance-value" id="camera-distance-value" for="camera-distance">2.0×</output>
+                  </div>
+                  <input id="camera-distance" class="camera-distance-range" type="range" min="0.5" max="5" step="0.1" value="2"
+                         data-i18n-aria-label="cameraFaceCamDistance">
+                  <div class="camera-distance-scale" aria-hidden="true">
+                    <span>0.5×</span>
+                    <span>5×</span>
+                  </div>
+                  <p class="camera-distance-note" id="camera-distance-note" data-i18n="cameraDistanceHint">ใช้กับโหมด FaceCam เท่านั้น — ล้อเมาส์ในเกมปรับระยะชั่วคราวได้</p>
+                </div>
+
+                <div class="camera-actions">
+                  <span class="camera-save-state" id="camera-save-state" data-state="idle">
+                    <span class="camera-state-dot" aria-hidden="true"></span>
+                    <span id="camera-save-state-text" data-i18n="cameraStatusIdle">พร้อมบันทึก</span>
+                  </span>
+                  <button type="button" class="btn btn-success camera-save-button" id="btn-save-camera" data-i18n="cameraSave">บันทึกกล้อง</button>
+                </div>
               </div>
             </div>
             <div class="ex-switch-card">
@@ -1858,6 +1888,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.20"></script>
+  <script type="module" src="js/app.js?v=3.26"></script>
 </body>
 </html>
