@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.24">
+  <link rel="stylesheet" href="css/styles.css?v=2.29">
   <link rel="stylesheet" href="css/item-catalog.css?v=2">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -1531,7 +1531,7 @@
         </div>
 
         <!-- 4. Level, Promotion, Superimpose, and Equip Avatar -->
-        <div class="grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem; align-items: end;">
+        <div class="grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 0.75rem; align-items: start;">
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" data-i18n="modalColLevel" style="font-size: 0.75rem;">เลเวล (1-80)</label>
             <input type="number" id="add-lc-level" class="form-input" min="1" max="80" value="80" required>
@@ -1629,7 +1629,7 @@
     <div class="modal-content assign-picker-modal" role="dialog" aria-modal="true" aria-labelledby="modal-assign-title">
       <div class="modal-header assign-picker-header">
         <div class="assign-picker-heading">
-          <h3 id="modal-assign-title" style="font-weight: 800; margin: 0; font-size: 1.15rem;">สวมใส่ให้ตัวละคร</h3>
+          <h3 id="modal-assign-title" data-i18n="assignPickerTitleRelic" style="font-weight: 800; margin: 0; font-size: 1.15rem;">สวมใส่ให้ตัวละคร</h3>
           <div id="modal-assign-subtitle" class="assign-picker-subtitle"></div>
         </div>
         <button type="button" class="btn btn-sm btn-secondary" id="btn-close-assign-picker">✕</button>
@@ -1858,6 +1858,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.16"></script>
+  <script type="module" src="js/app.js?v=3.20"></script>
 </body>
 </html>

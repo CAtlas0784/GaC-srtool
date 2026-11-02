@@ -1,4 +1,4 @@
-import { getCurrentLanguage, translateElement, translatePath } from "./i18n.js?v=2.16";
+import { getCurrentLanguage, translateElement, translatePath } from "./i18n.js?v=2.17";
 
 export const AVATAR_METADATA = {
   "1001": {

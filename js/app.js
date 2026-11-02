@@ -4,7 +4,7 @@ import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetIn
 import { initializeItemCatalog } from './item-catalog.js?v=2';
 import { initializeUnstuck } from './unstuck.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.16';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.17';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -1062,6 +1062,14 @@ function applyTranslations() {
   }
   if (state.avatarsList.length > 0) {
     renderAvatarsGrid();
+  }
+
+  // Keep the equip-target chips and the avatar picker in the active language.
+  renderEquipTargetDisplay('relic');
+  renderEquipTargetDisplay('lc');
+  if (el.modalAvatarAssign?.classList.contains('active')) {
+    updateAvatarAssignCurrent();
+    renderAvatarAssignGrid();
   }
   loadEquipment();
   if (analystState.currentReport) {
@@ -2271,6 +2279,233 @@ function renderPickerGrid() {
 
     el.pickerAvatarsGrid.appendChild(card);
   });
+}
+
+/* ==========================================================================
+   Avatar Assignment Picker (Add Relic / Add Light Cone)
+   ========================================================================== */
+const avatarAssignState = { kind: 'relic', pending: 0 };
+
+function avatarAssignSelectEl(kind) {
+  return kind === 'lc' ? el.addLcAvatar : el.addRelicAvatar;
+}
+
+function avatarAssignButtonEl(kind) {
+  return kind === 'lc' ? el.addLcAvatarBtn : el.addRelicAvatarBtn;
+}
+
+function getRelicSlotNumber() {
+  return parseInt(el.addRelicSlot?.value || '1', 10) || 1;
+}
+
+// What (if anything) the given avatar currently wears in this slot.
+function findAvatarEquippedItem(kind, avatarId, relicSlot) {
+  if (kind === 'lc') {
+    const lc = (state.fullFreesrData?.lightcones || []).find(l => l.equip_avatar === avatarId);
+    return lc ? { name: getLightconeInfo(lc.item_id).name } : null;
+  }
+  const relic = (state.fullFreesrData?.relics || [])
+    .find(r => r.equip_avatar === avatarId && (r.relic_id % 10) === relicSlot);
+  if (!relic) return null;
+  const setId = Math.floor((relic.relic_id % 10000) / 10);
+  return { name: getRelicSetInfo(setId).name };
+}
+
+// Keep the hidden <select> as the source of truth for the submit handlers,
+// but only ever hold the single selected option (instead of ~100 <option>s).
+function setAvatarAssignValue(kind, avatarId) {
+  const select = avatarAssignSelectEl(kind);
+  if (!select) return;
+  const value = parseInt(avatarId, 10) || 0;
+  const option = document.createElement('option');
+  option.value = String(value);
+  option.textContent = value ? getAvatarInfo(value).name : t('unassigned');
+  select.innerHTML = '';
+  select.appendChild(option);
+  select.value = String(value);
+}
+
+function getAssignItemLabel(kind) {
+  if (kind === 'lc') {
+    const lcId = parseInt(el.addLcSelectedId?.value || '23001', 10);
+    return getLightconeInfo(lcId).name;
+  }
+  const setId = parseInt(el.addRelicSet?.value || '0', 10);
+  return `${getRelicSetInfo(setId).name} • ${getSlotInfo(getRelicSlotNumber()).short}`;
+}
+
+function renderEquipTargetDisplay(kind) {
+  const btn = avatarAssignButtonEl(kind);
+  const select = avatarAssignSelectEl(kind);
+  if (!btn) return;
+
+  const avatarId = parseInt(select?.value || '0', 10) || 0;
+  const meta = avatarId ? getAvatarInfo(avatarId) : null;
+
+  if (!meta) {
+    btn.classList.add('is-empty');
+    btn.title = '';
+    btn.innerHTML = `
+      <span class="equip-target-avatar">🎒</span>
+      <span class="equip-target-body">
+        <span class="equip-target-name">${t('assignKeepInventory')}</span>
+        <span class="equip-target-sub">${t('assignChooseHint')}</span>
+      </span>
+      <span class="equip-target-cta">${t('assignChoose')}</span>
+    `;
+    return;
+  }
+
+  btn.classList.remove('is-empty');
+  const avatar = (state.avatarsList || []).find(a => a.avatar_id === avatarId);
+  const levelText = avatar ? `Lv.${avatar.level} • E${avatar.rank}` : '';
+  const existing = findAvatarEquippedItem(kind, avatarId, getRelicSlotNumber());
+  const warnText = existing
+    ? t(kind === 'lc' ? 'assignReplaceLc' : 'assignReplaceRelic', { name: existing.name })
+    : '';
+  btn.title = warnText;
+  btn.innerHTML = `
+    <span class="equip-target-avatar">
+      <img src="${getAvatarIconSrc(avatarId)}" onerror="handleAvatarImgError(this, ${avatarId})" alt="${meta.name}">
+    </span>
+    <span class="equip-target-body">
+      <span class="equip-target-name">${meta.name}</span>
+      <span class="equip-target-sub">
+        ${getElementIconHtml(meta.element, 12)}
+        ${getPathIconHtml(meta.path, 12)}
+        <span>${levelText}</span>
+      </span>
+    </span>
+    <span class="equip-target-cta${existing ? ' has-warning' : ''}">${existing ? '⚠ ' : ''}${t('assignChange')}</span>
+  `;
+}
+
+function openAvatarAssignPicker(kind) {
+  if (!el.modalAvatarAssign) return;
+  avatarAssignState.kind = kind;
+  avatarAssignState.pending = parseInt(avatarAssignSelectEl(kind)?.value || '0', 10) || 0;
+
+  if (el.modalAssignTitle) {
+    el.modalAssignTitle.textContent = t(kind === 'lc' ? 'assignPickerTitleLc' : 'assignPickerTitleRelic');
+  }
+  if (el.modalAssignSubtitle) {
+    el.modalAssignSubtitle.innerHTML = t('assignPickerSubtitle', {
+      item: `<strong>${getAssignItemLabel(kind)}</strong>`
+    });
+  }
+  if (el.assignPickerSearch) el.assignPickerSearch.value = '';
+
+  renderAvatarAssignGrid();
+  updateAvatarAssignCurrent();
+  el.modalAvatarAssign.classList.add('active');
+  setTimeout(() => el.assignPickerSearch?.focus(), 40);
+}
+
+function renderAvatarAssignGrid() {
+  if (!el.assignPickerGrid) return;
+  const kind = avatarAssignState.kind;
+  const search = (el.assignPickerSearch?.value || '').trim().toLowerCase();
+  const relicSlot = getRelicSlotNumber();
+  el.assignPickerGrid.innerHTML = '';
+
+  // "Keep in inventory" option
+  const inventoryCard = document.createElement('div');
+  inventoryCard.className = 'assign-inventory-card' + (avatarAssignState.pending === 0 ? ' is-selected' : '');
+  inventoryCard.setAttribute('role', 'option');
+  inventoryCard.setAttribute('aria-selected', avatarAssignState.pending === 0 ? 'true' : 'false');
+  inventoryCard.innerHTML = `
+    <span class="assign-inventory-icon">🎒</span>
+    <span class="assign-inventory-text">
+      <strong>${t('assignKeepInventory')}</strong>
+      <small>${t('assignKeepInventoryHint')}</small>
+    </span>
+    <span class="assign-check">✓</span>
+  `;
+  inventoryCard.addEventListener('click', () => selectAvatarAssign(0, inventoryCard));
+  el.assignPickerGrid.appendChild(inventoryCard);
+
+  const sortedAvatars = [...(state.avatarsList || [])].sort((a, b) => b.avatar_id - a.avatar_id);
+  let visible = 0;
+
+  sortedAvatars.forEach(item => {
+    const meta = getAvatarInfo(item.avatar_id);
+    if (search && !meta.name.toLowerCase().includes(search) && !String(item.avatar_id).includes(search)) {
+      return;
+    }
+    visible += 1;
+
+    const equipped = findAvatarEquippedItem(kind, item.avatar_id, relicSlot);
+    const isSelected = avatarAssignState.pending === item.avatar_id;
+    const card = document.createElement('div');
+    card.className = `picker-card-item assign-avatar-card card-rarity-${meta.rarity}${isSelected ? ' is-selected' : ''}`;
+    card.setAttribute('role', 'option');
+    card.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    card.innerHTML = `
+      <div class="picker-avatar-img-wrap">
+        <img class="picker-avatar-img"
+             src="${getAvatarIconSrc(item.avatar_id)}"
+             onerror="handleAvatarImgError(this, ${item.avatar_id})"
+             alt="${meta.name}">
+      </div>
+      <div class="picker-avatar-info">
+        <div class="picker-avatar-name" title="${meta.name}">${meta.name}</div>
+        <div class="picker-avatar-subinfo">
+          ${getElementIconHtml(meta.element, 18)}
+          ${getPathIconHtml(meta.path, 18)}
+          <span style="font-weight: 600; margin-left: 0.2rem;">Lv. ${item.level} • E${item.rank}</span>
+        </div>
+        ${equipped ? `<div class="assign-equipped-badge">⚠ ${t(kind === 'lc' ? 'assignReplaceLc' : 'assignReplaceRelic', { name: equipped.name })}</div>` : ''}
+      </div>
+    `;
+
+    card.addEventListener('click', () => selectAvatarAssign(item.avatar_id, card));
+    card.addEventListener('dblclick', () => {
+      selectAvatarAssign(item.avatar_id, card);
+      confirmAvatarAssign();
+    });
+
+    el.assignPickerGrid.appendChild(card);
+  });
+
+  if (visible === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'assign-picker-empty';
+    empty.textContent = t('assignNoResults');
+    el.assignPickerGrid.appendChild(empty);
+  }
+}
+
+function selectAvatarAssign(avatarId, cardEl) {
+  avatarAssignState.pending = parseInt(avatarId, 10) || 0;
+  el.assignPickerGrid?.querySelectorAll('.is-selected').forEach(node => node.classList.remove('is-selected'));
+  cardEl?.classList.add('is-selected');
+  el.assignPickerGrid?.querySelectorAll('[role="option"]').forEach(node => {
+    node.setAttribute('aria-selected', node === cardEl ? 'true' : 'false');
+  });
+  updateAvatarAssignCurrent();
+}
+
+function updateAvatarAssignCurrent() {
+  if (!el.assignPickerCurrentValue) return;
+  el.assignPickerCurrentValue.textContent = avatarAssignState.pending === 0
+    ? t('assignKeepInventory')
+    : getAvatarInfo(avatarAssignState.pending).name;
+}
+
+function closeAvatarAssignPicker() {
+  el.modalAvatarAssign?.classList.remove('active');
+}
+
+function confirmAvatarAssign() {
+  const kind = avatarAssignState.kind;
+  setAvatarAssignValue(kind, avatarAssignState.pending);
+  renderEquipTargetDisplay(kind);
+  closeAvatarAssignPicker();
+}
+
+function resetAvatarAssignForForm(kind) {
+  setAvatarAssignValue(kind, 0);
+  renderEquipTargetDisplay(kind);
 }
 
 // Assign avatar to lineup slot
@@ -6776,18 +7011,8 @@ function openAddLcModal() {
   const filterRarity = document.getElementById('add-lc-filter-rarity');
   if (filterRarity) filterRarity.value = 'all';
 
-  // Avatars dropdown
-  if (el.addLcAvatar) {
-    el.addLcAvatar.innerHTML = `<option value="0">${t('unassigned') || '-- ยังไม่สวมใส่ (เก็บในคลัง) --'}</option>`;
-    const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
-    sortedAvatars.forEach(av => {
-      const info = getAvatarInfo(av.avatar_id);
-      const opt = document.createElement('option');
-      opt.value = av.avatar_id;
-      opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
-      el.addLcAvatar.appendChild(opt);
-    });
-  }
+  // Equip target starts empty ("keep in inventory")
+  resetAvatarAssignForForm('lc');
 
   if (el.addLcLevel) el.addLcLevel.value = 80;
   if (el.addLcPromotion) el.addLcPromotion.value = 6;
@@ -6970,15 +7195,8 @@ async function openAddRelicModal() {
     el.addRelicSet.appendChild(opt);
   });
 
-  el.addRelicAvatar.innerHTML = `<option value="0">${t('unassigned')}</option>`;
-  const sortedAvatars = [...state.avatarsList].sort((a, b) => b.avatar_id - a.avatar_id);
-  sortedAvatars.forEach(av => {
-    const info = getAvatarInfo(av.avatar_id);
-    const opt = document.createElement('option');
-    opt.value = av.avatar_id;
-    opt.textContent = `${info.name} (ID: ${av.avatar_id})`;
-    el.addRelicAvatar.appendChild(opt);
-  });
+  // Equip target starts empty ("keep in inventory")
+  resetAvatarAssignForForm('relic');
 
   const firstAvailable = Array.from(el.addRelicSet.options).find(option => !option.disabled);
   if (firstAvailable) el.addRelicSet.value = firstAvailable.value;
@@ -8711,6 +8929,24 @@ function setupEvents() {
   // Lineup Picker Modal Controls
   el.btnClosePickerModal.addEventListener('click', () => el.modalLineupPicker.classList.remove('active'));
   el.pickerSearch.addEventListener('input', renderPickerGrid);
+
+  // Avatar assignment picker (Add Relic / Add Light Cone)
+  el.addRelicAvatarBtn?.addEventListener('click', () => openAvatarAssignPicker('relic'));
+  el.addLcAvatarBtn?.addEventListener('click', () => openAvatarAssignPicker('lc'));
+  el.assignPickerSearch?.addEventListener('input', renderAvatarAssignGrid);
+  el.btnCloseAssignPicker?.addEventListener('click', closeAvatarAssignPicker);
+  el.btnCancelAssignPicker?.addEventListener('click', closeAvatarAssignPicker);
+  el.btnConfirmAssignPicker?.addEventListener('click', confirmAvatarAssign);
+  el.modalAvatarAssign?.addEventListener('click', (e) => {
+    if (e.target === el.modalAvatarAssign) closeAvatarAssignPicker();
+  });
+  // Esc closes only the picker, keeping the parent Add Relic / Add LC form open.
+  el.modalAvatarAssign?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeAvatarAssignPicker();
+    }
+  });
 
   // Creative Mode Toggle
   if (el.toggleCreativeMode) {

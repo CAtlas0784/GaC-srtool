@@ -1560,10 +1560,10 @@ input:checked + .slider:before {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   text-align: left;
-  padding: 0.5rem 0.65rem;
-  min-height: 52px;
+  padding: 0.2rem 0.55rem;
+  min-height: 40px;
   background: rgba(10, 13, 20, 0.7);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -1589,8 +1589,8 @@ input:checked + .slider:before {
 }
 
 .equip-target-avatar {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -1599,7 +1599,7 @@ input:checked + .slider:before {
   justify-content: center;
   background: var(--bg-secondary);
   border: 2px solid var(--border-color);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 
@@ -1624,7 +1624,7 @@ input:checked + .slider:before {
 }
 
 .equip-target-name {
-  font-size: 0.875rem;
+  font-size: 0.83rem;
   font-weight: 700;
   color: var(--text-highlight);
   white-space: nowrap;
@@ -1634,24 +1634,39 @@ input:checked + .slider:before {
 }
 
 .equip-target-sub {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.equip-target-sub .icon-badge {
+  width: 15px;
+  height: 15px;
+  padding: 1.5px;
+  flex-shrink: 0;
 }
 
 .equip-target-cta {
   flex-shrink: 0;
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 800;
   color: var(--accent-cyan);
   border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: 999px;
-  padding: 0.2rem 0.6rem;
+  padding: 0.15rem 0.45rem;
   background: rgba(56, 189, 248, 0.08);
   white-space: nowrap;
+}
+
+.equip-target-cta.has-warning {
+  color: var(--accent-gold);
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.1);
 }
 
 .assign-picker-modal {
@@ -1815,6 +1830,14 @@ input:checked + .slider:before {
   color: var(--accent-gold);
   line-height: 1.3;
   overflow-wrap: anywhere;
+}
+
+.assign-picker-empty {
+  grid-column: 1 / -1;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .assign-picker-footer {
