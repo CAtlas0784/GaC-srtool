@@ -4,7 +4,10 @@ import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetIn
 import { initializeItemCatalog } from './item-catalog.js?v=5';
 import { initializeUnstuck } from './unstuck.js?v=4';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.22';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.23';
+import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
+import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
+import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -28,10 +31,12 @@ window.KNOWN_GACHABASE_ASSETS = KNOWN_GACHABASE_ASSETS;
 
 // Application State
 const state = {
-  serverMode: localStorage.getItem('gac_srtool_mode') || 'gac', // 'gac' | 'firefly' | 'robin'
+  serverMode: normalizeMode(localStorage.getItem('gac_srtool_mode') || 'gac'), // 'gac' | 'firefly' | 'robin'
   apiUrl: localStorage.getItem('gac_srtool_api_url') || 'http://localhost:21000',
   pingIntervalSec: 10,
   isConnected: false,
+  fireflyConnected: false,
+  fireflyExtraData: readStoredFireflyExtra(),
   statusData: null,
   avatarsList: [],
   fullFreesrData: null,
@@ -84,6 +89,8 @@ const el = {
   badgeCreativeMode: document.getElementById('badge-creative-mode'),
   // Mini Battle Summary & Team Stats
   cardBattleSummary: document.getElementById('card-battle-summary'),
+  cardLineup: document.getElementById('card-lineup'),
+  cardServerStatus: document.getElementById('card-server-status'),
   badgeMiniBattleStatus: document.getElementById('badge-mini-battle-status'),
   miniTotalDmg: document.getElementById('mini-total-dmg'),
   miniTeamDps: document.getElementById('mini-team-dps'),
@@ -197,6 +204,13 @@ const el = {
   toggleCastoriceGlobal: document.getElementById('toggle-castorice-global'),
   toggleAhaGlobal: document.getElementById('toggle-aha-global'),
   btnSavePersistentToggles: document.getElementById('btn-save-persistent-toggles'),
+
+  // Mode-gated tabs & cards
+  tabBtnInventory: document.getElementById('tab-btn-inventory'),
+  tabBtnMonsterSettings: document.getElementById('tab-btn-monster-settings'),
+  cardFireflyExtras: document.getElementById('card-firefly-extras'),
+  apiUrlModeHint: document.getElementById('api-url-mode-hint'),
+  badgePersistenceMode: document.getElementById('badge-persistence-mode'),
 
   // Material Inventory
   inventorySearch: document.getElementById('inventory-search'),
@@ -449,11 +463,78 @@ async function apiCall(endpoint, method = 'GET', data = null) {
   }
 }
 
+// FireflyGo transport. Firefly_Srtools exposes a single POST /sync endpoint and
+// has no CORS preflight handling, so no custom headers are sent here.
+async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
+  const url = fireflySyncUrl(state.apiUrl);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+      signal: controller.signal
+    });
+    const text = await res.text();
+    let parsed = null;
+    if (text) {
+      try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+    }
+    if (!res.ok) {
+      const serverMessage = parsed && typeof parsed.message === 'string' ? parsed.message : '';
+      throw new Error(serverMessage || `HTTP ${res.status}: ${res.statusText}`);
+    }
+    if (parsed && (parsed.ok === false || parsed.success === false)) {
+      throw new Error(typeof parsed.message === 'string' && parsed.message ? parsed.message : t('fireflyRequestFailed'));
+    }
+    return parsed || {};
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error(t('fireflyTimeout'));
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// The connect probe: no `data` key, so FireflyGo only reports its state and
+// returns the current extra_data without overwriting the save file.
+async function probeFirefly({ silent = false } = {}) {
+  const result = await fireflyRequest({ username: '', password: '' });
+  state.fireflyConnected = true;
+  setConnectionStatus(true);
+
+  const extra = normalizeExtraData(result?.extra_data);
+  if (extra) {
+    state.fireflyExtraData = extra;
+    persistFireflyExtra(extra);
+    renderFireflyExtras({ force: true });
+  }
+
+  const warnings = Array.isArray(result?.warnings)
+    ? result.warnings.filter(w => typeof w === 'string' && w.trim())
+    : [];
+  if (!silent) {
+    if (warnings.length) {
+      showToast(warnings.join(' • '), 'warning');
+    } else {
+      showToast(t('fireflyProbeSuccess'), 'success');
+    }
+  }
+  return result;
+}
+
 // Explicit, expiring custom-battle connection. The backend returns its TTL.
 let toolSessionTimer = null;
 let toolSessionConnected = false;
 let toolSessionGeneration = 0;
 async function syncToolSession(connected) {
+  // Only the GaCy GO gateway implements /api/tool-session.
+  if (!modeSupports('toolSession')) {
+    toolSessionConnected = connected;
+    return;
+  }
   const generation = ++toolSessionGeneration;
   if (toolSessionTimer) { clearTimeout(toolSessionTimer); toolSessionTimer = null; }
   toolSessionConnected = connected;
@@ -469,7 +550,7 @@ async function syncToolSession(connected) {
   }
 }
 window.addEventListener('pagehide', () => {
-  if (!toolSessionConnected) return;
+  if (!toolSessionConnected || !modeSupports('toolSession')) return;
   const base = state.apiUrl.replace(/\/+$/, '');
   navigator.sendBeacon(`${base}/api/tool-session`, JSON.stringify({ connected: false, client: 'GaC-Srtool' }));
 });
@@ -1181,100 +1262,112 @@ function setupLanguageSelector() {
 }
 
 // Server Mode Setup
-function setupServerModes() {
-  const updateModeDisplay = (mode) => {
-    if (mode !== 'gac') {
-      mode = 'gac';
-      showToast(t('serverModesPausedNotice'), 'warning');
-    }
-    state.serverMode = mode;
-    localStorage.setItem('gac_srtool_mode', mode);
-    if (state.activeTab === 'tab-monster-settings') loadMonsterSettings();
-    if (el.serverModeSelect) el.serverModeSelect.value = mode;
-    if (el.settingServerMode) el.settingServerMode.value = mode;
+let serverModesBound = false;
 
-    if (mode === 'gac') {
-      if (el.lblActiveMode) el.lblActiveMode.textContent = 'GaCy GO';
-      if (el.tabBtnPersistent) {
-        el.tabBtnPersistent.style.display = '';
-        el.tabBtnPersistent.textContent = t('tabPersistentGaC');
-      }
-      if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
-      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = '';
-      if (el.tabBtnExrank) el.tabBtnExrank.style.display = '';
-      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = '';
-      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = '';
-      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceGaC');
-    } else if (mode === 'firefly') {
-      if (el.lblActiveMode) el.lblActiveMode.textContent = 'FireflyGo';
-      if (el.tabBtnPersistent) {
-        el.tabBtnPersistent.style.display = '';
-        el.tabBtnPersistent.textContent = t('tabPersistentFirefly');
-      }
-      if (el.cardPersistentChars) el.cardPersistentChars.style.display = '';
-      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = 'none'; // Hide unsupported GaC switches
-      if (el.tabBtnExrank) el.tabBtnExrank.style.display = 'none'; // Hide unsupported Ex-ranks
-      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
-      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
-      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = ''; // Show data-in-game for Firefly
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
+// Re-applies every mode-dependent piece of UI. Safe to call repeatedly (it is
+// also called from applyTranslations so labels follow a language switch).
+function applyModeDisplay(mode) {
+  mode = normalizeMode(mode);
+  const caps = modeCapabilities(mode);
+  state.serverMode = mode;
+  localStorage.setItem('gac_srtool_mode', mode);
 
-      if (state.activeTab === 'tab-exrank') {
-        const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
-        if (dashboardBtn) dashboardBtn.click();
-      }
+  if (el.serverModeSelect) el.serverModeSelect.value = mode;
+  if (el.settingServerMode) el.settingServerMode.value = mode;
+  if (el.lblActiveMode) el.lblActiveMode.textContent = MODE_LABELS[mode];
 
-      if (state.currentJsonMode === 'persistent') {
-        loadJsonData('datagame');
-      }
-    } else { // robin
-      if (el.lblActiveMode) el.lblActiveMode.textContent = 'RobinSR';
-      if (el.tabBtnPersistent) el.tabBtnPersistent.style.display = 'none';
-      if (el.cardPersistentGlobal) el.cardPersistentGlobal.style.display = 'none';
-      if (el.tabBtnExrank) el.tabBtnExrank.style.display = 'none';
-      if (el.btnQuickSyncPersistent) el.btnQuickSyncPersistent.style.display = 'none';
-      if (el.btnSelectPersistent) el.btnSelectPersistent.style.display = 'none';
-      if (el.btnSelectDatagame) el.btnSelectDatagame.style.display = 'none';
-      if (el.badgePersistenceMode) el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
-
-      if (state.activeTab === 'tab-persistent' || state.activeTab === 'tab-exrank') {
-        const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
-        if (dashboardBtn) dashboardBtn.click();
-      }
-
-      if (state.currentJsonMode === 'persistent' || state.currentJsonMode === 'datagame') {
-        loadJsonData('freesr');
-      }
-    }
-
-    // Creative Mode is OPEN for all server modes!
-    if (el.toggleCreativeMode) {
-      el.toggleCreativeMode.disabled = false;
-      el.toggleCreativeMode.checked = state.creativeMode;
-    }
-    if (el.badgeCreativeMode) {
-      el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
-    }
+  const setVisible = (node, visible) => {
+    if (node) node.style.display = visible ? '' : 'none';
   };
 
-  if (el.serverModeSelect) {
-    el.serverModeSelect.addEventListener('change', (e) => {
-      updateModeDisplay(e.target.value);
-      showToast(t('toastServerSwitched', { mode: el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value }), 'info');
-      refreshStatus();
-    });
+  // Tabs that need an endpoint the selected backend does not implement.
+  setVisible(el.tabBtnInventory, caps.inventory);
+  setVisible(el.tabBtnMonsterSettings, caps.monsterSettings);
+  setVisible(el.tabBtnDamageAnalyst, caps.damageAnalyst);
+  setVisible(el.tabBtnPersistent, caps.saveManager);
+  setVisible(el.tabBtnExrank, caps.exranks);
+
+  // Cards/panels driven by GaCy-only endpoints.
+  setVisible(el.cardServerStatus, caps.sceneCard);
+  setVisible(el.cardGmConsole, caps.gmConsole);
+  setVisible(el.cardBattleSummary, caps.battleSummary);
+  setVisible(el.cardPersistentChars, caps.saveManager);
+  setVisible(el.cardPersistentGlobal, caps.saveManager);
+  setVisible(el.cardFireflyExtras, caps.extraData);
+  setVisible(el.btnQuickSyncPersistent, caps.saveManager);
+  setVisible(el.btnSelectPersistent, caps.saveManager);
+  setVisible(el.btnSelectDatagame, caps.jsonModes.includes('datagame'));
+
+  if (el.tabBtnPersistent && caps.saveManager) {
+    el.tabBtnPersistent.textContent = t('tabPersistentGaC');
+  }
+  if (el.badgePersistenceMode) {
+    el.badgePersistenceMode.textContent = t(caps.extraData ? 'badgePersistenceFirefly'
+      : caps.saveManager ? 'badgePersistenceGaC' : 'badgePersistenceRobin');
+    el.badgePersistenceMode.className = caps.saveManager ? 'badge-creative' : 'badge-super-tag';
+  }
+  if (el.apiUrlModeHint) {
+    el.apiUrlModeHint.textContent = t(caps.extraData ? 'apiUrlHintFirefly'
+      : mode === 'robin' ? 'apiUrlHintRobin' : 'apiUrlHintGaC');
   }
 
-  if (el.settingServerMode) {
-    el.settingServerMode.addEventListener('change', (e) => {
-      updateModeDisplay(e.target.value);
-      showToast(t('toastServerSwitched', { mode: el.lblActiveMode ? el.lblActiveMode.textContent : e.target.value }), 'info');
-      refreshStatus();
-    });
+  // Never leave a hidden tab selected.
+  const hiddenTabs = [];
+  if (!caps.inventory) hiddenTabs.push('tab-inventory');
+  if (!caps.monsterSettings) hiddenTabs.push('tab-monster-settings');
+  if (!caps.damageAnalyst) hiddenTabs.push('tab-damage-analyst');
+  if (!caps.saveManager) hiddenTabs.push('tab-persistent');
+  if (!caps.exranks) hiddenTabs.push('tab-exrank');
+  const activeTabId = document.querySelector('.tab-btn.active')?.getAttribute('data-tab') || state.activeTab;
+  if (hiddenTabs.includes(activeTabId)) {
+    const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
+    if (dashboardBtn) dashboardBtn.click();
   }
 
-  updateModeDisplay(state.serverMode);
+  // JSON editor: only offer file modes the backend can round-trip.
+  if (!caps.jsonModes.includes(state.currentJsonMode)) {
+    loadJsonData(caps.jsonModes[0] || 'freesr');
+  }
+
+  if (caps.extraData) renderFireflyExtras();
+  if (caps.monsterSettings && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
+
+  // Creative Mode is OPEN for all server modes.
+  if (el.toggleCreativeMode) {
+    el.toggleCreativeMode.disabled = false;
+    el.toggleCreativeMode.checked = state.creativeMode;
+  }
+  if (el.badgeCreativeMode) {
+    el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
+  }
+}
+
+function setupServerModes() {
+  const handleModeChange = (mode) => {
+    const next = normalizeMode(mode);
+    const changed = next !== state.serverMode;
+    applyModeDisplay(next);
+    if (!changed) {
+      refreshStatus();
+      return;
+    }
+    // FireflyGo is push-only, so its connection state must never carry over.
+    state.fireflyConnected = false;
+    showToast(t('toastServerSwitched', { mode: MODE_LABELS[next] }), 'info');
+    refreshStatus();
+  };
+
+  if (!serverModesBound) {
+    serverModesBound = true;
+    if (el.serverModeSelect) {
+      el.serverModeSelect.addEventListener('change', (e) => handleModeChange(e.target.value));
+    }
+    if (el.settingServerMode) {
+      el.settingServerMode.addEventListener('change', (e) => handleModeChange(e.target.value));
+    }
+  }
+
+  applyModeDisplay(state.serverMode);
 }
 
 // Initialize Avatars Database: Populates all known avatars from metadata
@@ -1336,38 +1429,29 @@ async function refreshStatus() {
         await saveFreesrCache(freesr.data);
       }
     } else if (state.serverMode === 'firefly') {
-      // FireflyGo uses data-in-game.json for live state and freesr-data.json for inventory
-      const datagame = await apiCall('/api/data-in-game').catch(() => null);
-      if (datagame && (datagame.data || datagame.lineups)) {
-        state.dataGameData = datagame.data || datagame;
-        await saveDataGameCache(state.dataGameData);
-      }
-      const freesr = await apiCall('/api/freesr').catch(() => null);
-      if (freesr && freesr.data) {
-        state.fullFreesrData = freesr.data;
+      // FireflyGo is push-only (POST /sync) and has no read endpoints, so the
+      // dashboard is rebuilt from the local FreeSR snapshot and the ping loop
+      // never touches the network. `state.fireflyConnected` tracks the last
+      // explicit /sync result instead.
+      const freesr = state.fullFreesrData;
+      if (freesr) {
         data = {
           status: 200,
-          avatar_count: Object.keys(freesr.data.avatars || {}).length,
-          lightcone_count: (freesr.data.lightcones || []).length,
-          relic_count: (freesr.data.relics || []).length,
-          lineups: state.dataGameData?.lineups || freesr.data.lineups || freesr.data.battle_config?.custom_battle_lineup || DEFAULT_LINEUP,
-          scene: state.dataGameData?.scene || freesr.data.scene,
-          position: state.dataGameData?.position || freesr.data.position,
-          ex_ranks: []
-        };
-      } else if (state.dataGameData) {
-        data = {
-          status: 200,
-          avatar_count: state.avatarsList.length,
-          lightcone_count: 0,
-          relic_count: 0,
-          lineups: state.dataGameData.lineups || DEFAULT_LINEUP,
-          scene: state.dataGameData.scene,
-          position: state.dataGameData.position,
+          avatar_count: Object.keys(freesr.avatars || {}).length,
+          lightcone_count: (freesr.lightcones || []).length,
+          relic_count: (freesr.relics || []).length,
+          lineups: freesr.battle_config?.custom_battle_lineup || DEFAULT_LINEUP,
           ex_ranks: []
         };
       } else {
-        throw new Error('Firefly server not reachable');
+        data = {
+          status: 200,
+          avatar_count: 0,
+          lightcone_count: 0,
+          relic_count: 0,
+          lineups: DEFAULT_LINEUP,
+          ex_ranks: []
+        };
       }
     } else { // robin
       const freesr = await apiCall('/api/freesr').catch(() => null);
@@ -1389,7 +1473,7 @@ async function refreshStatus() {
     }
 
     state.statusData = data;
-    setConnectionStatus(true);
+    setConnectionStatus(state.serverMode === 'firefly' ? state.fireflyConnected : true);
 
     el.lblApiUrl.textContent = state.apiUrl;
     el.statAvatars.textContent = data.avatar_count ?? state.avatarsList.length;
@@ -1436,7 +1520,11 @@ async function refreshStatus() {
       updateDashboardBattleBanner();
     }
   } catch (err) {
-    setConnectionStatus(false, t('offline'));
+    if (state.serverMode === 'firefly') {
+      setConnectionStatus(state.fireflyConnected);
+    } else {
+      setConnectionStatus(false, t('offline'));
+    }
     el.lblApiUrl.textContent = state.apiUrl;
 
     if (state.fullFreesrData) {
@@ -2585,7 +2673,7 @@ async function loadAvatars() {
     }
   }
 
-  if (state.isConnected) {
+  if (state.isConnected && state.serverMode === 'gac') {
     try {
       const res = await apiCall('/api/freesr/avatars');
       if (res && res.avatars && res.avatars.length > 0) {
@@ -2612,7 +2700,15 @@ function renderAvatarsGrid() {
   const elementFilter = el.avatarFilterElement.value;
   const pathFilter = el.avatarFilterPath ? el.avatarFilterPath.value : 'all';
 
+  // FireflyGo only ever loads the characters present in freesr-data.json, so
+  // the roster must not advertise characters the server cannot spawn.
+  const ownedOnly = modeCapabilities().ownedAvatarsOnly;
+  const ownedIds = ownedOnly
+    ? new Set(Object.keys(state.fullFreesrData?.avatars || {}).map(id => parseInt(id, 10)))
+    : null;
+
   const filtered = state.avatarsList.filter(item => {
+    if (ownedIds && !ownedIds.has(item.avatar_id)) return false;
     const meta = getAvatarInfo(item.avatar_id);
     const matchesSearch = meta.name.toLowerCase().includes(searchTerm) || String(item.avatar_id).includes(searchTerm);
     const matchesRarity = rarityFilter === 'all' || String(meta.rarity) === rarityFilter;
@@ -6545,17 +6641,54 @@ async function maxAllAvatars({ englishOnly = false } = {}) {
   }
 }
 
+// Push the local FreeSR snapshot to FireflyGo (POST /sync).
+async function pushFireflySync({ silent = false } = {}) {
+  if (!state.fullFreesrData) throw new Error(t('fireflyNoData'));
+
+  const payload = {
+    username: '',
+    password: '',
+    data: buildSyncPayload(state.fullFreesrData)
+  };
+  const extra = normalizeExtraData(state.fireflyExtraData);
+  if (extra) payload.extra_data = extra;
+
+  const result = await fireflyRequest(payload);
+  state.fireflyConnected = true;
+  setConnectionStatus(true);
+
+  if (extra) {
+    state.fireflyExtraData = extra;
+    persistFireflyExtra(extra);
+  }
+
+  const warnings = Array.isArray(result?.warnings)
+    ? result.warnings.filter(w => typeof w === 'string' && w.trim())
+    : [];
+  if (!silent) {
+    if (warnings.length) showToast(warnings.join(' • '), 'warning');
+    else showToast(t('fireflySyncSuccess'), 'success');
+  }
+  return result;
+}
+
 // Push local freesr changes to server and save to local browser cache
 async function saveFreesrChangesToServer() {
   if (!state.fullFreesrData) return;
   await saveFreesrCache(state.fullFreesrData);
+
+  // FireflyGo only understands POST /sync; there is no freesr/persistent API.
+  if (state.serverMode === 'firefly') {
+    await pushFireflySync();
+    return;
+  }
 
   // Attempt to push to server
   let lastErr = null;
   const payloadWrapped = { data: state.fullFreesrData };
   const payloadDirect = state.fullFreesrData;
 
-  if (state.serverMode === 'firefly' || state.serverMode === 'robin') {
+  if (state.serverMode === 'robin') {
     try {
       await apiCall('/srtools', 'POST', payloadWrapped);
       state.isConnected = true;
@@ -8484,7 +8617,7 @@ async function loadJsonData(mode) {
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'freesr-data.json' });
     try {
-      if (state.fullFreesrData && !state.isConnected) {
+      if (state.fullFreesrData && (!state.isConnected || state.serverMode === 'firefly')) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
       } else if (state.isConnected) {
@@ -8904,6 +9037,357 @@ function setupInventoryEvents() {
   el.btnInventoryDiscard?.addEventListener('click', () => { state.inventoryDraft = {}; renderMaterialsInventory(); });
   el.btnInventoryPrev?.addEventListener('click', () => { state.inventoryPage = Math.max(0, state.inventoryPage - 1); renderMaterialsInventory(); });
   el.btnInventoryNext?.addEventListener('click', () => { state.inventoryPage++; renderMaterialsInventory(); });
+}
+
+/* ------------------------------------------------------------------ *
+ * FireflyGo extra_data controls
+ * ------------------------------------------------------------------ */
+
+let fireflyExtrasDirty = false;
+
+function readStoredFireflyExtra() {
+  try {
+    const raw = localStorage.getItem('gac_srtool_firefly_extra');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function persistFireflyExtra(extra) {
+  try {
+    localStorage.setItem('gac_srtool_firefly_extra', JSON.stringify(extra));
+  } catch (e) {
+    console.warn('Could not persist Firefly extra_data:', e);
+  }
+}
+
+function setFireflyExtraStatus(messageKey, vars = {}, tone = 'info') {
+  const node = document.getElementById('firefly-extra-status');
+  if (!node) return;
+  if (!messageKey) {
+    node.textContent = '';
+    node.style.color = '';
+    return;
+  }
+  node.textContent = t(messageKey, vars);
+  node.style.color = tone === 'error' ? 'var(--accent-red)'
+    : tone === 'success' ? 'var(--accent-green)'
+      : tone === 'warning' ? 'var(--accent-gold)' : 'var(--text-muted)';
+}
+
+// Fills the extra_data form from the last known server/local values.
+function renderFireflyExtras({ force = false } = {}) {
+  const card = el.cardFireflyExtras;
+  if (!card) return;
+  if (fireflyExtrasDirty && !force) return;
+
+  const extra = normalizeExtraData(state.fireflyExtraData) || FIREFLY_EXTRA_FALLBACK;
+  const multiPath = extra.multi_path || {};
+  const setting = extra.setting || {};
+  const challenge = extra.challenge || {};
+  const theory = extra.theory_craft || {};
+
+  const setVal = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.value = value ?? '';
+  };
+  const setChk = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.checked = value === true;
+  };
+  const listText = (value) => (Array.isArray(value) ? value.join(', ') : '');
+
+  setVal('ff-multi-path-main', multiPath.main ?? 0);
+  setVal('ff-multi-path-march7', multiPath.march_7 ?? 0);
+  setVal('ff-multi-path-main-list', listText(multiPath.multi_path_main));
+  setVal('ff-multi-path-march7-list', listText(multiPath.multi_path_march_7));
+
+  setChk('ff-setting-censorship', setting.censorship);
+  setChk('ff-setting-cm', setting.cm);
+  setChk('ff-setting-first-person', setting.first_person);
+  setChk('ff-setting-hide-ui', setting.hide_ui);
+  setVal('ff-setting-invasion-percent', setting.invasion_percent ?? 0);
+
+  setVal('ff-challenge-skip-node', challenge.skip_node ?? 0);
+  setVal('ff-challenge-peak-group', challenge.challenge_peak_group_id ?? 0);
+  setVal('ff-challenge-peak-list', listText(challenge.challenge_peak_group_id_list));
+
+  setChk('ff-theory-mode', theory.mode);
+  setVal('ff-theory-cycle-count', theory.cycle_count ?? 0);
+  setVal('ff-theory-stage-id', theory.stage_id ?? 0);
+  setVal('ff-theory-lineup', listText(theory.custom_lineup));
+  const hp = theory.hp;
+  setVal('ff-theory-hp', hp && Object.keys(hp).length > 0 ? JSON.stringify(hp) : '');
+  setVal('ff-lua', extra.lua ?? '');
+
+  fireflyExtrasDirty = false;
+  setFireflyExtraStatus('');
+}
+
+// Reads the form back into the FireflyGo ExtraData shape.
+function readFireflyExtrasForm() {
+  const val = (id) => document.getElementById(id)?.value ?? '';
+  const chk = (id) => document.getElementById(id)?.checked === true;
+  const nums = (id) => val(id)
+    .split(/[\s,;]+/)
+    .map(entry => entry.trim())
+    .filter(Boolean)
+    .map(entry => Number(entry))
+    .filter(Number.isFinite);
+
+  let hp = {};
+  const hpRaw = val('ff-theory-hp').trim();
+  if (hpRaw) {
+    let parsed;
+    try {
+      parsed = JSON.parse(hpRaw);
+    } catch (e) {
+      throw new Error(t('fireflyHpInvalid'));
+    }
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error(t('fireflyHpInvalid'));
+    }
+    hp = parsed;
+  }
+
+  const luaRaw = val('ff-lua');
+  return normalizeExtraData({
+    multi_path: {
+      main: Number(val('ff-multi-path-main')) || 0,
+      march_7: Number(val('ff-multi-path-march7')) || 0,
+      multi_path_main: nums('ff-multi-path-main-list'),
+      multi_path_march_7: nums('ff-multi-path-march7-list')
+    },
+    setting: {
+      censorship: chk('ff-setting-censorship'),
+      cm: chk('ff-setting-cm'),
+      first_person: chk('ff-setting-first-person'),
+      hide_ui: chk('ff-setting-hide-ui'),
+      invasion_percent: Number(val('ff-setting-invasion-percent')) || 0
+    },
+    challenge: {
+      skip_node: Number(val('ff-challenge-skip-node')) || 0,
+      challenge_peak_group_id: Number(val('ff-challenge-peak-group')) || 0,
+      challenge_peak_group_id_list: nums('ff-challenge-peak-list')
+    },
+    theory_craft: {
+      hp,
+      cycle_count: Number(val('ff-theory-cycle-count')) || 0,
+      mode: chk('ff-theory-mode'),
+      stage_id: Number(val('ff-theory-stage-id')) || 0,
+      custom_lineup: nums('ff-theory-lineup')
+    },
+    lua: luaRaw.trim() ? luaRaw : null
+  });
+}
+
+function saveFireflyExtrasFromForm() {
+  const extra = readFireflyExtrasForm();
+  state.fireflyExtraData = extra;
+  persistFireflyExtra(extra);
+  fireflyExtrasDirty = false;
+  return extra;
+}
+
+function setupFireflyExtrasEvents() {
+  const card = el.cardFireflyExtras;
+  if (!card) return;
+
+  const markDirty = () => { fireflyExtrasDirty = true; };
+  card.addEventListener('input', markDirty);
+  card.addEventListener('change', markDirty);
+
+  const btnProbe = document.getElementById('btn-firefly-probe');
+  if (btnProbe) {
+    btnProbe.addEventListener('click', async () => {
+      setFireflyExtraStatus('fireflyProbing', {}, 'info');
+      btnProbe.disabled = true;
+      try {
+        await probeFirefly();
+        setFireflyExtraStatus('fireflyProbeSuccess', {}, 'success');
+      } catch (err) {
+        setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+      } finally {
+        btnProbe.disabled = false;
+      }
+    });
+  }
+
+  const btnSave = document.getElementById('btn-firefly-save-extra');
+  if (btnSave) {
+    btnSave.addEventListener('click', () => {
+      try {
+        saveFireflyExtrasFromForm();
+        renderFireflyExtras({ force: true });
+        setFireflyExtraStatus('fireflyExtraSaved', {}, 'success');
+        showToast(t('fireflyExtraSaved'), 'success');
+      } catch (err) {
+        setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+      }
+    });
+  }
+
+  const btnSync = document.getElementById('btn-firefly-sync');
+  if (btnSync) {
+    btnSync.addEventListener('click', async () => {
+      btnSync.disabled = true;
+      try {
+        saveFireflyExtrasFromForm();
+        setFireflyExtraStatus('fireflySyncing', {}, 'info');
+        await pushFireflySync({ silent: true });
+        setFireflyExtraStatus('fireflySyncSuccess', {}, 'success');
+        showToast(t('fireflySyncSuccess'), 'success');
+        refreshStatus();
+      } catch (err) {
+        setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+      } finally {
+        btnSync.disabled = false;
+      }
+    });
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Enka.network import (leftover characters -> freesr-data.json)
+ * ------------------------------------------------------------------ */
+
+function setEnkaStatus(messageKey, vars = {}, tone = 'info') {
+  const node = document.getElementById('enka-import-status');
+  if (!node) return;
+  if (!messageKey) {
+    node.textContent = '';
+    node.style.color = '';
+    return;
+  }
+  node.textContent = t(messageKey, vars);
+  node.style.color = tone === 'error' ? 'var(--accent-red)'
+    : tone === 'success' ? 'var(--accent-green)'
+      : tone === 'warning' ? 'var(--accent-gold)' : 'var(--text-muted)';
+}
+
+// enka.network does not send CORS headers, so the browser goes through the
+// /api/enka/:uid rewrite defined in vercel.json.
+async function fetchEnkaProfile(uid) {
+  let res;
+  try {
+    res = await fetch(`/api/enka/${encodeURIComponent(uid)}`, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(20000)
+    });
+  } catch (err) {
+    throw new Error(t('enkaProxyUnavailable'));
+  }
+  if (res.status === 404) throw new Error(t('enkaUidNotFound'));
+  if (res.status === 429) throw new Error(t('enkaRateLimited'));
+  if (!res.ok) throw new Error(t('enkaFetchFailed', { status: res.status }));
+  return await res.json();
+}
+
+async function applyEnkaImport(body, { uid = 0 } = {}) {
+  let incoming;
+  try {
+    incoming = enkaToFreeSR(body, { ownerUid: uid });
+  } catch (err) {
+    throw new Error(err.message === 'ENKA_NO_AVATARS' ? t('enkaNoAvatars') : err.message);
+  }
+
+  const mode = document.getElementById('enka-import-mode')?.value === 'replace' ? 'replace' : 'merge';
+  const base = state.fullFreesrData && typeof state.fullFreesrData === 'object' ? state.fullFreesrData : null;
+  const merged = mergeFreeSR(base, incoming, mode);
+  state.fullFreesrData = merged;
+  await saveFreesrCache(merged);
+
+  const counts = countFreeSRContent(merged);
+  loadAvatars();
+  loadEquipment();
+  renderAvatarsGrid();
+  updateCacheUsageDisplay();
+
+  if (state.currentJsonMode === 'freesr' && el.jsonEditor) {
+    el.jsonEditor.value = JSON.stringify(merged, null, 2);
+    if (el.jsonStatusInfo) el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
+  }
+
+  if (state.autoSync) {
+    try {
+      await saveFreesrChangesToServer();
+      await refreshStatus();
+    } catch (err) {
+      setEnkaStatus('enkaSyncFailed', { message: err.message }, 'warning');
+      return counts;
+    }
+  } else {
+    el.statAvatars.textContent = counts.avatars;
+    el.statLightcones.textContent = counts.lightcones;
+    el.statRelics.textContent = counts.relics;
+  }
+
+  setEnkaStatus('enkaImportDone', {
+    avatars: counts.avatars,
+    lightcones: counts.lightcones,
+    relics: counts.relics
+  }, 'success');
+  return counts;
+}
+
+async function runEnkaFetch() {
+  const uid = normalizeEnkaUid(document.getElementById('enka-uid-input')?.value);
+  if (!uid) {
+    setEnkaStatus('enkaUidInvalid', {}, 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-enka-fetch');
+  if (btn) btn.disabled = true;
+  setEnkaStatus('enkaFetching', { uid }, 'info');
+  try {
+    const body = await fetchEnkaProfile(uid);
+    await applyEnkaImport(body, { uid: Number(uid) });
+  } catch (err) {
+    setEnkaStatus('enkaFetchFailedDetail', { message: err.message }, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function runEnkaPaste() {
+  const raw = document.getElementById('enka-paste-input')?.value?.trim();
+  if (!raw) {
+    setEnkaStatus('enkaPasteEmpty', {}, 'warning');
+    return;
+  }
+
+  let body;
+  try {
+    body = JSON.parse(raw);
+  } catch (e) {
+    setEnkaStatus('enkaPasteInvalid', {}, 'error');
+    return;
+  }
+
+  const uid = normalizeEnkaUid(document.getElementById('enka-uid-input')?.value);
+  setEnkaStatus('enkaFetching', { uid: uid || '—' }, 'info');
+  try {
+    await applyEnkaImport(body, { uid: Number(uid) || 0 });
+  } catch (err) {
+    setEnkaStatus('enkaFetchFailedDetail', { message: err.message }, 'error');
+  }
+}
+
+function setupEnkaImportEvents() {
+  document.getElementById('btn-enka-fetch')?.addEventListener('click', () => {
+    runEnkaFetch();
+  });
+  document.getElementById('btn-enka-paste')?.addEventListener('click', () => {
+    runEnkaPaste();
+  });
+  document.getElementById('enka-uid-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runEnkaFetch();
+    }
+  });
 }
 
 // Setup Event Listeners
@@ -9585,16 +10069,27 @@ function setupEvents() {
   if (el.btnTestConnection) {
     el.btnTestConnection.addEventListener('click', async () => {
       const targetUrl = (el.settingApiUrl?.value || state.apiUrl).trim().replace(/\/+$/, '');
+      const isFirefly = state.serverMode === 'firefly';
       if (el.pingLatencyBadge) {
         el.pingLatencyBadge.style.display = 'inline-block';
         el.pingLatencyBadge.textContent = '⏳ ...';
         el.pingLatencyBadge.style.backgroundColor = 'var(--bg-card)';
         el.pingLatencyBadge.style.color = 'var(--text-muted)';
       }
+
+      // Adopt the URL typed in the field so the probe and later syncs agree.
+      const previousUrl = state.apiUrl;
+      state.apiUrl = targetUrl || state.apiUrl;
+
       const t0 = performance.now();
       try {
-        const res = await fetch(`${targetUrl}/api/status`, { signal: AbortSignal.timeout(3500) });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (isFirefly) {
+          await probeFirefly({ silent: true });
+        } else {
+          const res = await fetch(`${state.apiUrl}/api/status`, { signal: AbortSignal.timeout(3500) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          setConnectionStatus(true);
+        }
         const latency = Math.round(performance.now() - t0);
         if (el.pingLatencyBadge) {
           el.pingLatencyBadge.textContent = `${latency} ms`;
@@ -9602,14 +10097,18 @@ function setupEvents() {
           el.pingLatencyBadge.style.color = latency < 80 ? 'var(--accent-green)' : 'var(--accent-gold)';
         }
         showToast(t('toastPingSuccess', { ms: latency }), 'success');
-        setConnectionStatus(true);
       } catch (err) {
+        state.apiUrl = previousUrl;
         if (el.pingLatencyBadge) {
           el.pingLatencyBadge.textContent = 'ERR';
           el.pingLatencyBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
           el.pingLatencyBadge.style.color = '#ef4444';
         }
         showToast(t('toastPingFailed'), 'error');
+        if (isFirefly) {
+          state.fireflyConnected = false;
+          setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+        }
         setConnectionStatus(false);
       }
     });
@@ -9988,6 +10487,8 @@ function parseFireflySranalysisJson(json) {
 }
 
 async function fetchLatestBattleReport(silent = false) {
+  // Damage Analyst reads /api/battle_report, which only GaCy GO provides.
+  if (!modeSupports('damageAnalyst')) return;
   if (analystState.isFetching) return;
   analystState.isFetching = true;
   try {
@@ -10615,6 +11116,8 @@ async function init() {
   setupTabs();
   setupModalSubtabs();
   setupEvents();
+  setupFireflyExtrasEvents();
+  setupEnkaImportEvents();
   initCameraSettings();
   setupInventoryEvents();
   setupDamageAnalystEvents();

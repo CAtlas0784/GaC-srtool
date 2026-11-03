@@ -2256,6 +2256,55 @@ input:checked + .slider:before {
   letter-spacing: 0.5px;
 }
 
+/* FireflyGo extra_data controls */
+.ff-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  min-width: 0;
+}
+
+.ff-group-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-highlight);
+}
+
+.ff-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.ff-field .form-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.ff-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.ff-toggle > span:first-child {
+  min-width: 0;
+}
+
+.form-hint {
+  line-height: 1.45;
+}
+
 .lc-passive-card {
   background: rgba(11, 15, 25, 0.75);
   border: 1px solid rgba(56, 189, 248, 0.25);
@@ -5000,3 +5049,11 @@ input:checked + .slider:before {
 }
 
 
+
+/* FireflyGo extras card: keep controls finger-sized on phones. */
+@media (max-width: 640px) {
+  #card-firefly-extras .card-title { font-size: 1rem; }
+  #card-firefly-extras .ff-toggle { min-height: 44px; }
+  #card-firefly-extras .btn { flex: 1 1 100%; }
+  #card-firefly-extras .json-textarea { min-height: 96px; }
+}

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.34">
+  <link rel="stylesheet" href="css/styles.css?v=2.35">
   <link rel="stylesheet" href="css/item-catalog.css?v=3">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -30,7 +30,7 @@
         <span>🌐</span>
         <select id="server-mode-select" class="server-mode-select">
           <option value="gac" selected>GaCy GO</option>
-          <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
+          <option value="firefly" data-i18n="serverModeFirefly">FireflyGo</option>
           <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
         </select>
       </div>
@@ -56,7 +56,7 @@
     <button class="tab-btn active" data-tab="tab-dashboard" data-i18n="tabDashboard">📊 แดชบอร์ด & จัดทีม</button>
     <button class="tab-btn" data-tab="tab-avatars" data-i18n="tabAvatars">👥 ตัวละคร</button>
     <button class="tab-btn" data-tab="tab-equipment" data-i18n="tabEquipment">🗡️ กรวยแสง & รีลิกส์</button>
-    <button class="tab-btn" data-tab="tab-inventory" data-i18n="tabInventory">🎒 ไอเทมในกระเป๋า</button>
+    <button class="tab-btn" data-tab="tab-inventory" id="tab-btn-inventory" data-i18n="tabInventory">🎒 ไอเทมในกระเป๋า</button>
     <button class="tab-btn" data-tab="tab-monster-settings" id="tab-btn-monster-settings" data-i18n="tabMonsterSettings">👾 Monster Setting</button>
     <button class="tab-btn" data-tab="tab-damage-analyst" id="tab-btn-damage-analyst" data-i18n="tabDamageAnalyst">💥 Damage Analyst</button>
     <button class="tab-btn" data-tab="tab-persistent" id="tab-btn-persistent" data-i18n="tabPersistent">💾 จัดการเซฟ GaCy</button>
@@ -92,7 +92,7 @@
       </div>
 
       <!-- Party Lineup Visualizer -->
-      <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card" id="card-lineup" style="margin-bottom: 1.5rem;">
         <div class="card-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.6rem;">
             <span data-i18n="currentLineupTitle">🎮 ทีมปัจจุบัน</span>
@@ -117,7 +117,7 @@
         <!-- Column 1: Server Status & Team Combat Synergy -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
           <!-- 1. Server & Map Card -->
-          <div class="card">
+          <div class="card" id="card-server-status">
             <div class="card-title">
               <span data-i18n="serverStatusTitle">📍 สถานะเซิร์ฟเวอร์ & พิกัดปัจจุบัน</span>
               <span class="btn-sm btn-secondary" id="badge-version" data-i18n="apiLive">API Live</span>
@@ -782,6 +782,42 @@
 
     <!-- 6. JSON Management Tab -->
     <section id="tab-json" class="tab-content">
+      <!-- Enka import: builds a fresh FreeSR document from a real game UID -->
+      <div class="card" id="card-enka-import" style="margin-bottom: 1.5rem;">
+        <div class="card-title" style="flex-wrap: wrap; gap: 0.5rem;">
+          <span data-i18n="enkaImportTitle">📡 สร้างไฟล์ FreeSR จาก UID เกมจริง (Enka)</span>
+          <span class="badge-super-tag">enka.network</span>
+        </div>
+        <p class="card-subtitle" data-i18n="enkaImportSubtitle">
+          ดึงตัวละคร กรวยแสง และรีลิกส์จากโปรไฟล์ Enka แล้วสร้างเป็นไฟล์ freesr-data.json ใช้ได้ทุกโหมดการเชื่อมต่อ
+        </p>
+        <div class="grid-2">
+          <div>
+            <label class="form-label" for="enka-uid-input" data-i18n="enkaUidLabel">UID ของเกม</label>
+            <input id="enka-uid-input" class="form-input" inputmode="numeric" autocomplete="off"
+                   placeholder="800000000" data-i18n-placeholder="enkaUidPlaceholder">
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; align-items: center;">
+              <select id="enka-import-mode" class="form-select" style="max-width: 240px;">
+                <option value="merge" data-i18n="enkaModeMerge">รวมกับข้อมูลเดิม</option>
+                <option value="replace" data-i18n="enkaModeReplace">แทนที่ตัวละครทั้งหมด</option>
+              </select>
+              <button type="button" class="btn btn-primary btn-sm" id="btn-enka-fetch" data-i18n="btnEnkaFetch">
+                ดึงข้อมูลจาก Enka
+              </button>
+            </div>
+            <div id="enka-import-status" role="status" aria-live="polite"
+                 style="margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.4;"></div>
+          </div>
+          <div>
+            <label class="form-label" for="enka-paste-input" data-i18n="enkaPasteLabel">หรือวาง JSON จาก Enka</label>
+            <textarea id="enka-paste-input" class="json-textarea" style="min-height: 108px;" spellcheck="false"
+                      placeholder="https://enka.network/api/hsr/uid/..." data-i18n-placeholder="enkaPastePlaceholder"></textarea>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-enka-paste" style="margin-top: 0.5rem;"
+                    data-i18n="btnEnkaParsePaste">ใช้ JSON ที่วาง</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title" style="flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; gap: 0.5rem;">
@@ -824,7 +860,7 @@
                 <label class="form-label" data-i18n="lblServerMode">โหมดเซิร์ฟเวอร์</label>
                 <select id="setting-server-mode" class="form-select">
                   <option value="gac">GaCy GO</option>
-                  <option value="firefly" disabled data-i18n="serverModeFireflyPaused">FireflyGo (กำลังพัฒนา)</option>
+                  <option value="firefly" data-i18n="serverModeFirefly">FireflyGo</option>
                   <option value="robin" disabled data-i18n="serverModeRobinPaused">RobinSR (กำลังพัฒนา)</option>
                 </select>
               </div>
@@ -832,6 +868,7 @@
               <div class="form-group">
                 <label class="form-label" data-i18n="lblApiGatewayUrl">REST API Gateway URL</label>
                 <input type="text" id="setting-api-url" class="form-input" placeholder="http://localhost:21000">
+                <div id="api-url-mode-hint" class="form-hint" style="margin-top: 0.4rem; font-size: 0.78rem; color: var(--text-muted); line-height: 1.45;"></div>
                 <div style="display: flex; gap: 0.35rem; margin-top: 0.5rem; flex-wrap: wrap;">
                   <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://localhost:21000">localhost:21000</button>
                   <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://127.0.0.1:21000">127.0.0.1:21000</button>
@@ -891,6 +928,128 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- FireflyGo extras: controls the script/server through extra_data -->
+        <div class="card" id="card-firefly-extras" style="display: none;">
+          <div class="card-title" style="flex-wrap: wrap; gap: 0.5rem;">
+            <span data-i18n="fireflyExtrasTitle">🦋 ตัวควบคุม FireflyGo (extra_data)</span>
+            <span class="badge-super-tag" data-i18n="fireflyExtrasBadge">POST /sync</span>
+          </div>
+          <p class="card-subtitle" data-i18n="fireflyExtrasSubtitle">
+            ค่าเหล่านี้ถูกส่งไปพร้อมข้อมูลตัวละครทุกครั้งที่ซิงค์ เพื่อสั่งงานสคริปต์และเซิร์ฟเวอร์ Firefly
+          </p>
+
+          <div class="grid-2">
+            <div class="ff-group">
+              <div class="ff-group-title" data-i18n="fireflyMultiPathTitle">🧭 Multi-Path ( Trailblazer )</div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-multi-path-main" data-i18n="fireflyMultiPathMain">Main path id</label>
+                <input type="number" id="ff-multi-path-main" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-multi-path-march7" data-i18n="fireflyMultiPathMarch7">March 7th path id</label>
+                <input type="number" id="ff-multi-path-march7" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-multi-path-main-list" data-i18n="fireflyMultiPathMainList">Main path list</label>
+                <input type="text" id="ff-multi-path-main-list" class="form-input" inputmode="numeric"
+                       placeholder="1, 2, 3" data-i18n-placeholder="fireflyListPlaceholder">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-multi-path-march7-list" data-i18n="fireflyMultiPathMarch7List">March 7th path list</label>
+                <input type="text" id="ff-multi-path-march7-list" class="form-input" inputmode="numeric"
+                       placeholder="1, 2, 3" data-i18n-placeholder="fireflyListPlaceholder">
+              </div>
+            </div>
+
+            <div class="ff-group">
+              <div class="ff-group-title" data-i18n="fireflySettingTitle">🎛️ In-game settings</div>
+              <label class="ff-toggle">
+                <span data-i18n="fireflySettingCensorship">Censorship</span>
+                <span class="switch"><input type="checkbox" id="ff-setting-censorship"><span class="slider"></span></span>
+              </label>
+              <label class="ff-toggle">
+                <span data-i18n="fireflySettingCm">Cinematic mode</span>
+                <span class="switch"><input type="checkbox" id="ff-setting-cm"><span class="slider"></span></span>
+              </label>
+              <label class="ff-toggle">
+                <span data-i18n="fireflySettingFirstPerson">First person</span>
+                <span class="switch"><input type="checkbox" id="ff-setting-first-person"><span class="slider"></span></span>
+              </label>
+              <label class="ff-toggle">
+                <span data-i18n="fireflySettingHideUi">Hide UI</span>
+                <span class="switch"><input type="checkbox" id="ff-setting-hide-ui"><span class="slider"></span></span>
+              </label>
+              <div class="ff-field">
+                <label class="form-label" for="ff-setting-invasion-percent" data-i18n="fireflySettingInvasion">Invasion percent</label>
+                <input type="number" id="ff-setting-invasion-percent" class="form-input" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="ff-group">
+              <div class="ff-group-title" data-i18n="fireflyChallengeTitle">⚔️ Challenge Peak</div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-challenge-skip-node" data-i18n="fireflyChallengeSkipNode">Skip node</label>
+                <input type="number" id="ff-challenge-skip-node" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-challenge-peak-group" data-i18n="fireflyChallengeGroupId">Peak group id</label>
+                <input type="number" id="ff-challenge-peak-group" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-challenge-peak-list" data-i18n="fireflyChallengeGroupList">Peak group id list</label>
+                <input type="text" id="ff-challenge-peak-list" class="form-input" inputmode="numeric"
+                       placeholder="1, 2, 3" data-i18n-placeholder="fireflyListPlaceholder">
+              </div>
+            </div>
+
+            <div class="ff-group">
+              <div class="ff-group-title" data-i18n="fireflyTheoryTitle">🧪 Theory Craft</div>
+              <label class="ff-toggle">
+                <span data-i18n="fireflyTheoryMode">Enable theory craft</span>
+                <span class="switch"><input type="checkbox" id="ff-theory-mode"><span class="slider"></span></span>
+              </label>
+              <div class="ff-field">
+                <label class="form-label" for="ff-theory-cycle-count" data-i18n="fireflyTheoryCycleCount">Cycle count</label>
+                <input type="number" id="ff-theory-cycle-count" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-theory-stage-id" data-i18n="fireflyTheoryStageId">Stage id</label>
+                <input type="number" id="ff-theory-stage-id" class="form-input" min="0" step="1" value="0">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-theory-lineup" data-i18n="fireflyTheoryLineup">Custom lineup</label>
+                <input type="text" id="ff-theory-lineup" class="form-input" inputmode="numeric"
+                       placeholder="1001, 1002, 1003, 1004" data-i18n-placeholder="fireflyListPlaceholder">
+              </div>
+              <div class="ff-field">
+                <label class="form-label" for="ff-theory-hp" data-i18n="fireflyTheoryHp">HP overrides (JSON)</label>
+                <textarea id="ff-theory-hp" class="json-textarea" style="min-height: 84px;" spellcheck="false"
+                          placeholder='{"1001": [12000, 9000]}'></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="ff-field" style="margin-top: 0.5rem;">
+            <label class="form-label" for="ff-lua" data-i18n="fireflyLuaLabel">Lua script (optional)</label>
+            <textarea id="ff-lua" class="json-textarea" style="min-height: 84px;" spellcheck="false"
+                      placeholder="-- custom lua" data-i18n-placeholder="fireflyLuaPlaceholder"></textarea>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-firefly-probe" data-i18n="btnFireflyProbe">
+              🔄 ดึงค่าจากเซิร์ฟเวอร์
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-firefly-save-extra" data-i18n="btnFireflySaveExtra">
+              💾 บันทึกตัวควบคุม
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-firefly-sync" data-i18n="btnFireflySync">
+              🚀 ซิงค์ลง FireflyGo
+            </button>
+          </div>
+          <div id="firefly-extra-status" role="status" aria-live="polite"
+               style="margin-top: 0.6rem; font-size: 0.85rem; line-height: 1.4;"></div>
         </div>
 
         <div class="grid-2">
@@ -1888,6 +2047,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.27"></script>
+  <script type="module" src="js/app.js?v=3.28"></script>
 </body>
 </html>

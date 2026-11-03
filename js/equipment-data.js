@@ -1,4 +1,4 @@
-import { getCurrentLanguage, translatePath } from "./i18n.js?v=2.22";
+import { getCurrentLanguage, translatePath } from "./i18n.js?v=2.23";
 
 export const LIGHTCONE_METADATA = {
   "20000": {
