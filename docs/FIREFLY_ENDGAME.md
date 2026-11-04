@@ -341,8 +341,8 @@ battle_config = {
 | ไฟล์ | เวอร์ชันใหม่ |
 | :--- | :--- |
 | `css/styles.css` | `2.36` |
-| `js/app.js` | `3.32` |
-| `js/i18n.js` | `2.26` (ทุก importer ต้องตรงกัน) |
+| `js/app.js` | `3.33` |
+| `js/i18n.js` | `2.27` (ทุก importer ต้องตรงกัน) |
 | `js/endgame.js` | `1` (ไฟล์ใหม่) |
 
 Importer ของ `i18n.js` ที่ถูกแก้: `index.html` (ทาง `app.js`), `js/app.js`, `js/avatars-data.js`, `js/equipment-data.js`, `js/item-catalog.js`, `js/unstuck.js`
@@ -358,6 +358,7 @@ Importer ของ `i18n.js` ที่ถูกแก้: `index.html` (ทา�
 | `scripts/build-firefly-endgame-data.cjs` | สร้างแคตตาล็อกจาก API ต้นฉบับ |
 | `assets/firefly-endgame.json` | แคตตาล็อกพร้อมใช้ (~604 KB) |
 | `tests/endgame.test.cjs` | unit tests ของ endgame helpers (8 tests) |
+| `tests/i18n-coverage.test.cjs` | ตรวจว่า `data-i18n*` ทุกคีย์ resolve ได้ทั้ง th/en |
 
 ### แก้ไข
 | ไฟล์ | สิ่งที่แก้ |
@@ -368,7 +369,7 @@ Importer ของ `i18n.js` ที่ถูกแก้: `index.html` (ทา�
 | `js/firefly.js` | normalize `blessings` / `monsters` ให้ตรง zod |
 | `js/i18n.js` | เพิ่ม 46 คีย์ th/en, bump version |
 | `css/styles.css` | สไตล์ `.ff-endgame-*` + responsive |
-| `js/avatars-data.js`, `js/equipment-data.js`, `js/item-catalog.js`, `js/unstuck.js` | bump `i18n.js?v=2.26` (และ bump version ของ module ปลายทางใน `app.js`) |
+| `js/avatars-data.js`, `js/equipment-data.js`, `js/item-catalog.js`, `js/unstuck.js` | bump `i18n.js?v=2.27` (และ bump version ของ module ปลายทางใน `app.js`) |
 | `tests/firefly-payload.test.cjs` | อัปเดต expected shape + เพิ่ม test normalize |
 | `tests/mode-capabilities.test.cjs` | เพิ่ม `fireflyEndgame`, คีย์ i18n, DOM hooks |
 
@@ -423,8 +424,8 @@ Importer ของ `i18n.js` ที่ถูกแก้: `index.html` (ทา�
 ### 5.6 Tests
 ```
 node --test tests/*.test.cjs
-ℹ tests 44
-ℹ pass 44
+ℹ tests 47
+ℹ pass 47
 ℹ fail 0
 ```
 
@@ -433,6 +434,7 @@ node --test tests/*.test.cjs
 - การ normalize `blessings` / `monsters` (รวม `dynamic_key`)
 - capability matrix + i18n keys + DOM hooks
 - endgame helpers: default/resolve/build/challenge/find-by-stage/custom
+- **i18n coverage:** ทุก `data-i18n*` ใน `index.html` ต้อง resolve ได้ทั้ง th/en
 
 ---
 
@@ -455,6 +457,18 @@ node --test tests/*.test.cjs
 `#ff-endgame-status` มี `data-i18n="ffEndgameLoading"` ทำให้ `applyTranslations()` เขียนทับข้อความสถานะเป็น "กำลังโหลด…" ทุกครั้งที่เปลี่ยนภาษา แต่ `renderFireflyEndgame()` ไม่คืนค่าสถานะที่เก็บไว้
 
 **แก้โดย:** เพิ่ม `applyFireflyEndgameStatus()` ที่อ่าน `state.fireflyEndgame.statusKey/statusState/statusVars` แล้วเรียกที่ท้าย `renderFireflyEndgame()` ทั้งสอง branch (ทั้งตอน catalog ยังไม่โหลดและตอนเรนเดอร์ปกติ) — ตอนนี้สถานะถูกต้องหลังสลับภาษา
+
+### 6.1.2 🐞 บั๊ก i18n ที่พบเพิ่มเติมและแก้แล้ว
+ตรวจทั้งโปรเจกต์ด้วยสคริปต์ (เทียบ `data-i18n*` ใน `index.html` + คีย์จาก `t()` ทุกไฟล์ กับ `TRANSLATIONS.th/en`) พบว่า:
+
+1. **ชื่อธาตุ/สายไม่เคยถูกแปล** — `<option data-i18n="Fire">` แต่พจนานุกรมเก็บไว้ใต้ `elements.Fire` / `paths.Destruction` ทำให้ `t('Fire')` คืนค่าเป็นคีย์เดิม แล้ว `applyTranslations()` ข้ามการอัปเดต (เงื่อนไข `val !== key`) — แก้เป็น `data-i18n="elements.Fire"` และ `data-i18n="paths.Destruction"` ครบทั้ง 34 จุด (7 ธาตุ + 9 สาย × หลาย dropdown)
+2. **`fireflyTheoryModeHint` ไม่มีในพจนานุกรมทั้ง th/en** — ข้อความใต้สวิตช์ Creative Mode จึงไม่เคยเปลี่ยนภาษา แก้โดยเพิ่ม th/en
+3. **บรรทัดพจนานุกรมไทยถูก merge ข้ามภาษา** — บรรทัดเดียวมีคีย์ `analystDamageAvPlaceholder`, `analystCyclesPlaceholder`, `analystTurnsPlaceholder`, `analystAutoTurnsPlaceholder`, `miniViewFullAnalystTooltip` ซ้ำกัน 13 ภาษา (ค่าที่ชนะคือภาษาโปรตุเกส) และ `copyCardGenerated` หายไป — แยกกลับเป็นค่าภาษาไทยที่ถูกต้อง และเพิ่มคีย์ภาษาอังกฤษที่ขาด
+4. **`miniViewFullAnalystTooltip` และ analyst placeholders ไม่มีใน en** — เพิ่มครบแล้ว
+
+เพิ่มเทสต์กันพลาดซ้ำ: `tests/i18n-coverage.test.cjs` ตรวจว่า **ทุก** `data-i18n`, `data-i18n-placeholder`, `data-i18n-title`, `data-i18n-alt`, `data-i18n-aria-label` ใน `index.html` resolve ได้ทั้ง th และ en (รองรับ dotted key) และตรวจ nested `elements.*` / `paths.*`
+
+**ผลตรวจหลังแก้:** data-i18n missing th = 0, en = 0; t() missing th = 0, en = 0
 
 ### 6.2 ✅ ทดสอบมือถือ 360–768px
 **สถานะ:** ทดสอบด้วย iframe ขนาด 360×800 และ 768×1024 (media query ภายใน iframe ทำงานเหมือน viewport จริง)
@@ -547,7 +561,8 @@ node scripts/dev-server.cjs
 - [x] เปลี่ยนภาษาแล้วหน้า picker รีเรนเดอร์ และสถานะไม่ค้างที่ loading
 - [x] มือถือ 360px ไม่มี horizontal scroll และปุ่ม ≥44px
 - [x] โหมด GaCy เดิมยังทำงาน (Monster Setting เดิม, Aha's Help, custom waves)
-- [x] `?v=` ถูก bump ครบ (`styles.css 2.36`, `app.js 3.32`, `i18n.js 2.26` ทุก importer)
+- [x] `?v=` ถูก bump ครบ (`styles.css 2.36`, `app.js 3.33`, `i18n.js 2.27` ทุก importer)
 - [x] ไม่มีข้อความ hardcode ใหม่ใน HTML/JS
+- [x] ทุก `data-i18n*` resolve ได้ทั้ง th/en (มีเทสต์บังคับ)
 - [x] ไม่แก้ `README.md`
 - [ ] ทดสอบ `POST /sync` happy path กับ FireflyGO จริง (ต้องมีเซิร์ฟเวอร์)
