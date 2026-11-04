@@ -19,6 +19,7 @@ test('GaCy GO keeps every tool feature', async () => {
   ]) {
     assert.equal(caps[feature], true, `${feature} must be available on GaCy GO`);
   }
+  assert.equal(caps.fireflyEndgame, false);
   assert.equal(caps.extraData, false);
   assert.equal(caps.ownedAvatarsOnly, false);
   assert.deepEqual(caps.jsonModes, ['freesr', 'persistent']);
@@ -34,10 +35,14 @@ test('FireflyGo hides every GaCy-only feature and exposes extra_data', async () 
     assert.equal(caps[feature], false, `${feature} must be hidden on FireflyGo`);
   }
   assert.equal(caps.extraData, true);
+  assert.equal(caps.fireflyEndgame, true);
   assert.equal(caps.ownedAvatarsOnly, true);
   assert.deepEqual(caps.jsonModes, ['freesr']);
   assert.equal(modeSupports('extraData', 'firefly'), true);
-  assert.equal(modeSupports('saveManager', 'firefly'), false);
+  assert.equal(modeSupports('fireflyEndgame', 'firefly'), true);
+  assert.equal(modeSupports('monsterSettings', 'firefly'), false);
+  assert.equal(modeSupports('fireflyEndgame', 'gac'), false);
+  assert.equal(modeSupports('fireflyEndgame', 'robin'), false);
 });
 
 test('unknown modes fall back to GaCy GO', async () => {
@@ -73,7 +78,20 @@ test('mode UI strings exist in Thai and English', async () => {
     'btnFireflyProbe', 'btnFireflySaveExtra', 'btnFireflySync',
     'fireflyProbing', 'fireflySyncing', 'fireflyProbeSuccess', 'fireflySyncSuccess',
     'fireflyRequestFailed', 'fireflyRequestFailedDetail', 'fireflyTimeout',
-    'fireflyNoData', 'fireflyExtraSaved', 'fireflyHpInvalid'
+    'fireflyNoData', 'fireflyExtraSaved', 'fireflyHpInvalid',
+    'ffEndgameTitle', 'ffEndgameTablistLabel', 'ffEndgameDescription', 'ffEndgameRule', 'ffEndgameModePeak',
+    'ffEndgameLoading', 'ffEndgameReady', 'ffEndgameCatalogError', 'ffEndgameSeason',
+    'ffEndgameFloor', 'ffEndgameFloorValue', 'ffEndgameSide', 'ffEndgameSideFirst',
+    'ffEndgameSideSecond', 'ffEndgameSideThird', 'ffEndgameStage', 'ffEndgameStageValue',
+    'ffEndgameStageKindPre', 'ffEndgameStageKindBoss', 'ffEndgameStageKindHard',
+    'ffEndgameStageId', 'ffEndgamePreview', 'ffEndgameNoStages', 'ffEndgameUseCycle',
+    'ffEndgameUseBuff', 'ffEndgameCycles', 'ffEndgameBlessings', 'ffEndgameMonsterCount',
+    'ffEndgameApply', 'ffEndgameApplySync', 'ffEndgameReset', 'ffEndgameResetDone',
+    'ffEndgameSaving', 'ffEndgameSaved', 'ffEndgameSynced', 'ffEndgameApplyError',
+    'ffEndgameNoData', 'ffEndgameSyncError', 'ffEndgameCustomDescription',
+    'ffEndgameAddWave', 'ffEndgameRemoveWave', 'ffEndgameAddMonster',
+    'ffEndgameRemoveMonster', 'ffEndgameMonsterId', 'ffEndgameMonsterLevel',
+    'ffEndgameMonsterAmount', 'ffEndgameCycleCount'
   ];
   for (const lang of ['th', 'en']) {
     for (const key of keys) {
@@ -103,7 +121,10 @@ test('mode-gated DOM hooks exist in index.html', () => {
     'ff-challenge-skip-node', 'ff-challenge-peak-group', 'ff-challenge-peak-list',
     'ff-theory-mode', 'ff-theory-cycle-count', 'ff-theory-stage-id', 'ff-theory-lineup',
     'ff-theory-hp', 'ff-lua', 'btn-firefly-probe', 'btn-firefly-save-extra',
-    'btn-firefly-sync', 'firefly-extra-status'
+    'btn-firefly-sync', 'firefly-extra-status',
+    'monster-settings-gac', 'monster-settings-firefly', 'ff-endgame-tabs',
+    'ff-endgame-status', 'ff-endgame-view', 'ff-endgame-reset',
+    'ff-endgame-apply', 'ff-endgame-apply-sync'
   ]) {
     assert.ok(html.includes(`id="${id}"`), `index.html must contain #${id}`);
   }

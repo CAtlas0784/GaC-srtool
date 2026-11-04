@@ -152,16 +152,56 @@ test('buildSyncPayload emits the FreeSR shape FireflyGo expects', async () => {
   assert.equal(payload.relics.length, 1);
   assert.deepEqual(payload.relics[0].sub_affixes, [{ sub_affix_id: 2, count: 3, step: 0 }]);
 
-  // Unknown battle_config keys such as custom_battle_lineup are stripped.
+  // Unknown battle_config keys such as custom_battle_lineup are stripped and
+  // the blessing/monster arrays are coerced into FireflyGo's zod shape.
   assert.deepEqual(payload.battle_config, {
     battle_type: 'MOC',
-    blessings: [1, 2],
+    blessings: [{ id: 1, level: 1 }, { id: 2, level: 1 }],
     custom_stats: [],
     cycle_count: 3,
     stage_id: 12,
     path_resonance_id: 0,
-    monsters: [[1002010, 1]]
+    monsters: [[{ monster_id: 1002010, level: 1, amount: 1 }, { monster_id: 1, level: 1, amount: 1 }]]
   });
+});
+
+test('buildSyncPayload normalises detailed blessings and monster waves', async () => {
+  const { buildSyncPayload } = await load();
+  const payload = buildSyncPayload({
+    battle_config: {
+      battle_type: 'PEAK',
+      blessings: [
+        { id: 3034002, level: '2', dynamic_key: { key: 'abc', value: '4' } },
+        { id: 0, level: 1 },
+        { id: '3001' }
+      ],
+      cycle_count: '6',
+      stage_id: '30127123',
+      monsters: [
+        [
+          { monster_id: 4033010, level: 92, amount: 2 },
+          { monster_id: 0, level: 1 },
+          { monster_id: '4033020', level: '95' }
+        ],
+        [],
+        [4044010]
+      ]
+    }
+  });
+
+  assert.deepEqual(payload.battle_config.blessings, [
+    { id: 3034002, level: 2, dynamic_key: { key: 'abc', value: 4 } },
+    { id: 3001, level: 1 }
+  ]);
+  assert.deepEqual(payload.battle_config.monsters, [
+    [
+      { monster_id: 4033010, level: 92, amount: 2 },
+      { monster_id: 4033020, level: 95, amount: 1 }
+    ],
+    [{ monster_id: 4044010, level: 1, amount: 1 }]
+  ]);
+  assert.equal(payload.battle_config.cycle_count, 6);
+  assert.equal(payload.battle_config.stage_id, 30127123);
 });
 
 test('buildSyncPayload derives the anchor map when the save has none', async () => {

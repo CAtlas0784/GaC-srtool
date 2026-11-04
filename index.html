@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.35">
+  <link rel="stylesheet" href="css/styles.css?v=2.36">
   <link rel="stylesheet" href="css/item-catalog.css?v=3">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -485,50 +485,79 @@
 
     <!-- Monster settings: resource-backed stage inspection plus Calyx-only custom waves. -->
     <section id="tab-monster-settings" class="tab-content">
-      <div class="card monster-settings-intro">
-        <div class="card-title"><span data-i18n="monsterSettingsTitle">👾 Monster Setting</span></div>
-        <p class="card-subtitle" data-i18n="monsterSettingsDescription">ตรวจสอบข้อมูลด่านและคลื่นมอนจาก resource ของ Client ตามเวอร์ชัน ปรับ custom monster ได้เฉพาะ Golden / Crimson Calyx เท่านั้น</p>
-        <div class="monster-settings-rule" role="note">
-          <span aria-hidden="true">🔒</span>
-          <span data-i18n="monsterSettingsRule">Weekly Boss, Stagnant Shadow, Cavern of Corrosion และ Endgame ใช้ข้อมูลด่านจาก Client และแก้คลื่นมอนผ่าน Srtool ไม่ได้</span>
+      <div id="monster-settings-gac">
+        <div class="card monster-settings-intro">
+          <div class="card-title"><span data-i18n="monsterSettingsTitle">👾 Monster Setting</span></div>
+          <p class="card-subtitle" data-i18n="monsterSettingsDescription">ตรวจสอบข้อมูลด่านและคลื่นมอนจาก resource ของ Client ตามเวอร์ชัน ปรับ custom monster ได้เฉพาะ Golden / Crimson Calyx เท่านั้น</p>
+          <div class="monster-settings-rule" role="note">
+            <span aria-hidden="true">🔒</span>
+            <span data-i18n="monsterSettingsRule">Weekly Boss, Stagnant Shadow, Cavern of Corrosion และ Endgame ใช้ข้อมูลด่านจาก Client และแก้คลื่นมอนผ่าน Srtool ไม่ได้</span>
+          </div>
+        </div>
+
+        <div class="monster-settings-tabs" role="tablist" aria-label="Monster settings modes">
+          <button type="button" class="monster-settings-tab active" role="tab" aria-selected="true" data-monster-mode="moc" data-i18n="monsterModeMoc">Memory of Chaos</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="pf" data-i18n="monsterModePf">Pure Fiction</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="as" data-i18n="monsterModeAs">Apocalyptic Shadow</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="aa" data-i18n="monsterModeAa">Anomaly Arbitration</button>
+          <button type="button" class="monster-settings-tab monster-settings-tab-aha" id="monster-mode-aha" role="tab" aria-selected="false" aria-controls="monster-settings-aha-help" data-monster-mode="aha" data-i18n="ahaHelpTitle">Aha's Help</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="custom" data-i18n="monsterModeCustom">Custom Enemy</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="su" data-i18n="monsterModeSu">Simulated Universe</button>
+        </div>
+        <div id="monster-settings-status" class="monster-settings-status" role="status" aria-live="polite" data-i18n="monsterSettingsLoading">กำลังอ่าน stage จาก resource ของ Client...</div>
+        <div id="monster-settings-view" class="monster-settings-view" role="tabpanel" aria-live="polite"></div>
+
+        <div id="monster-settings-aha-help" class="monster-settings-aha-help" role="tabpanel" aria-labelledby="monster-mode-aha" hidden>
+          <div class="aha-help-card" id="aha-help-card">
+            <div class="aha-help-heading">
+              <div class="aha-help-emblem" aria-hidden="true">✦</div>
+              <div class="aha-help-heading-copy">
+                <h3 data-i18n="ahaHelpTitle">Aha's Help</h3>
+                <p data-i18n="ahaHelpDescription">Choose the support level for the next battle that includes Voracity Corruption. This setting is separate from Aha Global.</p>
+              </div>
+            </div>
+            <div class="aha-help-options" id="aha-help-options" role="group" aria-label="Aha's Help level" aria-describedby="aha-help-status"></div>
+            <select id="aha-help-level" class="aha-help-native-select" aria-hidden="true" tabindex="-1" disabled>
+              <option value="" data-i18n="ahaHelpLoading">Loading levels…</option>
+            </select>
+            <div class="aha-help-actions">
+              <div class="aha-help-save-state" id="aha-help-status" role="status" aria-live="polite" data-state="loading">
+                <span class="aha-help-state-dot" aria-hidden="true"></span>
+                <span id="aha-help-status-text" data-i18n="ahaHelpLoading">Loading levels…</span>
+              </div>
+              <button type="button" class="btn btn-success aha-help-save-button" id="btn-save-aha-help" disabled>
+                <span aria-hidden="true">💾</span>
+                <span data-i18n="ahaHelpSave">Save Aha's Help</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="monster-settings-tabs" role="tablist" aria-label="Monster settings modes">
-        <button type="button" class="monster-settings-tab active" role="tab" aria-selected="true" data-monster-mode="moc" data-i18n="monsterModeMoc">Memory of Chaos</button>
-        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="pf" data-i18n="monsterModePf">Pure Fiction</button>
-        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="as" data-i18n="monsterModeAs">Apocalyptic Shadow</button>
-        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="aa" data-i18n="monsterModeAa">Anomaly Arbitration</button>
-        <button type="button" class="monster-settings-tab monster-settings-tab-aha" id="monster-mode-aha" role="tab" aria-selected="false" aria-controls="monster-settings-aha-help" data-monster-mode="aha" data-i18n="ahaHelpTitle">Aha's Help</button>
-        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="custom" data-i18n="monsterModeCustom">Custom Enemy</button>
-        <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="su" data-i18n="monsterModeSu">Simulated Universe</button>
-      </div>
-      <div id="monster-settings-status" class="monster-settings-status" role="status" aria-live="polite" data-i18n="monsterSettingsLoading">กำลังอ่าน stage จาก resource ของ Client...</div>
-      <div id="monster-settings-view" class="monster-settings-view" role="tabpanel" aria-live="polite"></div>
+      <div id="monster-settings-firefly" hidden>
+        <div class="card monster-settings-intro">
+          <div class="card-title"><span data-i18n="ffEndgameTitle">🦋 FireflyGO Endgame Room</span></div>
+          <p class="card-subtitle" data-i18n="ffEndgameDescription">เลือกด่าน endgame และคลื่นมอนที่ FireflyGO จะใช้ แล้วเขียนลง battle_config โดยตรง</p>
+          <div class="monster-settings-rule" role="note">
+            <span aria-hidden="true">🎯</span>
+            <span data-i18n="ffEndgameRule">ค่าเหล่านี้เขียนลง battle_config (และ extra_data.challenge สำหรับ Anomaly Arbitration) จากนั้นบันทึกในเครื่องหรือซิงค์ขึ้น FireflyGO</span>
+          </div>
+        </div>
 
-      <div id="monster-settings-aha-help" class="monster-settings-aha-help" role="tabpanel" aria-labelledby="monster-mode-aha" hidden>
-        <div class="aha-help-card" id="aha-help-card">
-          <div class="aha-help-heading">
-            <div class="aha-help-emblem" aria-hidden="true">✦</div>
-            <div class="aha-help-heading-copy">
-              <h3 data-i18n="ahaHelpTitle">Aha's Help</h3>
-              <p data-i18n="ahaHelpDescription">Choose the support level for the next battle that includes Voracity Corruption. This setting is separate from Aha Global.</p>
-            </div>
-          </div>
-          <div class="aha-help-options" id="aha-help-options" role="group" aria-label="Aha's Help level" aria-describedby="aha-help-status"></div>
-          <select id="aha-help-level" class="aha-help-native-select" aria-hidden="true" tabindex="-1" disabled>
-            <option value="" data-i18n="ahaHelpLoading">Loading levels…</option>
-          </select>
-          <div class="aha-help-actions">
-            <div class="aha-help-save-state" id="aha-help-status" role="status" aria-live="polite" data-state="loading">
-              <span class="aha-help-state-dot" aria-hidden="true"></span>
-              <span id="aha-help-status-text" data-i18n="ahaHelpLoading">Loading levels…</span>
-            </div>
-            <button type="button" class="btn btn-success aha-help-save-button" id="btn-save-aha-help" disabled>
-              <span aria-hidden="true">💾</span>
-              <span data-i18n="ahaHelpSave">Save Aha's Help</span>
-            </button>
-          </div>
+        <div class="monster-settings-tabs" id="ff-endgame-tabs" role="tablist" aria-label="FireflyGO endgame room modes" data-i18n-aria-label="ffEndgameTablistLabel">
+          <button type="button" class="monster-settings-tab active" role="tab" aria-selected="true" data-ff-endgame-mode="moc" data-i18n="monsterModeMoc">Memory of Chaos</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-ff-endgame-mode="pf" data-i18n="monsterModePf">Pure Fiction</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-ff-endgame-mode="as" data-i18n="monsterModeAs">Apocalyptic Shadow</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-ff-endgame-mode="peak" data-i18n="ffEndgameModePeak">Anomaly Arbitration</button>
+          <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-ff-endgame-mode="custom" data-i18n="monsterModeCustom">Custom Enemy</button>
+        </div>
+        <div id="ff-endgame-status" class="monster-settings-status" role="status" aria-live="polite" data-state="loading" data-i18n="ffEndgameLoading">กำลังโหลดข้อมูลด่าน endgame…</div>
+        <div id="ff-endgame-view" class="monster-settings-view" role="tabpanel" aria-live="polite"></div>
+
+        <div class="ff-endgame-actions">
+          <button type="button" class="btn btn-secondary" id="ff-endgame-reset" data-i18n="ffEndgameReset">↺ รีเซ็ตค่าเริ่มต้น</button>
+          <button type="button" class="btn btn-primary" id="ff-endgame-apply" data-i18n="ffEndgameApply">💾 ใช้กับ battle_config</button>
+          <button type="button" class="btn btn-success" id="ff-endgame-apply-sync" data-i18n="ffEndgameApplySync">🚀 ใช้และซิงค์</button>
         </div>
       </div>
     </section>
@@ -1006,6 +1035,9 @@
 
             <div class="ff-group">
               <div class="ff-group-title" data-i18n="fireflyTheoryTitle">🧪 Theory Craft</div>
+              <p class="form-hint" style="margin: 0; font-size: 0.78rem; color: var(--text-muted);" data-i18n="fireflyTheoryModeHint">
+                สวิตช์นี้คือโหมดสร้างสรรค์ (Creative Mode) — เปิดจากที่ไหนก็ได้ อีกที่จะตามให้อัตโนมัติ
+              </p>
               <label class="ff-toggle">
                 <span data-i18n="fireflyTheoryMode">Enable theory craft</span>
                 <span class="switch"><input type="checkbox" id="ff-theory-mode"><span class="slider"></span></span>
@@ -2047,6 +2079,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.28"></script>
+  <script type="module" src="js/app.js?v=3.32"></script>
 </body>
 </html>

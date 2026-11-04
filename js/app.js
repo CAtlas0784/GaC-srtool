@@ -1,13 +1,26 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
-import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.21';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.27';
-import { initializeItemCatalog } from './item-catalog.js?v=5';
-import { initializeUnstuck } from './unstuck.js?v=4';
+import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.22';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.28';
+import { initializeItemCatalog } from './item-catalog.js?v=6';
+import { initializeUnstuck } from './unstuck.js?v=5';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.23';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.26';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
+import {
+  ENDGAME_MODES,
+  FIREFLY_ENDGAME_CATALOG_URL,
+  battleTypeForMode,
+  buildFireflyBattleConfig,
+  buildFireflyChallenge,
+  defaultEndgameSelection,
+  findSelectionByStageId,
+  groupList,
+  monsterInfo,
+  resolveEndgameSelection,
+  summarizeEndgameSelection
+} from './endgame.js?v=1';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -58,6 +71,17 @@ const state = {
   inventoryDraft: {},
   inventoryPage: 0,
   monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
+  fireflyEndgame: {
+    activeMode: 'moc',
+    catalog: null,
+    catalogState: 'idle',
+    catalogError: '',
+    catalogPromise: null,
+    selections: {},
+    statusKey: '',
+    statusVars: null,
+    statusState: 'info'
+  },
 };
 
 // UI Elements Map
@@ -483,7 +507,10 @@ async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
       try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
     }
     if (!res.ok) {
-      const serverMessage = parsed && typeof parsed.message === 'string' ? parsed.message : '';
+      let serverMessage = parsed && typeof parsed.message === 'string' ? parsed.message : '';
+      if (/player data is not loaded yet/i.test(serverMessage)) {
+        serverMessage = t('fireflyPlayerNotLoaded');
+      }
       throw new Error(serverMessage || `HTTP ${res.status}: ${res.statusText}`);
     }
     if (parsed && (parsed.ok === false || parsed.success === false)) {
@@ -492,6 +519,9 @@ async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
     return parsed || {};
   } catch (err) {
     if (err.name === 'AbortError') throw new Error(t('fireflyTimeout'));
+    if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) {
+      throw new Error(`${err.message} (${t('fireflyMixedContentHint')})`);
+    }
     throw err;
   } finally {
     clearTimeout(timeoutId);
@@ -560,7 +590,8 @@ function setConnectionStatus(connected, extraText = '') {
   const connectionChanged = state.isConnected !== connected;
   if (connected !== toolSessionConnected) syncToolSession(connected);
   state.isConnected = connected;
-  if (connectionChanged && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
+  // FireflyGo's endgame picker is local-only, so only GaCy needs a reload here.
+  if (connectionChanged && state.serverMode === 'gac' && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
   updateCameraSaveStatus();
   if (connected) {
     el.statusDot.classList.add('connected');
@@ -1188,7 +1219,7 @@ function applyTranslations() {
   renderGMCommandPreview();
   if (state.activeTab === 'tab-monster-settings') {
     renderMonsterSettings();
-    if (state.monsterSettings.activeMode === 'aha') loadAhaHelpSettings();
+    if (state.serverMode === 'gac' && state.monsterSettings.activeMode === 'aha') loadAhaHelpSettings();
   }
   refreshOpenAvatarDetailModal();
 }
@@ -1281,8 +1312,11 @@ function applyModeDisplay(mode) {
   };
 
   // Tabs that need an endpoint the selected backend does not implement.
+  // The Monster Setting tab doubles as the FireflyGo endgame room picker, so
+  // it stays visible for either capability.
+  const monsterTabVisible = caps.monsterSettings || caps.fireflyEndgame;
   setVisible(el.tabBtnInventory, caps.inventory);
-  setVisible(el.tabBtnMonsterSettings, caps.monsterSettings);
+  setVisible(el.tabBtnMonsterSettings, monsterTabVisible);
   setVisible(el.tabBtnDamageAnalyst, caps.damageAnalyst);
   setVisible(el.tabBtnPersistent, caps.saveManager);
   setVisible(el.tabBtnExrank, caps.exranks);
@@ -1314,7 +1348,7 @@ function applyModeDisplay(mode) {
   // Never leave a hidden tab selected.
   const hiddenTabs = [];
   if (!caps.inventory) hiddenTabs.push('tab-inventory');
-  if (!caps.monsterSettings) hiddenTabs.push('tab-monster-settings');
+  if (!monsterTabVisible) hiddenTabs.push('tab-monster-settings');
   if (!caps.damageAnalyst) hiddenTabs.push('tab-damage-analyst');
   if (!caps.saveManager) hiddenTabs.push('tab-persistent');
   if (!caps.exranks) hiddenTabs.push('tab-exrank');
@@ -1324,13 +1358,19 @@ function applyModeDisplay(mode) {
     if (dashboardBtn) dashboardBtn.click();
   }
 
+  // Only one backend's Monster Setting implementation is usable at a time.
+  const gacMonster = document.getElementById('monster-settings-gac');
+  const fireflyMonster = document.getElementById('monster-settings-firefly');
+  if (gacMonster) gacMonster.hidden = !caps.monsterSettings;
+  if (fireflyMonster) fireflyMonster.hidden = !caps.fireflyEndgame;
+
   // JSON editor: only offer file modes the backend can round-trip.
   if (!caps.jsonModes.includes(state.currentJsonMode)) {
     loadJsonData(caps.jsonModes[0] || 'freesr');
   }
 
   if (caps.extraData) renderFireflyExtras();
-  if (caps.monsterSettings && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
+  if (monsterTabVisible && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
 
   // Creative Mode is OPEN for all server modes.
   if (el.toggleCreativeMode) {
@@ -6643,24 +6683,33 @@ async function maxAllAvatars({ englishOnly = false } = {}) {
 
 // Push the local FreeSR snapshot to FireflyGo (POST /sync).
 async function pushFireflySync({ silent = false } = {}) {
-  if (!state.fullFreesrData) throw new Error(t('fireflyNoData'));
-
   const payload = {
     username: '',
-    password: '',
-    data: buildSyncPayload(state.fullFreesrData)
+    password: ''
   };
-  const extra = normalizeExtraData(state.fireflyExtraData);
-  if (extra) payload.extra_data = extra;
+  if (state.fullFreesrData) {
+    payload.data = buildSyncPayload(state.fullFreesrData);
+  }
+
+  // Creative Mode *is* FireflyGo's theory_craft.mode, so the flag is always
+  // taken from the app state instead of whatever the form last held.
+  const extra = normalizeExtraData(state.fireflyExtraData) || normalizeExtraData(FIREFLY_EXTRA_FALLBACK);
+  const theory = extra.theory_craft || {};
+  extra.theory_craft = {
+    hp: theory.hp && typeof theory.hp === 'object' ? theory.hp : {},
+    cycle_count: theory.cycle_count || 0,
+    mode: state.creativeMode === true,
+    stage_id: theory.stage_id || 0,
+    custom_lineup: Array.isArray(theory.custom_lineup) ? theory.custom_lineup : []
+  };
+  payload.extra_data = extra;
 
   const result = await fireflyRequest(payload);
   state.fireflyConnected = true;
   setConnectionStatus(true);
 
-  if (extra) {
-    state.fireflyExtraData = extra;
-    persistFireflyExtra(extra);
-  }
+  state.fireflyExtraData = extra;
+  persistFireflyExtra(extra);
 
   const warnings = Array.isArray(result?.warnings)
     ? result.warnings.filter(w => typeof w === 'string' && w.trim())
@@ -8054,6 +8103,10 @@ function renderMonsterCustomEditor() {
 }
 
 function renderMonsterSettings() {
+  if (state.serverMode === 'firefly') {
+    renderFireflyEndgame();
+    return;
+  }
   const root = document.getElementById('monster-settings-view');
   const help = document.getElementById('monster-settings-aha-help');
   const status = document.getElementById('monster-settings-status');
@@ -8081,6 +8134,12 @@ function renderMonsterSettings() {
 }
 
 async function loadMonsterSettings() {
+  // FireflyGo has no /api/monster-settings; its picker is built from the
+  // bundled endgame catalog plus the local FreeSR save.
+  if (state.serverMode === 'firefly') {
+    await loadFireflyEndgame();
+    return;
+  }
   const editor = state.monsterSettings;
   if (!document.getElementById('monster-settings-view')) return;
   editor.ready = false;
@@ -8297,6 +8356,697 @@ function setupMonsterSettingsEvents() {
       setMonsterEditorStatus('monsterCustomSaveError', 'error', { error: error.message });
       showToast(t('toastErrorMessage', { message: error.message }), 'error');
     } finally { updateMonsterEditorControls(); }
+  });
+}
+
+/* ------------------------------------------------------------------ *
+ * FireflyGo endgame room picker (Monster Setting)
+ *
+ * FireflyGO reads the room from battle_config (battle_type, stage_id,
+ * blessings, cycle_count, monsters) and, for Anomaly Arbitration, from
+ * extra_data.challenge.challenge_peak_group_id. The catalog is a compact
+ * extract of the Firefly SrTools client tables (journey/endgame.json), so
+ * this picker works offline and never calls the FireflyGo server.
+ * ------------------------------------------------------------------ */
+
+const FIREFLY_BATTLE_MODES = { MOC: 'moc', PF: 'pf', AS: 'as', PEAK: 'peak', CE: 'custom' };
+const FIREFLY_SIDE_LABEL_KEYS = {
+  firstNode: 'ffEndgameSideFirst',
+  secondNode: 'ffEndgameSideSecond',
+  thirdNode: 'ffEndgameSideThird'
+};
+const FIREFLY_PEAK_KIND_KEYS = {
+  pre: 'ffEndgameStageKindPre',
+  boss: 'ffEndgameStageKindBoss',
+  hard: 'ffEndgameStageKindHard'
+};
+
+function fireflyModeFromBattleType(type) {
+  return FIREFLY_BATTLE_MODES[String(type || '').toUpperCase()] || null;
+}
+
+function fireflyLocalizedText(names) {
+  if (!names || typeof names !== 'object') return '';
+  const lang = String(getCurrentLanguage() || 'en');
+  return String(names[lang] || names.en || '').trim();
+}
+
+function defaultFireflyCustomSelection() {
+  return {
+    mode: 'custom',
+    customWaves: [[{ monster_id: '', level: '80', amount: '1' }]],
+    customCycle: 0
+  };
+}
+
+function fireflyEndgameSelection(mode = state.fireflyEndgame.activeMode) {
+  const editor = state.fireflyEndgame;
+  if (!editor.selections[mode]) {
+    editor.selections[mode] = mode === 'custom'
+      ? defaultFireflyCustomSelection()
+      : defaultEndgameSelection(editor.catalog, mode);
+  }
+  return editor.selections[mode];
+}
+
+function setFireflyEndgameStatus(key, statusState = 'info', vars = null) {
+  const editor = state.fireflyEndgame;
+  editor.statusKey = key || '';
+  editor.statusState = statusState;
+  editor.statusVars = vars;
+  applyFireflyEndgameStatus();
+}
+
+// Re-renders the status line from the stored key. applyTranslations() resets
+// [data-i18n] nodes to their static text, so every re-render has to restore the
+// current status instead of leaving the "loading" fallback in place.
+function applyFireflyEndgameStatus() {
+  const editor = state.fireflyEndgame;
+  const node = document.getElementById('ff-endgame-status');
+  if (!node) return;
+  node.dataset.state = editor.statusState || 'info';
+  node.textContent = editor.statusKey ? t(editor.statusKey, editor.statusVars || undefined) : '';
+}
+
+function fireflyEndgameGroupLabel(group) {
+  const name = fireflyLocalizedText(group?.name) || `#${group?.id ?? ''}`;
+  return `${name} · #${group?.id ?? ''}`;
+}
+
+function fireflyEndgameLevelLabel(level) {
+  return [
+    level?.floor ? t('ffEndgameFloorValue', { floor: level.floor }) : '',
+    `#${level?.id ?? ''}`
+  ].filter(Boolean).join(' · ');
+}
+
+function makeFireflyMonsterChip(catalog, monsterId) {
+  const info = monsterInfo(catalog, monsterId);
+  const item = monsterElement('span', 'monster-settings-monster compact');
+  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '👾');
+  if (info?.icon) {
+    const image = document.createElement('img');
+    image.src = info.icon;
+    image.alt = '';
+    image.loading = 'lazy';
+    image.referrerPolicy = 'no-referrer';
+    image.addEventListener('error', () => image.remove(), { once: true });
+    portrait.append(image);
+  }
+  const copy = monsterElement('span', 'monster-settings-monster-copy');
+  copy.append(monsterElement('strong', '', fireflyLocalizedText(info?.name) || `Monster ${monsterId}`));
+  copy.append(monsterElement('code', '', String(monsterId)));
+  item.append(portrait, copy);
+  return item;
+}
+
+// Fetches assets/firefly-endgame.json once and seeds every mode with its
+// newest season default.
+async function ensureFireflyEndgameCatalog({ force = false } = {}) {
+  const editor = state.fireflyEndgame;
+  if (!force && editor.catalog) return editor.catalog;
+  if (!force && editor.catalogPromise) return editor.catalogPromise;
+
+  editor.catalogState = 'loading';
+  editor.catalogError = '';
+  setFireflyEndgameStatus('ffEndgameLoading', 'loading');
+  renderFireflyEndgame();
+
+  editor.catalogPromise = (async () => {
+    try {
+      const res = await fetch(FIREFLY_ENDGAME_CATALOG_URL, { cache: 'force-cache' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const catalog = await res.json();
+      editor.catalog = catalog;
+      editor.catalogState = 'ready';
+      for (const mode of ENDGAME_MODES) {
+        if (mode === 'custom') continue;
+        if (!editor.selections[mode]) editor.selections[mode] = defaultEndgameSelection(catalog, mode);
+      }
+      return catalog;
+    } catch (error) {
+      editor.catalog = null;
+      editor.catalogState = 'error';
+      editor.catalogError = error.message;
+      return null;
+    } finally {
+      editor.catalogPromise = null;
+    }
+  })();
+
+  const catalog = await editor.catalogPromise;
+  if (catalog) {
+    syncFireflyEndgameSelectionFromSave();
+    setFireflyEndgameStatus('ffEndgameReady', 'saved');
+  } else {
+    setFireflyEndgameStatus('ffEndgameCatalogError', 'error', { error: editor.catalogError });
+  }
+  renderFireflyEndgame();
+  return catalog;
+}
+
+// Opens the picker on the room already stored in battle_config so applying
+// again does not silently move the player to another stage.
+function syncFireflyEndgameSelectionFromSave() {
+  const editor = state.fireflyEndgame;
+  const catalog = editor.catalog;
+  const config = state.fullFreesrData?.battle_config;
+  if (!catalog || !config || typeof config !== 'object') return;
+
+  const mode = fireflyModeFromBattleType(config.battle_type);
+  if (!mode) return;
+  editor.activeMode = mode;
+
+  if (mode === 'custom') {
+    const waves = (Array.isArray(config.monsters) ? config.monsters : [])
+      .map((wave) => (Array.isArray(wave) ? wave : [])
+        .map((entry) => ({
+          monster_id: String(entry?.monster_id ?? entry ?? ''),
+          level: String(entry?.level ?? 80),
+          amount: String(entry?.amount ?? 1)
+        })))
+      .filter((wave) => wave.length > 0);
+    editor.selections.custom = {
+      mode: 'custom',
+      customWaves: waves.length ? waves : defaultFireflyCustomSelection().customWaves,
+      customCycle: Number(config.cycle_count) || 0
+    };
+    return;
+  }
+
+  const peakGroupId = mode === 'peak'
+    ? Number(state.fireflyExtraData?.challenge?.challenge_peak_group_id) || 0
+    : 0;
+  const selection = findSelectionByStageId(catalog, mode, config.stage_id, peakGroupId);
+  if (selection) editor.selections[mode] = selection;
+}
+
+async function loadFireflyEndgame() {
+  // FireflyGo is push-only, so the picker reads the local snapshot instead of
+  // asking the server. Fall back to the browser cache when nothing is loaded.
+  if (!state.fullFreesrData) {
+    try {
+      let cached = await idbGet('gac_srtool_freesr_cache');
+      if (!cached) {
+        const raw = localStorage.getItem('gac_srtool_freesr_cache');
+        if (raw) cached = JSON.parse(raw);
+      }
+      if (cached) state.fullFreesrData = cached;
+    } catch (_) { /* Apply stays disabled without a snapshot. */ }
+  }
+  await ensureFireflyEndgameCatalog();
+  renderFireflyEndgame();
+}
+
+function updateFireflyEndgameControls() {
+  const editor = state.fireflyEndgame;
+  const config = editor.catalog ? buildFireflyBattleConfig(editor.catalog, fireflyEndgameSelection()) : null;
+  const canApply = Boolean(config && state.fullFreesrData);
+  for (const id of ['ff-endgame-apply', 'ff-endgame-apply-sync']) {
+    const button = document.getElementById(id);
+    if (button) button.disabled = !canApply;
+  }
+  const reset = document.getElementById('ff-endgame-reset');
+  if (reset) reset.disabled = !editor.catalog;
+}
+
+function renderFireflyEndgame() {
+  const editor = state.fireflyEndgame;
+  const root = document.getElementById('ff-endgame-view');
+  const tabs = document.getElementById('ff-endgame-tabs');
+  if (!root) return;
+
+  const mode = ENDGAME_MODES.includes(editor.activeMode) ? editor.activeMode : 'moc';
+  editor.activeMode = mode;
+
+  if (tabs) {
+    tabs.querySelectorAll('[data-ff-endgame-mode]').forEach((button) => {
+      const selected = button.dataset.ffEndgameMode === mode;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', String(selected));
+    });
+  }
+
+  root.replaceChildren();
+  if (!editor.catalog) {
+    root.append(monsterElement('div', 'monster-settings-empty',
+      editor.catalogState === 'error'
+        ? t('ffEndgameCatalogError', { error: editor.catalogError || '' })
+        : t('ffEndgameLoading')));
+    updateFireflyEndgameControls();
+    applyFireflyEndgameStatus();
+    return;
+  }
+
+  if (mode === 'custom') renderFireflyCustomEditor(root);
+  else renderFireflyRoomEditor(root, mode);
+  updateFireflyEndgameControls();
+  applyFireflyEndgameStatus();
+}
+
+function renderFireflyRoomEditor(root, mode) {
+  const editor = state.fireflyEndgame;
+  const catalog = editor.catalog;
+  const selection = fireflyEndgameSelection(mode);
+  const groups = groupList(catalog, mode).slice().sort((a, b) => Number(b.id) - Number(a.id));
+  const resolved = resolveEndgameSelection(catalog, selection);
+  const group = groups.find((entry) => Number(entry.id) === Number(selection.groupId)) || groups[0];
+  if (group && Number(selection.groupId) !== Number(group.id)) selection.groupId = Number(group.id);
+
+  const picker = monsterElement('section', 'ff-endgame-picker');
+
+  const seasonField = monsterElement('label', 'ff-field');
+  seasonField.append(monsterElement('span', 'form-label', t('ffEndgameSeason')));
+  const season = monsterElement('select', 'form-input ff-endgame-select');
+  season.id = 'ff-endgame-group';
+  season.dataset.ffEndgameGroup = 'true';
+  season.setAttribute('aria-label', t('ffEndgameSeason'));
+  for (const entry of groups) {
+    const option = document.createElement('option');
+    option.value = String(entry.id);
+    option.textContent = fireflyEndgameGroupLabel(entry);
+    season.append(option);
+  }
+  season.value = selection.groupId == null ? '' : String(selection.groupId);
+  seasonField.append(season);
+  picker.append(seasonField);
+
+  if (mode === 'peak') {
+    const stages = Array.isArray(group?.stages) ? group.stages : [];
+    selection.stageIndex = Math.min(Math.max(Number(selection.stageIndex) || 0, 0), Math.max(stages.length - 1, 0));
+    const stageField = monsterElement('div', 'ff-field');
+    stageField.append(monsterElement('span', 'form-label', t('ffEndgameStage')));
+    const stageGrid = monsterElement('div', 'monster-settings-stage-grid');
+    stages.forEach((stage, index) => {
+      const active = index === selection.stageIndex;
+      const isBoss = stage.kind === 'boss' || stage.kind === 'hard';
+      const card = monsterElement('button', `monster-settings-stage-card${active ? ' active' : ''}${isBoss ? ' is-boss' : ''}`);
+      card.type = 'button';
+      card.dataset.ffEndgameStage = String(index);
+      card.setAttribute('aria-pressed', String(active));
+      const firstMonster = stage.waves?.[0]?.[0];
+      if (firstMonster) card.append(makeFireflyMonsterChip(catalog, firstMonster));
+      const copy = monsterElement('span', 'monster-settings-stage-copy');
+      copy.append(monsterElement('strong', '', fireflyLocalizedText(stage.name) || t('ffEndgameStageValue', { id: stage.stageId })));
+      copy.append(monsterElement('span', 'monster-settings-stage-meta',
+        `${t(FIREFLY_PEAK_KIND_KEYS[stage.kind] || 'ffEndgameStageKindPre')} · ${t('monsterSettingsWaveCount', { count: stage.waves?.length || 0 })}`));
+      card.append(copy);
+      stageGrid.append(card);
+    });
+    stageField.append(stageGrid);
+    picker.append(stageField);
+  } else {
+    const levels = (Array.isArray(group?.levels) ? group.levels : []).slice().sort((a, b) => Number(b.floor || b.id) - Number(a.floor || a.id));
+    const levelField = monsterElement('label', 'ff-field');
+    levelField.append(monsterElement('span', 'form-label', t('ffEndgameFloor')));
+    const levelSelect = monsterElement('select', 'form-input ff-endgame-select');
+    levelSelect.id = 'ff-endgame-level';
+    levelSelect.dataset.ffEndgameLevel = 'true';
+    levelSelect.setAttribute('aria-label', t('ffEndgameFloor'));
+    for (const level of levels) {
+      const option = document.createElement('option');
+      option.value = String(level.id);
+      option.textContent = fireflyEndgameLevelLabel(level);
+      levelSelect.append(option);
+    }
+    let level = levels.find((entry) => Number(entry.id) === Number(selection.levelId));
+    if (!level) level = levels[0] || null;
+    selection.levelId = level ? Number(level.id) : null;
+    levelSelect.value = selection.levelId == null ? '' : String(selection.levelId);
+    levelField.append(levelSelect);
+    picker.append(levelField);
+
+    const sides = Array.isArray(level?.sides) ? level.sides : [];
+    if (!sides.some((side) => side.side === selection.side)) {
+      selection.side = sides.find((side) => side.side === 'firstNode')?.side || sides[0]?.side || 'firstNode';
+    }
+    const sideField = monsterElement('div', 'ff-field');
+    sideField.append(monsterElement('span', 'form-label', t('ffEndgameSide')));
+    const sideRow = monsterElement('div', 'ff-endgame-sides');
+    for (const side of sides) {
+      const active = side.side === selection.side;
+      const button = monsterElement('button', `ff-endgame-side${active ? ' active' : ''}`);
+      button.type = 'button';
+      button.dataset.ffEndgameSide = side.side;
+      button.setAttribute('aria-pressed', String(active));
+      button.append(monsterElement('span', 'ff-endgame-side-label', t(FIREFLY_SIDE_LABEL_KEYS[side.side] || 'ffEndgameSideFirst')));
+      const names = (side.waves?.[0] || [])
+        .map((id) => fireflyLocalizedText(monsterInfo(catalog, id)?.name))
+        .filter(Boolean);
+      if (names.length) button.append(monsterElement('span', 'ff-endgame-side-sub', names.slice(0, 2).join(' / ')));
+      sideRow.append(button);
+    }
+    sideField.append(sideRow);
+    picker.append(sideField);
+  }
+
+  root.append(picker);
+
+  const toggles = monsterElement('div', 'ff-endgame-toggles');
+  toggles.append(makeFireflyToggle('cycle', t('ffEndgameUseCycle'), selection.useCycle !== false));
+  toggles.append(makeFireflyToggle('buff', t('ffEndgameUseBuff'), selection.useBuff !== false));
+  root.append(toggles);
+
+  root.append(renderFireflyEndgamePreview(resolved, selection));
+}
+
+function makeFireflyToggle(kind, label, checked) {
+  const wrapper = monsterElement('label', 'ff-toggle');
+  wrapper.append(monsterElement('span', '', label));
+  const switchWrap = monsterElement('span', 'switch');
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = checked;
+  input.dataset.ffEndgameToggle = kind;
+  input.setAttribute('aria-label', label);
+  switchWrap.append(input, monsterElement('span', 'slider'));
+  wrapper.append(switchWrap);
+  return wrapper;
+}
+
+function renderFireflyEndgamePreview(resolved, selection) {
+  const catalog = state.fireflyEndgame.catalog;
+  const config = buildFireflyBattleConfig(catalog, selection);
+  const section = monsterElement('section', 'ff-endgame-preview');
+  section.append(monsterElement('h3', 'monster-settings-picker-title', t('ffEndgamePreview')));
+  if (!config) {
+    section.append(monsterElement('div', 'monster-settings-empty', t('ffEndgameNoStages')));
+    return section;
+  }
+
+  const summary = summarizeEndgameSelection(catalog, selection);
+  const meta = monsterElement('div', 'monster-settings-meta');
+  meta.append(monsterElement('span', 'monster-settings-badge', config.battle_type));
+  meta.append(monsterElement('span', '', t('ffEndgameStageId', { id: config.stage_id })));
+  if (summary?.stageLevel) meta.append(monsterElement('span', '', t('monsterSettingsLevel', { level: summary.stageLevel })));
+  meta.append(monsterElement('span', '', t('monsterSettingsWaveCount', { count: config.monsters.length })));
+  meta.append(monsterElement('span', '', t('ffEndgameCycles', { count: config.cycle_count })));
+  meta.append(monsterElement('span', '', t('ffEndgameBlessings', { count: config.blessings.length })));
+  section.append(meta);
+
+  config.monsters.forEach((wave, index) => {
+    const row = monsterElement('div', 'monster-settings-wave');
+    row.append(monsterElement('strong', '', t('monsterSettingsWave', { number: index + 1 })));
+    const list = monsterElement('div', 'monster-settings-monsters');
+    for (const monster of wave) list.append(makeFireflyMonsterChip(catalog, monster.monster_id));
+    row.append(list);
+    section.append(row);
+  });
+  return section;
+}
+
+function makeFireflyCustomInput(field, waveIndex, monsterIndex, value, label, type = 'text') {
+  const wrapper = monsterElement('label', 'ff-field');
+  wrapper.append(monsterElement('span', 'form-label', label));
+  const input = document.createElement('input');
+  input.type = type;
+  input.className = 'form-input';
+  if (type === 'number') {
+    input.min = '1';
+    input.step = '1';
+  } else {
+    input.inputMode = 'numeric';
+    input.autocomplete = 'off';
+    input.setAttribute('list', 'ff-endgame-monster-options');
+  }
+  input.value = value == null ? '' : String(value);
+  input.dataset.ffCustomField = field;
+  input.dataset.waveIndex = String(waveIndex);
+  input.dataset.monsterIndex = String(monsterIndex);
+  input.setAttribute('aria-label', label);
+  wrapper.append(input);
+  return wrapper;
+}
+
+function refreshFireflyCustomSummary() {
+  const node = document.getElementById('ff-endgame-custom-summary');
+  if (!node) return;
+  const summary = summarizeEndgameSelection(state.fireflyEndgame.catalog, fireflyEndgameSelection('custom'));
+  if (!summary) {
+    node.textContent = t('ffEndgameNoStages');
+    return;
+  }
+  node.textContent = [
+    t('monsterSettingsWaveCount', { count: summary.waveCount }),
+    t('ffEndgameMonsterCount', { count: summary.monsterCount }),
+    t('ffEndgameCycles', { count: summary.cycleCount })
+  ].join(' · ');
+}
+
+function renderFireflyCustomEditor(root) {
+  const editor = state.fireflyEndgame;
+  const catalog = editor.catalog;
+  const selection = fireflyEndgameSelection('custom');
+  if (!Array.isArray(selection.customWaves) || selection.customWaves.length === 0) {
+    selection.customWaves = defaultFireflyCustomSelection().customWaves;
+  }
+
+  root.append(monsterElement('p', 'card-subtitle', t('ffEndgameCustomDescription')));
+
+  const list = monsterElement('div', 'ff-endgame-custom-waves');
+  selection.customWaves.forEach((wave, waveIndex) => {
+    const card = monsterElement('article', 'monster-settings-battle');
+    const heading = monsterElement('div', 'monster-settings-encounter-heading');
+    heading.append(monsterElement('h4', '', t('monsterSettingsWave', { number: waveIndex + 1 })));
+    const removeWave = monsterElement('button', 'btn btn-secondary btn-sm', t('ffEndgameRemoveWave'));
+    removeWave.type = 'button';
+    removeWave.dataset.ffCustomAction = 'remove-wave';
+    removeWave.dataset.waveIndex = String(waveIndex);
+    heading.append(removeWave);
+    card.append(heading);
+
+    wave.forEach((monster, monsterIndex) => {
+      const row = monsterElement('div', 'ff-endgame-custom-row');
+      row.append(makeFireflyCustomInput('monster_id', waveIndex, monsterIndex, monster.monster_id, t('ffEndgameMonsterId')));
+      row.append(makeFireflyCustomInput('level', waveIndex, monsterIndex, monster.level, t('ffEndgameMonsterLevel'), 'number'));
+      row.append(makeFireflyCustomInput('amount', waveIndex, monsterIndex, monster.amount, t('ffEndgameMonsterAmount'), 'number'));
+      const remove = monsterElement('button', 'btn btn-secondary btn-sm ff-endgame-remove', '✕');
+      remove.type = 'button';
+      remove.title = t('ffEndgameRemoveMonster');
+      remove.setAttribute('aria-label', t('ffEndgameRemoveMonster'));
+      remove.dataset.ffCustomAction = 'remove-monster';
+      remove.dataset.waveIndex = String(waveIndex);
+      remove.dataset.monsterIndex = String(monsterIndex);
+      row.append(remove);
+      card.append(row);
+    });
+
+    const addMonster = monsterElement('button', 'btn btn-secondary btn-sm', `＋ ${t('ffEndgameAddMonster')}`);
+    addMonster.type = 'button';
+    addMonster.dataset.ffCustomAction = 'add-monster';
+    addMonster.dataset.waveIndex = String(waveIndex);
+    card.append(addMonster);
+    list.append(card);
+  });
+  root.append(list);
+
+  const actions = monsterElement('div', 'ff-endgame-custom-actions');
+  const addWave = monsterElement('button', 'btn btn-secondary', `＋ ${t('ffEndgameAddWave')}`);
+  addWave.type = 'button';
+  addWave.dataset.ffCustomAction = 'add-wave';
+  actions.append(addWave);
+
+  const cycleField = monsterElement('label', 'ff-field');
+  cycleField.append(monsterElement('span', 'form-label', t('ffEndgameCycleCount')));
+  const cycleInput = document.createElement('input');
+  cycleInput.type = 'number';
+  cycleInput.min = '0';
+  cycleInput.step = '1';
+  cycleInput.className = 'form-input';
+  cycleInput.value = String(selection.customCycle ?? 0);
+  cycleInput.dataset.ffCustomCycle = 'true';
+  cycleInput.setAttribute('aria-label', t('ffEndgameCycleCount'));
+  cycleField.append(cycleInput);
+  actions.append(cycleField);
+  root.append(actions);
+
+  const summary = monsterElement('div', 'ff-endgame-summary');
+  summary.id = 'ff-endgame-custom-summary';
+  root.append(summary);
+  refreshFireflyCustomSummary();
+
+  const datalist = document.createElement('datalist');
+  datalist.id = 'ff-endgame-monster-options';
+  for (const [id, info] of Object.entries(catalog.monsters || {})) {
+    const option = document.createElement('option');
+    option.value = id;
+    option.label = fireflyLocalizedText(info.name) || `Monster ${id}`;
+    datalist.append(option);
+  }
+  root.append(datalist);
+}
+
+function handleFireflyCustomAction(button) {
+  const selection = fireflyEndgameSelection('custom');
+  const waveIndex = Number(button.dataset.waveIndex);
+  const monsterIndex = Number(button.dataset.monsterIndex);
+  const action = button.dataset.ffCustomAction;
+  if (action === 'add-wave') selection.customWaves.push([{ monster_id: '', level: '80', amount: '1' }]);
+  if (action === 'remove-wave') selection.customWaves.splice(waveIndex, 1);
+  if (action === 'add-monster' && selection.customWaves[waveIndex]) {
+    selection.customWaves[waveIndex].push({ monster_id: '', level: '80', amount: '1' });
+  }
+  if (action === 'remove-monster' && selection.customWaves[waveIndex]) {
+    selection.customWaves[waveIndex].splice(monsterIndex, 1);
+  }
+  if (!selection.customWaves.length) selection.customWaves = defaultFireflyCustomSelection().customWaves;
+  renderFireflyEndgame();
+}
+
+async function applyFireflyEndgame({ sync = false } = {}) {
+  const editor = state.fireflyEndgame;
+  const selection = fireflyEndgameSelection();
+  const config = buildFireflyBattleConfig(editor.catalog, selection);
+  if (!config) {
+    setFireflyEndgameStatus('ffEndgameApplyError', 'error');
+    showToast(t('ffEndgameApplyError'), 'error');
+    return;
+  }
+  if (!state.fullFreesrData) {
+    state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
+  }
+
+  state.fullFreesrData.battle_config = config;
+  if (selection.mode === 'peak') {
+    const extra = normalizeExtraData(state.fireflyExtraData) || normalizeExtraData(FIREFLY_EXTRA_FALLBACK);
+    if (extra) {
+      extra.challenge = buildFireflyChallenge(selection, extra.challenge);
+      state.fireflyExtraData = extra;
+      persistFireflyExtra(extra);
+      renderFireflyExtras({ force: true });
+    }
+  }
+
+  setFireflyEndgameStatus('ffEndgameSaving', 'loading');
+  try {
+    if (sync) await saveFreesrChangesToServer();
+    else await saveFreesrCache(state.fullFreesrData);
+    setFireflyEndgameStatus(sync ? 'ffEndgameSynced' : 'ffEndgameSaved', 'saved');
+    showToast(t(sync ? 'ffEndgameSynced' : 'ffEndgameSaved'), 'success');
+  } catch (error) {
+    setFireflyEndgameStatus('ffEndgameSyncError', 'error', { error: error.message });
+    showToast(t('ffEndgameSyncError', { error: error.message }), 'error');
+  }
+  renderFireflyEndgame();
+}
+
+function resetFireflyEndgame() {
+  const editor = state.fireflyEndgame;
+  const mode = editor.activeMode;
+  editor.selections[mode] = mode === 'custom'
+    ? defaultFireflyCustomSelection()
+    : defaultEndgameSelection(editor.catalog, mode);
+  setFireflyEndgameStatus('ffEndgameResetDone', 'info');
+  renderFireflyEndgame();
+}
+
+function setupFireflyEndgameEvents() {
+  const section = document.getElementById('monster-settings-firefly');
+  if (!section) return;
+
+  section.addEventListener('click', (event) => {
+    const modeButton = event.target.closest('[data-ff-endgame-mode]');
+    if (modeButton) {
+      state.fireflyEndgame.activeMode = modeButton.dataset.ffEndgameMode;
+      renderFireflyEndgame();
+      return;
+    }
+
+    const stageButton = event.target.closest('[data-ff-endgame-stage]');
+    if (stageButton) {
+      fireflyEndgameSelection('peak').stageIndex = Number(stageButton.dataset.ffEndgameStage) || 0;
+      renderFireflyEndgame();
+      return;
+    }
+
+    const sideButton = event.target.closest('[data-ff-endgame-side]');
+    if (sideButton) {
+      fireflyEndgameSelection().side = sideButton.dataset.ffEndgameSide;
+      renderFireflyEndgame();
+      return;
+    }
+
+    const customAction = event.target.closest('[data-ff-custom-action]');
+    if (customAction) {
+      handleFireflyCustomAction(customAction);
+      return;
+    }
+
+    if (event.target.closest('#ff-endgame-reset')) {
+      resetFireflyEndgame();
+      return;
+    }
+    if (event.target.closest('#ff-endgame-apply')) {
+      applyFireflyEndgame({ sync: false });
+      return;
+    }
+    if (event.target.closest('#ff-endgame-apply-sync')) {
+      applyFireflyEndgame({ sync: true });
+    }
+  });
+
+  section.addEventListener('change', (event) => {
+    const groupSelect = event.target.closest('[data-ff-endgame-group]');
+    if (groupSelect) {
+      const selection = fireflyEndgameSelection();
+      const groupId = Number(groupSelect.value) || null;
+      const group = groupList(state.fireflyEndgame.catalog, selection.mode)
+        .find((entry) => Number(entry.id) === Number(groupId));
+      selection.groupId = group ? Number(group.id) : groupId;
+      selection.stageIndex = 0;
+      if (selection.mode !== 'peak') {
+        const levels = (Array.isArray(group?.levels) ? group.levels : [])
+          .slice().sort((a, b) => Number(b.floor || b.id) - Number(a.floor || a.id));
+        const level = levels[0] || null;
+        selection.levelId = level ? Number(level.id) : null;
+        const sides = Array.isArray(level?.sides) ? level.sides : [];
+        selection.side = sides.find((side) => side.side === 'firstNode')?.side || sides[0]?.side || 'firstNode';
+      }
+      renderFireflyEndgame();
+      return;
+    }
+
+    const levelSelect = event.target.closest('[data-ff-endgame-level]');
+    if (levelSelect) {
+      const selection = fireflyEndgameSelection();
+      const levelId = Number(levelSelect.value) || null;
+      const group = groupList(state.fireflyEndgame.catalog, selection.mode)
+        .find((entry) => Number(entry.id) === Number(selection.groupId));
+      const level = (group?.levels || []).find((entry) => Number(entry.id) === Number(levelId)) || null;
+      selection.levelId = level ? Number(level.id) : null;
+      const sides = Array.isArray(level?.sides) ? level.sides : [];
+      selection.side = sides.find((side) => side.side === selection.side)?.side || sides[0]?.side || 'firstNode';
+      renderFireflyEndgame();
+      return;
+    }
+
+    const toggle = event.target.closest('[data-ff-endgame-toggle]');
+    if (toggle) {
+      const selection = fireflyEndgameSelection();
+      if (toggle.dataset.ffEndgameToggle === 'cycle') selection.useCycle = toggle.checked;
+      if (toggle.dataset.ffEndgameToggle === 'buff') selection.useBuff = toggle.checked;
+      renderFireflyEndgame();
+    }
+  });
+
+  section.addEventListener('input', (event) => {
+    const cycleInput = event.target.closest('[data-ff-custom-cycle]');
+    if (cycleInput) {
+      fireflyEndgameSelection('custom').customCycle = Number(cycleInput.value) || 0;
+      updateFireflyEndgameControls();
+      refreshFireflyCustomSummary();
+      return;
+    }
+
+    const input = event.target.closest('[data-ff-custom-field]');
+    if (!input) return;
+    const selection = fireflyEndgameSelection('custom');
+    const wave = selection.customWaves[Number(input.dataset.waveIndex)];
+    const monster = wave?.[Number(input.dataset.monsterIndex)];
+    if (!monster) return;
+    monster[input.dataset.ffCustomField] = input.value;
+    updateFireflyEndgameControls();
+    refreshFireflyCustomSummary();
   });
 }
 
@@ -9062,6 +9812,36 @@ function persistFireflyExtra(extra) {
   }
 }
 
+// Creative Mode and FireflyGo's `theory_craft.mode` are the same switch: both
+// unlock a custom lineup (duplicates / more than four slots). Keep a single
+// state so the header toggle and the extra_data card can never disagree.
+function setCreativeMode(value, { silent = false } = {}) {
+  const enabled = value === true;
+  state.creativeMode = enabled;
+  localStorage.setItem('gac_srtool_creative_mode', String(enabled));
+
+  if (el.toggleCreativeMode) {
+    el.toggleCreativeMode.disabled = false;
+    el.toggleCreativeMode.checked = enabled;
+  }
+  if (el.badgeCreativeMode) {
+    el.badgeCreativeMode.style.display = enabled ? 'inline-flex' : 'none';
+  }
+
+  // Mirror the same switch inside the FireflyGo controls card.
+  const theoryToggle = document.getElementById('ff-theory-mode');
+  if (theoryToggle && theoryToggle.checked !== enabled) theoryToggle.checked = enabled;
+
+  renderLineup(state.statusData?.lineups);
+
+  if (!silent) {
+    showToast(t('toastCreativeModeToggled', {
+      title: t('lblCreativeMode'),
+      status: t(enabled ? 'enabled' : 'disabled')
+    }), 'info');
+  }
+}
+
 function setFireflyExtraStatus(messageKey, vars = {}, tone = 'info') {
   const node = document.getElementById('firefly-extra-status');
   if (!node) return;
@@ -9113,7 +9893,7 @@ function renderFireflyExtras({ force = false } = {}) {
   setVal('ff-challenge-peak-group', challenge.challenge_peak_group_id ?? 0);
   setVal('ff-challenge-peak-list', listText(challenge.challenge_peak_group_id_list));
 
-  setChk('ff-theory-mode', theory.mode);
+  setChk('ff-theory-mode', state.creativeMode);
   setVal('ff-theory-cycle-count', theory.cycle_count ?? 0);
   setVal('ff-theory-stage-id', theory.stage_id ?? 0);
   setVal('ff-theory-lineup', listText(theory.custom_lineup));
@@ -9197,6 +9977,14 @@ function setupFireflyExtrasEvents() {
   const markDirty = () => { fireflyExtrasDirty = true; };
   card.addEventListener('input', markDirty);
   card.addEventListener('change', markDirty);
+
+  // Theory Craft is the FireflyGo name for Creative Mode.
+  const theoryToggle = document.getElementById('ff-theory-mode');
+  if (theoryToggle) {
+    theoryToggle.addEventListener('change', (e) => {
+      setCreativeMode(e.target.checked);
+    });
+  }
 
   const btnProbe = document.getElementById('btn-firefly-probe');
   if (btnProbe) {
@@ -9639,19 +10427,12 @@ function setupEvents() {
     }
   });
 
-  // Creative Mode Toggle
+  // Creative Mode Toggle (= FireflyGo theory_craft.mode)
   if (el.toggleCreativeMode) {
     el.toggleCreativeMode.checked = state.creativeMode;
     el.toggleCreativeMode.disabled = false;
     el.toggleCreativeMode.addEventListener('change', (e) => {
-      state.creativeMode = e.target.checked;
-      localStorage.setItem('gac_srtool_creative_mode', state.creativeMode);
-      if (el.badgeCreativeMode) {
-        el.badgeCreativeMode.style.display = state.creativeMode ? 'inline-flex' : 'none';
-      }
-      renderLineup(state.statusData?.lineups);
-      const title = t('lblCreativeMode') || 'โหมดสร้างสรรค์';
-      showToast(t('toastCreativeModeToggled', { title, status: t(state.creativeMode ? 'enabled' : 'disabled') }), 'info');
+      setCreativeMode(e.target.checked);
     });
   }
 
@@ -9774,6 +10555,7 @@ function setupEvents() {
     } finally { button.disabled = select.disabled; }
   });
   setupMonsterSettingsEvents();
+  setupFireflyEndgameEvents();
   el.btnSavePersistentToggles.addEventListener('click', async () => {
     const sw = el.toggleSwGlobal.checked;
     const castorice = el.toggleCastoriceGlobal.checked;
@@ -10165,11 +10947,7 @@ function setupEvents() {
       localStorage.setItem('gac_srtool_default_creative', val);
       state.defaultCreative = val;
       if (val && !state.creativeMode) {
-        state.creativeMode = true;
-        localStorage.setItem('gac_srtool_creative_mode', 'true');
-        if (el.toggleCreativeMode) el.toggleCreativeMode.checked = true;
-        if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'inline-flex';
-        renderLineup(state.statusData?.lineups);
+        setCreativeMode(true, { silent: true });
       }
     });
   }
@@ -10228,7 +11006,7 @@ function setupEvents() {
       state.persistentData = null;
       state.apiUrl = 'http://localhost:21000';
       state.serverMode = 'gac';
-      state.creativeMode = false;
+      state.fireflyExtraData = null;
       state.defaultEnergy = 50;
       state.autoSync = true;
       state.showcaseRolls = true;
@@ -10239,8 +11017,7 @@ function setupEvents() {
       if (el.settingDefaultCreative) el.settingDefaultCreative.checked = false;
       if (el.settingShowcaseRolls) el.settingShowcaseRolls.checked = true;
       if (el.settingShowcaseAura) el.settingShowcaseAura.checked = true;
-      if (el.toggleCreativeMode) el.toggleCreativeMode.checked = false;
-      if (el.badgeCreativeMode) el.badgeCreativeMode.style.display = 'none';
+      setCreativeMode(false, { silent: true });
       loadAvatars();
       loadEquipment();
       updateCacheUsageDisplay();
@@ -10282,7 +11059,7 @@ function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
     'tab-avatars': `👥 ${t('tabAvatars')} | GaCy-Srtool`,
     'tab-equipment': `🗡️ ${t('tabEquipment')} | GaCy-Srtool`,
     'tab-inventory': `🎒 ${t('tabInventory')} | GaCy-Srtool`,
-    'tab-monster-settings': `👾 ${t('tabMonsterSettings')} | GaCy-Srtool`,
+    'tab-monster-settings': `${state.serverMode === 'firefly' ? '🦋' : '👾'} ${t(state.serverMode === 'firefly' ? 'ffEndgameTitle' : 'tabMonsterSettings')} | GaCy-Srtool`,
     'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaCy-Srtool`,
     'tab-persistent': `💾 ${t('tabPersistent')} | GaCy-Srtool`,
     'tab-exrank': `⚡ ${t('tabExrank')} | GaCy-Srtool`,

@@ -20,6 +20,9 @@ export const MODE_CAPABILITIES = {
     exranks: true,
     inventory: true,
     monsterSettings: true,
+    // FireflyGo ships its own endgame room picker; GaCy GO reads the Client
+    // catalog from /api/monster-settings instead.
+    fireflyEndgame: false,
     damageAnalyst: true,
     sceneCard: true,
     gmConsole: true,
@@ -36,6 +39,7 @@ export const MODE_CAPABILITIES = {
     exranks: false,
     inventory: false,
     monsterSettings: false,
+    fireflyEndgame: true,
     damageAnalyst: false,
     sceneCard: false,
     gmConsole: false,
@@ -50,6 +54,7 @@ export const MODE_CAPABILITIES = {
     exranks: false,
     inventory: false,
     monsterSettings: false,
+    fireflyEndgame: false,
     damageAnalyst: false,
     sceneCard: false,
     gmConsole: false,

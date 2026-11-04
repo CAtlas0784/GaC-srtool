@@ -4387,6 +4387,32 @@ input:checked + .slider:before {
 .monster-settings-monster-copy code { width: fit-content; color: var(--text-muted); font-size: .72rem; }
 .monster-settings-monster.compact { padding: .25rem; }
 .monster-settings-empty { padding: 1.4rem; border: 1px dashed rgba(148, 163, 184, .3); border-radius: 12px; color: var(--text-muted); background: var(--bg-card); text-align: center; line-height: 1.6; }
+
+/* FireflyGo endgame room picker */
+.ff-endgame-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: .85rem; padding: 1rem; border: 1px solid rgba(56, 189, 248, .22); border-radius: 14px; background: linear-gradient(120deg, rgba(14, 165, 233, .08), rgba(15, 23, 42, .7)); }
+.ff-endgame-select { min-height: 46px; width: 100%; }
+.ff-endgame-sides { display: flex; gap: .5rem; flex-wrap: wrap; }
+.ff-endgame-side { display: grid; gap: .2rem; flex: 1 1 150px; min-height: 52px; padding: .55rem .7rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); color: var(--text-main); text-align: left; cursor: pointer; }
+.ff-endgame-side:hover { border-color: rgba(56, 189, 248, .45); }
+.ff-endgame-side.active { border-color: rgba(56, 189, 248, .72); background: rgba(14, 165, 233, .14); }
+.ff-endgame-side-label { font-size: .86rem; font-weight: 800; }
+.ff-endgame-side-sub { color: var(--text-muted); font-size: .74rem; line-height: 1.25; overflow-wrap: anywhere; }
+.ff-endgame-toggles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: .35rem .9rem; padding: .35rem .8rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-card); }
+.ff-endgame-preview { display: grid; gap: .65rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-card); }
+.ff-endgame-preview .monster-settings-monster.compact .monster-settings-monster-portrait { flex-basis: 48px; width: 48px; height: 48px; }
+.ff-endgame-custom-waves { display: grid; gap: .85rem; }
+.ff-endgame-custom-row { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, .6fr)) 44px; gap: .6rem; align-items: end; }
+.ff-endgame-remove { min-height: 44px; }
+.ff-endgame-custom-actions { display: flex; gap: .75rem; align-items: end; flex-wrap: wrap; }
+.ff-endgame-custom-actions .ff-field { min-width: 160px; }
+.ff-endgame-summary { color: var(--text-muted); font-size: .84rem; }
+.ff-endgame-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+.ff-endgame-actions > .btn { min-height: 46px; }
+@media (max-width: 640px) {
+  .ff-endgame-custom-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .ff-endgame-remove { grid-column: 1 / -1; }
+  .ff-endgame-actions > .btn { flex: 1 1 100%; }
+}
 .monster-settings-aha-help[hidden] { display: none; }
 .monster-settings-aha-help { margin-top: 1rem; }
 .monster-custom-card { display: grid; gap: .85rem; }

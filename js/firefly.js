@@ -148,16 +148,63 @@ function normalizeAnchorMap(skillsByAnchorType, skills) {
   return Object.keys(derived).length > 0 ? derived : undefined;
 }
 
+// FireflyGo validates `blessings: [{ id, level, dynamic_key? }]` and rejects
+// the raw id arrays some FreeSR exports still contain.
+function normalizeBlessings(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => {
+      const raw = entry && typeof entry === 'object' ? entry : { id: entry };
+      const id = num(raw.id ?? raw.ID);
+      if (id <= 0) return null;
+      const blessing = { id, level: Math.max(1, num(raw.level, 1) || 1) };
+      const dynamicKey = raw.dynamic_key;
+      if (dynamicKey && typeof dynamicKey === 'object' && dynamicKey.key != null && dynamicKey.key !== '') {
+        blessing.dynamic_key = {
+          key: typeof dynamicKey.key === 'number' ? num(dynamicKey.key) : String(dynamicKey.key),
+          value: num(dynamicKey.value)
+        };
+      }
+      return blessing;
+    })
+    .filter(Boolean);
+}
+
+// `monsters` is a list of waves; every wave is a list of
+// `{ monster_id, level, amount }` objects.
+function normalizeMonsterWaves(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((wave) => {
+      const entries = Array.isArray(wave)
+        ? wave
+        : Object.values(wave && typeof wave === 'object' ? wave : {});
+      return entries
+        .map((entry) => {
+          const raw = entry && typeof entry === 'object' ? entry : { monster_id: entry };
+          const monsterId = num(raw.monster_id ?? raw.id);
+          if (monsterId <= 0) return null;
+          return {
+            monster_id: monsterId,
+            level: Math.max(1, num(raw.level, 1) || 1),
+            amount: Math.max(1, num(raw.amount, 1) || 1)
+          };
+        })
+        .filter(Boolean);
+    })
+    .filter((wave) => wave.length > 0);
+}
+
 function normalizeBattleConfig(battleConfig) {
   const source = battleConfig && typeof battleConfig === 'object' ? battleConfig : {};
   return {
     battle_type: typeof source.battle_type === 'string' && source.battle_type ? source.battle_type : 'DEFAULT',
-    blessings: Array.isArray(source.blessings) ? source.blessings : [],
+    blessings: normalizeBlessings(source.blessings),
     custom_stats: Array.isArray(source.custom_stats) ? source.custom_stats : [],
     cycle_count: num(source.cycle_count),
     stage_id: num(source.stage_id),
     path_resonance_id: num(source.path_resonance_id),
-    monsters: Array.isArray(source.monsters) ? source.monsters : []
+    monsters: normalizeMonsterWaves(source.monsters)
   };
 }
 
