@@ -1870,6 +1870,24 @@ export const AVATAR_METADATA = {
     "rarity": 5,
     "hasExRank": false
   },
+  "1514": {
+    "names": {
+      "en": "Ellen"
+    },
+    "path": "Destruction",
+    "element": "Ice",
+    "rarity": 5,
+    "hasExRank": false
+  },
+  "1515": {
+    "names": {
+      "en": "Astra Yao"
+    },
+    "path": "Harmony",
+    "element": "Quantum",
+    "rarity": 5,
+    "hasExRank": false
+  },
   "8001": {
     "names": {
       "th": "ผู้บุกเบิก (กายภาพ ♂)",

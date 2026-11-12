@@ -3121,7 +3121,13 @@ export const LIGHTCONE_METADATA = {
     "def": 529,
     "skill_name": "IMPROV TOUR",
     "desc": "เพิ่มความเร็วพื้นฐานของผู้สวมใส่ 12 เมื่อใช้สกิลการต่อสู้กับเป้าหมายฝ่ายเรา 1 ตัว จะได้รับ \"Punchline\" 10 แต้ม เอฟเฟกต์นี้เกิดขึ้นได้มากสุด 1 ครั้งในทุก 1 เทิร์น จากนั้นจะทำให้ฝ่ายเราทั้งหมดเพิกเฉยต่อ DEF ของเป้าหมายศัตรู 16% เมื่อสร้าง DMG ในการต่อสู้นี้ โดยเอฟเฟกต์นี้ไม่สามารถซ้อนทับได้",
-    "desc_en": "Increases the wearer's base Speed by 12. When using a Skill on one other ally, gains 10 Punchline. This effect can trigger at most once every interval of 1 turn(s). Then, causes all allies to ignore 16% of the enemy target's DEF when dealing DMG during this combat. This effect cannot be stacked."
+    "desc_en": "Increases the wearer's base Speed by 12. When using a Skill on one other ally, gains 10 Punchline. This effect can trigger at most once every interval of 1 turn(s). Then, causes all allies to ignore 16% of the enemy target's DEF when dealing DMG during this combat. This effect cannot be stacked.",
+    // Superimposition values follow the supplied 4.7.51 EquipmentSkillConfig table.
+    "passive": {
+      "en": "Increases the wearer's base Speed by {0}. When using a Skill on one other ally, gains {1} Punchline. This effect can trigger at most once every interval of {2} turn(s). Then, causes all allies to ignore {3}% of the enemy target's DEF when dealing DMG during this combat. This effect cannot be stacked.",
+      "th": "ทำให้ความเร็วพื้นฐานของผู้สวมใส่เพิ่มขึ้น {0} หน่วย เมื่อใช้สกิลต่อสู้กับเพื่อนร่วมทีมอื่น 1 ตัว จะได้รับ Punchline {1} แต้ม เอฟเฟกต์นี้เกิดขึ้นได้สูงสุดทุก {2} เทิร์น จากนั้นทำให้เพื่อนร่วมทีมทั้งหมดเมิน DEF ของเป้าหมายศัตรู {3}% เมื่อสร้าง DMG ในการต่อสู้นี้ เอฟเฟกต์นี้ไม่สามารถซ้อนทับได้",
+      "values": [[12, 10, 1, 16], [14, 12, 1, 18], [16, 14, 1, 20], [18, 16, 1, 22], [20, 18, 1, 24]]
+    }
   },
   "24000": {
     "names": {
@@ -3258,13 +3264,51 @@ export const LIGHTCONE_METADATA = {
   }
 };
 
-// Item data and artwork: nanoka.cc, game data revision 4.6.54.
+// Existing 22009 art is bundled locally; 4.7.x effect data follows the beta catalog.
 LIGHTCONE_METADATA[22009] = {
   names: { en: "See You at the World's End!" }, rarity: 4, path: 'Elation',
-  hp: 847, atk: 476, def: 397,
+  hp: 846, atk: 476, def: 396,
   images: { fullArt: './assets/lightcones/22009-full.webp', thumbnail: './assets/lightcones/22009-icon.webp' },
   passive: { en: "For every Elation character on the team, increases the wearer's CRIT DMG by {0}%. When Aeon ★ Aha is on the field, the wearer's CRIT DMG additionally increases by {1}%.", values: [[6,12],[7,14],[8,16],[9,18],[10,20]] }
 };
+
+// New 4.7 beta Light Cones verified against the supplied resource tables and Gachabase v4.7.51.
+Object.assign(LIGHTCONE_METADATA, {
+  23066: {
+    names: { en: 'No Shifts on Rainy Days' },
+    rarity: 5,
+    path: 'Destruction',
+    hp: 952,
+    atk: 582,
+    def: 529,
+    skill_name: 'Slack Off',
+    images: {
+      fullArt: 'https://cdn.gachabase.net/hsr/assets/be97525b57f9c119127a45a54f0dd71e.png',
+      thumbnail: 'https://cdn.gachabase.net/hsr/assets/f8173c562ac2f427f1c6f073e8130605.png'
+    },
+    passive: {
+      en: 'Increases the wearer\'s CRIT DMG by {0}% and Energy Regeneration Rate by {1}%. When the wearer uses a Basic ATK, they gain "Snack," lasting for 2 turns. While "Snack" is active, the wearer\'s ATK increases by {2}%. When the wearer consumes at least 200 Energy at once to use their Ultimate, they gain "Iced Drink," lasting for 3 turns. While "Iced Drink" is active, Basic ATK and Ultimate DMG dealt by the wearer ignores {3}% of the target\'s DEF. When the wearer has both "Snack" and "Iced Drink" simultaneously, they additionally gain "Good Mood," and Basic ATK and Ultimate DMG dealt additionally ignores {4}% of the target\'s DEF.',
+      values: [[24,12,20,12,12],[28,14,23,14,14],[32,16,26,16,16],[36,18,29,18,18],[40,20,32,20,20]]
+    }
+  },
+  23067: {
+    names: { en: 'Shine Bright Like Her' },
+    rarity: 5,
+    path: 'Harmony',
+    hp: 952,
+    atk: 582,
+    def: 529,
+    skill_name: 'Chant',
+    images: {
+      fullArt: 'https://cdn.gachabase.net/hsr/assets/b348811621b9d0005c6254790055fabb.png',
+      thumbnail: 'https://cdn.gachabase.net/hsr/assets/5ea3fa673e1ca2768f1818310aa7fc2e.png'
+    },
+    passive: {
+      en: 'Increases the wearer\'s ATK by {0}% and Energy Regeneration Rate by {1}%. After the wearer uses their Ultimate, if the wearer is not the first character in the team lineup, advances the action of the first character in the team lineup by {2}%. If the Ultimate consumes {3} Energy or more, the wearer gains "Our Melody," increasing the CRIT DMG of all allies by {4}%, lasting for 4 turns.',
+      values: [[24,12,25,240,48],[30,13,25,240,60],[36,14,25,240,72],[42,15,25,240,84],[48,16,25,240,96]]
+    }
+  }
+});
 
 export const RELIC_SET_METADATA = {
   "101": {

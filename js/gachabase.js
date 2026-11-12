@@ -14,11 +14,15 @@ export const KNOWN_GACHABASE_ASSETS = {
     1506: 'https://cdn.gachabase.net/hsr/assets/0cbfb275bfef439b16ba6ff9f848eb3a.png', // Silver Wolf Collab
     1511: 'https://cdn.gachabase.net/hsr/assets/2be49dbbe7cfe8f77187dcfea51d9863.png', // Aeon ★ Aha
     1513: 'https://cdn.gachabase.net/hsr/assets/2fdf5d4fe6eb998064438ffd373ce95f.png', // Aventurine • Waveflair
+    1514: 'https://cdn.gachabase.net/hsr/assets/ac8b25ec99a6790fbe48a1282a3e7bdd.png', // Ellen square icon
+    1515: 'https://cdn.gachabase.net/hsr/assets/b2e25a3498ff343cfe11749bb1250f97.png', // Astra Yao square icon
   },
   avatarSplash: {
     1511: 'https://cdn.gachabase.net/hsr/assets/f8b5630e85022ab8b2761e4e3f614b42.png', // Aha Splash Art (2048x1914)
     1502: 'https://cdn.gachabase.net/hsr/assets/8ca2530c42791593b72d54a850fce97e.png', // Yao Guang
     1501: 'https://cdn.gachabase.net/hsr/assets/09ee6e2618ac2a0dab2aec8d73b0bb01.png', // Sparxie
+    1514: 'https://cdn.gachabase.net/hsr/assets/b6630831011ddc01b175aff98a3c4f48.png', // Ellen
+    1515: 'https://cdn.gachabase.net/hsr/assets/5ebb24c5af224b6ca2828c1eb2f7844b.png', // Astra Yao
   },
   lightcones: {
     23065: 'https://cdn.gachabase.net/hsr/assets/500cfc18698932759756f6b3ba4db417.png', // Upon the First Echo of "Aha" Full Art

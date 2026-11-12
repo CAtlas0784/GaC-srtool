@@ -1,6 +1,6 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
-import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.23';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.29';
+import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.24';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.30';
 import { initializeItemCatalog } from './item-catalog.js?v=7';
 import { initializeUnstuck } from './unstuck.js?v=6';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
@@ -30,7 +30,7 @@ import {
   handleLcImgError,
   GACHABASE_IMAGE_CACHE,
   KNOWN_GACHABASE_ASSETS
-} from './gachabase.js';
+} from './gachabase.js?v=2';
 
 // Expose image resolvers & error handlers to window for inline onclick/onerror attributes
 window.handleAvatarImgError = handleAvatarImgError;
@@ -3074,6 +3074,8 @@ const SIGNATURE_LIGHTCONES = {
   1407: 23040, // Castorice -> Make Farewells More Beautiful
   1408: 23042, // Phainon
   1511: 23065, // Aeon ★ Aha -> Upon the First Echo of "Aha"
+  1514: 23066, // Ellen -> No Shifts on Rainy Days
+  1515: 23067, // Astra Yao -> Shine Bright Like Her
   8001: 24000, // Trailblazer Male Destruction -> On the Fall of an Aeon
   8002: 24000, // Trailblazer Female Destruction
   8003: 24002, // Trailblazer Male Preservation -> Texture of Memories
@@ -3090,6 +3092,8 @@ const SIGNATURE_LIGHTCONES = {
 // 7: SPD, 8: CRIT Rate%, 9: CRIT DMG%, 10: EHR%, 11: Effect RES%, 12: Break Effect%
 const CHARACTER_OPTIMAL_BUILDS = {
   1511: { cavern: 133, planar: 329, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 7, 5] }, // Aeon ★ Aha
+  1514: { cavern: 134, planar: 317, body: 4, feet: 4, sphere: 6, rope: 2, substats: [8, 9, 5, 7] }, // Ellen
+  1515: { cavern: 134, planar: 317, body: 5, feet: 4, sphere: 9, rope: 2, substats: [8, 9, 5, 7] }, // Astra Yao
   1308: { cavern: 117, planar: 313, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Acheron
   1310: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 2, rope: 1, substats: [12, 7, 5, 11] }, // Firefly
   1220: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Feixiao
@@ -3411,7 +3415,6 @@ function getLightconePassiveDesc(lcId, rank = 5) {
     23032: `ทำให้ Energy Regeneration Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยสกิลต่อสู้หรือท่าไม้ตาย จะเพิ่ม CRIT DMG ของพันธมิตร <strong>${48 + (r - 1) * 8}%</strong>`,
     23034: `ทำให้ CRIT Rate ของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 2}%</strong> เมื่อปล่อยท่าไม้ตาย จะสร้าง DMG น้ำแข็งเพิ่มเติม <strong>${60 + (r - 1) * 10}%</strong> ของ ATK แก่ศัตรูทั้งหมด`,
     23036: `ทำให้ HP สูงสุดของผู้สวมใส่เพิ่มขึ้น <strong>${30 + (r - 1) * 5}%</strong> และเมื่ออยู่ในสนามรบ สมาชิกทีมทุกคนสร้าง DMG เพิ่มขึ้น <strong>${24 + (r - 1) * 4}%</strong>`,
-    23065: `ทำให้ความเร็วพื้นฐานของผู้สวมใส่เพิ่มขึ้น <strong>${12 + (r - 1) * 3}</strong> เมื่อใช้สกิลการต่อสู้กับเพื่อนร่วมทีม 1 ตัว จะได้รับ "Punchline" 10 แต้ม (เกิดได้สูงสุด 1 ครั้งทุกๆ 1 เทิร์น) และทำให้เพื่อนร่วมทีมทั้งหมดเมิน DEF ศัตรู <strong>${16 + (r - 1) * 4}%</strong> เมื่อสร้าง DMG ในการต่อสู้นี้ (ไม่ซ้อนทับ)`,
     24001: `เมื่อผู้สวมใส่โจมตี จะเพิ่ม ATK <strong>${8 + (r - 1) * 2}%</strong> สูงสุด 4 ชั้น และเมื่อทำลายจุดอ่อนศัตรู จะเพิ่ม DMG <strong>${12 + (r - 1) * 3}%</strong> เป็นเวลา 2 เทิร์น`
   };
 
@@ -7226,7 +7229,7 @@ function openAddLcModal() {
   if (el.addLcPromotion) el.addLcPromotion.value = 6;
   if (el.addLcRank) el.addLcRank.value = 5;
 
-  const defaultId = LIGHTCONE_METADATA[23065] ? 23065 : 23001;
+  const defaultId = LIGHTCONE_METADATA[23067] ? 23067 : (LIGHTCONE_METADATA[23065] ? 23065 : 23001);
   updateAddLcPreview(defaultId);
   renderAddLcVisualGrid();
 
