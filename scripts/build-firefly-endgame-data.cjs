@@ -177,21 +177,36 @@ async function loadTable(name) {
   if (fs.existsSync(file)) {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
   }
-  const res = await fetch(`${ORIGIN}/${name}`);
-  if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`);
-  const text = await res.text();
-  fs.writeFileSync(file, text);
-  return JSON.parse(text);
+  // The source turns away bursts of requests (seen as HTTP 403 on one table
+  // at a time from CI), so a refused table is retried after a pause.
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const res = await fetch(`${ORIGIN}/${name}`, {
+        headers: { 'User-Agent': 'srtool-data-sync/1.0', Accept: 'application/json' }
+      });
+      if (res.ok) {
+        const text = await res.text();
+        fs.writeFileSync(file, text);
+        return JSON.parse(text);
+      }
+      lastError = new Error(`${name}: HTTP ${res.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 5000 * attempt));
+  }
+  throw lastError;
 }
 
 async function main() {
-  const [moc, pf, as, peak, monsters] = await Promise.all([
-    loadTable('moc'),
-    loadTable('pf'),
-    loadTable('as'),
-    loadTable('peak'),
-    loadTable('monster')
-  ]);
+  // One table at a time: five large downloads at once is the burst the
+  // source refuses.
+  const moc = await loadTable('moc');
+  const pf = await loadTable('pf');
+  const as = await loadTable('as');
+  const peak = await loadTable('peak');
+  const monsters = await loadTable('monster');
 
   const modes = {
     moc: { groups: buildMocLike(moc, 'moc') },
