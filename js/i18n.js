@@ -7049,6 +7049,20 @@ for (const [language, description] of Object.entries(ITEM_CATALOG_INTERACTION_DE
 // language falls back to en through t(), so no Thai leaks into other locales.
 const MODAL_AND_TOOL_TRANSLATIONS = {
   th: {
+    // Build guide: in-game recommendation
+    buildGuideIngameTitle: 'คำแนะนำจากในเกม',
+    buildGuideIngameNote: 'ชุดและค่าสถานะที่ตัวเกมแนะนำสำหรับตัวละครนี้ อัปเดตอัตโนมัติทุกเวอร์ชัน',
+    buildGuideSubstats: 'ค่าสถานะรอง',
+    buildGuideIngameLightCones: 'กรวยแสงที่แนะนำ',
+    buildGuideIngameRelicSets: 'เซ็ตรีลิกส์ที่แนะนำ',
+    buildGuideIngamePlanarSets: 'เซ็ตมิติที่แนะนำ',
+    buildGuideIngameMainStats: 'ออฟหลักที่แนะนำ',
+    buildGuideBeta: 'ตัวละครนี้ยังอยู่ในเบต้า ข้อมูลอาจเปลี่ยนก่อนเปิดให้เล่นจริง',
+    buildGuideAutoSource: 'ปุ่มสวมใส่อัตโนมัติใช้: {source}',
+    buildGuideSourceManual: 'Build ที่ผู้ดูแลกำหนดไว้',
+    buildGuideSourceUsage: 'คำแนะนำในเกม ปรับตามสถิติผู้เล่น',
+    buildGuideSourceIngame: 'คำแนะนำในเกม',
+    buildGuideSourcePath: 'ค่าเริ่มต้นตามสายของตัวละคร',
     // Server modes
     serverModeFirefly: 'FireflyGo',
     apiUrlHintGaC: 'GaCy GO ใช้ REST API ใต้ URL นี้ (เช่น /api/status, /api/freesr, /api/persistent)',
@@ -7324,6 +7338,20 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     ffEndgameCycleCount: 'จำนวนรอบ'
   },
   en: {
+    // Build guide: in-game recommendation
+    buildGuideIngameTitle: 'In-game recommendation',
+    buildGuideIngameNote: 'Sets and stats the game itself recommends for this character. Updated automatically every version.',
+    buildGuideSubstats: 'Sub stats',
+    buildGuideIngameLightCones: 'Recommended light cones',
+    buildGuideIngameRelicSets: 'Recommended relic sets',
+    buildGuideIngamePlanarSets: 'Recommended planar sets',
+    buildGuideIngameMainStats: 'Recommended main stats',
+    buildGuideBeta: 'This character is still in beta. Details may change before release.',
+    buildGuideAutoSource: 'Auto-equip uses: {source}',
+    buildGuideSourceManual: 'Maintainer-defined build',
+    buildGuideSourceUsage: 'In-game recommendation, adjusted by player usage',
+    buildGuideSourceIngame: 'In-game recommendation',
+    buildGuideSourcePath: 'Default for the character path',
     // Server modes
     serverModeFirefly: 'FireflyGo',
     apiUrlHintGaC: 'GaCy GO serves its REST API under this URL (e.g. /api/status, /api/freesr, /api/persistent)',

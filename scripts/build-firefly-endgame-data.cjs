@@ -222,14 +222,23 @@ async function main() {
     };
   }
 
+  const target = path.join(root, 'assets', 'firefly-endgame.json');
+  // The date only moves when the content does, so a run without new seasons
+  // leaves the file byte-identical and produces no commit.
+  let version = new Date().toISOString().slice(0, 10);
+  try {
+    const previous = JSON.parse(fs.readFileSync(target, 'utf8'));
+    if (JSON.stringify(previous.modes) === JSON.stringify(modes)
+      && JSON.stringify(previous.monsters) === JSON.stringify(monsterIndex)) version = previous.version;
+  } catch (_) {}
+
   const output = {
-    version: new Date().toISOString().slice(0, 10),
+    version,
     source: 'https://srtools.punklorde.org/api/data',
     modes,
     monsters: monsterIndex
   };
 
-  const target = path.join(root, 'assets', 'firefly-endgame.json');
   fs.writeFileSync(target, JSON.stringify(output));
   const bytes = fs.statSync(target).size;
   console.log(`Wrote ${target} (${(bytes / 1024).toFixed(1)} KB)`);

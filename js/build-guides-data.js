@@ -4,62 +4,54 @@ export const PRYDWEN_BUILD_GUIDES = {
     "dataset": "LvlUrArti/MocDataProcessed",
     "license": "MIT",
     "credit": "LvlUrArti",
-    "version": "4.6.2",
-    "collectedAt": "14/10/2026",
+    "version": "4.6.4",
+    "collectedAt": "05/11/2026",
     "note": "Prydwen endgame build usage sample; not a curated or official ranking."
   },
   "profiles": {
     "1001": {
       "slug": "march-7th",
-      "count": 3,
+      "count": 2,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
-          "name": "Moment of Victory",
-          "usage": 40.91
-        },
-        {
-          "name": "Journey, Forever Peaceful",
-          "usage": 40.91
+          "name": "Though Worlds Apart",
+          "usage": 71.43
         },
         {
           "name": "In the Night",
-          "usage": 18.18
+          "usage": 28.57
         }
       ],
       "relicSets": [
         {
-          "name": "Self-Enshrouded Recluse",
-          "usage": 81.82
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
+          "usage": 71.43
         },
         {
-          "name": "Musketeer of Wild Wheat",
-          "usage": 18.18
+          "name": "The Edacious Heretic",
+          "usage": 28.57
         }
       ],
       "planarSets": [
         {
-          "name": "Sprightly Vonwacq",
-          "usage": 40.91
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 40.91
+          "name": "Giant Tree of Rapt Brooding",
+          "usage": 71.43
         },
         {
           "name": "Rutilant Arena",
-          "usage": 18.18
+          "usage": 28.57
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "DEF",
-            "usage": 59.09
+            "usage": 64.29
           },
           {
-            "name": "Effect Hit Rate",
-            "usage": 40.91
+            "name": "Outgoing Healing Boost",
+            "usage": 35.71
           }
         ],
         "feet": [
@@ -77,14 +69,18 @@ export const PRYDWEN_BUILD_GUIDES = {
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 100
+            "usage": 64.29
+          },
+          {
+            "name": "ATK",
+            "usage": 35.71
           }
         ]
       }
     },
     "1002": {
       "slug": "dan-heng",
-      "count": 1,
+      "count": 4,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -133,488 +129,480 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1003": {
       "slug": "himeko",
-      "count": 13,
-      "mode": "Pure Fiction",
+      "count": 9,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "After the Charmony Fall",
-          "usage": 41.91
-        },
-        {
-          "name": "Before Dawn",
-          "usage": 16.19
+          "usage": 47.37
         },
         {
           "name": "Night on the Milky Way",
-          "usage": 13.97
+          "usage": 31.58
         },
         {
-          "name": "Life Should Be Cast to Flames",
-          "usage": 13.97
-        },
-        {
-          "name": "Geniuses' Repose",
-          "usage": 13.97
+          "name": "Into the Unreachable Veil",
+          "usage": 21.06
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 55.87
+          "usage": 47.37
         },
         {
           "name": "The Ashblazing Grand Duke",
-          "usage": 30.16
+          "usage": 31.58
         },
         {
-          "name": "Scholar Lost in Erudition, World-Remaking Deliverer",
-          "usage": 13.97
+          "name": "Scholar Lost in Erudition, Wavestrider Captain",
+          "usage": 21.06
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 41.91
+          "usage": 31.58
         },
         {
           "name": "Fallen Star Anchorage",
-          "usage": 16.19
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 13.97
+          "usage": 21.06
         },
         {
           "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 13.97
+          "usage": 15.79
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 15.79
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT Rate",
-            "usage": 54.88
+            "name": "HP",
+            "usage": 31.58
           },
           {
-            "name": "HP",
-            "usage": 15.04
+            "name": "CRIT Rate",
+            "usage": 31.58
           },
           {
             "name": "CRIT DMG",
-            "usage": 15.04
+            "usage": 21.06
           }
         ],
         "feet": [
           {
-            "name": "SPD",
-            "usage": 61.65
+            "name": "ATK",
+            "usage": 52.63
           },
           {
-            "name": "ATK",
-            "usage": 38.35
+            "name": "SPD",
+            "usage": 47.37
           }
         ],
         "sphere": [
           {
-            "name": "Fire DMG Boost",
-            "usage": 69.91
+            "name": "ATK",
+            "usage": 52.63
           },
           {
             "name": "Imaginary DMG Boost",
-            "usage": 7.52
+            "usage": 15.79
           },
           {
-            "name": "ATK",
-            "usage": 7.52
+            "name": "DEF",
+            "usage": 15.79
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 46.61
+            "usage": 52.63
           },
           {
             "name": "Break Effect",
-            "usage": 30.09
+            "usage": 31.58
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 23.31
+            "usage": 15.79
           }
         ]
       }
     },
     "1004": {
       "slug": "welt",
-      "count": 277,
+      "count": 249,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 32.69
+          "usage": 34.87
         },
         {
           "name": "Before the Tutorial Mission Starts",
-          "usage": 25.55
+          "usage": 26.31
         },
         {
           "name": "In the Name of the World",
-          "usage": 18.47
+          "usage": 17.58
         },
         {
           "name": "Lies Dance on the Breeze",
-          "usage": 10.53
+          "usage": 9.36
         },
         {
           "name": "Holiday Thermae Escapade",
-          "usage": 5.53
+          "usage": 5.25
         }
       ],
       "relicSets": [
         {
           "name": "Eagle of Twilight Line",
-          "usage": 75.93
+          "usage": 79.73
         },
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 10.53
+          "usage": 7.94
         },
         {
           "name": "Wastelander of Banditry Desert",
-          "usage": 2.98
+          "usage": 2.81
         },
         {
           "name": "Divine-Querying Master Smith",
-          "usage": 2.98
+          "usage": 2.72
         },
         {
           "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 0.96
+          "usage": 1.24
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 62.78
+          "usage": 63.49
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 16.9
-        },
-        {
-          "name": "Pan-Cosmic Commercial Enterprise",
-          "usage": 6.7
+          "usage": 17.62
         },
         {
           "name": "Rutilant Arena",
-          "usage": 5.34
+          "usage": 7.42
+        },
+        {
+          "name": "Pan-Cosmic Commercial Enterprise",
+          "usage": 4.28
         },
         {
           "name": "Fallen Star Anchorage",
-          "usage": 1.57
+          "usage": 1.5
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT Rate",
-            "usage": 38.99
+            "name": "Effect Hit Rate",
+            "usage": 36.44
           },
           {
-            "name": "Effect Hit Rate",
-            "usage": 37.45
+            "name": "CRIT Rate",
+            "usage": 34.94
           },
           {
             "name": "CRIT DMG",
-            "usage": 4.73
+            "usage": 10.07
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 95.96
+            "usage": 95.8
           },
           {
             "name": "ATK",
-            "usage": 3.89
+            "usage": 3.8
           }
         ],
         "sphere": [
           {
             "name": "Imaginary DMG Boost",
-            "usage": 36.94
+            "usage": 32.1
           },
           {
             "name": "HP",
-            "usage": 29.02
+            "usage": 26.43
           },
           {
             "name": "ATK",
-            "usage": 21.37
+            "usage": 24.18
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 80.47
+            "usage": 82.46
           },
           {
             "name": "ATK",
-            "usage": 16.61
+            "usage": 15.82
           },
           {
             "name": "HP",
-            "usage": 1.58
+            "usage": 0.71
           }
         ]
       }
     },
     "1005": {
       "slug": "kafka",
-      "count": 1159,
-      "mode": "Memory of Chaos",
+      "count": 1717,
+      "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Before the Tutorial Mission Starts",
-          "usage": 81.22
+          "usage": 75.85
         },
         {
           "name": "Patience Is All You Need",
-          "usage": 12.65
-        },
-        {
-          "name": "Lies Dance on the Breeze",
-          "usage": 1.38
-        },
-        {
-          "name": "Good Night and Sleep Well",
-          "usage": 1.06
+          "usage": 15.64
         },
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 1
+          "usage": 2.01
+        },
+        {
+          "name": "Lies Dance on the Breeze",
+          "usage": 1.8
+        },
+        {
+          "name": "Good Night and Sleep Well",
+          "usage": 1.38
         }
       ],
       "relicSets": [
         {
           "name": "Eagle of Twilight Line",
-          "usage": 89.72
+          "usage": 86.48
         },
         {
           "name": "Prisoner in Deep Confinement",
-          "usage": 8.29
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 0.62
+          "usage": 10.6
         },
         {
           "name": "Eagle of Twilight Line, Flex",
-          "usage": 0.52
+          "usage": 0.86
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
+          "usage": 0.58
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 0.19
+          "usage": 0.51
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 78.05
+          "usage": 75.52
         },
         {
           "name": "Revelry by the Sea",
-          "usage": 13.16
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 3.82
+          "usage": 16.07
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 2.92
+          "usage": 3.47
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 2.85
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 0.19
+          "usage": 0.3
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "ATK",
-            "usage": 66.77
+            "usage": 66.43
           },
           {
             "name": "Effect Hit Rate",
-            "usage": 28.01
+            "usage": 28.71
           },
           {
             "name": "HP",
-            "usage": 2.85
+            "usage": 1.86
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.68
+            "usage": 98.71
           },
           {
             "name": "ATK",
-            "usage": 1.14
+            "usage": 1.04
+          },
+          {
+            "name": "HP",
+            "usage": 0.04
           }
         ],
         "sphere": [
           {
             "name": "Lightning DMG Boost",
-            "usage": 71.52
+            "usage": 72.47
           },
           {
             "name": "ATK",
-            "usage": 21.73
+            "usage": 20.77
           },
           {
             "name": "HP",
-            "usage": 3.26
+            "usage": 3.17
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 88.45
+            "usage": 87.23
           },
           {
             "name": "ATK",
-            "usage": 11.42
+            "usage": 12.3
           },
           {
             "name": "DEF",
-            "usage": 0.09
+            "usage": 0.15
           }
         ]
       }
     },
     "1006": {
       "slug": "silver-wolf",
-      "count": 79,
+      "count": 78,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Before the Tutorial Mission Starts",
-          "usage": 33.18
-        },
-        {
-          "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 26.87
+          "usage": 31.13
         },
         {
           "name": "Lies Dance on the Breeze",
-          "usage": 22.99
+          "usage": 23.44
+        },
+        {
+          "name": "Resolution Shines As Pearls of Sweat",
+          "usage": 22.4
         },
         {
           "name": "Incessant Rain",
-          "usage": 7.24
+          "usage": 11.45
         },
         {
           "name": "Holiday Thermae Escapade",
-          "usage": 3.2
+          "usage": 5.66
         }
       ],
       "relicSets": [
         {
           "name": "Eagle of Twilight Line",
-          "usage": 66.44
+          "usage": 50.04
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 11.79
+          "usage": 14.15
+        },
+        {
+          "name": "Eagle of Twilight Line, Flex",
+          "usage": 9.44
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 7.89
+          "usage": 8.04
         },
         {
-          "name": "Diviner of Distant Reach, Wavestrider Captain",
-          "usage": 3.2
-        },
-        {
-          "name": "Messenger Traversing Hackerspace",
-          "usage": 2.22
+          "name": "Genius of Brilliant Stars",
+          "usage": 5.65
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 39.96
+          "usage": 32.28
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 29.13
+          "usage": 26.55
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 11.08
+          "usage": 12.41
         },
         {
-          "name": "Giant Tree of Rapt Brooding",
-          "usage": 2.75
+          "name": "Broken Keel",
+          "usage": 3.47
         },
         {
           "name": "Pan-Cosmic Commercial Enterprise",
-          "usage": 2.67
+          "usage": 2.77
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 47.64
+            "usage": 46.36
           },
           {
             "name": "Effect Hit Rate",
-            "usage": 30.64
+            "usage": 32.43
           },
           {
             "name": "HP",
-            "usage": 7.72
+            "usage": 5.74
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 95.9
+            "usage": 90.28
           },
           {
             "name": "ATK",
-            "usage": 3.86
+            "usage": 8.48
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 45.66
+            "usage": 44.59
           },
           {
             "name": "HP",
-            "usage": 18.41
+            "usage": 19.15
           },
           {
             "name": "ATK",
-            "usage": 16.01
+            "usage": 15.75
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 91.26
+            "usage": 88.42
           },
           {
             "name": "ATK",
-            "usage": 7.24
-          },
-          {
-            "name": "DEF",
-            "usage": 0.67
+            "usage": 9.73
           }
         ]
       }
@@ -636,7 +624,7 @@ export const PRYDWEN_BUILD_GUIDES = {
     "1009": {
       "slug": "asta",
       "count": 2,
-      "mode": "Memory of Chaos",
+      "mode": "Pure Fiction",
       "lightCones": [],
       "relicSets": [],
       "planarSets": [],
@@ -649,245 +637,245 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1013": {
       "slug": "herta",
-      "count": 17,
+      "count": 23,
       "mode": "Pure Fiction",
       "lightCones": [
         {
+          "name": "Night on the Milky Way",
+          "usage": 28.86
+        },
+        {
           "name": "Eternal Calculus",
-          "usage": 32.14
+          "usage": 28.52
         },
         {
           "name": "The Birth of the Self",
-          "usage": 22.62
+          "usage": 28.18
         },
         {
-          "name": "Night on the Milky Way",
-          "usage": 22.62
-        },
-        {
-          "name": "Make the World Clamor",
-          "usage": 11.31
+          "name": "Passkey",
+          "usage": 7.38
         },
         {
           "name": "Before Dawn",
-          "usage": 11.31
+          "usage": 7.04
         }
       ],
       "relicSets": [
         {
-          "name": "Eagle of Twilight Line",
-          "usage": 38.69
-        },
-        {
-          "name": "Hunter of Glacial Forest",
-          "usage": 22.62
-        },
-        {
           "name": "The Ashblazing Grand Duke",
-          "usage": 16.07
+          "usage": 42.62
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 22.16
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 11.31
+          "usage": 14.1
         },
         {
-          "name": "Messenger Traversing Hackerspace, Scholar Lost in Erudition",
-          "usage": 11.31
+          "name": "Hunter of Glacial Forest",
+          "usage": 14.1
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Scholar Lost in Erudition",
+          "usage": 7.04
         }
       ],
       "planarSets": [
         {
+          "name": "Inert Salsotto",
+          "usage": 49.32
+        },
+        {
           "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 26.79
+          "usage": 14.1
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 16.07
+          "usage": 7.38
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 11.9
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 11.31
+          "usage": 7.38
         },
         {
           "name": "Space Sealing Station",
-          "usage": 11.31
+          "usage": 7.04
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 81.97
+            "usage": 69.84
           },
           {
             "name": "CRIT DMG",
-            "usage": 18.03
+            "usage": 25.88
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 47.66
+            "usage": 48
           },
           {
             "name": "ATK",
-            "usage": 46.47
+            "usage": 43.42
           },
           {
             "name": "HP",
-            "usage": 5.88
+            "usage": 4.29
           }
         ],
         "sphere": [
           {
             "name": "Ice DMG Boost",
-            "usage": 78.16
+            "usage": 82.75
           },
           {
             "name": "ATK",
-            "usage": 21.84
+            "usage": 12.96
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 67.6
+            "usage": 69.19
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 32.4
+            "usage": 26.53
           }
         ]
       }
     },
     "1014": {
       "slug": "saber",
-      "count": 993,
+      "count": 988,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "A Thankless Coronation",
-          "usage": 89.93
+          "usage": 89.44
         },
         {
           "name": "On the Fall of an Aeon",
-          "usage": 5.24
+          "usage": 5.09
         },
         {
           "name": "I Am As You Behold",
-          "usage": 2
+          "usage": 2.58
         },
         {
           "name": "Brighter Than the Sun",
-          "usage": 0.87
+          "usage": 1.14
         },
         {
           "name": "Thus Burns the Dawn",
-          "usage": 0.82
+          "usage": 0.7
         }
       ],
       "relicSets": [
         {
           "name": "Wavestrider Captain",
-          "usage": 40.12
+          "usage": 41.87
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 34.66
+          "usage": 32.67
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 19.74
+          "usage": 19.02
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 2.85
+          "usage": 3.4
         },
         {
-          "name": "As Navigator Isee Sees It",
-          "usage": 0.39
+          "name": "Wavestrider Captain, Flex",
+          "usage": 0.44
         }
       ],
       "planarSets": [
         {
           "name": "Cosmic Life Sciences Institute",
-          "usage": 44.95
+          "usage": 47.79
         },
         {
           "name": "Inert Salsotto",
-          "usage": 39.76
+          "usage": 36.62
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 6.52
+          "usage": 6.49
         },
         {
           "name": "Rutilant Arena",
-          "usage": 4.12
+          "usage": 3.85
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 2.46
+          "usage": 2.91
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 58.62
+            "usage": 56.69
           },
           {
             "name": "CRIT Rate",
-            "usage": 41.09
+            "usage": 42.79
           },
           {
             "name": "ATK",
-            "usage": 0.25
+            "usage": 0.1
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 61.29
+            "usage": 62.34
           },
           {
             "name": "ATK",
-            "usage": 38.47
+            "usage": 37.43
           },
           {
-            "name": "HP",
-            "usage": 0.12
+            "name": "DEF",
+            "usage": 0.01
           }
         ],
         "sphere": [
           {
             "name": "Wind DMG Boost",
-            "usage": 84.92
+            "usage": 87.18
           },
           {
             "name": "ATK",
-            "usage": 14.89
+            "usage": 12.65
           },
           {
-            "name": "Quantum DMG Boost",
-            "usage": 0.13
+            "name": "Ice DMG Boost",
+            "usage": 0.03
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 96.01
+            "usage": 94.71
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 3.93
+            "usage": 5.1
           },
           {
-            "name": "HP",
+            "name": "Break Effect",
             "usage": 0.03
           }
         ]
@@ -895,367 +883,367 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1015": {
       "slug": "archer",
-      "count": 1317,
+      "count": 1256,
       "mode": "Apocalyptic Shadow",
       "lightCones": [
         {
           "name": "The Hell Where Ideals Burn",
-          "usage": 88.88
+          "usage": 89.29
         },
         {
           "name": "Cruising in the Stellar Sea",
-          "usage": 7.19
+          "usage": 6.51
         },
         {
           "name": "The Finale of a Lie",
-          "usage": 1.7
-        },
-        {
-          "name": "In the Night",
-          "usage": 0.54
+          "usage": 1.85
         },
         {
           "name": "Worrisome, Blissful",
-          "usage": 0.32
+          "usage": 0.67
+        },
+        {
+          "name": "Baptism of Pure Thought",
+          "usage": 0.54
         }
       ],
       "relicSets": [
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 77.61
+          "usage": 78.13
         },
         {
           "name": "As Navigator Isee Sees It",
-          "usage": 9.62
+          "usage": 9.99
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 8.81
+          "usage": 8.84
         },
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 2.11
+          "usage": 1.53
         },
         {
           "name": "Wavestrider Captain",
-          "usage": 0.66
+          "usage": 0.58
         }
       ],
       "planarSets": [
         {
           "name": "Tengoku@Livestream",
-          "usage": 48.64
+          "usage": 49.65
         },
         {
           "name": "Rutilant Arena",
-          "usage": 47.21
+          "usage": 47.36
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 2.07
+          "usage": 1.3
         },
         {
           "name": "Inert Salsotto",
-          "usage": 0.68
+          "usage": 0.45
         },
         {
-          "name": "Duran, Dynasty of Running Wolves",
-          "usage": 0.15
+          "name": "Bone Collection's Serene Demesne",
+          "usage": 0.23
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 77.5
+            "usage": 77.76
           },
           {
             "name": "CRIT DMG",
-            "usage": 21.75
+            "usage": 21.79
           },
           {
-            "name": "ATK",
-            "usage": 0.15
+            "name": "HP",
+            "usage": 0.13
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 96.86
+            "usage": 97.76
           },
           {
             "name": "SPD",
-            "usage": 2.47
+            "usage": 1.79
           },
           {
             "name": "HP",
-            "usage": 0.14
+            "usage": 0.08
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 89.74
+            "usage": 88.91
           },
           {
             "name": "ATK",
-            "usage": 9.44
+            "usage": 10.56
           },
           {
             "name": "HP",
-            "usage": 0.29
+            "usage": 0.35
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 86.2
+            "usage": 85.38
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 13.2
+            "usage": 14.13
           },
           {
             "name": "HP",
-            "usage": 0.16
+            "usage": 0.28
           }
         ]
       }
     },
     "1101": {
       "slug": "bronya",
-      "count": 17,
+      "count": 12,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "But the Battle Isn't Over",
-          "usage": 72.9
-        },
-        {
-          "name": "A Grounded Ascent",
-          "usage": 7.71
+          "usage": 71.56
         },
         {
           "name": "Past and Future",
-          "usage": 5.2
+          "usage": 12.21
         },
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 5.2
+          "usage": 5.96
         },
         {
-          "name": "Meshing Cogs",
-          "usage": 3.98
+          "name": "Memories of the Past",
+          "usage": 3.42
+        },
+        {
+          "name": "Carve the Moon, Weave the Clouds",
+          "usage": 3.42
         }
       ],
       "relicSets": [
         {
+          "name": "Messenger Traversing Hackerspace",
+          "usage": 31.87
+        },
+        {
           "name": "Sacerdos' Relived Ordeal",
-          "usage": 42.83
+          "usage": 28.73
+        },
+        {
+          "name": "Guard of Wuthering Snow, Messenger Traversing Hackerspace",
+          "usage": 16.92
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 30.26
-        },
-        {
-          "name": "Messenger Traversing Hackerspace",
-          "usage": 12.72
+          "usage": 9.38
         },
         {
           "name": "Messenger Traversing Hackerspace, Flex",
-          "usage": 5.2
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 3.98
+          "usage": 6.25
         }
       ],
       "planarSets": [
         {
           "name": "Broken Keel",
-          "usage": 66.42
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 16.7
+          "usage": 51.21
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 11.69
+          "usage": 32.56
         },
         {
-          "name": "Fleet of the Ageless",
-          "usage": 5.2
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 12.81
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 89.41
+            "usage": 90.53
           },
           {
             "name": "ATK",
-            "usage": 7.83
-          },
-          {
-            "name": "HP",
-            "usage": 2.76
+            "usage": 9.47
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 86.29
+            "usage": 80.94
           },
           {
             "name": "DEF",
-            "usage": 11.63
+            "usage": 15.49
           },
           {
-            "name": "ATK",
-            "usage": 2.08
+            "name": "HP",
+            "usage": 3.57
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 59.42
+            "usage": 45.33
           },
           {
             "name": "Quantum DMG Boost",
-            "usage": 12.05
+            "usage": 15.3
           },
           {
             "name": "DEF",
-            "usage": 10.85
+            "usage": 8.46
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 100
+            "usage": 98.87
+          },
+          {
+            "name": "HP",
+            "usage": 1.13
           }
         ]
       }
     },
     "1102": {
       "slug": "seele",
-      "count": 74,
+      "count": 79,
       "mode": "Apocalyptic Shadow",
       "lightCones": [
         {
           "name": "In the Night",
-          "usage": 53.59
+          "usage": 59.45
         },
         {
           "name": "The Hell Where Ideals Burn",
-          "usage": 19.48
+          "usage": 19.64
         },
         {
           "name": "Cruising in the Stellar Sea",
-          "usage": 17.08
-        },
-        {
-          "name": "River Flows in Spring",
-          "usage": 2.86
+          "usage": 13.05
         },
         {
           "name": "Swordplay",
-          "usage": 2.52
+          "usage": 2.58
+        },
+        {
+          "name": "Sleep Like the Dead",
+          "usage": 1.28
         }
       ],
       "relicSets": [
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 62.3
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 14.68
-        },
-        {
-          "name": "Scholar Lost in Erudition, Flex",
-          "usage": 6.06
+          "usage": 70.08
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 5.1
+          "usage": 6.46
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 5.3
+        },
+        {
+          "name": "Genius of Brilliant Stars, Flex",
+          "usage": 2.72
         },
         {
           "name": "Genius of Brilliant Stars, Scholar Lost in Erudition",
-          "usage": 2.86
+          "usage": 1.28
         }
       ],
       "planarSets": [
         {
           "name": "Rutilant Arena",
-          "usage": 61.73
+          "usage": 51.26
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 20.64
-        },
-        {
-          "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 3.27
-        },
-        {
-          "name": "Inert Salsotto",
-          "usage": 3.2
+          "usage": 21.49
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 2.86
+          "usage": 5.17
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 3.88
+        },
+        {
+          "name": "Space Sealing Station",
+          "usage": 2.6
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT Rate",
-            "usage": 50.07
+            "name": "CRIT DMG",
+            "usage": 51.14
           },
           {
-            "name": "CRIT DMG",
-            "usage": 45.16
+            "name": "CRIT Rate",
+            "usage": 35.45
+          },
+          {
+            "name": "ATK",
+            "usage": 0.34
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 76.65
+            "usage": 81.39
           },
           {
             "name": "SPD",
-            "usage": 18.04
+            "usage": 9.98
+          },
+          {
+            "name": "HP",
+            "usage": 0.75
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 71.51
+            "usage": 70.13
           },
           {
             "name": "ATK",
-            "usage": 24.58
+            "usage": 17.42
           },
           {
-            "name": "DEF",
-            "usage": 0.68
+            "name": "Wind DMG Boost",
+            "usage": 1.31
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 89.8
+            "usage": 83.89
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 6.51
-          },
-          {
-            "name": "Break Effect",
-            "usage": 0.54
+            "usage": 5.52
           }
         ]
       }
@@ -1263,7 +1251,7 @@ export const PRYDWEN_BUILD_GUIDES = {
     "1103": {
       "slug": "serval",
       "count": 1,
-      "mode": "Memory of Chaos",
+      "mode": "Pure Fiction",
       "lightCones": [],
       "relicSets": [],
       "planarSets": [],
@@ -1292,7 +1280,7 @@ export const PRYDWEN_BUILD_GUIDES = {
       ],
       "planarSets": [
         {
-          "name": "Broken Keel",
+          "name": "Belobog of the Architects",
           "usage": 100
         }
       ],
@@ -1326,22 +1314,22 @@ export const PRYDWEN_BUILD_GUIDES = {
     "1105": {
       "slug": "natasha",
       "count": 1,
-      "mode": "Anomaly Arbitration",
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
-          "name": "Post-Op Conversation",
+          "name": "Quid Pro Quo",
           "usage": 100
         }
       ],
       "relicSets": [
         {
-          "name": "Passerby of Wandering Cloud",
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
           "usage": 100
         }
       ],
       "planarSets": [
         {
-          "name": "Forge of the Kalpagni Lantern",
+          "name": "Fleet of the Ageless",
           "usage": 100
         }
       ],
@@ -1376,9 +1364,24 @@ export const PRYDWEN_BUILD_GUIDES = {
       "slug": "pela",
       "count": 0,
       "mode": "",
-      "lightCones": [],
-      "relicSets": [],
-      "planarSets": [],
+      "lightCones": [
+        {
+          "name": "Resolution Shines As Pearls of Sweat",
+          "usage": 100
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 100
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Broken Keel",
+          "usage": 100
+        }
+      ],
       "mainStats": {
         "body": [],
         "feet": [],
@@ -1388,49 +1391,61 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1107": {
       "slug": "clara",
-      "count": 9,
+      "count": 8,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dance at Sunset",
-          "usage": 92.31
+          "usage": 36.61
+        },
+        {
+          "name": "Thus Burns the Dawn",
+          "usage": 22.32
+        },
+        {
+          "name": "Something Irreplaceable",
+          "usage": 18.75
+        },
+        {
+          "name": "The Unreachable Side",
+          "usage": 9.82
         },
         {
           "name": "On the Fall of an Aeon",
-          "usage": 7.69
+          "usage": 6.25
         }
       ],
       "relicSets": [
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 92.31
+          "usage": 93.75
         }
       ],
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 78.46
+          "usage": 90.18
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 3.57
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 54.36
+            "usage": 70.36
           },
           {
             "name": "CRIT DMG",
-            "usage": 39.23
+            "usage": 29.64
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 91.54
-          },
-          {
-            "name": "SPD",
-            "usage": 2.05
+            "usage": 100
           }
         ],
         "sphere": [
@@ -1442,23 +1457,58 @@ export const PRYDWEN_BUILD_GUIDES = {
         "rope": [
           {
             "name": "ATK",
-            "usage": 93.59
+            "usage": 100
           }
         ]
       }
     },
     "1108": {
       "slug": "sampo",
-      "count": 0,
-      "mode": "",
-      "lightCones": [],
-      "relicSets": [],
-      "planarSets": [],
+      "count": 3,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Eyes of the Prey",
+          "usage": 100
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Prisoner in Deep Confinement",
+          "usage": 100
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Revelry by the Sea",
+          "usage": 100
+        }
+      ],
       "mainStats": {
-        "body": [],
-        "feet": [],
-        "sphere": [],
-        "rope": []
+        "body": [
+          {
+            "name": "ATK",
+            "usage": 100
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 100
+          }
+        ],
+        "sphere": [
+          {
+            "name": "Wind DMG Boost",
+            "usage": 100
+          }
+        ],
+        "rope": [
+          {
+            "name": "ATK",
+            "usage": 100
+          }
+        ]
       }
     },
     "1109": {
@@ -1505,7 +1555,7 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1112": {
       "slug": "topaz",
-      "count": 22,
+      "count": 23,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -1516,73 +1566,61 @@ export const PRYDWEN_BUILD_GUIDES = {
       "relicSets": [
         {
           "name": "The Ashblazing Grand Duke",
-          "usage": 76.92
-        },
-        {
-          "name": "Pioneer Diver of Dead Waters",
-          "usage": 23.08
+          "usage": 100
         }
       ],
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 53.85
-        },
-        {
-          "name": "Inert Salsotto",
-          "usage": 23.08
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 23.08
+          "usage": 100
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 55.18
+            "usage": 65.97
           },
           {
             "name": "CRIT Rate",
-            "usage": 44.82
+            "usage": 34.03
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 69.43
+            "usage": 70.84
           },
           {
             "name": "ATK",
-            "usage": 30.57
+            "usage": 29.16
           }
         ],
         "sphere": [
           {
             "name": "Fire DMG Boost",
-            "usage": 96.59
+            "usage": 95.14
           },
           {
             "name": "ATK",
-            "usage": 3.41
+            "usage": 4.87
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 91.8
+            "usage": 86.11
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 8.2
+            "usage": 13.89
           }
         ]
       }
     },
     "1201": {
       "slug": "qingque",
-      "count": 10,
+      "count": 8,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -1592,7 +1630,7 @@ export const PRYDWEN_BUILD_GUIDES = {
       ],
       "relicSets": [
         {
-          "name": "Poet of Mourning Collapse",
+          "name": "Genius of Brilliant Stars",
           "usage": 100
         }
       ],
@@ -1606,41 +1644,37 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 88.24
+            "usage": 52.22
           },
           {
             "name": "CRIT Rate",
-            "usage": 11.76
+            "usage": 47.78
           }
         ],
         "feet": [
           {
-            "name": "ATK",
-            "usage": 73.53
+            "name": "SPD",
+            "usage": 64.45
           },
           {
-            "name": "SPD",
-            "usage": 26.47
+            "name": "ATK",
+            "usage": 35.55
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 59.8
+            "usage": 52.22
           },
           {
             "name": "Quantum DMG Boost",
-            "usage": 36.27
+            "usage": 43.33
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 94.12
-          },
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 1.96
+            "usage": 95.56
           }
         ]
       }
@@ -1648,185 +1682,154 @@ export const PRYDWEN_BUILD_GUIDES = {
     "1202": {
       "slug": "tingyun",
       "count": 2,
-      "mode": "Pure Fiction",
-      "lightCones": [
-        {
-          "name": "But the Battle Isn't Over",
-          "usage": 100
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Sacerdos' Relived Ordeal",
-          "usage": 100
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 100
-        }
-      ],
+      "mode": "Apocalyptic Shadow",
+      "lightCones": [],
+      "relicSets": [],
+      "planarSets": [],
       "mainStats": {
-        "body": [
-          {
-            "name": "HP",
-            "usage": 50
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 50
-          }
-        ],
-        "sphere": [
-          {
-            "name": "HP",
-            "usage": 50
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 50
-          }
-        ]
+        "body": [],
+        "feet": [],
+        "sphere": [],
+        "rope": []
       }
     },
     "1203": {
       "slug": "luocha",
-      "count": 44,
+      "count": 38,
       "mode": "Anomaly Arbitration",
       "lightCones": [
         {
           "name": "Perfect Timing",
-          "usage": 34.97
+          "usage": 34.55
         },
         {
           "name": "Echoes of the Coffin",
-          "usage": 29.5
-        },
-        {
-          "name": "Time Waits for No One",
-          "usage": 8.84
+          "usage": 30.16
         },
         {
           "name": "Quid Pro Quo",
-          "usage": 8.43
+          "usage": 14.97
+        },
+        {
+          "name": "Time Waits for No One",
+          "usage": 6.1
         },
         {
           "name": "Shared Feeling",
-          "usage": 7.24
+          "usage": 3.53
         }
       ],
       "relicSets": [
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 36.81
+          "usage": 35.35
         },
         {
           "name": "Passerby of Wandering Cloud, Musketeer of Wild Wheat",
-          "usage": 16.99
-        },
-        {
-          "name": "Passerby of Wandering Cloud, Messenger Traversing Hackerspace",
-          "usage": 6.89
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 6.07
+          "usage": 16.9
         },
         {
           "name": "Passerby of Wandering Cloud",
-          "usage": 5.81
+          "usage": 11.44
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
+          "usage": 6.1
+        },
+        {
+          "name": "Passerby of Wandering Cloud, Messenger Traversing Hackerspace",
+          "usage": 5.4
         }
       ],
       "planarSets": [
         {
           "name": "Broken Keel",
-          "usage": 47.72
+          "usage": 40.11
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 20.58
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 11.22
+          "usage": 18.45
         },
         {
           "name": "Fleet of the Ageless",
-          "usage": 8
+          "usage": 11.5
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 11.5
         },
         {
           "name": "Space Sealing Station",
-          "usage": 5.41
+          "usage": 8.87
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 74.2
+            "usage": 75.94
           },
           {
             "name": "ATK",
-            "usage": 21.5
+            "usage": 21.01
           },
           {
-            "name": "HP",
-            "usage": 2.11
+            "name": "DEF",
+            "usage": 1.93
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 88.24
+            "usage": 87.9
           },
           {
             "name": "ATK",
-            "usage": 11.76
+            "usage": 12.1
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 87.7
+            "usage": 83.15
           },
           {
             "name": "HP",
-            "usage": 6.94
+            "usage": 9.15
           },
           {
-            "name": "Imaginary DMG Boost",
-            "usage": 2.15
+            "name": "Wind DMG Boost",
+            "usage": 3.35
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 48.54
+            "usage": 47.88
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 47.94
+            "usage": 44.41
           },
           {
             "name": "HP",
-            "usage": 3.52
+            "usage": 5.77
           }
         ]
       }
     },
     "1204": {
       "slug": "jing-yuan",
-      "count": 50,
+      "count": 63,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Before Dawn",
-          "usage": 100
+          "usage": 94.45
+        },
+        {
+          "name": "A Dream Scented in Wheat",
+          "usage": 5.55
         }
       ],
       "relicSets": [
@@ -1838,165 +1841,212 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 87.5
+          "usage": 94.45
         },
         {
           "name": "Inert Salsotto",
-          "usage": 12.5
+          "usage": 5.55
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT DMG",
-            "usage": 52.64
+            "name": "CRIT Rate",
+            "usage": 51
           },
           {
-            "name": "CRIT Rate",
-            "usage": 46.98
+            "name": "CRIT DMG",
+            "usage": 44.46
+          },
+          {
+            "name": "ATK",
+            "usage": 4.54
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 89.27
+            "usage": 73.55
           },
           {
             "name": "ATK",
-            "usage": 10.73
+            "usage": 26.45
           }
         ],
         "sphere": [
           {
             "name": "Lightning DMG Boost",
-            "usage": 76.08
+            "usage": 70.16
           },
           {
             "name": "ATK",
-            "usage": 23.92
+            "usage": 29.84
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 99.63
+            "usage": 96.6
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.37
+            "usage": 3.4
           }
         ]
       }
     },
     "1205": {
       "slug": "blade",
-      "count": 37,
+      "count": 33,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "The Unreachable Side",
-          "usage": 70.42
-        },
-        {
-          "name": "A Secret Vow",
-          "usage": 18.12
+          "usage": 88.36
         },
         {
           "name": "Ninja Record: Sound Hunt",
-          "usage": 11.46
+          "usage": 5.82
+        },
+        {
+          "name": "A Secret Vow",
+          "usage": 5.82
         }
       ],
       "relicSets": [
         {
           "name": "Longevous Disciple",
-          "usage": 48.75
+          "usage": 49.21
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 33.12
+          "usage": 31.75
+        },
+        {
+          "name": "Eagle of Twilight Line, Scholar Lost in Erudition",
+          "usage": 13.23
         },
         {
           "name": "Eagle of Twilight Line, Flex",
-          "usage": 18.12
+          "usage": 5.82
         }
       ],
       "planarSets": [
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 72.92
+          "usage": 69.84
         },
         {
           "name": "Rutilant Arena",
-          "usage": 15.62
+          "usage": 13.23
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 11.11
         },
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 11.46
+          "usage": 5.82
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 97.9
-          },
-          {
-            "name": "HP",
-            "usage": 1.22
+            "usage": 91.62
           },
           {
             "name": "CRIT Rate",
-            "usage": 0.88
+            "usage": 6.82
+          },
+          {
+            "name": "HP",
+            "usage": 1.56
           }
         ],
         "feet": [
           {
-            "name": "HP",
-            "usage": 56.26
+            "name": "SPD",
+            "usage": 53.14
           },
           {
-            "name": "SPD",
-            "usage": 43.74
+            "name": "HP",
+            "usage": 46.86
           }
         ],
         "sphere": [
           {
             "name": "Wind DMG Boost",
-            "usage": 85.66
+            "usage": 88.13
           },
           {
             "name": "HP",
-            "usage": 14.27
-          },
-          {
-            "name": "Ice DMG Boost",
-            "usage": 0.07
+            "usage": 11.87
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 98.78
+            "usage": 97.96
           },
           {
             "name": "ATK",
-            "usage": 1.22
+            "usage": 1.62
+          },
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 0.42
           }
         ]
       }
     },
     "1206": {
       "slug": "sushang",
-      "count": 0,
-      "mode": "",
-      "lightCones": [],
-      "relicSets": [],
-      "planarSets": [],
+      "count": 1,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Sailing Towards A Second Life",
+          "usage": 100
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Iron Cavalry Against the Scourge",
+          "usage": 100
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Forge of the Kalpagni Lantern",
+          "usage": 100
+        }
+      ],
       "mainStats": {
-        "body": [],
-        "feet": [],
-        "sphere": [],
-        "rope": []
+        "body": [
+          {
+            "name": "HP",
+            "usage": 100
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 100
+          }
+        ],
+        "sphere": [
+          {
+            "name": "Imaginary DMG Boost",
+            "usage": 100
+          }
+        ],
+        "rope": [
+          {
+            "name": "Break Effect",
+            "usage": 100
+          }
+        ]
       }
     },
     "1207": {
@@ -2015,180 +2065,141 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1208": {
       "slug": "fu-xuan",
-      "count": 94,
+      "count": 51,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "She Already Shut Her Eyes",
-          "usage": 61.96
+          "usage": 64.89
         },
         {
           "name": "Texture of Memories",
-          "usage": 18.02
-        },
-        {
-          "name": "Moment of Victory",
-          "usage": 7.21
+          "usage": 18.81
         },
         {
           "name": "Day One of My New Life",
-          "usage": 6.47
+          "usage": 8.72
+        },
+        {
+          "name": "Moment of Victory",
+          "usage": 4.52
         },
         {
           "name": "Trend of the Universal Market",
-          "usage": 2.36
+          "usage": 1.52
         }
       ],
       "relicSets": [
         {
           "name": "Guard of Wuthering Snow, Longevous Disciple",
-          "usage": 53.28
+          "usage": 50.54
         },
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 17.17
+          "usage": 23.89
         },
         {
           "name": "Messenger Traversing Hackerspace, Longevous Disciple",
           "usage": 14.4
         },
         {
-          "name": "Longevous Disciple",
-          "usage": 5.21
+          "name": "Diviner of Distant Reach, Warrior Goddess of Sun and Thunder",
+          "usage": 3.36
         },
         {
-          "name": "Longevous Disciple, Divine-Querying Master Smith",
-          "usage": 3.16
+          "name": "Guard of Wuthering Snow, Messenger Traversing Hackerspace",
+          "usage": 3.28
         }
       ],
       "planarSets": [
         {
           "name": "Broken Keel",
-          "usage": 53.15
+          "usage": 47.02
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 12.71
+          "usage": 19.69
         },
         {
           "name": "Fleet of the Ageless",
-          "usage": 12.45
+          "usage": 15.98
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 6.85
+          "usage": 4.52
         },
         {
-          "name": "Penacony, Land of the Dreams",
-          "usage": 6.38
+          "name": "Giant Tree of Rapt Brooding",
+          "usage": 4.16
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 80.63
+            "usage": 77.67
           },
           {
             "name": "DEF",
-            "usage": 8.18
+            "usage": 8.6
           },
           {
-            "name": "Outgoing Healing Boost",
-            "usage": 5.69
+            "name": "CRIT DMG",
+            "usage": 4.03
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 73.05
+            "usage": 69.91
           },
           {
             "name": "HP",
-            "usage": 25.63
-          },
-          {
-            "name": "DEF",
-            "usage": 1.32
+            "usage": 30.09
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 83.37
+            "usage": 86.71
           },
           {
             "name": "DEF",
-            "usage": 7.03
+            "usage": 5.83
           },
           {
             "name": "Quantum DMG Boost",
-            "usage": 6.32
+            "usage": 5.73
           }
         ],
         "rope": [
           {
-            "name": "Energy Regeneration Rate",
-            "usage": 50.59
-          },
-          {
             "name": "HP",
-            "usage": 47.9
+            "usage": 53.14
           },
           {
-            "name": "ATK",
-            "usage": 0.46
+            "name": "Energy Regeneration Rate",
+            "usage": 44.93
+          },
+          {
+            "name": "DEF",
+            "usage": 0.94
           }
         ]
       }
     },
     "1209": {
       "slug": "yanqing",
-      "count": 2,
+      "count": 3,
       "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Baptism of Pure Thought",
-          "usage": 100
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Scholar Lost in Erudition",
-          "usage": 100
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Rutilant Arena",
-          "usage": 100
-        }
-      ],
+      "lightCones": [],
+      "relicSets": [],
+      "planarSets": [],
       "mainStats": {
-        "body": [
-          {
-            "name": "CRIT DMG",
-            "usage": 100
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 100
-          }
-        ],
-        "sphere": [
-          {
-            "name": "Ice DMG Boost",
-            "usage": 100
-          }
-        ],
-        "rope": [
-          {
-            "name": "ATK",
-            "usage": 100
-          }
-        ]
+        "body": [],
+        "feet": [],
+        "sphere": [],
+        "rope": []
       }
     },
     "1210": {
@@ -2207,69 +2218,61 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1211": {
       "slug": "bailu",
-      "count": 4,
-      "mode": "Memory of Chaos",
+      "count": 2,
+      "mode": "Anomaly Arbitration",
       "lightCones": [
         {
-          "name": "Time Waits for No One",
-          "usage": 40.66
+          "name": "Quid Pro Quo",
+          "usage": 42.31
         },
         {
-          "name": "Quid Pro Quo",
-          "usage": 34.62
+          "name": "Time Waits for No One",
+          "usage": 19.23
         },
         {
           "name": "Post-Op Conversation",
-          "usage": 24.73
+          "usage": 19.23
+        },
+        {
+          "name": "Multiplication",
+          "usage": 19.23
         }
       ],
       "relicSets": [
         {
           "name": "Passerby of Wandering Cloud, Messenger Traversing Hackerspace",
-          "usage": 34.62
+          "usage": 42.31
         },
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 31.87
+          "usage": 38.46
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 8.79
+          "usage": 19.23
         }
       ],
       "planarSets": [
         {
           "name": "Broken Keel",
-          "usage": 50.55
+          "usage": 61.54
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 15.93
-        },
-        {
-          "name": "Fleet of the Ageless",
-          "usage": 8.79
+          "usage": 38.46
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 68.87
-          },
-          {
-            "name": "HP",
-            "usage": 9.34
+            "usage": 100
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 65.93
-          },
-          {
-            "name": "HP",
-            "usage": 12.27
+            "usage": 100
           }
         ],
         "sphere": [
@@ -2281,14 +2284,18 @@ export const PRYDWEN_BUILD_GUIDES = {
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 100
+            "usage": 61.54
+          },
+          {
+            "name": "HP",
+            "usage": 38.46
           }
         ]
       }
     },
     "1212": {
       "slug": "jingliu",
-      "count": 48,
+      "count": 41,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -2305,94 +2312,90 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 57.14
+          "usage": 83.33
         },
         {
           "name": "Rutilant Arena",
-          "usage": 42.86
+          "usage": 16.67
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 77.04
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 17.19
+            "usage": 88.44
           },
           {
             "name": "CRIT Rate",
-            "usage": 5.76
+            "usage": 7.33
+          },
+          {
+            "name": "CRIT DMG",
+            "usage": 4.23
           }
         ],
         "feet": [
           {
             "name": "HP",
-            "usage": 56.37
+            "usage": 54.5
           },
           {
             "name": "SPD",
-            "usage": 43.63
+            "usage": 45.5
           }
         ],
         "sphere": [
           {
             "name": "Ice DMG Boost",
-            "usage": 78.18
+            "usage": 66.69
           },
           {
             "name": "HP",
-            "usage": 21.24
+            "usage": 33.31
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 98.86
+            "usage": 100
           }
         ]
       }
     },
     "1213": {
       "slug": "imbibitor-lunae",
-      "count": 29,
+      "count": 50,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Brighter Than the Sun",
-          "usage": 81.25
+          "usage": 85.42
         },
         {
           "name": "Thus Burns the Dawn",
-          "usage": 12.5
-        },
-        {
-          "name": "Under the Blue Sky",
-          "usage": 6.25
+          "usage": 14.58
         }
       ],
       "relicSets": [
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 41.67
+          "usage": 33.33
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 20.83
+          "usage": 25
+        },
+        {
+          "name": "The Edacious Heretic",
+          "usage": 14.58
+        },
+        {
+          "name": "Musketeer of Wild Wheat",
+          "usage": 14.58
         },
         {
           "name": "Musketeer of Wild Wheat, Wavestrider Captain",
-          "usage": 18.75
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Scholar Lost in Erudition",
           "usage": 12.5
-        },
-        {
-          "name": "Wastelander of Banditry Desert, Musketeer of Wild Wheat",
-          "usage": 6.25
         }
       ],
       "planarSets": [
@@ -2402,63 +2405,59 @@ export const PRYDWEN_BUILD_GUIDES = {
         },
         {
           "name": "Rutilant Arena",
-          "usage": 33.33
+          "usage": 39.58
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 18.75
+          "usage": 12.5
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 88.54
+            "usage": 89.36
           },
           {
             "name": "CRIT Rate",
-            "usage": 7.71
-          },
-          {
-            "name": "ATK",
-            "usage": 3.75
+            "usage": 10.64
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 90.62
+            "usage": 90.73
           },
           {
             "name": "SPD",
-            "usage": 9.38
+            "usage": 9.27
           }
         ],
         "sphere": [
           {
             "name": "Imaginary DMG Boost",
-            "usage": 85.42
+            "usage": 77.08
           },
           {
             "name": "ATK",
-            "usage": 14.58
+            "usage": 22.92
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 96.04
+            "usage": 88.62
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 3.96
+            "usage": 11.04
           }
         ]
       }
     },
     "1214": {
       "slug": "xueyi",
-      "count": 3,
+      "count": 4,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -2482,45 +2481,37 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 83.34
+            "usage": 71.67
           },
           {
             "name": "HP",
-            "usage": 16.66
+            "usage": 28.33
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 75
+            "usage": 90
           },
           {
             "name": "ATK",
-            "usage": 25
+            "usage": 6.67
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 70.84
+            "usage": 68.33
           },
           {
             "name": "HP",
-            "usage": 16.66
-          },
-          {
-            "name": "Quantum DMG Boost",
-            "usage": 12.5
+            "usage": 28.33
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 91.67
-          },
-          {
-            "name": "ATK",
-            "usage": 8.33
+            "usage": 96.67
           }
         ]
       }
@@ -2541,343 +2532,375 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1217": {
       "slug": "huohuo",
-      "count": 671,
+      "count": 479,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Night of Fright",
-          "usage": 41.61
+          "usage": 43.1
         },
         {
           "name": "Post-Op Conversation",
-          "usage": 20.96
+          "usage": 21.22
         },
         {
           "name": "Shared Feeling",
-          "usage": 19.54
+          "usage": 18.05
         },
         {
           "name": "Quid Pro Quo",
-          "usage": 10.17
+          "usage": 10.48
         },
         {
           "name": "Time Waits for No One",
-          "usage": 3.62
+          "usage": 3.1
         }
       ],
       "relicSets": [
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 58.52
+          "usage": 60.39
         },
         {
           "name": "Messenger Traversing Hackerspace",
-          "usage": 13.7
+          "usage": 13.27
         },
         {
           "name": "Passerby of Wandering Cloud",
-          "usage": 9.61
+          "usage": 8
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 3.42
+          "usage": 2.92
         },
         {
           "name": "Messenger Traversing Hackerspace, Longevous Disciple",
-          "usage": 2.79
+          "usage": 2.85
         }
       ],
       "planarSets": [
         {
+          "name": "Fleet of the Ageless",
+          "usage": 24.82
+        },
+        {
           "name": "Broken Keel",
-          "usage": 27.75
+          "usage": 24.41
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 24.26
-        },
-        {
-          "name": "Fleet of the Ageless",
-          "usage": 23.65
+          "usage": 24.19
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 11.72
+          "usage": 12.92
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 7.88
+          "usage": 9.78
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 86.09
+            "usage": 86.39
           },
           {
             "name": "HP",
-            "usage": 12.45
+            "usage": 11.29
           },
           {
             "name": "ATK",
-            "usage": 0.89
+            "usage": 0.93
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 96.02
+            "usage": 95.84
           },
           {
             "name": "HP",
-            "usage": 3.54
+            "usage": 3.4
           },
           {
             "name": "ATK",
-            "usage": 0.2
+            "usage": 0.29
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 94.58
+            "usage": 93.96
           },
           {
             "name": "DEF",
-            "usage": 1.5
+            "usage": 1.84
           },
           {
-            "name": "ATK",
-            "usage": 1.16
+            "name": "Wind DMG Boost",
+            "usage": 0.97
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 93.7
+            "usage": 93.99
           },
           {
             "name": "HP",
-            "usage": 5.6
+            "usage": 4.97
           },
           {
-            "name": "ATK",
-            "usage": 0.3
+            "name": "Break Effect",
+            "usage": 0.12
           }
         ]
       }
     },
     "1218": {
       "slug": "jiaoqiu",
-      "count": 33,
-      "mode": "Memory of Chaos",
+      "count": 42,
+      "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Those Many Springs",
-          "usage": 93.02
+          "usage": 86.34
         },
         {
-          "name": "Before the Tutorial Mission Starts",
-          "usage": 3.65
+          "name": "Solitary Healing",
+          "usage": 4.33
         },
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 3.33
+          "usage": 3.87
+        },
+        {
+          "name": "Before the Tutorial Mission Starts",
+          "usage": 3.3
+        },
+        {
+          "name": "Eyes of the Prey",
+          "usage": 2.17
         }
       ],
       "relicSets": [
         {
           "name": "Prisoner in Deep Confinement",
-          "usage": 60.06
+          "usage": 58.09
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 24.13
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
-          "usage": 4.72
-        },
-        {
-          "name": "Pioneer Diver of Dead Waters, Messenger Traversing Hackerspace",
-          "usage": 4.11
+          "usage": 19.58
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 3.65
+          "usage": 5.47
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
+          "usage": 4.33
+        },
+        {
+          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
+          "usage": 2.17
         }
       ],
       "planarSets": [
         {
           "name": "Revelry by the Sea",
-          "usage": 39.53
+          "usage": 36.32
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 23.53
+          "usage": 28.27
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 15.81
+          "usage": 16.28
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 12.76
+          "usage": 11.5
         },
         {
-          "name": "Pan-Cosmic Commercial Enterprise",
-          "usage": 4.72
+          "name": "Forge of the Kalpagni Lantern",
+          "usage": 3.3
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Effect Hit Rate",
-            "usage": 82.73
+            "usage": 89.33
           },
           {
             "name": "ATK",
-            "usage": 14
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 1.63
+            "usage": 10.67
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 95.27
+            "usage": 96.35
           },
           {
             "name": "ATK",
-            "usage": 4.73
+            "usage": 3.43
           }
         ],
         "sphere": [
           {
             "name": "Fire DMG Boost",
-            "usage": 65.94
-          },
-          {
-            "name": "HP",
-            "usage": 19.45
+            "usage": 73.92
           },
           {
             "name": "ATK",
-            "usage": 13.99
+            "usage": 12.33
+          },
+          {
+            "name": "HP",
+            "usage": 7.18
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 82.18
+            "usage": 81.27
           },
           {
             "name": "ATK",
-            "usage": 17.82
+            "usage": 18.5
           }
         ]
       }
     },
     "1220": {
       "slug": "feixiao",
-      "count": 123,
-      "mode": "Apocalyptic Shadow",
+      "count": 147,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "I Venture Forth to Hunt",
-          "usage": 86.58
+          "usage": 81.08
         },
         {
           "name": "Worrisome, Blissful",
-          "usage": 3.49
+          "usage": 7.15
         },
         {
           "name": "Baptism of Pure Thought",
-          "usage": 2.88
-        },
-        {
-          "name": "Swordplay",
-          "usage": 2.32
+          "usage": 3.11
         },
         {
           "name": "In the Night",
-          "usage": 1.84
+          "usage": 2.21
+        },
+        {
+          "name": "Swordplay",
+          "usage": 2.16
         }
       ],
       "relicSets": [
         {
           "name": "Eagle of Twilight Line",
-          "usage": 66.6
+          "usage": 66.22
         },
         {
           "name": "The Wind-Soaring Valorous",
-          "usage": 32.3
+          "usage": 30.67
+        },
+        {
+          "name": "Eagle of Twilight Line, Flex",
+          "usage": 1.05
+        },
+        {
+          "name": "Pioneer Diver of Dead Waters, Flex",
+          "usage": 0.58
+        },
+        {
+          "name": "Pioneer Diver of Dead Waters",
+          "usage": 0.53
         }
       ],
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 94.3
+          "usage": 95.45
         },
         {
           "name": "Inert Salsotto",
-          "usage": 3.44
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 2.27
+          "usage": 4.12
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 71.1
+            "usage": 69.31
           },
           {
             "name": "CRIT DMG",
-            "usage": 28.9
+            "usage": 29.85
+          },
+          {
+            "name": "ATK",
+            "usage": 0.19
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 50.17
+            "usage": 54.15
           },
           {
             "name": "SPD",
-            "usage": 49.05
+            "usage": 45.85
           }
         ],
         "sphere": [
           {
             "name": "Wind DMG Boost",
-            "usage": 90.2
+            "usage": 88.87
           },
           {
             "name": "ATK",
-            "usage": 9.8
+            "usage": 11.13
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 100
+            "usage": 98.79
+          },
+          {
+            "name": "Break Effect",
+            "usage": 0.83
+          },
+          {
+            "name": "HP",
+            "usage": 0.38
           }
         ]
       }
     },
     "1221": {
       "slug": "yunli",
-      "count": 22,
-      "mode": "Apocalyptic Shadow",
+      "count": 29,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dance at Sunset",
-          "usage": 100
+          "usage": 92.2
+        },
+        {
+          "name": "Thus Burns the Dawn",
+          "usage": 4.66
+        },
+        {
+          "name": "Something Irreplaceable",
+          "usage": 3.14
         }
       ],
       "relicSets": [
@@ -2889,181 +2912,185 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 67.24
+          "usage": 80.36
         },
         {
           "name": "Inert Salsotto",
-          "usage": 32.76
+          "usage": 19.63
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 78.88
+            "usage": 80.4
           },
           {
             "name": "CRIT DMG",
-            "usage": 21.12
+            "usage": 19.6
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 100
+            "usage": 96.06
+          },
+          {
+            "name": "SPD",
+            "usage": 3.94
           }
         ],
         "sphere": [
           {
             "name": "Physical DMG Boost",
-            "usage": 97.25
+            "usage": 90.11
           },
           {
             "name": "ATK",
-            "usage": 2.75
+            "usage": 9.89
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 79.91
+            "usage": 61.67
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 20.09
+            "usage": 38.33
           }
         ]
       }
     },
     "1222": {
       "slug": "lingsha",
-      "count": 250,
+      "count": 215,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Scent Alone Stays True",
-          "usage": 47.02
+          "usage": 47.6
         },
         {
           "name": "What Is Real?",
-          "usage": 18.61
+          "usage": 21.1
         },
         {
           "name": "Post-Op Conversation",
-          "usage": 9.23
-        },
-        {
-          "name": "Quid Pro Quo",
-          "usage": 8.3
+          "usage": 8.93
         },
         {
           "name": "Echoes of the Coffin",
-          "usage": 7.34
+          "usage": 7.22
+        },
+        {
+          "name": "Dream's Montage",
+          "usage": 5.91
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 76.88
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 4.16
-        },
-        {
-          "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
-          "usage": 4.11
+          "usage": 76.98
         },
         {
           "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 3.78
+          "usage": 4.6
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 3.27
+        },
+        {
+          "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
+          "usage": 3.12
         },
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 2.4
+          "usage": 2.44
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 85.4
+          "usage": 85.15
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 3.84
+          "usage": 3.71
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 3.15
+          "usage": 3.37
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 2.6
+          "usage": 2.41
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 1.16
+          "usage": 2.31
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 80.36
+            "usage": 79.21
           },
           {
             "name": "ATK",
-            "usage": 17.79
+            "usage": 17.82
           },
           {
             "name": "HP",
-            "usage": 1.25
+            "usage": 2.01
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.63
+            "usage": 97.52
           },
           {
             "name": "ATK",
-            "usage": 1.37
+            "usage": 2.48
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 88.11
-          },
-          {
-            "name": "Fire DMG Boost",
-            "usage": 6.15
+            "usage": 89.16
           },
           {
             "name": "HP",
-            "usage": 3.38
+            "usage": 4.41
+          },
+          {
+            "name": "Fire DMG Boost",
+            "usage": 3.62
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 61.64
+            "usage": 60.95
           },
           {
             "name": "Break Effect",
-            "usage": 36.13
+            "usage": 36.38
           },
           {
             "name": "ATK",
-            "usage": 1.67
+            "usage": 2.13
           }
         ]
       }
     },
     "1223": {
       "slug": "moze",
-      "count": 2,
-      "mode": "Apocalyptic Shadow",
+      "count": 0,
+      "mode": "",
       "lightCones": [],
       "relicSets": [],
       "planarSets": [],
@@ -3076,8 +3103,8 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1224": {
       "slug": "march-7th-swordmaster",
-      "count": 11,
-      "mode": "Pure Fiction",
+      "count": 10,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Cruising in the Stellar Sea",
@@ -3086,29 +3113,24 @@ export const PRYDWEN_BUILD_GUIDES = {
       ],
       "relicSets": [
         {
-          "name": "Eagle of Twilight Line",
+          "name": "Eagle of Twilight Line, The Ashblazing Grand Duke",
           "usage": 100
         }
       ],
-      "planarSets": [
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 100
-        }
-      ],
+      "planarSets": [],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 66.67
-          },
-          {
-            "name": "HP",
-            "usage": 16.67
+            "usage": 57.14
           },
           {
             "name": "CRIT DMG",
-            "usage": 16.67
+            "usage": 28.57
+          },
+          {
+            "name": "HP",
+            "usage": 14.29
           }
         ],
         "feet": [
@@ -3120,816 +3142,925 @@ export const PRYDWEN_BUILD_GUIDES = {
         "sphere": [
           {
             "name": "Imaginary DMG Boost",
-            "usage": 50
+            "usage": 57.14
           },
           {
             "name": "ATK",
-            "usage": 50
+            "usage": 42.86
           }
         ],
         "rope": [
           {
-            "name": "ATK",
-            "usage": 50
+            "name": "Energy Regeneration Rate",
+            "usage": 42.86
           },
           {
-            "name": "Energy Regeneration Rate",
-            "usage": 33.33
+            "name": "ATK",
+            "usage": 42.86
           },
           {
             "name": "HP",
-            "usage": 16.67
+            "usage": 14.29
           }
         ]
       }
     },
     "1225": {
       "slug": "tingyun-fugue",
-      "count": 701,
-      "mode": "Apocalyptic Shadow",
+      "count": 676,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Long Road Leads Home",
-          "usage": 47.39
+          "usage": 47.17
         },
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 30.93
+          "usage": 30.28
         },
         {
           "name": "Solitary Healing",
-          "usage": 10.57
+          "usage": 10.89
         },
         {
           "name": "Lies Dance on the Breeze",
-          "usage": 3.55
+          "usage": 3.53
         },
         {
-          "name": "Never Forget Her Flame",
-          "usage": 2.7
+          "name": "Before the Tutorial Mission Starts",
+          "usage": 2.95
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 71.42
+          "usage": 71.84
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 11.41
+          "usage": 11.33
         },
         {
           "name": "Thief of Shooting Meteor",
-          "usage": 5.91
+          "usage": 5
         },
         {
           "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
-          "usage": 5.15
+          "usage": 4.68
         },
         {
           "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 3.6
+          "usage": 3.75
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 80.37
+          "usage": 78.4
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 6.55
+          "usage": 8.12
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 6.15
+          "usage": 6.93
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 5.48
+          "usage": 4.81
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 0.57
+          "usage": 0.44
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Effect Hit Rate",
-            "usage": 89
+            "usage": 89.33
           },
           {
             "name": "HP",
-            "usage": 6.66
+            "usage": 6.4
           },
           {
             "name": "ATK",
-            "usage": 2.13
+            "usage": 1.94
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.13
-          },
-          {
-            "name": "HP",
-            "usage": 0.38
+            "usage": 98.95
           },
           {
             "name": "ATK",
-            "usage": 0.18
+            "usage": 0.35
+          },
+          {
+            "name": "HP",
+            "usage": 0.26
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 62.36
+            "usage": 60.97
           },
           {
             "name": "DEF",
-            "usage": 19.56
+            "usage": 20.64
           },
           {
             "name": "ATK",
-            "usage": 10.79
+            "usage": 11.52
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 52.95
+            "usage": 51.67
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 46.47
+            "usage": 47
           },
           {
             "name": "HP",
-            "usage": 0.35
+            "usage": 0.66
           }
         ]
       }
     },
     "1301": {
       "slug": "gallagher",
-      "count": 16,
+      "count": 8,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Quid Pro Quo",
-          "usage": 34.35
-        },
-        {
-          "name": "Multiplication",
-          "usage": 31.9
-        },
-        {
-          "name": "Dream's Montage",
-          "usage": 10.46
-        },
-        {
-          "name": "What Is Real?",
-          "usage": 10.31
+          "usage": 25.35
         },
         {
           "name": "Post-Op Conversation",
-          "usage": 8.77
+          "usage": 20.14
+        },
+        {
+          "name": "Dream's Montage",
+          "usage": 19.98
+        },
+        {
+          "name": "What Is Real?",
+          "usage": 19.45
+        },
+        {
+          "name": "Multiplication",
+          "usage": 9.73
         }
       ],
       "relicSets": [
         {
-          "name": "Thief of Shooting Meteor",
-          "usage": 21.68
-        },
-        {
-          "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 20.46
-        },
-        {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 19.41
+          "usage": 34.06
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 18.46
+          "usage": 26.67
         },
         {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 10.31
+          "name": "Thief of Shooting Meteor",
+          "usage": 15.79
+        },
+        {
+          "name": "Iron Cavalry Against the Scourge",
+          "usage": 9.73
+        },
+        {
+          "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
+          "usage": 5.37
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 29.96
+          "usage": 34.91
         },
         {
           "name": "Broken Keel",
-          "usage": 22.67
-        },
-        {
-          "name": "Talia: Kingdom of Banditry",
-          "usage": 21.72
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 11.58
+          "usage": 25.67
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 11.26
+          "usage": 22.31
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 11.75
+        },
+        {
+          "name": "Talia: Kingdom of Banditry",
+          "usage": 5.37
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 88.31
-          },
-          {
-            "name": "HP",
-            "usage": 6.23
+            "usage": 85.11
           },
           {
             "name": "DEF",
-            "usage": 5.46
+            "usage": 8.51
+          },
+          {
+            "name": "HP",
+            "usage": 5.09
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 97.61
-          },
-          {
-            "name": "HP",
-            "usage": 2.39
+            "usage": 98.71
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 58.17
+            "usage": 53.57
           },
           {
             "name": "DEF",
-            "usage": 22.98
+            "usage": 37.93
           },
           {
-            "name": "ATK",
-            "usage": 8.61
+            "name": "Fire DMG Boost",
+            "usage": 8.51
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 87.11
+            "usage": 82.53
           },
           {
             "name": "Break Effect",
-            "usage": 9.3
+            "usage": 16.18
           },
           {
             "name": "HP",
-            "usage": 2.86
+            "usage": 1.29
           }
         ]
       }
     },
     "1302": {
       "slug": "argenti",
-      "count": 11,
+      "count": 6,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "An Instant Before A Gaze",
-          "usage": 68.75
+          "usage": 60
+        },
+        {
+          "name": "Life Should Be Cast to Flames",
+          "usage": 20
         },
         {
           "name": "After the Charmony Fall",
-          "usage": 22.92
-        },
-        {
-          "name": "Today Is Another Peaceful Day",
-          "usage": 8.33
+          "usage": 20
         }
       ],
       "relicSets": [
         {
-          "name": "Scholar Lost in Erudition",
-          "usage": 54.17
+          "name": "Eagle of Twilight Line",
+          "usage": 60
         },
         {
-          "name": "Eagle of Twilight Line",
-          "usage": 45.83
+          "name": "Scholar Lost in Erudition",
+          "usage": 20
+        },
+        {
+          "name": "Champion of Streetwise Boxing",
+          "usage": 20
         }
       ],
       "planarSets": [
         {
-          "name": "Inert Salsotto",
-          "usage": 45.83
+          "name": "Sigonia, the Unclaimed Desolation",
+          "usage": 40
         },
         {
-          "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 31.25
+          "name": "Rutilant Arena",
+          "usage": 20
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 20
         },
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 22.92
+          "usage": 20
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT DMG",
-            "usage": 61.41
+            "name": "CRIT Rate",
+            "usage": 33.33
           },
           {
-            "name": "CRIT Rate",
-            "usage": 19.62
+            "name": "CRIT DMG",
+            "usage": 33.33
           },
           {
             "name": "DEF",
-            "usage": 18.97
+            "usage": 16.67
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 60.77
+            "usage": 66.67
           },
           {
             "name": "ATK",
-            "usage": 39.23
+            "usage": 33.33
           }
         ],
         "sphere": [
           {
             "name": "Physical DMG Boost",
-            "usage": 59.49
+            "usage": 50
           },
           {
             "name": "ATK",
-            "usage": 20.9
+            "usage": 33.33
           },
           {
             "name": "DEF",
-            "usage": 18.97
+            "usage": 16.67
           }
         ],
         "rope": [
           {
-            "name": "ATK",
-            "usage": 61.41
-          },
-          {
             "name": "Energy Regeneration Rate",
-            "usage": 37.95
+            "usage": 66.67
           },
           {
-            "name": "HP",
-            "usage": 0.64
+            "name": "ATK",
+            "usage": 33.33
           }
         ]
       }
     },
     "1303": {
       "slug": "ruan-mei",
-      "count": 279,
+      "count": 255,
       "mode": "Apocalyptic Shadow",
       "lightCones": [
         {
           "name": "Past Self in Mirror",
-          "usage": 46.71
+          "usage": 50.41
         },
         {
           "name": "Memories of the Past",
-          "usage": 17.86
-        },
-        {
-          "name": "Dance! Dance! Dance!",
-          "usage": 15.5
+          "usage": 16.11
         },
         {
           "name": "In Pursuit of the Wind",
-          "usage": 14.79
+          "usage": 14.68
         },
         {
-          "name": "But the Battle Isn't Over",
-          "usage": 1.03
+          "name": "Dance! Dance! Dance!",
+          "usage": 13.86
+        },
+        {
+          "name": "Meshing Cogs",
+          "usage": 1.3
         }
       ],
       "relicSets": [
         {
           "name": "Watchmaker, Master of Dream Machinations",
-          "usage": 57.9
-        },
-        {
-          "name": "Thief of Shooting Meteor",
-          "usage": 10.8
-        },
-        {
-          "name": "Messenger Traversing Hackerspace",
-          "usage": 10.65
+          "usage": 56.93
         },
         {
           "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 9.6
+          "usage": 11.58
+        },
+        {
+          "name": "Messenger Traversing Hackerspace",
+          "usage": 10.89
+        },
+        {
+          "name": "Thief of Shooting Meteor",
+          "usage": 10.63
         },
         {
           "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
-          "usage": 3.69
+          "usage": 3.16
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 64.56
+          "usage": 63.68
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 10.19
+          "usage": 10.49
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 9.6
+          "usage": 8.67
+        },
+        {
+          "name": "Penacony, Land of the Dreams",
+          "usage": 2.94
         },
         {
           "name": "Fleet of the Ageless",
-          "usage": 2.79
-        },
-        {
-          "name": "Broken Keel",
-          "usage": 2.39
+          "usage": 2.82
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 68.86
+            "usage": 65.42
           },
           {
             "name": "DEF",
-            "usage": 24.72
+            "usage": 26.18
           },
           {
             "name": "ATK",
-            "usage": 3.13
+            "usage": 3.9
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 87.33
+            "usage": 82.9
           },
           {
             "name": "HP",
-            "usage": 8.06
+            "usage": 10.23
           },
           {
             "name": "DEF",
-            "usage": 3.96
+            "usage": 6.12
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 58.18
+            "usage": 56.41
           },
           {
             "name": "DEF",
-            "usage": 27.86
+            "usage": 29.22
           },
           {
             "name": "ATK",
-            "usage": 5.54
+            "usage": 4.21
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 81.08
+            "usage": 81.24
           },
           {
             "name": "Break Effect",
-            "usage": 17.39
+            "usage": 16.95
           },
           {
             "name": "HP",
-            "usage": 0.55
+            "usage": 0.4
           }
         ]
       }
     },
     "1304": {
       "slug": "aventurine",
-      "count": 205,
-      "mode": "Pure Fiction",
+      "count": 154,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Inherently Unjust Destiny",
-          "usage": 79.72
+          "usage": 76.94
         },
         {
           "name": "Moment of Victory",
-          "usage": 13.3
+          "usage": 13.13
         },
         {
           "name": "Trend of the Universal Market",
-          "usage": 2.95
-        },
-        {
-          "name": "Day One of My New Life",
-          "usage": 1.76
+          "usage": 3.81
         },
         {
           "name": "Journey, Forever Peaceful",
-          "usage": 0.88
+          "usage": 2.75
+        },
+        {
+          "name": "Though Worlds Apart",
+          "usage": 1.81
         }
       ],
       "relicSets": [
         {
           "name": "Self-Enshrouded Recluse",
-          "usage": 57.26
+          "usage": 62.65
         },
         {
           "name": "Knight of Purity Palace",
-          "usage": 19.58
+          "usage": 19.35
         },
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 10.32
-        },
-        {
-          "name": "Knight of Purity Palace, The Ashblazing Grand Duke",
-          "usage": 3.55
+          "usage": 11.61
         },
         {
           "name": "The Ashblazing Grand Duke, Knight of Purity Palace",
-          "usage": 1.47
+          "usage": 1.44
+        },
+        {
+          "name": "Knight of Purity Palace, The Ashblazing Grand Duke",
+          "usage": 0.96
         }
       ],
       "planarSets": [
         {
           "name": "Broken Keel",
-          "usage": 49.37
+          "usage": 49.04
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 16.37
+          "usage": 18.83
         },
         {
           "name": "Inert Salsotto",
-          "usage": 16.26
+          "usage": 16.02
         },
         {
           "name": "Belobog of the Architects",
-          "usage": 8.81
+          "usage": 6.4
         },
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 6.06
+          "usage": 5.6
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "DEF",
-            "usage": 58.68
+            "usage": 53.67
           },
           {
             "name": "CRIT DMG",
-            "usage": 36.7
+            "usage": 37.95
           },
           {
             "name": "CRIT Rate",
-            "usage": 4.62
+            "usage": 8.38
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 64.88
+            "usage": 71.86
           },
           {
             "name": "DEF",
-            "usage": 35.12
+            "usage": 28.14
           }
         ],
         "sphere": [
           {
             "name": "DEF",
-            "usage": 88.48
+            "usage": 85.2
           },
           {
             "name": "Imaginary DMG Boost",
-            "usage": 11.22
+            "usage": 13.55
           },
           {
-            "name": "Quantum DMG Boost",
-            "usage": 0.3
+            "name": "ATK",
+            "usage": 1.26
           }
         ],
         "rope": [
           {
             "name": "DEF",
-            "usage": 90.86
+            "usage": 89.36
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 9.14
+            "usage": 10.64
           }
         ]
       }
     },
     "1305": {
       "slug": "dr-ratio",
-      "count": 13,
+      "count": 17,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Baptism of Pure Thought",
-          "usage": 90.48
-        },
-        {
-          "name": "Worrisome, Blissful",
-          "usage": 9.52
+          "usage": 100
         }
       ],
       "relicSets": [
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 66.67
+          "usage": 68.33
+        },
+        {
+          "name": "Eagle of Twilight Line, Flex",
+          "usage": 25
         },
         {
           "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
-          "usage": 14.29
-        },
-        {
-          "name": "Genius of Brilliant Stars",
-          "usage": 9.52
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 9.52
+          "usage": 6.67
         }
       ],
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 76.19
+          "usage": 56.11
         },
         {
           "name": "Inert Salsotto",
-          "usage": 14.29
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 9.52
+          "usage": 43.89
         }
       ],
       "mainStats": {
         "body": [
           {
-            "name": "CRIT Rate",
-            "usage": 53.74
+            "name": "CRIT DMG",
+            "usage": 54.18
           },
           {
-            "name": "CRIT DMG",
-            "usage": 41.5
+            "name": "CRIT Rate",
+            "usage": 41.14
           },
           {
             "name": "ATK",
-            "usage": 4.76
+            "usage": 4.68
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 60.35
+            "usage": 73.46
           },
           {
             "name": "ATK",
-            "usage": 39.65
+            "usage": 26.55
           }
         ],
         "sphere": [
           {
             "name": "Imaginary DMG Boost",
-            "usage": 67.88
+            "usage": 67.61
           },
           {
             "name": "ATK",
-            "usage": 32.12
+            "usage": 32.39
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 69.37
+            "usage": 73.25
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 30.63
+            "usage": 26.75
           }
         ]
       }
     },
     "1306": {
       "slug": "sparkle",
-      "count": 1517,
+      "count": 1408,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 52.46
+          "usage": 54.53
         },
         {
           "name": "Earthly Escapade",
-          "usage": 30.84
+          "usage": 30.17
         },
         {
           "name": "A Grounded Ascent",
-          "usage": 8.83
+          "usage": 9.49
         },
         {
           "name": "But the Battle Isn't Over",
-          "usage": 4.47
+          "usage": 3.69
         },
         {
           "name": "Past and Future",
-          "usage": 1.09
+          "usage": 0.73
         }
       ],
       "relicSets": [
         {
           "name": "Sacerdos' Relived Ordeal",
-          "usage": 44.91
+          "usage": 44.92
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 32.11
+          "usage": 33.81
         },
         {
           "name": "Messenger Traversing Hackerspace",
-          "usage": 10.17
+          "usage": 10.27
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 7.15
+          "usage": 6.73
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 1.48
+          "usage": 1.08
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 42.76
+          "usage": 43.19
         },
         {
           "name": "Broken Keel",
-          "usage": 24.76
+          "usage": 23.56
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 20.03
+          "usage": 21.13
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 7.47
+          "usage": 7.79
         },
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 1.12
+          "usage": 1.26
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 97.67
+            "usage": 97.76
           },
           {
             "name": "HP",
-            "usage": 0.57
+            "usage": 0.71
           },
           {
-            "name": "ATK",
-            "usage": 0.26
+            "name": "DEF",
+            "usage": 0.51
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.37
+            "usage": 99.48
           },
           {
             "name": "ATK",
-            "usage": 0.15
+            "usage": 0.11
+          },
+          {
+            "name": "HP",
+            "usage": 0.04
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 53.52
+          },
+          {
+            "name": "DEF",
+            "usage": 27.01
+          },
+          {
+            "name": "ATK",
+            "usage": 6.45
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 98.64
+          },
+          {
+            "name": "DEF",
+            "usage": 0.42
+          },
+          {
+            "name": "ATK",
+            "usage": 0.17
+          }
+        ]
+      }
+    },
+    "1307": {
+      "slug": "black-swan",
+      "count": 1006,
+      "mode": "Pure Fiction",
+      "lightCones": [
+        {
+          "name": "Reforged Remembrance",
+          "usage": 39.57
+        },
+        {
+          "name": "Eyes of the Prey",
+          "usage": 32.89
+        },
+        {
+          "name": "Why Does the Ocean Sing",
+          "usage": 18.95
+        },
+        {
+          "name": "Those Many Springs",
+          "usage": 6.2
+        },
+        {
+          "name": "Good Night and Sleep Well",
+          "usage": 0.67
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Prisoner in Deep Confinement",
+          "usage": 99.37
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 0.26
+        },
+        {
+          "name": "Divine-Querying Master Smith",
+          "usage": 0.16
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
+          "usage": 0.11
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Prisoner in Deep Confinement",
+          "usage": 0.06
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Revelry by the Sea",
+          "usage": 85.15
+        },
+        {
+          "name": "Pan-Cosmic Commercial Enterprise",
+          "usage": 9.83
+        },
+        {
+          "name": "Firmament Frontline: Glamoth",
+          "usage": 4.74
+        },
+        {
+          "name": "Space Sealing Station",
+          "usage": 0.18
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "Effect Hit Rate",
+            "usage": 69.19
+          },
+          {
+            "name": "ATK",
+            "usage": 30.81
+          }
+        ],
+        "feet": [
+          {
+            "name": "ATK",
+            "usage": 52.97
+          },
+          {
+            "name": "SPD",
+            "usage": 46.98
           },
           {
             "name": "HP",
@@ -3938,1669 +4069,1576 @@ export const PRYDWEN_BUILD_GUIDES = {
         ],
         "sphere": [
           {
-            "name": "HP",
-            "usage": 54.64
-          },
-          {
-            "name": "DEF",
-            "usage": 25.83
-          },
-          {
-            "name": "ATK",
-            "usage": 6.97
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 98.21
-          },
-          {
-            "name": "ATK",
-            "usage": 0.52
-          },
-          {
-            "name": "HP",
-            "usage": 0.32
-          }
-        ]
-      }
-    },
-    "1307": {
-      "slug": "black-swan",
-      "count": 764,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Reforged Remembrance",
-          "usage": 39.13
-        },
-        {
-          "name": "Eyes of the Prey",
-          "usage": 29.36
-        },
-        {
-          "name": "Why Does the Ocean Sing",
-          "usage": 22.37
-        },
-        {
-          "name": "Those Many Springs",
-          "usage": 6.72
-        },
-        {
-          "name": "Patience Is All You Need",
-          "usage": 0.79
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Prisoner in Deep Confinement",
-          "usage": 99.22
-        },
-        {
-          "name": "Eagle of Twilight Line, Musketeer of Wild Wheat",
-          "usage": 0.4
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 0.17
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Flex",
-          "usage": 0.11
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
-          "usage": 0.1
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Revelry by the Sea",
-          "usage": 86.71
-        },
-        {
-          "name": "Pan-Cosmic Commercial Enterprise",
-          "usage": 8.57
-        },
-        {
-          "name": "Firmament Frontline: Glamoth",
-          "usage": 4.54
-        },
-        {
-          "name": "Space Sealing Station",
-          "usage": 0.06
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "Effect Hit Rate",
-            "usage": 67.54
-          },
-          {
-            "name": "ATK",
-            "usage": 32.43
-          }
-        ],
-        "feet": [
-          {
-            "name": "ATK",
-            "usage": 56.37
-          },
-          {
-            "name": "SPD",
-            "usage": 43.63
-          }
-        ],
-        "sphere": [
-          {
             "name": "Wind DMG Boost",
-            "usage": 87.86
+            "usage": 87.18
           },
           {
             "name": "ATK",
-            "usage": 11.94
+            "usage": 12.75
           },
           {
             "name": "HP",
-            "usage": 0.19
+            "usage": 0.05
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 97.75
+            "usage": 97.95
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 2.17
+            "usage": 1.83
           },
           {
             "name": "HP",
-            "usage": 0.07
+            "usage": 0.22
           }
         ]
       }
     },
     "1308": {
       "slug": "acheron",
-      "count": 852,
+      "count": 1196,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Along the Passing Shore",
-          "usage": 96.78
+          "usage": 95.92
         },
         {
           "name": "Boundless Choreo",
-          "usage": 1.39
+          "usage": 2.57
         },
         {
           "name": "Good Night and Sleep Well",
-          "usage": 0.95
-        },
-        {
-          "name": "Incessant Rain",
-          "usage": 0.34
+          "usage": 0.72
         },
         {
           "name": "Before the Tutorial Mission Starts",
-          "usage": 0.14
+          "usage": 0.26
+        },
+        {
+          "name": "Incessant Rain",
+          "usage": 0.15
         }
       ],
       "relicSets": [
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 88.58
+          "usage": 54.44
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 5.41
+          "usage": 41.51
         },
         {
           "name": "The Ashblazing Grand Duke",
-          "usage": 3.14
+          "usage": 1.11
         },
         {
-          "name": "Scholar Lost in Erudition",
-          "usage": 0.69
+          "name": "Eagle of Twilight Line, Flex",
+          "usage": 0.77
         },
         {
-          "name": "Poet of Mourning Collapse",
-          "usage": 0.42
+          "name": "Eagle of Twilight Line, Pioneer Diver of Dead Waters",
+          "usage": 0.31
         }
       ],
       "planarSets": [
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 92.14
+          "usage": 91.56
         },
         {
           "name": "Inert Salsotto",
-          "usage": 4.78
+          "usage": 4.87
         },
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 2.17
+          "usage": 2.28
         },
         {
-          "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 0.21
+          "name": "City of Converging Stars",
+          "usage": 0.46
         },
         {
-          "name": "Tengoku@Livestream",
-          "usage": 0.14
+          "name": "Firmament Frontline: Glamoth",
+          "usage": 0.1
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 50.72
+            "usage": 60.46
           },
           {
             "name": "CRIT DMG",
-            "usage": 49.03
+            "usage": 38.36
           },
           {
             "name": "ATK",
-            "usage": 0.21
+            "usage": 0.77
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 88.39
+            "usage": 87.83
           },
           {
             "name": "SPD",
-            "usage": 11.38
+            "usage": 11.8
           },
           {
-            "name": "DEF",
+            "name": "HP",
             "usage": 0.04
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 66.56
+            "usage": 68.98
           },
           {
             "name": "Lightning DMG Boost",
-            "usage": 33.26
+            "usage": 30.82
           },
           {
-            "name": "Quantum DMG Boost",
-            "usage": 0.04
+            "name": "Ice DMG Boost",
+            "usage": 0.03
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 99.58
+            "usage": 99.56
           },
           {
             "name": "HP",
-            "usage": 0.28
+            "usage": 0.22
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.08
+            "usage": 0.04
           }
         ]
       }
     },
     "1309": {
       "slug": "robin",
-      "count": 239,
+      "count": 227,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Flowing Nightglow",
-          "usage": 71.73
-        },
-        {
-          "name": "For Tomorrow's Journey",
-          "usage": 10.39
+          "usage": 72.41
         },
         {
           "name": "But the Battle Isn't Over",
-          "usage": 8.57
+          "usage": 12.94
+        },
+        {
+          "name": "For Tomorrow's Journey",
+          "usage": 10.22
         },
         {
           "name": "Past Self in Mirror",
-          "usage": 3.79
+          "usage": 1.64
         },
         {
-          "name": "Poised to Bloom",
-          "usage": 1.34
+          "name": "The Forever Victual",
+          "usage": 1.17
         }
       ],
       "relicSets": [
         {
           "name": "Musketeer of Wild Wheat, Prisoner in Deep Confinement",
-          "usage": 73.86
+          "usage": 74.45
         },
         {
           "name": "Hero of Triumphant Song, Musketeer of Wild Wheat",
-          "usage": 12.14
+          "usage": 14.14
         },
         {
           "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
-          "usage": 4.39
-        },
-        {
-          "name": "As Navigator Isee Sees It, Musketeer of Wild Wheat",
-          "usage": 1.98
+          "usage": 3.94
         },
         {
           "name": "Musketeer of Wild Wheat, Flex",
-          "usage": 1.12
+          "usage": 2.93
+        },
+        {
+          "name": "Passerby of Wandering Cloud",
+          "usage": 0.94
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 69.32
+          "usage": 65.9
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 19.43
+          "usage": 20.98
         },
         {
           "name": "Broken Keel",
-          "usage": 2.23
-        },
-        {
-          "name": "Fleet of the Ageless",
-          "usage": 1.85
+          "usage": 3.21
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 1.43
+          "usage": 3.02
+        },
+        {
+          "name": "Fleet of the Ageless",
+          "usage": 2.98
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "ATK",
-            "usage": 98.73
-          },
-          {
-            "name": "Effect Hit Rate",
-            "usage": 0.79
+            "usage": 97.93
           },
           {
             "name": "HP",
-            "usage": 0.26
+            "usage": 0.79
+          },
+          {
+            "name": "Effect Hit Rate",
+            "usage": 0.65
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 93.72
+            "usage": 95.11
           },
           {
             "name": "SPD",
-            "usage": 6.22
+            "usage": 4.66
           },
           {
-            "name": "DEF",
-            "usage": 0.06
+            "name": "HP",
+            "usage": 0.23
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 86.72
+            "usage": 85.24
           },
           {
             "name": "Physical DMG Boost",
-            "usage": 9.38
+            "usage": 11.05
           },
           {
             "name": "HP",
-            "usage": 1.34
+            "usage": 2.75
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 92.18
+            "usage": 92.41
           },
           {
             "name": "ATK",
-            "usage": 6.44
+            "usage": 6.96
           },
           {
-            "name": "Break Effect",
-            "usage": 0.2
+            "name": "HP",
+            "usage": 0.3
           }
         ]
       }
     },
     "1310": {
       "slug": "firefly",
-      "count": 2685,
-      "mode": "Apocalyptic Shadow",
+      "count": 2653,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Whereabouts Should Dreams Rest",
-          "usage": 75.9
+          "usage": 77.1
         },
         {
           "name": "On the Fall of an Aeon",
-          "usage": 18.09
+          "usage": 16.64
         },
         {
           "name": "Thus Burns the Dawn",
-          "usage": 4.62
+          "usage": 4.88
         },
         {
           "name": "Indelible Promise",
-          "usage": 0.97
+          "usage": 0.9
         },
         {
           "name": "Something Irreplaceable",
-          "usage": 0.11
+          "usage": 0.21
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 99.73
-        },
-        {
-          "name": "Thief of Shooting Meteor, Flex",
-          "usage": 0.13
+          "usage": 99.65
         },
         {
           "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
-          "usage": 0.05
+          "usage": 0.04
+        },
+        {
+          "name": "Thief of Shooting Meteor, Flex",
+          "usage": 0.03
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 0.03
+        },
+        {
+          "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
+          "usage": 0.01
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 99.53
+          "usage": 99.49
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 0.26
+          "usage": 0.21
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 0.05
+          "usage": 0.03
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "ATK",
-            "usage": 99.49
+            "usage": 99.47
           },
           {
             "name": "HP",
-            "usage": 0.24
+            "usage": 0.2
           },
           {
-            "name": "DEF",
+            "name": "CRIT Rate",
             "usage": 0.07
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 96.41
+            "usage": 96.15
           },
           {
             "name": "ATK",
-            "usage": 3.53
+            "usage": 3.68
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 98.23
+            "usage": 98.43
           },
           {
             "name": "Fire DMG Boost",
-            "usage": 1.43
+            "usage": 1.05
           },
           {
             "name": "HP",
-            "usage": 0.18
+            "usage": 0.26
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 99.6
+            "usage": 99.63
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.2
+            "usage": 0.22
           },
           {
             "name": "ATK",
-            "usage": 0.12
+            "usage": 0.09
           }
         ]
       }
     },
     "1312": {
       "slug": "misha",
-      "count": 2,
-      "mode": "Memory of Chaos",
-      "lightCones": [],
+      "count": 1,
+      "mode": "Pure Fiction",
+      "lightCones": [
+        {
+          "name": "On the Fall of an Aeon",
+          "usage": 100
+        }
+      ],
       "relicSets": [],
-      "planarSets": [],
+      "planarSets": [
+        {
+          "name": "Broken Keel",
+          "usage": 100
+        }
+      ],
       "mainStats": {
         "body": [],
         "feet": [],
-        "sphere": [],
-        "rope": []
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 100
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 100
+          }
+        ]
       }
     },
     "1313": {
       "slug": "sunday",
-      "count": 1225,
+      "count": 958,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "A Grounded Ascent",
-          "usage": 85.06
+          "usage": 85.41
         },
         {
           "name": "But the Battle Isn't Over",
-          "usage": 10.18
+          "usage": 9.84
         },
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 2.48
+          "usage": 2.82
         },
         {
           "name": "Past and Future",
-          "usage": 1.63
+          "usage": 1.49
         },
         {
-          "name": "Carve the Moon, Weave the Clouds",
-          "usage": 0.2
+          "name": "Earthly Escapade",
+          "usage": 0.23
         }
       ],
       "relicSets": [
         {
           "name": "Sacerdos' Relived Ordeal",
-          "usage": 93.8
+          "usage": 95.16
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 2.03
+          "usage": 1.64
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 1.98
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Flex",
-          "usage": 0.8
+          "usage": 1.49
         },
         {
           "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 0.71
+          "usage": 0.6
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Flex",
+          "usage": 0.35
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 82.16
+          "usage": 83.85
         },
         {
           "name": "Broken Keel",
-          "usage": 10.45
+          "usage": 9.71
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 5.73
-        },
-        {
-          "name": "Penacony, Land of the Dreams",
-          "usage": 0.27
+          "usage": 5.08
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 0.23
+          "usage": 0.19
+        },
+        {
+          "name": "Fleet of the Ageless",
+          "usage": 0.15
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 99.3
+            "usage": 99.05
           },
           {
-            "name": "ATK",
-            "usage": 0.34
+            "name": "HP",
+            "usage": 0.26
           },
           {
             "name": "CRIT Rate",
-            "usage": 0.25
+            "usage": 0.26
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 97.46
+            "usage": 97.92
           },
           {
             "name": "HP",
-            "usage": 1.34
+            "usage": 0.96
           },
           {
             "name": "DEF",
-            "usage": 0.68
+            "usage": 0.49
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 56.46
+            "usage": 57.22
           },
           {
             "name": "DEF",
-            "usage": 26.6
+            "usage": 26.91
           },
           {
             "name": "ATK",
-            "usage": 6.75
+            "usage": 6.28
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 98.09
-          },
-          {
-            "name": "HP",
-            "usage": 0.79
+            "usage": 98.59
           },
           {
             "name": "ATK",
-            "usage": 0.63
+            "usage": 0.56
+          },
+          {
+            "name": "HP",
+            "usage": 0.43
           }
         ]
       }
     },
     "1314": {
       "slug": "jade",
-      "count": 73,
+      "count": 65,
       "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Yet Hope Is Priceless",
-          "usage": 72.47
-        },
-        {
-          "name": "Night on the Milky Way",
-          "usage": 8.16
+          "usage": 70.52
         },
         {
           "name": "Today Is Another Peaceful Day",
-          "usage": 8.06
+          "usage": 9.09
+        },
+        {
+          "name": "Eternal Calculus",
+          "usage": 5
         },
         {
           "name": "Life Should Be Cast to Flames",
-          "usage": 2.02
+          "usage": 4.85
         },
         {
-          "name": "Into the Unreachable Veil",
-          "usage": 2.02
+          "name": "The Birth of the Self",
+          "usage": 2.54
         }
       ],
       "relicSets": [
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 44.12
+          "usage": 39.73
         },
         {
           "name": "The Ashblazing Grand Duke",
-          "usage": 41.21
+          "usage": 39.27
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 10.63
+          "usage": 15.55
         },
         {
-          "name": "Scholar Lost in Erudition, Wavestrider Captain",
-          "usage": 2.02
+          "name": "The Wind-Soaring Valorous",
+          "usage": 1.81
+        },
+        {
+          "name": "The Ashblazing Grand Duke, Scholar Lost in Erudition",
+          "usage": 1.81
         }
       ],
       "planarSets": [
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 64.16
+          "usage": 63.73
         },
         {
           "name": "Inert Salsotto",
-          "usage": 22.42
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 7.38
+          "usage": 15.55
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 4.03
+          "usage": 9.09
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 8
         },
         {
           "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 2.02
+          "usage": 3.64
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 55.78
+            "usage": 59.44
           },
           {
             "name": "CRIT DMG",
-            "usage": 44.22
+            "usage": 40.56
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 89.78
+            "usage": 93.03
           },
           {
             "name": "SPD",
-            "usage": 10.22
+            "usage": 6.97
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 88.89
+            "usage": 87.66
           },
           {
             "name": "ATK",
-            "usage": 11.11
+            "usage": 11.05
+          },
+          {
+            "name": "HP",
+            "usage": 1.29
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 91.74
+            "usage": 96.12
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 8.26
+            "usage": 3.88
           }
         ]
       }
     },
     "1315": {
       "slug": "boothill",
-      "count": 70,
+      "count": 77,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Sailing Towards A Second Life",
-          "usage": 89.62
+          "usage": 91.74
         },
         {
           "name": "Shadowed By Night",
-          "usage": 10.38
+          "usage": 5.58
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 60.88
+          "usage": 54.62
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 33.51
+          "usage": 37.42
+        },
+        {
+          "name": "Thief of Shooting Meteor, Flex",
+          "usage": 1.88
         },
         {
           "name": "Thief of Shooting Meteor",
-          "usage": 3.55
+          "usage": 0.94
         },
         {
-          "name": "Messenger Traversing Hackerspace, Flex",
-          "usage": 0.96
+          "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
+          "usage": 0.72
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 66.68
+          "usage": 63.82
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 30.03
+          "usage": 33.5
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 37.1
+            "usage": 32.49
           },
           {
             "name": "DEF",
-            "usage": 28.96
+            "usage": 31.8
           },
           {
             "name": "CRIT Rate",
-            "usage": 21.87
+            "usage": 18.09
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.33
-          },
-          {
-            "name": "ATK",
-            "usage": 0.74
+            "usage": 96.79
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 35.92
+            "usage": 44.87
           },
           {
             "name": "Physical DMG Boost",
-            "usage": 27.22
+            "usage": 20.81
           },
           {
-            "name": "DEF",
-            "usage": 18.09
+            "name": "ATK",
+            "usage": 12
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 98.2
-          },
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 0.1
-          },
-          {
-            "name": "ATK",
-            "usage": 0.1
+            "usage": 98.15
           }
         ]
       }
     },
     "1317": {
       "slug": "rappa",
-      "count": 49,
-      "mode": "Pure Fiction",
+      "count": 114,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Ninjutsu Inscription: Dazzling Evilbreaker",
-          "usage": 96.13
+          "usage": 91.57
         },
         {
           "name": "After the Charmony Fall",
-          "usage": 3.87
+          "usage": 8.43
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 93.38
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 4.97
+          "usage": 98.47
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 63.18
+          "usage": 67.07
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 35.17
+          "usage": 31.4
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "ATK",
-            "usage": 97.58
+            "usage": 97.91
           },
           {
-            "name": "CRIT Rate",
-            "usage": 1.55
+            "name": "CRIT DMG",
+            "usage": 0.96
+          },
+          {
+            "name": "DEF",
+            "usage": 0.04
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.13
+            "usage": 97.38
+          },
+          {
+            "name": "ATK",
+            "usage": 1.53
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 95.85
-          },
-          {
-            "name": "HP",
-            "usage": 1.73
+            "usage": 96.73
           },
           {
             "name": "Imaginary DMG Boost",
-            "usage": 1.55
+            "usage": 1.18
+          },
+          {
+            "name": "HP",
+            "usage": 1
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 89.52
+            "usage": 80.06
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 9.7
+            "usage": 18.89
           }
         ]
       }
     },
     "1321": {
       "slug": "the-dahlia",
-      "count": 1141,
-      "mode": "Apocalyptic Shadow",
+      "count": 1063,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Never Forget Her Flame",
-          "usage": 79.03
+          "usage": 79.54
         },
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 11.58
+          "usage": 11.5
         },
         {
           "name": "Solitary Healing",
-          "usage": 3.33
+          "usage": 2.83
         },
         {
           "name": "Lies Dance on the Breeze",
-          "usage": 2.61
+          "usage": 2.45
         },
         {
           "name": "Before the Tutorial Mission Starts",
-          "usage": 1.36
+          "usage": 1.33
         }
       ],
       "relicSets": [
         {
           "name": "Iron Cavalry Against the Scourge",
-          "usage": 94.15
+          "usage": 93.39
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 4.27
+          "usage": 4.96
+        },
+        {
+          "name": "Thief of Shooting Meteor",
+          "usage": 0.27
         },
         {
           "name": "Thief of Shooting Meteor, Flex",
-          "usage": 0.36
+          "usage": 0.26
         },
         {
-          "name": "Thief of Shooting Meteor, Watchmaker, Master of Dream Machinations",
-          "usage": 0.32
-        },
-        {
-          "name": "Guard of Wuthering Snow",
-          "usage": 0.22
+          "name": "Eagle of Twilight Line, Flex",
+          "usage": 0.24
         }
       ],
       "planarSets": [
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 91.96
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 3.71
+          "usage": 92.28
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 3.43
+          "usage": 3.67
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 3.32
         },
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 0.32
+          "usage": 0.43
         },
         {
-          "name": "Bone Collection's Serene Demesne",
-          "usage": 0.13
+          "name": "Broken Keel",
+          "usage": 0.04
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 56.29
+            "usage": 58.34
           },
           {
             "name": "DEF",
-            "usage": 20.53
+            "usage": 19.29
           },
           {
             "name": "ATK",
-            "usage": 13.08
+            "usage": 12.88
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.97
+            "usage": 99.35
+          },
+          {
+            "name": "DEF",
+            "usage": 0.33
           },
           {
             "name": "HP",
-            "usage": 0.5
-          },
-          {
-            "name": "ATK",
-            "usage": 0.26
+            "usage": 0.21
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 56.23
+            "usage": 54.17
           },
           {
             "name": "DEF",
-            "usage": 25.6
+            "usage": 26.9
           },
           {
             "name": "ATK",
-            "usage": 10.94
+            "usage": 11.68
           }
         ],
         "rope": [
           {
             "name": "Break Effect",
-            "usage": 71.59
+            "usage": 69.2
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 27.73
+            "usage": 30.43
           },
           {
             "name": "ATK",
-            "usage": 0.18
+            "usage": 0.13
           }
         ]
       }
     },
     "1401": {
       "slug": "the-herta",
-      "count": 623,
-      "mode": "Memory of Chaos",
+      "count": 561,
+      "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Into the Unreachable Veil",
-          "usage": 88.84
+          "usage": 86.5
         },
         {
           "name": "Night on the Milky Way",
-          "usage": 3.72
-        },
-        {
-          "name": "Eternal Calculus",
-          "usage": 2.64
+          "usage": 3.95
         },
         {
           "name": "Today Is Another Peaceful Day",
-          "usage": 1.36
+          "usage": 3.28
+        },
+        {
+          "name": "Eternal Calculus",
+          "usage": 1.4
         },
         {
           "name": "The Great Cosmic Enterprise",
-          "usage": 0.87
+          "usage": 1.09
         }
       ],
       "relicSets": [
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 96.67
-        },
-        {
-          "name": "Scholar Lost in Erudition, Flex",
-          "usage": 0.52
-        },
-        {
-          "name": "Eagle of Twilight Line, Scholar Lost in Erudition",
-          "usage": 0.32
-        },
-        {
-          "name": "Wavestrider Captain, Flex",
-          "usage": 0.31
+          "usage": 97.07
         },
         {
           "name": "Hunter of Glacial Forest",
-          "usage": 0.3
+          "usage": 0.44
+        },
+        {
+          "name": "Genius of Brilliant Stars",
+          "usage": 0.37
+        },
+        {
+          "name": "Wavestrider Captain, Flex",
+          "usage": 0.29
+        },
+        {
+          "name": "Scholar Lost in Erudition, Flex",
+          "usage": 0.18
         }
       ],
       "planarSets": [
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 78.38
+          "usage": 77.09
         },
         {
           "name": "Rutilant Arena",
-          "usage": 18.01
-        },
-        {
-          "name": "The Wondrous BananAmusement Park",
-          "usage": 1.39
+          "usage": 20.05
         },
         {
           "name": "Sigonia, the Unclaimed Desolation",
-          "usage": 1.35
+          "usage": 1.33
+        },
+        {
+          "name": "The Wondrous BananAmusement Park",
+          "usage": 0.18
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 57.79
+            "usage": 59.15
           },
           {
             "name": "CRIT DMG",
-            "usage": 40.88
+            "usage": 39.87
           },
           {
             "name": "ATK",
-            "usage": 0.26
+            "usage": 0.01
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 76.44
+            "usage": 76.96
           },
           {
             "name": "SPD",
-            "usage": 22.52
-          },
-          {
-            "name": "HP",
-            "usage": 0.11
+            "usage": 21.81
           }
         ],
         "sphere": [
           {
             "name": "Ice DMG Boost",
-            "usage": 86.72
+            "usage": 85.1
           },
           {
             "name": "ATK",
-            "usage": 12.83
+            "usage": 14.42
           },
           {
             "name": "Wind DMG Boost",
-            "usage": 0.18
+            "usage": 0.1
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 97.2
+            "usage": 96.66
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 2.46
+            "usage": 2.57
           }
         ]
       }
     },
     "1402": {
       "slug": "aglaea",
-      "count": 237,
+      "count": 178,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Time Woven Into Gold",
-          "usage": 91.64
+          "usage": 92.26
         },
         {
           "name": "Sweat Now, Cry Less",
-          "usage": 2.75
+          "usage": 3.55
         },
         {
           "name": "Geniuses' Greetings",
-          "usage": 2.37
+          "usage": 1.96
         },
         {
           "name": "Reminiscence",
-          "usage": 1.7
+          "usage": 1.78
         },
         {
-          "name": "The Flower Remembers",
-          "usage": 1.17
+          "name": "Victory In a Blink",
+          "usage": 0.45
         }
       ],
       "relicSets": [
         {
           "name": "Hero of Triumphant Song",
-          "usage": 94.88
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Scholar Lost in Erudition",
-          "usage": 1.61
+          "usage": 93.68
         },
         {
           "name": "Musketeer of Wild Wheat",
-          "usage": 1.54
+          "usage": 2.05
         },
         {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 1.17
+          "name": "Hero of Triumphant Song, Flex",
+          "usage": 1.42
         },
         {
-          "name": "Musketeer of Wild Wheat, Scholar Lost in Erudition",
-          "usage": 0.44
+          "name": "Scholar Lost in Erudition, Wavestrider Captain",
+          "usage": 1.07
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Scholar Lost in Erudition",
+          "usage": 0.89
         }
       ],
       "planarSets": [
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 94.89
+          "usage": 96.62
         },
         {
           "name": "Rutilant Arena",
-          "usage": 3.97
+          "usage": 2.85
         },
         {
           "name": "Amphoreus, The Eternal Land",
-          "usage": 0.76
+          "usage": 0.54
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 87.83
+            "usage": 87.39
           },
           {
             "name": "CRIT DMG",
-            "usage": 12.17
+            "usage": 12.61
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 82.35
+            "usage": 82.83
           },
           {
             "name": "ATK",
-            "usage": 16.84
+            "usage": 16.86
           },
           {
             "name": "HP",
-            "usage": 0.81
+            "usage": 0.31
           }
         ],
         "sphere": [
           {
             "name": "Lightning DMG Boost",
-            "usage": 96.24
+            "usage": 95.62
           },
           {
             "name": "ATK",
-            "usage": 3.76
+            "usage": 3.37
+          },
+          {
+            "name": "Physical DMG Boost",
+            "usage": 1.01
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 62.89
+            "usage": 67.48
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 35.84
-          },
-          {
-            "name": "HP",
-            "usage": 1.28
+            "usage": 32.52
           }
         ]
       }
     },
     "1403": {
       "slug": "tribbie",
-      "count": 1741,
+      "count": 1462,
       "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 72.42
+          "usage": 73.17
         },
         {
           "name": "If Time Were a Flower",
-          "usage": 24.42
-        },
-        {
-          "name": "But the Battle Isn't Over",
-          "usage": 0.46
+          "usage": 24.72
         },
         {
           "name": "In Pursuit of the Wind",
-          "usage": 0.35
+          "usage": 0.31
+        },
+        {
+          "name": "But the Battle Isn't Over",
+          "usage": 0.3
         },
         {
           "name": "Memories of the Past",
-          "usage": 0.32
+          "usage": 0.29
         }
       ],
       "relicSets": [
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 76.3
+          "usage": 72.42
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 20
+          "usage": 24.11
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 0.67
+          "usage": 0.78
         },
         {
           "name": "Eagle of Twilight Line, Flex",
-          "usage": 0.36
+          "usage": 0.27
         },
         {
           "name": "Scholar Lost in Erudition, Longevous Disciple",
-          "usage": 0.3
+          "usage": 0.24
         }
       ],
       "planarSets": [
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 69.88
+          "usage": 64.92
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 13.07
+          "usage": 15.6
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 12.51
+          "usage": 14.76
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 0.89
+          "usage": 1.16
         },
         {
           "name": "Broken Keel",
-          "usage": 0.38
+          "usage": 1
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 52.26
+            "usage": 50.76
           },
           {
             "name": "CRIT Rate",
-            "usage": 40.01
+            "usage": 41.14
           },
           {
             "name": "HP",
-            "usage": 6.49
+            "usage": 7.17
           }
         ],
         "feet": [
           {
             "name": "HP",
-            "usage": 80.88
+            "usage": 76.63
           },
           {
             "name": "SPD",
-            "usage": 18.49
+            "usage": 22.76
           },
           {
             "name": "ATK",
-            "usage": 0.22
+            "usage": 0.25
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 86.2
+            "usage": 85.85
           },
           {
             "name": "Quantum DMG Boost",
-            "usage": 11.68
+            "usage": 11.49
           },
           {
-            "name": "DEF",
-            "usage": 0.47
+            "name": "ATK",
+            "usage": 0.44
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 83.9
+            "usage": 84.17
           },
           {
             "name": "HP",
-            "usage": 15.61
+            "usage": 15.33
           },
           {
             "name": "ATK",
-            "usage": 0.26
+            "usage": 0.18
           }
         ]
       }
     },
     "1404": {
       "slug": "mydei",
-      "count": 229,
-      "mode": "Memory of Chaos",
+      "count": 179,
+      "mode": "Anomaly Arbitration",
       "lightCones": [
         {
           "name": "Flame of Blood, Blaze My Path",
-          "usage": 97.13
+          "usage": 97.3
         },
         {
           "name": "Ninja Record: Sound Hunt",
-          "usage": 1.92
+          "usage": 1.55
         },
         {
           "name": "A Secret Vow",
-          "usage": 0.63
+          "usage": 0.78
         },
         {
           "name": "The Unreachable Side",
-          "usage": 0.32
+          "usage": 0.37
         }
       ],
       "relicSets": [
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 86.97
+          "usage": 86.45
         },
         {
           "name": "As Navigator Isee Sees It",
-          "usage": 11.76
+          "usage": 12.54
+        },
+        {
+          "name": "Scholar Lost in Erudition, Flex",
+          "usage": 0.7
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 0.63
-        },
-        {
-          "name": "As Navigator Isee Sees It, Flex",
-          "usage": 0.32
-        },
-        {
-          "name": "Wavestrider Captain, Flex",
           "usage": 0.31
         }
       ],
       "planarSets": [
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 94.42
+          "usage": 94.66
         },
         {
           "name": "Rutilant Arena",
-          "usage": 4.94
+          "usage": 4.25
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 0.7
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 80.95
+            "usage": 84.17
           },
           {
             "name": "HP",
-            "usage": 15.9
+            "usage": 12.65
           },
           {
             "name": "CRIT Rate",
-            "usage": 3.11
+            "usage": 2.69
           }
         ],
         "feet": [
           {
             "name": "HP",
-            "usage": 65.63
+            "usage": 68.29
           },
           {
             "name": "SPD",
-            "usage": 34.37
+            "usage": 31.66
           }
         ],
         "sphere": [
           {
             "name": "Imaginary DMG Boost",
-            "usage": 68.9
+            "usage": 70
           },
           {
             "name": "HP",
-            "usage": 31.03
-          },
-          {
-            "name": "Fire DMG Boost",
-            "usage": 0.04
+            "usage": 29.87
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 99.22
+            "usage": 99.55
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.47
+            "usage": 0.45
           }
         ]
       }
     },
     "1405": {
       "slug": "anaxa",
-      "count": 338,
+      "count": 337,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Life Should Be Cast to Flames",
-          "usage": 64.33
+          "usage": 65.76
         },
         {
           "name": "Into the Unreachable Veil",
-          "usage": 20
+          "usage": 17.3
         },
         {
           "name": "The Great Cosmic Enterprise",
-          "usage": 10.53
+          "usage": 12.54
         },
         {
           "name": "Eternal Calculus",
-          "usage": 2.86
+          "usage": 1.94
         },
         {
           "name": "Passkey",
-          "usage": 0.7
+          "usage": 1.37
         }
       ],
       "relicSets": [
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 37.01
+          "usage": 38.06
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 26.91
+          "usage": 27.86
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 22.57
+          "usage": 20.98
         },
         {
           "name": "As Navigator Isee Sees It",
-          "usage": 8.97
+          "usage": 8.8
         },
         {
           "name": "Wavestrider Captain",
-          "usage": 1.13
+          "usage": 0.99
         }
       ],
       "planarSets": [
         {
           "name": "Rutilant Arena",
-          "usage": 85.2
+          "usage": 86.18
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 5.7
+          "usage": 5.31
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 2.84
+          "usage": 4.13
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 2.71
+          "usage": 1.63
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 1.43
+          "usage": 1.4
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 76.29
+            "usage": 76.64
           },
           {
             "name": "CRIT DMG",
-            "usage": 22.6
+            "usage": 22
           },
           {
             "name": "ATK",
-            "usage": 0.6
+            "usage": 0.46
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 54.02
+            "usage": 50.37
           },
           {
             "name": "ATK",
-            "usage": 45.86
+            "usage": 49
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 58.58
+            "usage": 61.41
           },
           {
             "name": "Wind DMG Boost",
-            "usage": 39.4
+            "usage": 37.88
           },
           {
             "name": "HP",
-            "usage": 0.74
+            "usage": 0.71
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 91.99
+            "usage": 93.92
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 7.22
+            "usage": 5.38
           },
           {
-            "name": "Break Effect",
-            "usage": 0.24
+            "name": "HP",
+            "usage": 0.35
           }
         ]
       }
     },
     "1406": {
       "slug": "cipher",
-      "count": 138,
+      "count": 154,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
@@ -5609,162 +5647,158 @@ export const PRYDWEN_BUILD_GUIDES = {
         },
         {
           "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 12.38
-        },
-        {
-          "name": "Before the Tutorial Mission Starts",
-          "usage": 6.19
+          "usage": 15.98
         },
         {
           "name": "Holiday Thermae Escapade",
-          "usage": 3.1
+          "usage": 4.35
         },
         {
-          "name": "Good Night and Sleep Well",
-          "usage": 1.52
+          "name": "Before the Tutorial Mission Starts",
+          "usage": 2.58
+        },
+        {
+          "name": "Boundless Choreo",
+          "usage": 0.62
         }
       ],
       "relicSets": [
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 43.98
+          "usage": 47.39
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 12.34
-        },
-        {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 10.76
+          "usage": 11.83
         },
         {
           "name": "Divine-Querying Master Smith",
-          "usage": 9.22
+          "usage": 9.64
+        },
+        {
+          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
+          "usage": 9.12
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 3.89
+          "usage": 3.7
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 51.39
+          "usage": 47.19
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 22
+          "usage": 21.92
         },
         {
           "name": "City of Converging Stars",
-          "usage": 11.24
+          "usage": 9.84
         },
         {
-          "name": "Duran, Dynasty of Running Wolves",
-          "usage": 2.62
+          "name": "Sprightly Vonwacq",
+          "usage": 2.59
         },
         {
-          "name": "Inert Salsotto",
-          "usage": 0.82
+          "name": "Broken Keel",
+          "usage": 2.4
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 71.3
+            "usage": 67.11
           },
           {
             "name": "HP",
-            "usage": 8.53
+            "usage": 10.98
           },
           {
             "name": "CRIT Rate",
-            "usage": 6.55
+            "usage": 6.43
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.15
+            "usage": 98.79
           },
           {
             "name": "ATK",
-            "usage": 0.59
-          },
-          {
-            "name": "HP",
-            "usage": 0.26
+            "usage": 0.84
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 56.07
+            "usage": 58.56
           },
           {
             "name": "ATK",
-            "usage": 21.36
+            "usage": 16.85
           },
           {
             "name": "HP",
-            "usage": 14.84
+            "usage": 14.65
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 69.23
+            "usage": 69.87
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 16.12
+            "usage": 17.04
           },
           {
             "name": "HP",
-            "usage": 11.3
+            "usage": 10.57
           }
         ]
       }
     },
     "1407": {
       "slug": "castorice",
-      "count": 5225,
-      "mode": "Memory of Chaos",
+      "count": 4666,
+      "mode": "Anomaly Arbitration",
       "lightCones": [
         {
           "name": "Make Farewells More Beautiful",
-          "usage": 95.32
+          "usage": 95.01
         },
         {
           "name": "Sweat Now, Cry Less",
-          "usage": 1.68
+          "usage": 1.79
         },
         {
           "name": "The Flower Remembers",
-          "usage": 0.84
+          "usage": 0.87
         },
         {
           "name": "The Story's Next Page",
-          "usage": 0.63
+          "usage": 0.61
         },
         {
           "name": "Time Waits for No One",
-          "usage": 0.61
+          "usage": 0.53
         }
       ],
       "relicSets": [
         {
           "name": "Poet of Mourning Collapse",
-          "usage": 99.18
+          "usage": 99.15
         },
         {
           "name": "World-Remaking Deliverer",
-          "usage": 0.64
+          "usage": 0.62
         },
         {
           "name": "Genius of Brilliant Stars, Flex",
-          "usage": 0.07
+          "usage": 0.08
         },
         {
           "name": "Genius of Brilliant Stars, Poet of Mourning Collapse",
@@ -5778,22 +5812,22 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 99.62
+          "usage": 99.56
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 0.07
+          "usage": 0.06
         },
         {
           "name": "Arcadia of Woven Dreams",
-          "usage": 0.07
+          "usage": 0.05
         },
         {
           "name": "Rutilant Arena",
           "usage": 0.02
         },
         {
-          "name": "Giant Tree of Rapt Brooding",
+          "name": "Amphoreus, The Eternal Land",
           "usage": 0.01
         }
       ],
@@ -5801,121 +5835,121 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 96.88
+            "usage": 97.03
           },
           {
             "name": "CRIT Rate",
-            "usage": 1.96
+            "usage": 1.86
           },
           {
             "name": "HP",
-            "usage": 1.13
+            "usage": 1.05
           }
         ],
         "feet": [
           {
             "name": "HP",
-            "usage": 99.85
+            "usage": 99.9
           },
           {
             "name": "ATK",
-            "usage": 0.1
+            "usage": 0.06
           },
           {
             "name": "SPD",
-            "usage": 0.04
+            "usage": 0.03
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 79.88
+            "usage": 80.19
           },
           {
             "name": "Quantum DMG Boost",
-            "usage": 19.94
+            "usage": 19.57
           },
           {
-            "name": "Ice DMG Boost",
-            "usage": 0.1
+            "name": "Wind DMG Boost",
+            "usage": 0.05
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 99.73
-          },
-          {
-            "name": "ATK",
-            "usage": 0.13
+            "usage": 99.71
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.11
+            "usage": 0.16
+          },
+          {
+            "name": "ATK",
+            "usage": 0.1
           }
         ]
       }
     },
     "1408": {
       "slug": "phainon",
-      "count": 1976,
+      "count": 1968,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Thus Burns the Dawn",
-          "usage": 96.66
+          "usage": 97.6
         },
         {
           "name": "On the Fall of an Aeon",
-          "usage": 2.04
+          "usage": 1.53
         },
         {
           "name": "Something Irreplaceable",
-          "usage": 0.28
-        },
-        {
-          "name": "The Unreachable Side",
-          "usage": 0.14
+          "usage": 0.32
         },
         {
           "name": "Brighter Than the Sun",
-          "usage": 0.14
+          "usage": 0.17
+        },
+        {
+          "name": "A Trail of Bygone Blood",
+          "usage": 0.12
         }
       ],
       "relicSets": [
         {
           "name": "Wavestrider Captain",
-          "usage": 82.52
+          "usage": 82.09
         },
         {
           "name": "As Navigator Isee Sees It",
-          "usage": 15.95
+          "usage": 16.62
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 0.53
+          "usage": 0.48
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 0.28
+          "usage": 0.24
         },
         {
-          "name": "As Navigator Isee Sees It, Flex",
-          "usage": 0.24
+          "name": "Wavestrider Captain, Flex",
+          "usage": 0.18
         }
       ],
       "planarSets": [
         {
           "name": "Arcadia of Woven Dreams",
-          "usage": 83.32
+          "usage": 83.9
         },
         {
           "name": "Rutilant Arena",
-          "usage": 16.12
+          "usage": 15.58
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 0.35
+          "usage": 0.34
         },
         {
           "name": "Space Sealing Station",
@@ -5930,174 +5964,178 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 75.9
+            "usage": 73.83
           },
           {
             "name": "CRIT DMG",
-            "usage": 23.86
+            "usage": 26
           },
           {
             "name": "ATK",
-            "usage": 0.01
+            "usage": 0.08
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 95.23
+            "usage": 95.63
           },
           {
             "name": "SPD",
-            "usage": 4.72
+            "usage": 4.13
           }
         ],
         "sphere": [
           {
             "name": "Physical DMG Boost",
-            "usage": 94.71
+            "usage": 94.51
           },
           {
             "name": "ATK",
-            "usage": 5.21
+            "usage": 5.48
           },
           {
-            "name": "Wind DMG Boost",
-            "usage": 0.06
+            "name": "Lightning DMG Boost",
+            "usage": 0.01
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 99.82
+            "usage": 99.88
           },
           {
             "name": "HP",
-            "usage": 0.03
+            "usage": 0.05
+          },
+          {
+            "name": "Break Effect",
+            "usage": 0.02
           }
         ]
       }
     },
     "1409": {
       "slug": "hyacine",
-      "count": 3834,
+      "count": 3489,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Long May Rainbows Adorn the Sky",
-          "usage": 85.75
+          "usage": 87.1
         },
         {
           "name": "Memory's Curtain Never Falls",
-          "usage": 9.12
+          "usage": 8.37
         },
         {
           "name": "The Story's Next Page",
-          "usage": 4.43
+          "usage": 3.75
         },
         {
           "name": "Victory In a Blink",
-          "usage": 0.24
+          "usage": 0.23
         },
         {
-          "name": "Fly Into a Pink Tomorrow",
-          "usage": 0.13
+          "name": "This Love, Forever",
+          "usage": 0.15
         }
       ],
       "relicSets": [
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 97.02
+          "usage": 96.86
         },
         {
           "name": "World-Remaking Deliverer",
-          "usage": 0.85
+          "usage": 0.83
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 0.78
-        },
-        {
-          "name": "Warrior Goddess of Sun and Thunder, Flex",
-          "usage": 0.28
+          "usage": 0.81
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 0.26
+          "usage": 0.34
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 0.28
         }
       ],
       "planarSets": [
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 97.78
+          "usage": 97.94
         },
         {
           "name": "Amphoreus, The Eternal Land",
-          "usage": 1.07
+          "usage": 1.02
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 0.33
+          "usage": 0.41
         },
         {
           "name": "Broken Keel",
-          "usage": 0.24
+          "usage": 0.19
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 0.18
+          "usage": 0.14
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 93.12
+            "usage": 93.21
           },
           {
             "name": "HP",
-            "usage": 5.48
+            "usage": 5.12
           },
           {
             "name": "CRIT DMG",
-            "usage": 1.27
+            "usage": 1.4
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.58
+            "usage": 99.7
           },
           {
             "name": "HP",
-            "usage": 0.28
+            "usage": 0.17
           },
           {
             "name": "ATK",
-            "usage": 0.05
+            "usage": 0.06
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 98.7
+            "usage": 99.05
           },
           {
             "name": "Wind DMG Boost",
-            "usage": 0.98
+            "usage": 0.72
           },
           {
             "name": "DEF",
-            "usage": 0.07
+            "usage": 0.04
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 92.34
+            "usage": 92.4
           },
           {
             "name": "HP",
-            "usage": 7.54
+            "usage": 7.47
           },
           {
             "name": "ATK",
@@ -6108,284 +6146,296 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1410": {
       "slug": "hysilens",
-      "count": 1125,
-      "mode": "Memory of Chaos",
+      "count": 1595,
+      "mode": "Pure Fiction",
       "lightCones": [
         {
           "name": "Why Does the Ocean Sing",
-          "usage": 62.22
-        },
-        {
-          "name": "Reforged Remembrance",
-          "usage": 19.47
+          "usage": 59.12
         },
         {
           "name": "Eyes of the Prey",
-          "usage": 12.54
+          "usage": 17.8
+        },
+        {
+          "name": "Reforged Remembrance",
+          "usage": 15.84
         },
         {
           "name": "Those Many Springs",
-          "usage": 2.27
+          "usage": 2.28
         },
         {
           "name": "Patience Is All You Need",
-          "usage": 1.54
+          "usage": 2.17
         }
       ],
       "relicSets": [
         {
           "name": "Prisoner in Deep Confinement",
-          "usage": 99.91
+          "usage": 99.67
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 0.09
+          "usage": 0.19
+        },
+        {
+          "name": "Passerby of Wandering Cloud, Flex",
+          "usage": 0.07
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Flex",
+          "usage": 0.05
+        },
+        {
+          "name": "Genius of Brilliant Stars",
+          "usage": 0.03
         }
       ],
       "planarSets": [
         {
           "name": "Revelry by the Sea",
-          "usage": 97.94
+          "usage": 98.78
         },
         {
           "name": "Firmament Frontline: Glamoth",
-          "usage": 0.98
+          "usage": 0.59
         },
         {
           "name": "Pan-Cosmic Commercial Enterprise",
-          "usage": 0.84
+          "usage": 0.46
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 0.09
         },
         {
           "name": "Space Sealing Station",
-          "usage": 0.12
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 0.12
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "Effect Hit Rate",
-            "usage": 69.92
-          },
-          {
-            "name": "ATK",
-            "usage": 30.08
-          }
-        ],
-        "feet": [
-          {
-            "name": "ATK",
-            "usage": 69.79
-          },
-          {
-            "name": "SPD",
-            "usage": 30.21
-          }
-        ],
-        "sphere": [
-          {
-            "name": "Physical DMG Boost",
-            "usage": 84.17
-          },
-          {
-            "name": "ATK",
-            "usage": 15.49
-          },
-          {
-            "name": "HP",
-            "usage": 0.2
-          }
-        ],
-        "rope": [
-          {
-            "name": "ATK",
-            "usage": 82.66
-          },
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 17.31
-          }
-        ]
-      }
-    },
-    "1412": {
-      "slug": "cerydra",
-      "count": 603,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Epoch Etched in Golden Blood",
-          "usage": 35.89
-        },
-        {
-          "name": "The Forever Victual",
-          "usage": 28.45
-        },
-        {
-          "name": "Dance! Dance! Dance!",
-          "usage": 24.28
-        },
-        {
-          "name": "Flowing Nightglow",
-          "usage": 5.91
-        },
-        {
-          "name": "A Grounded Ascent",
-          "usage": 1.06
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Sacerdos' Relived Ordeal",
-          "usage": 90.66
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 5.83
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
-          "usage": 0.63
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Flex",
-          "usage": 0.55
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 0.55
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 79.47
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 18.05
-        },
-        {
-          "name": "Broken Keel",
-          "usage": 0.86
-        },
-        {
-          "name": "Penacony, Land of the Dreams",
-          "usage": 0.44
-        },
-        {
-          "name": "Forge of the Kalpagni Lantern",
           "usage": 0.07
         }
       ],
       "mainStats": {
         "body": [
           {
+            "name": "Effect Hit Rate",
+            "usage": 71.59
+          },
+          {
             "name": "ATK",
-            "usage": 96.46
+            "usage": 28.41
+          }
+        ],
+        "feet": [
+          {
+            "name": "ATK",
+            "usage": 68.74
+          },
+          {
+            "name": "SPD",
+            "usage": 31.26
+          }
+        ],
+        "sphere": [
+          {
+            "name": "Physical DMG Boost",
+            "usage": 83.76
+          },
+          {
+            "name": "ATK",
+            "usage": 16.1
+          },
+          {
+            "name": "Wind DMG Boost",
+            "usage": 0.1
+          }
+        ],
+        "rope": [
+          {
+            "name": "ATK",
+            "usage": 83.92
+          },
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 16.08
+          }
+        ]
+      }
+    },
+    "1412": {
+      "slug": "cerydra",
+      "count": 588,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Epoch Etched in Golden Blood",
+          "usage": 38.1
+        },
+        {
+          "name": "The Forever Victual",
+          "usage": 28.25
+        },
+        {
+          "name": "Dance! Dance! Dance!",
+          "usage": 21.82
+        },
+        {
+          "name": "Flowing Nightglow",
+          "usage": 6.39
+        },
+        {
+          "name": "A Grounded Ascent",
+          "usage": 1.79
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Sacerdos' Relived Ordeal",
+          "usage": 91.09
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 5.65
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Messenger Traversing Hackerspace",
+          "usage": 0.69
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
+          "usage": 0.65
+        },
+        {
+          "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
+          "usage": 0.44
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 78.51
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 18.5
+        },
+        {
+          "name": "Broken Keel",
+          "usage": 0.87
+        },
+        {
+          "name": "Penacony, Land of the Dreams",
+          "usage": 0.47
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 0.28
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "ATK",
+            "usage": 96.82
           },
           {
             "name": "CRIT DMG",
-            "usage": 2.06
+            "usage": 2.46
           },
           {
             "name": "HP",
-            "usage": 1.2
+            "usage": 0.54
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 67.71
+            "usage": 64.68
           },
           {
             "name": "ATK",
-            "usage": 32.08
+            "usage": 35.25
           },
           {
             "name": "HP",
-            "usage": 0.05
+            "usage": 0.07
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 95.89
+            "usage": 96.13
           },
           {
             "name": "HP",
-            "usage": 2.09
+            "usage": 2.58
           },
           {
             "name": "Wind DMG Boost",
-            "usage": 1.03
+            "usage": 0.76
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 57.68
+            "usage": 56.47
           },
           {
             "name": "ATK",
-            "usage": 41.62
+            "usage": 43.1
           },
           {
             "name": "HP",
-            "usage": 0.43
+            "usage": 0.22
           }
         ]
       }
     },
     "1413": {
       "slug": "march-7th-evernight",
-      "count": 4159,
-      "mode": "Memory of Chaos",
+      "count": 3771,
+      "mode": "Anomaly Arbitration",
       "lightCones": [
         {
           "name": "To Evernight's Stars",
-          "usage": 77.32
+          "usage": 78.39
+        },
+        {
+          "name": "Make Farewells More Beautiful",
+          "usage": 4.11
         },
         {
           "name": "Sweat Now, Cry Less",
-          "usage": 4.57
+          "usage": 4.09
         },
         {
           "name": "The Flower Remembers",
-          "usage": 4.29
+          "usage": 3.78
         },
         {
           "name": "Memory's Curtain Never Falls",
-          "usage": 3.21
-        },
-        {
-          "name": "The Story's Next Page",
-          "usage": 3.13
+          "usage": 3.28
         }
       ],
       "relicSets": [
         {
           "name": "World-Remaking Deliverer",
-          "usage": 99.41
+          "usage": 99.45
         },
         {
           "name": "Scholar Lost in Erudition, Flex",
-          "usage": 0.2
+          "usage": 0.12
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 0.13
+          "usage": 0.07
         },
         {
-          "name": "Poet of Mourning Collapse",
+          "name": "Hero of Triumphant Song",
+          "usage": 0.06
+        },
+        {
+          "name": "Scholar Lost in Erudition, World-Remaking Deliverer",
           "usage": 0.05
-        },
-        {
-          "name": "Scholar Lost in Erudition, Wavestrider Captain",
-          "usage": 0.04
         }
       ],
       "planarSets": [
@@ -6395,455 +6445,447 @@ export const PRYDWEN_BUILD_GUIDES = {
         },
         {
           "name": "Arcadia of Woven Dreams",
-          "usage": 2.75
+          "usage": 2.84
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 0.14
-        },
-        {
-          "name": "Amphoreus, The Eternal Land",
-          "usage": 0.04
+          "usage": 0.18
         },
         {
           "name": "Broken Keel",
           "usage": 0.03
+        },
+        {
+          "name": "Giant Tree of Rapt Brooding",
+          "usage": 0.02
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 96.93
+            "usage": 97.13
           },
           {
             "name": "CRIT Rate",
-            "usage": 1.79
+            "usage": 1.71
           },
           {
             "name": "HP",
-            "usage": 1.23
+            "usage": 1.09
           }
         ],
         "feet": [
           {
             "name": "HP",
-            "usage": 72.51
+            "usage": 73.3
           },
           {
             "name": "SPD",
-            "usage": 27.42
+            "usage": 26.65
           },
           {
             "name": "ATK",
-            "usage": 0.03
+            "usage": 0.02
           }
         ],
         "sphere": [
           {
             "name": "Ice DMG Boost",
-            "usage": 60.71
+            "usage": 60
           },
           {
             "name": "HP",
-            "usage": 39
+            "usage": 39.85
           },
           {
             "name": "ATK",
-            "usage": 0.11
+            "usage": 0.09
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 90.16
+            "usage": 89.11
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 9.67
+            "usage": 10.83
           },
           {
             "name": "ATK",
-            "usage": 0.09
+            "usage": 0.04
           }
         ]
       }
     },
     "1414": {
       "slug": "dan-heng-permansor-terrae",
-      "count": 1275,
+      "count": 1088,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Though Worlds Apart",
-          "usage": 38.84
+          "usage": 39.63
         },
         {
           "name": "Journey, Forever Peaceful",
-          "usage": 11.64
+          "usage": 11.32
         },
         {
           "name": "Something Irreplaceable",
-          "usage": 6.06
+          "usage": 6.15
         },
         {
           "name": "Moment of Victory",
-          "usage": 5.1
+          "usage": 5.46
         },
         {
-          "name": "Brighter Than the Sun",
-          "usage": 4.2
+          "name": "Sleep Like the Dead",
+          "usage": 4.12
         }
       ],
       "relicSets": [
         {
           "name": "Self-Enshrouded Recluse",
-          "usage": 94.49
+          "usage": 94.52
         },
         {
           "name": "Sacerdos' Relived Ordeal",
-          "usage": 1.44
+          "usage": 1.27
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 1.12
-        },
-        {
-          "name": "Self-Enshrouded Recluse, Musketeer of Wild Wheat",
-          "usage": 0.43
+          "usage": 1.07
         },
         {
           "name": "Self-Enshrouded Recluse, Messenger Traversing Hackerspace",
-          "usage": 0.42
+          "usage": 0.45
+        },
+        {
+          "name": "Musketeer of Wild Wheat, Prisoner in Deep Confinement",
+          "usage": 0.41
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 93
+          "usage": 93.55
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 1.59
+          "usage": 1.44
         },
         {
           "name": "Broken Keel",
-          "usage": 1.38
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 0.79
+          "usage": 1.35
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 0.58
+          "usage": 0.68
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 0.45
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "ATK",
-            "usage": 97.44
+            "usage": 97.8
           },
           {
             "name": "CRIT Rate",
-            "usage": 1.04
+            "usage": 0.92
           },
           {
             "name": "Effect Hit Rate",
-            "usage": 0.57
+            "usage": 0.5
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 85.98
+            "usage": 86.2
           },
           {
             "name": "ATK",
-            "usage": 13.98
-          },
-          {
-            "name": "HP",
-            "usage": 0.04
+            "usage": 13.78
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 97.94
+            "usage": 97.73
           },
           {
             "name": "Physical DMG Boost",
-            "usage": 0.78
+            "usage": 0.65
           },
           {
             "name": "HP",
-            "usage": 0.53
+            "usage": 0.62
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 81.87
+            "usage": 81.75
           },
           {
             "name": "ATK",
-            "usage": 17.93
-          },
-          {
-            "name": "HP",
-            "usage": 0.09
+            "usage": 18.17
           }
         ]
       }
     },
     "1415": {
       "slug": "cyrene",
-      "count": 4364,
+      "count": 4007,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "This Love, Forever",
-          "usage": 58.12
+          "usage": 59.76
         },
         {
           "name": "Memory's Curtain Never Falls",
-          "usage": 33.58
+          "usage": 32.66
         },
         {
           "name": "Long May Rainbows Adorn the Sky",
-          "usage": 3.7
+          "usage": 3.59
         },
         {
           "name": "Victory In a Blink",
-          "usage": 2.55
+          "usage": 2.22
         },
         {
           "name": "The Story's Next Page",
-          "usage": 1.08
+          "usage": 0.78
         }
       ],
       "relicSets": [
         {
           "name": "World-Remaking Deliverer",
-          "usage": 77.67
+          "usage": 77.76
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 7.35
+          "usage": 7.31
         },
         {
           "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 6.76
+          "usage": 6.65
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 3.19
+          "usage": 3.34
         },
         {
           "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 1.36
+          "usage": 1.33
         }
       ],
       "planarSets": [
         {
           "name": "Amphoreus, The Eternal Land",
-          "usage": 77.27
+          "usage": 77
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 17.04
+          "usage": 17.2
         },
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 2.73
+          "usage": 2.75
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 0.97
+          "usage": 0.87
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 0.57
+          "usage": 0.67
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 82.68
+            "usage": 83.09
           },
           {
             "name": "HP",
-            "usage": 8.63
+            "usage": 8.8
           },
           {
             "name": "CRIT Rate",
-            "usage": 7.8
+            "usage": 7.31
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.56
+            "usage": 99.69
           },
           {
             "name": "HP",
-            "usage": 0.26
+            "usage": 0.27
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 63.36
+            "usage": 62.82
           },
           {
             "name": "Ice DMG Boost",
-            "usage": 34.74
+            "usage": 35.27
           },
           {
             "name": "DEF",
-            "usage": 0.54
+            "usage": 0.44
           }
         ],
         "rope": [
           {
             "name": "HP",
-            "usage": 97.98
-          },
-          {
-            "name": "ATK",
-            "usage": 0.64
+            "usage": 98.13
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 0.35
+            "usage": 0.77
+          },
+          {
+            "name": "DEF",
+            "usage": 0.49
           }
         ]
       }
     },
     "1501": {
       "slug": "sparxie",
-      "count": 3108,
+      "count": 3062,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dazzled by a Flowery World",
-          "usage": 68.79
+          "usage": 69.33
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 19.13
+          "usage": 18.33
         },
         {
           "name": "Today's Good Luck",
-          "usage": 8.57
+          "usage": 8.72
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 1.94
+          "usage": 1.86
         },
         {
           "name": "Elation Brimming With Blessings",
-          "usage": 0.95
+          "usage": 0.99
         }
       ],
       "relicSets": [
         {
           "name": "Ever-Glorious Magical Girl",
-          "usage": 98.84
+          "usage": 98.43
         },
         {
           "name": "Diviner of Distant Reach",
-          "usage": 0.34
+          "usage": 0.64
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 0.28
+          "usage": 0.27
         },
         {
           "name": "Wavestrider Captain, Flex",
-          "usage": 0.12
+          "usage": 0.1
         },
         {
-          "name": "Scholar Lost in Erudition",
-          "usage": 0.07
+          "name": "Scholar Lost in Erudition, Wavestrider Captain",
+          "usage": 0.08
         }
       ],
       "planarSets": [
         {
           "name": "Tengoku@Livestream",
-          "usage": 88.68
+          "usage": 88.66
         },
         {
           "name": "Punklorde Stage Zero",
-          "usage": 7.91
+          "usage": 7.72
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 1.96
+          "usage": 1.84
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 0.82
+          "usage": 1.02
         },
         {
           "name": "Rutilant Arena",
-          "usage": 0.06
+          "usage": 0.05
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 93.67
+            "usage": 93.79
           },
           {
             "name": "CRIT DMG",
-            "usage": 5.89
+            "usage": 5.84
           },
           {
             "name": "ATK",
-            "usage": 0.32
+            "usage": 0.31
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 54.25
+            "usage": 54.57
           },
           {
             "name": "SPD",
-            "usage": 45.59
+            "usage": 45.1
           },
           {
-            "name": "DEF",
-            "usage": 0.08
+            "name": "HP",
+            "usage": 0.17
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 96.79
+            "usage": 96.86
           },
           {
             "name": "Fire DMG Boost",
-            "usage": 1.76
+            "usage": 1.73
           },
           {
             "name": "HP",
-            "usage": 0.88
+            "usage": 0.84
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 62.84
+            "usage": 63.14
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 36.54
+            "usage": 36.21
           },
           {
             "name": "HP",
@@ -6854,93 +6896,93 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "1502": {
       "slug": "yao-guang",
-      "count": 4172,
-      "mode": "Pure Fiction",
+      "count": 4069,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "When She Decided to See",
-          "usage": 60.54
+          "usage": 60.33
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 36.24
+          "usage": 36.41
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 1.77
+          "usage": 1.76
         },
         {
           "name": "Elation Brimming With Blessings",
-          "usage": 0.75
+          "usage": 0.73
         },
         {
           "name": "Today's Good Luck",
-          "usage": 0.3
+          "usage": 0.34
         }
       ],
       "relicSets": [
         {
           "name": "Diviner of Distant Reach",
-          "usage": 97.93
+          "usage": 97.98
         },
         {
           "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 0.66
+          "usage": 0.64
         },
         {
           "name": "Messenger Traversing Hackerspace",
-          "usage": 0.49
+          "usage": 0.55
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 0.25
+          "usage": 0.19
         },
         {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 0.11
+          "name": "Eagle of Twilight Line",
+          "usage": 0.13
         }
       ],
       "planarSets": [
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 68.34
+          "usage": 67.12
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 28.23
+          "usage": 29.58
         },
         {
           "name": "Broken Keel",
-          "usage": 0.91
+          "usage": 0.9
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 0.54
+          "usage": 0.52
         },
         {
           "name": "Penacony, Land of the Dreams",
-          "usage": 0.43
+          "usage": 0.41
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 66.76
+            "usage": 67.97
           },
           {
             "name": "CRIT DMG",
-            "usage": 29.78
+            "usage": 28.64
           },
           {
             "name": "HP",
-            "usage": 1.82
+            "usage": 1.98
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.9
+            "usage": 99.89
           },
           {
             "name": "HP",
@@ -6948,452 +6990,456 @@ export const PRYDWEN_BUILD_GUIDES = {
           },
           {
             "name": "ATK",
-            "usage": 0.01
+            "usage": 0.05
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 60.01
+            "usage": 59.04
           },
           {
             "name": "DEF",
-            "usage": 20.93
+            "usage": 20.84
           },
           {
             "name": "ATK",
-            "usage": 9.38
+            "usage": 9.64
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 99.08
+            "usage": 99.04
           },
           {
             "name": "ATK",
-            "usage": 0.57
+            "usage": 0.52
           },
           {
             "name": "HP",
-            "usage": 0.25
+            "usage": 0.24
           }
         ]
       }
     },
     "1503": {
       "slug": "pearl",
-      "count": 1906,
-      "mode": "Apocalyptic Shadow",
+      "count": 2475,
+      "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 74.22
+          "usage": 72.92
         },
         {
           "name": "Colors for Tomorrow",
-          "usage": 20.26
+          "usage": 21.99
         },
         {
           "name": "Elation Brimming With Blessings",
-          "usage": 2.36
+          "usage": 2.3
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 1.1
+          "usage": 0.97
         },
         {
           "name": "When She Decided to See",
-          "usage": 0.7
+          "usage": 0.73
         }
       ],
       "relicSets": [
         {
           "name": "Dreamlit Actor",
-          "usage": 74.5
+          "usage": 74.99
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 15.81
+          "usage": 17.81
         },
         {
           "name": "Warrior Goddess of Sun and Thunder",
-          "usage": 3.79
+          "usage": 3.01
         },
         {
           "name": "Messenger Traversing Hackerspace",
-          "usage": 1.63
+          "usage": 1.46
         },
         {
           "name": "Diviner of Distant Reach",
-          "usage": 1.23
+          "usage": 0.82
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 80.67
+          "usage": 81.79
         },
         {
           "name": "Broken Keel",
-          "usage": 13.51
+          "usage": 12.7
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 3.75
+          "usage": 3.64
         },
         {
           "name": "Giant Tree of Rapt Brooding",
-          "usage": 0.52
+          "usage": 0.56
         },
         {
           "name": "City of Converging Stars",
-          "usage": 0.36
+          "usage": 0.39
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "Outgoing Healing Boost",
-            "usage": 63.37
+            "usage": 63.54
           },
           {
             "name": "DEF",
-            "usage": 35.67
+            "usage": 35.65
           },
           {
             "name": "HP",
-            "usage": 0.11
+            "usage": 0.26
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.69
+            "usage": 98.95
           },
           {
             "name": "DEF",
-            "usage": 1.14
+            "usage": 0.88
           },
           {
             "name": "ATK",
-            "usage": 0.11
+            "usage": 0.09
           }
         ],
         "sphere": [
           {
             "name": "DEF",
-            "usage": 98.13
+            "usage": 97.93
           },
           {
             "name": "HP",
-            "usage": 0.79
+            "usage": 0.95
           },
           {
-            "name": "ATK",
-            "usage": 0.37
+            "name": "Ice DMG Boost",
+            "usage": 0.3
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 96.79
+            "usage": 97.39
           },
           {
             "name": "DEF",
-            "usage": 3.02
+            "usage": 2.32
           },
           {
-            "name": "Break Effect",
-            "usage": 0.04
+            "name": "ATK",
+            "usage": 0.12
           }
         ]
       }
     },
     "1504": {
       "slug": "ashveil",
-      "count": 1464,
+      "count": 1413,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "The Finale of a Lie",
-          "usage": 48.7
+          "usage": 47.97
         },
         {
           "name": "Worrisome, Blissful",
-          "usage": 24.87
+          "usage": 26
         },
         {
           "name": "Cruising in the Stellar Sea",
-          "usage": 15.1
+          "usage": 15.02
         },
         {
           "name": "Baptism of Pure Thought",
-          "usage": 7.03
+          "usage": 6.85
         },
         {
           "name": "Race to the Horizon",
-          "usage": 1.58
+          "usage": 1.53
         }
       ],
       "relicSets": [
         {
           "name": "The Ashblazing Grand Duke",
-          "usage": 89.38
+          "usage": 87.65
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 6.29
+          "usage": 8.13
         },
         {
           "name": "Pioneer Diver of Dead Waters",
-          "usage": 2.46
+          "usage": 2.35
         },
         {
           "name": "The Ashblazing Grand Duke, Scholar Lost in Erudition",
-          "usage": 0.31
+          "usage": 0.23
         },
         {
           "name": "Wavestrider Captain",
-          "usage": 0.19
+          "usage": 0.23
         }
       ],
       "planarSets": [
         {
           "name": "City of Converging Stars",
-          "usage": 70.41
+          "usage": 71.47
         },
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 24.38
+          "usage": 23.7
         },
         {
           "name": "Inert Salsotto",
-          "usage": 2.49
+          "usage": 2.28
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 1.08
+          "usage": 1.16
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 0.46
+          "usage": 0.41
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 91.44
+            "usage": 92.33
           },
           {
             "name": "CRIT DMG",
-            "usage": 7.8
+            "usage": 7.03
           },
           {
             "name": "HP",
-            "usage": 0.18
+            "usage": 0.33
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 59.21
+            "usage": 59.61
           },
           {
             "name": "ATK",
-            "usage": 40.67
+            "usage": 40.08
           },
           {
             "name": "HP",
-            "usage": 0.13
+            "usage": 0.19
           }
         ],
         "sphere": [
           {
             "name": "Lightning DMG Boost",
-            "usage": 66.49
+            "usage": 64.81
           },
           {
             "name": "ATK",
-            "usage": 31.48
+            "usage": 32.18
           },
           {
             "name": "HP",
-            "usage": 1.2
+            "usage": 2.45
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 87.71
+            "usage": 86.16
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 11.39
+            "usage": 12.47
           },
           {
-            "name": "DEF",
-            "usage": 0.23
+            "name": "HP",
+            "usage": 0.73
           }
         ]
       }
     },
     "1505": {
       "slug": "evanescia",
-      "count": 2256,
+      "count": 2371,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Until the Flowers Bloom Again",
-          "usage": 78.56
+          "usage": 79.2
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 8.87
+          "usage": 8.5
         },
         {
           "name": "Today's Good Luck",
-          "usage": 5.94
+          "usage": 5.57
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 5.51
+          "usage": 5.48
         },
         {
-          "name": "Dazzled by a Flowery World",
-          "usage": 0.41
+          "name": "A Little Getaway",
+          "usage": 0.4
         }
       ],
       "relicSets": [
         {
           "name": "Ever-Glorious Magical Girl",
-          "usage": 99.89
+          "usage": 99.66
         },
         {
           "name": "Wavestrider Captain, Flex",
-          "usage": 0.04
+          "usage": 0.15
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 0.02
+          "usage": 0.07
+        },
+        {
+          "name": "Wavestrider Captain, Ever-Glorious Magical Girl",
+          "usage": 0.03
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 0.01
-        },
-        {
-          "name": "Musketeer of Wild Wheat, Wavestrider Captain",
-          "usage": 0.01
+          "usage": 0.02
         }
       ],
       "planarSets": [
         {
           "name": "Punklorde Stage Zero",
-          "usage": 99.72
+          "usage": 99.56
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 0.09
+          "usage": 0.08
         },
         {
-          "name": "Penacony, Land of the Dreams",
-          "usage": 0.02
+          "name": "Inert Salsotto",
+          "usage": 0.05
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 0.02
+          "usage": 0.04
         },
         {
-          "name": "Cosmic Life Sciences Institute",
-          "usage": 0.01
+          "name": "Penacony, Land of the Dreams",
+          "usage": 0.04
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT DMG",
-            "usage": 93.01
+            "usage": 93
           },
           {
             "name": "CRIT Rate",
-            "usage": 6.96
+            "usage": 6.83
+          },
+          {
+            "name": "HP",
+            "usage": 0.03
           }
         ],
         "feet": [
           {
             "name": "ATK",
-            "usage": 54.23
+            "usage": 55.68
           },
           {
             "name": "SPD",
-            "usage": 32.87
+            "usage": 31
           },
           {
             "name": "HP",
-            "usage": 8.31
+            "usage": 8.43
           }
         ],
         "sphere": [
           {
             "name": "Physical DMG Boost",
-            "usage": 45.95
+            "usage": 44.98
           },
           {
             "name": "ATK",
-            "usage": 35.25
+            "usage": 35.6
           },
           {
             "name": "HP",
-            "usage": 9.78
+            "usage": 10.51
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 95.75
+            "usage": 95.96
           },
           {
             "name": "ATK",
-            "usage": 4.17
+            "usage": 3.81
           },
           {
             "name": "HP",
-            "usage": 0.02
+            "usage": 0.04
           }
         ]
       }
     },
     "1506": {
       "slug": "silver-wolf-lv-999",
-      "count": 5608,
+      "count": 5666,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Welcome to the Cosmic City",
-          "usage": 89.19
+          "usage": 88.63
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 7.06
+          "usage": 7.01
         },
         {
           "name": "Today's Good Luck",
-          "usage": 2.47
+          "usage": 2.98
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 0.63
+          "usage": 0.67
         },
         {
           "name": "A Little Getaway",
-          "usage": 0.41
+          "usage": 0.46
         }
       ],
       "relicSets": [
         {
           "name": "Ever-Glorious Magical Girl",
-          "usage": 99.55
+          "usage": 99.62
         },
         {
           "name": "Diviner of Distant Reach",
@@ -7401,11 +7447,11 @@ export const PRYDWEN_BUILD_GUIDES = {
         },
         {
           "name": "Wavestrider Captain, Flex",
-          "usage": 0.05
+          "usage": 0.03
         },
         {
-          "name": "Diviner of Distant Reach, Wavestrider Captain",
-          "usage": 0.01
+          "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
+          "usage": 0.02
         },
         {
           "name": "Messenger Traversing Hackerspace, Scholar Lost in Erudition",
@@ -7415,22 +7461,22 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Punklorde Stage Zero",
-          "usage": 99.85
-        },
-        {
-          "name": "Firmament Frontline: Glamoth",
-          "usage": 0.01
+          "usage": 99.88
         },
         {
           "name": "Forge of the Kalpagni Lantern",
+          "usage": 0.02
+        },
+        {
+          "name": "Firmament Frontline: Glamoth",
+          "usage": 0.02
+        },
+        {
+          "name": "Izumo Gensei and Takama Divine Realm",
           "usage": 0.01
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 0.01
-        },
-        {
-          "name": "Izumo Gensei and Takama Divine Realm",
           "usage": 0.01
         }
       ],
@@ -7438,25 +7484,412 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 82.95
+            "usage": 83.21
           },
           {
             "name": "CRIT DMG",
-            "usage": 16.99
+            "usage": 16.72
           },
           {
-            "name": "HP",
-            "usage": 0.02
+            "name": "ATK",
+            "usage": 0.04
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.85
+            "usage": 99.9
           },
           {
             "name": "ATK",
-            "usage": 0.06
+            "usage": 0.04
+          },
+          {
+            "name": "HP",
+            "usage": 0.03
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 49.59
+          },
+          {
+            "name": "DEF",
+            "usage": 29.25
+          },
+          {
+            "name": "ATK",
+            "usage": 7.79
+          }
+        ],
+        "rope": [
+          {
+            "name": "HP",
+            "usage": 51.4
+          },
+          {
+            "name": "DEF",
+            "usage": 33.92
+          },
+          {
+            "name": "ATK",
+            "usage": 11.2
+          }
+        ]
+      }
+    },
+    "1507": {
+      "slug": "blade-mortenax",
+      "count": 2806,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Reforged in Hellfire",
+          "usage": 37.29
+        },
+        {
+          "name": "Before the Tutorial Mission Starts",
+          "usage": 36.33
+        },
+        {
+          "name": "Resolution Shines As Pearls of Sweat",
+          "usage": 8.54
+        },
+        {
+          "name": "Lies Dance on the Breeze",
+          "usage": 6.12
+        },
+        {
+          "name": "Boundless Choreo",
+          "usage": 4.54
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Divine-Querying Master Smith",
+          "usage": 77.66
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 19.92
+        },
+        {
+          "name": "Guard of Wuthering Snow",
+          "usage": 1.06
+        },
+        {
+          "name": "Pioneer Diver of Dead Waters",
+          "usage": 0.24
+        },
+        {
+          "name": "Longevous Disciple",
+          "usage": 0.19
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Bone Collection's Serene Demesne",
+          "usage": 51.44
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 43.32
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 2.94
+        },
+        {
+          "name": "Duran, Dynasty of Running Wolves",
+          "usage": 0.9
+        },
+        {
+          "name": "Broken Keel",
+          "usage": 0.04
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT Rate",
+            "usage": 83.22
+          },
+          {
+            "name": "CRIT DMG",
+            "usage": 14.82
+          },
+          {
+            "name": "HP",
+            "usage": 1.12
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 91
+          },
+          {
+            "name": "HP",
+            "usage": 8.86
+          },
+          {
+            "name": "ATK",
+            "usage": 0.07
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 82.69
+          },
+          {
+            "name": "Fire DMG Boost",
+            "usage": 16.9
+          },
+          {
+            "name": "DEF",
+            "usage": 0.11
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 65.91
+          },
+          {
+            "name": "HP",
+            "usage": 33.83
+          },
+          {
+            "name": "ATK",
+            "usage": 0.23
+          }
+        ]
+      }
+    },
+    "1508": {
+      "slug": "rin-tohsaka",
+      "count": 932,
+      "mode": "Apocalyptic Shadow",
+      "lightCones": [
+        {
+          "name": "Flickering Stars",
+          "usage": 51.98
+        },
+        {
+          "name": "Eternal Calculus",
+          "usage": 19.16
+        },
+        {
+          "name": "Into the Unreachable Veil",
+          "usage": 11.63
+        },
+        {
+          "name": "Make the World Clamor",
+          "usage": 3.1
+        },
+        {
+          "name": "Night on the Milky Way",
+          "usage": 3.01
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Genius of Brilliant Stars",
+          "usage": 63.75
+        },
+        {
+          "name": "Scholar Lost in Erudition",
+          "usage": 13.78
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 8.9
+        },
+        {
+          "name": "The Ashblazing Grand Duke",
+          "usage": 2.32
+        },
+        {
+          "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
+          "usage": 1.98
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Tengoku@Livestream",
+          "usage": 35.11
+        },
+        {
+          "name": "Penacony, Land of the Dreams",
+          "usage": 26.92
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 14.55
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 13.3
+        },
+        {
+          "name": "Rutilant Arena",
+          "usage": 4.83
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT Rate",
+            "usage": 88.33
+          },
+          {
+            "name": "CRIT DMG",
+            "usage": 8.22
+          },
+          {
+            "name": "HP",
+            "usage": 2.03
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 86.86
+          },
+          {
+            "name": "ATK",
+            "usage": 12.71
+          },
+          {
+            "name": "HP",
+            "usage": 0.28
+          }
+        ],
+        "sphere": [
+          {
+            "name": "Quantum DMG Boost",
+            "usage": 74.19
+          },
+          {
+            "name": "ATK",
+            "usage": 18.7
+          },
+          {
+            "name": "HP",
+            "usage": 4.17
+          }
+        ],
+        "rope": [
+          {
+            "name": "ATK",
+            "usage": 50.34
+          },
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 48.46
+          },
+          {
+            "name": "HP",
+            "usage": 0.62
+          }
+        ]
+      }
+    },
+    "1509": {
+      "slug": "gilgamesh",
+      "count": 633,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "I Am As You Behold",
+          "usage": 66.05
+        },
+        {
+          "name": "On the Fall of an Aeon",
+          "usage": 20.57
+        },
+        {
+          "name": "Something Irreplaceable",
+          "usage": 3.51
+        },
+        {
+          "name": "Thus Burns the Dawn",
+          "usage": 2.32
+        },
+        {
+          "name": "A Secret Vow",
+          "usage": 2.17
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Scholar Lost in Erudition",
+          "usage": 85.57
+        },
+        {
+          "name": "The Ashblazing Grand Duke",
+          "usage": 4.18
+        },
+        {
+          "name": "Genius of Brilliant Stars",
+          "usage": 3.25
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 3.19
+        },
+        {
+          "name": "Poet of Mourning Collapse",
+          "usage": 0.63
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Cosmic Life Sciences Institute",
+          "usage": 82.86
+        },
+        {
+          "name": "Izumo Gensei and Takama Divine Realm",
+          "usage": 7.36
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 3.46
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 2.43
+        },
+        {
+          "name": "Rutilant Arena",
+          "usage": 0.9
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT Rate",
+            "usage": 85.03
+          },
+          {
+            "name": "CRIT DMG",
+            "usage": 14.42
+          },
+          {
+            "name": "ATK",
+            "usage": 0.42
+          }
+        ],
+        "feet": [
+          {
+            "name": "ATK",
+            "usage": 76.68
+          },
+          {
+            "name": "SPD",
+            "usage": 23.18
           },
           {
             "name": "HP",
@@ -7465,459 +7898,72 @@ export const PRYDWEN_BUILD_GUIDES = {
         ],
         "sphere": [
           {
-            "name": "HP",
-            "usage": 49.77
-          },
-          {
-            "name": "DEF",
-            "usage": 29.32
-          },
-          {
-            "name": "ATK",
-            "usage": 7.55
-          }
-        ],
-        "rope": [
-          {
-            "name": "HP",
-            "usage": 51.16
-          },
-          {
-            "name": "DEF",
-            "usage": 34.23
-          },
-          {
-            "name": "ATK",
-            "usage": 11.13
-          }
-        ]
-      }
-    },
-    "1507": {
-      "slug": "blade-mortenax",
-      "count": 2654,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Before the Tutorial Mission Starts",
-          "usage": 37.98
-        },
-        {
-          "name": "Reforged in Hellfire",
-          "usage": 34.66
-        },
-        {
-          "name": "Resolution Shines As Pearls of Sweat",
-          "usage": 8.99
-        },
-        {
-          "name": "Lies Dance on the Breeze",
-          "usage": 6.11
-        },
-        {
-          "name": "Boundless Choreo",
-          "usage": 4.69
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Divine-Querying Master Smith",
-          "usage": 81.69
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 15.78
-        },
-        {
-          "name": "Guard of Wuthering Snow",
-          "usage": 1.11
-        },
-        {
-          "name": "Pioneer Diver of Dead Waters",
-          "usage": 0.24
-        },
-        {
-          "name": "Scholar Lost in Erudition",
-          "usage": 0.19
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Bone Collection's Serene Demesne",
-          "usage": 53.88
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 40.05
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 3.22
-        },
-        {
-          "name": "Duran, Dynasty of Running Wolves",
-          "usage": 0.97
-        },
-        {
-          "name": "Rutilant Arena",
-          "usage": 0.07
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT Rate",
-            "usage": 82.67
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 15.3
-          },
-          {
-            "name": "HP",
-            "usage": 1.05
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 90.16
-          },
-          {
-            "name": "HP",
-            "usage": 9.56
-          },
-          {
-            "name": "ATK",
-            "usage": 0.19
-          }
-        ],
-        "sphere": [
-          {
-            "name": "HP",
-            "usage": 80.8
-          },
-          {
-            "name": "Fire DMG Boost",
-            "usage": 18.8
-          },
-          {
-            "name": "DEF",
-            "usage": 0.14
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 64.12
-          },
-          {
-            "name": "HP",
-            "usage": 35.6
-          },
-          {
-            "name": "ATK",
-            "usage": 0.12
-          }
-        ]
-      }
-    },
-    "1508": {
-      "slug": "rin-tohsaka",
-      "count": 1014,
-      "mode": "Apocalyptic Shadow",
-      "lightCones": [
-        {
-          "name": "Flickering Stars",
-          "usage": 52.54
-        },
-        {
-          "name": "Eternal Calculus",
-          "usage": 19.09
-        },
-        {
-          "name": "Into the Unreachable Veil",
-          "usage": 11.76
-        },
-        {
-          "name": "Make the World Clamor",
-          "usage": 3.26
-        },
-        {
-          "name": "Night on the Milky Way",
-          "usage": 2.82
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Genius of Brilliant Stars",
-          "usage": 65.16
-        },
-        {
-          "name": "Scholar Lost in Erudition",
-          "usage": 13.03
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 7.89
-        },
-        {
-          "name": "The Ashblazing Grand Duke",
-          "usage": 2.54
-        },
-        {
-          "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 2.12
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Tengoku@Livestream",
-          "usage": 34.69
-        },
-        {
-          "name": "Penacony, Land of the Dreams",
-          "usage": 27.57
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 14.04
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 12.41
-        },
-        {
-          "name": "Rutilant Arena",
-          "usage": 5.24
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT Rate",
-            "usage": 87.57
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 8
-          },
-          {
-            "name": "HP",
-            "usage": 2.49
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 85.73
-          },
-          {
-            "name": "ATK",
-            "usage": 13.77
-          },
-          {
-            "name": "HP",
-            "usage": 0.1
-          }
-        ],
-        "sphere": [
-          {
-            "name": "Quantum DMG Boost",
-            "usage": 74.46
-          },
-          {
-            "name": "ATK",
-            "usage": 18.07
-          },
-          {
-            "name": "HP",
-            "usage": 5.14
-          }
-        ],
-        "rope": [
-          {
-            "name": "ATK",
-            "usage": 50.83
-          },
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 47.63
-          },
-          {
-            "name": "HP",
-            "usage": 0.82
-          }
-        ]
-      }
-    },
-    "1509": {
-      "slug": "gilgamesh",
-      "count": 660,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "I Am As You Behold",
-          "usage": 65.78
-        },
-        {
-          "name": "On the Fall of an Aeon",
-          "usage": 20.08
-        },
-        {
-          "name": "Something Irreplaceable",
-          "usage": 3.61
-        },
-        {
-          "name": "Thus Burns the Dawn",
-          "usage": 2.77
-        },
-        {
-          "name": "A Secret Vow",
-          "usage": 2.08
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Scholar Lost in Erudition",
-          "usage": 86.38
-        },
-        {
-          "name": "The Ashblazing Grand Duke",
-          "usage": 4.02
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 2.82
-        },
-        {
-          "name": "Genius of Brilliant Stars",
-          "usage": 2.77
-        },
-        {
-          "name": "Poet of Mourning Collapse",
-          "usage": 0.66
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Cosmic Life Sciences Institute",
-          "usage": 81.65
-        },
-        {
-          "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 8.2
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 3.82
-        },
-        {
-          "name": "Inert Salsotto",
-          "usage": 2.32
-        },
-        {
-          "name": "Rutilant Arena",
-          "usage": 0.93
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT Rate",
-            "usage": 84.29
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 14.93
-          },
-          {
-            "name": "ATK",
-            "usage": 0.21
-          }
-        ],
-        "feet": [
-          {
-            "name": "ATK",
-            "usage": 76.64
-          },
-          {
-            "name": "SPD",
-            "usage": 23.13
-          },
-          {
-            "name": "HP",
-            "usage": 0.12
-          }
-        ],
-        "sphere": [
-          {
             "name": "Lightning DMG Boost",
-            "usage": 85.71
+            "usage": 86.3
           },
           {
             "name": "ATK",
-            "usage": 13.38
+            "usage": 12.42
           },
           {
             "name": "HP",
-            "usage": 0.66
+            "usage": 0.62
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 88.93
+            "usage": 89.06
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 10.98
+            "usage": 10.43
           },
           {
-            "name": "HP",
-            "usage": 0.05
+            "name": "Break Effect",
+            "usage": 0.15
           }
         ]
       }
     },
     "1510": {
       "slug": "himeko-nova",
-      "count": 2635,
+      "count": 2418,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "A Star That Lights the Night",
-          "usage": 80.55
+          "usage": 80.82
         },
         {
           "name": "Into the Unreachable Veil",
-          "usage": 7.92
+          "usage": 7.86
         },
         {
           "name": "Night on the Milky Way",
-          "usage": 5.98
+          "usage": 5.86
         },
         {
           "name": "Eternal Calculus",
-          "usage": 2.58
+          "usage": 2.72
         },
         {
           "name": "Today Is Another Peaceful Day",
-          "usage": 0.92
+          "usage": 0.73
         }
       ],
       "relicSets": [
         {
           "name": "As Navigator Isee Sees It",
-          "usage": 97.74
+          "usage": 97.94
         },
         {
           "name": "Scholar Lost in Erudition",
-          "usage": 1.02
+          "usage": 0.9
         },
         {
           "name": "Wavestrider Captain",
-          "usage": 0.39
+          "usage": 0.33
         },
         {
           "name": "Eagle of Twilight Line",
@@ -7925,40 +7971,40 @@ export const PRYDWEN_BUILD_GUIDES = {
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 0.15
+          "usage": 0.16
         }
       ],
       "planarSets": [
         {
           "name": "Fallen Star Anchorage",
-          "usage": 94.62
+          "usage": 94.68
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 3.28
+          "usage": 3.11
         },
         {
           "name": "Rutilant Arena",
-          "usage": 1.45
+          "usage": 1.58
         },
         {
           "name": "Inert Salsotto",
-          "usage": 0.19
+          "usage": 0.18
         },
         {
           "name": "Izumo Gensei and Takama Divine Realm",
-          "usage": 0.06
+          "usage": 0.09
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 80.57
+            "usage": 81.78
           },
           {
             "name": "CRIT DMG",
-            "usage": 19.25
+            "usage": 17.97
           },
           {
             "name": "ATK",
@@ -7968,11 +8014,11 @@ export const PRYDWEN_BUILD_GUIDES = {
         "feet": [
           {
             "name": "ATK",
-            "usage": 88.62
+            "usage": 88.46
           },
           {
             "name": "SPD",
-            "usage": 11.23
+            "usage": 11.28
           },
           {
             "name": "HP",
@@ -7982,97 +8028,97 @@ export const PRYDWEN_BUILD_GUIDES = {
         "sphere": [
           {
             "name": "ATK",
-            "usage": 60.62
+            "usage": 60.76
           },
           {
             "name": "Fire DMG Boost",
-            "usage": 39.04
+            "usage": 38.96
           },
           {
             "name": "HP",
-            "usage": 0.31
+            "usage": 0.28
           }
         ],
         "rope": [
           {
             "name": "ATK",
-            "usage": 84
+            "usage": 84.84
           },
           {
             "name": "Energy Regeneration Rate",
-            "usage": 15.87
+            "usage": 15.1
           },
           {
             "name": "HP",
-            "usage": 0.08
+            "usage": 0.04
           }
         ]
       }
     },
     "1512": {
       "slug": "robin-summeretto",
-      "count": 2291,
+      "count": 2295,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Memory's Curtain Never Falls",
-          "usage": 34.65
+          "usage": 34.79
         },
         {
           "name": "Rise and Sing",
-          "usage": 27.23
+          "usage": 27.17
         },
         {
           "name": "The Story's Next Page",
-          "usage": 25.53
+          "usage": 25.7
         },
         {
           "name": "Long May Rainbows Adorn the Sky",
-          "usage": 2.74
+          "usage": 3.11
         },
         {
           "name": "Victory In a Blink",
-          "usage": 2.43
+          "usage": 2.31
         }
       ],
       "relicSets": [
         {
           "name": "World-Remaking Deliverer",
-          "usage": 96.93
+          "usage": 96.9
         },
         {
           "name": "Sacerdos' Relived Ordeal",
-          "usage": 0.55
-        },
-        {
-          "name": "Messenger Traversing Hackerspace",
-          "usage": 0.49
+          "usage": 0.54
         },
         {
           "name": "Diviner of Distant Reach, Messenger Traversing Hackerspace",
-          "usage": 0.44
+          "usage": 0.49
         },
         {
           "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 0.35
+          "usage": 0.42
+        },
+        {
+          "name": "Messenger Traversing Hackerspace",
+          "usage": 0.39
         }
       ],
       "planarSets": [
         {
           "name": "Amphoreus, The Eternal Land",
-          "usage": 80.21
+          "usage": 79.91
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 14.33
+          "usage": 14.79
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 3.31
+          "usage": 3.17
         },
         {
           "name": "Bone Collection's Serene Demesne",
-          "usage": 0.6
+          "usage": 0.7
         },
         {
           "name": "Broken Keel",
@@ -8083,178 +8129,182 @@ export const PRYDWEN_BUILD_GUIDES = {
         "body": [
           {
             "name": "HP",
-            "usage": 73.19
+            "usage": 73.86
           },
           {
             "name": "CRIT DMG",
-            "usage": 25.09
+            "usage": 24.26
           },
           {
             "name": "CRIT Rate",
-            "usage": 1.13
+            "usage": 1.27
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 92.66
+            "usage": 92.73
           },
           {
             "name": "HP",
-            "usage": 7.14
+            "usage": 7.17
           },
           {
             "name": "ATK",
-            "usage": 0.2
+            "usage": 0.09
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 94.21
+            "usage": 94.12
           },
           {
             "name": "Wind DMG Boost",
-            "usage": 3.91
+            "usage": 3.98
           },
           {
             "name": "ATK",
-            "usage": 1.05
+            "usage": 1.09
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 85.92
+            "usage": 87.22
           },
           {
             "name": "HP",
-            "usage": 13.87
+            "usage": 12.63
           },
           {
             "name": "ATK",
-            "usage": 0.07
+            "usage": 0.08
           }
         ]
       }
     },
     "1513": {
       "slug": "aventurine-waveflair",
-      "count": 1299,
+      "count": 1285,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Summer Rides the Surf",
-          "usage": 45.53
+          "usage": 45.46
         },
         {
           "name": "Today's Good Luck",
-          "usage": 24.5
+          "usage": 25.39
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 19.84
+          "usage": 19.16
         },
         {
           "name": "A Little Getaway",
-          "usage": 4.63
+          "usage": 5.02
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 2.23
+          "usage": 2.28
         }
       ],
       "relicSets": [
         {
           "name": "Ever-Glorious Magical Girl",
-          "usage": 96.52
+          "usage": 96.85
         },
         {
           "name": "Diviner of Distant Reach",
-          "usage": 2.49
+          "usage": 2.53
         },
         {
           "name": "Genius of Brilliant Stars",
-          "usage": 0.36
+          "usage": 0.19
         },
         {
-          "name": "Wavestrider Captain, Flex",
-          "usage": 0.11
+          "name": "Scholar Lost in Erudition, Wavestrider Captain",
+          "usage": 0.12
         },
         {
-          "name": "Eagle of Twilight Line",
-          "usage": 0.1
+          "name": "Messenger Traversing Hackerspace, Scholar Lost in Erudition",
+          "usage": 0.06
         }
       ],
       "planarSets": [
         {
           "name": "Punklorde Stage Zero",
-          "usage": 99.43
-        },
-        {
-          "name": "Rutilant Arena",
-          "usage": 0.1
+          "usage": 99.57
         },
         {
           "name": "Duran, Dynasty of Running Wolves",
-          "usage": 0.1
-        },
-        {
-          "name": "Inert Salsotto",
-          "usage": 0.05
+          "usage": 0.15
         },
         {
           "name": "The Wondrous BananAmusement Park",
-          "usage": 0.01
+          "usage": 0.06
+        },
+        {
+          "name": "Rutilant Arena",
+          "usage": 0.06
+        },
+        {
+          "name": "Inert Salsotto",
+          "usage": 0.04
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 80.16
+            "usage": 79.76
           },
           {
             "name": "CRIT DMG",
-            "usage": 19.84
+            "usage": 20.23
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 99.8
+            "usage": 99.81
           },
           {
             "name": "ATK",
-            "usage": 0.15
+            "usage": 0.1
+          },
+          {
+            "name": "HP",
+            "usage": 0.08
           }
         ],
         "sphere": [
           {
             "name": "Quantum DMG Boost",
-            "usage": 37.24
+            "usage": 35.8
           },
           {
             "name": "HP",
-            "usage": 27.48
+            "usage": 27.95
           },
           {
             "name": "ATK",
-            "usage": 13.49
+            "usage": 13.42
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 93.58
+            "usage": 93.99
           },
           {
             "name": "ATK",
-            "usage": 4.29
+            "usage": 3.5
           },
           {
             "name": "HP",
-            "usage": 1.33
+            "usage": 1.74
           }
         ]
       }
@@ -8317,46 +8367,46 @@ export const PRYDWEN_BUILD_GUIDES = {
     },
     "8005": {
       "slug": "trailblazer-harmony",
-      "count": 51,
+      "count": 52,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 80.39
+          "usage": 81.64
         },
         {
           "name": "Memories of the Past",
-          "usage": 8.62
+          "usage": 8.1
         },
         {
           "name": "In Pursuit of the Wind",
-          "usage": 4.76
+          "usage": 4.73
         },
         {
           "name": "Past Self in Mirror",
-          "usage": 3
+          "usage": 3.09
         },
         {
-          "name": "Meshing Cogs",
-          "usage": 0.76
+          "name": "But the Battle Isn't Over",
+          "usage": 0.45
         }
       ],
       "relicSets": [
         {
           "name": "Watchmaker, Master of Dream Machinations",
-          "usage": 81
+          "usage": 80.49
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 10.07
-        },
-        {
-          "name": "Thief of Shooting Meteor",
-          "usage": 2.11
+          "usage": 11.52
         },
         {
           "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 1.95
+          "usage": 1.87
+        },
+        {
+          "name": "Thief of Shooting Meteor",
+          "usage": 1.45
         },
         {
           "name": "Messenger Traversing Hackerspace",
@@ -8366,122 +8416,122 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 36.56
+          "usage": 34.78
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 31.4
+          "usage": 34.01
         },
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 22.76
+          "usage": 21.73
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 4.61
+          "usage": 4.39
         },
         {
           "name": "Broken Keel",
-          "usage": 0.49
+          "usage": 0.5
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 53.72
+            "usage": 45.17
           },
           {
             "name": "DEF",
-            "usage": 33.77
+            "usage": 44.1
           },
           {
             "name": "ATK",
-            "usage": 8.93
+            "usage": 8.32
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.23
+            "usage": 98.31
           },
           {
             "name": "DEF",
-            "usage": 1.77
+            "usage": 1.69
           }
         ],
         "sphere": [
           {
             "name": "HP",
-            "usage": 52.65
+            "usage": 53.11
           },
           {
             "name": "DEF",
-            "usage": 22.2
+            "usage": 29.4
           },
           {
             "name": "ATK",
-            "usage": 10.51
+            "usage": 4.53
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 52.47
+            "usage": 52.2
           },
           {
             "name": "Break Effect",
-            "usage": 46.82
+            "usage": 46.11
           },
           {
-            "name": "ATK",
-            "usage": 0.2
+            "name": "DEF",
+            "usage": 1.69
           }
         ]
       }
     },
     "8006": {
       "slug": "trailblazer-harmony",
-      "count": 51,
+      "count": 52,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Dance! Dance! Dance!",
-          "usage": 80.39
+          "usage": 81.64
         },
         {
           "name": "Memories of the Past",
-          "usage": 8.62
+          "usage": 8.1
         },
         {
           "name": "In Pursuit of the Wind",
-          "usage": 4.76
+          "usage": 4.73
         },
         {
           "name": "Past Self in Mirror",
-          "usage": 3
+          "usage": 3.09
         },
         {
-          "name": "Meshing Cogs",
-          "usage": 0.76
+          "name": "But the Battle Isn't Over",
+          "usage": 0.45
         }
       ],
       "relicSets": [
         {
           "name": "Watchmaker, Master of Dream Machinations",
-          "usage": 81
+          "usage": 80.49
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 10.07
-        },
-        {
-          "name": "Thief of Shooting Meteor",
-          "usage": 2.11
+          "usage": 11.52
         },
         {
           "name": "Thief of Shooting Meteor, Messenger Traversing Hackerspace",
-          "usage": 1.95
+          "usage": 1.87
+        },
+        {
+          "name": "Thief of Shooting Meteor",
+          "usage": 1.45
         },
         {
           "name": "Messenger Traversing Hackerspace",
@@ -8491,38 +8541,421 @@ export const PRYDWEN_BUILD_GUIDES = {
       "planarSets": [
         {
           "name": "Talia: Kingdom of Banditry",
-          "usage": 36.56
+          "usage": 34.78
         },
         {
           "name": "Sprightly Vonwacq",
-          "usage": 31.4
+          "usage": 34.01
         },
         {
           "name": "Forge of the Kalpagni Lantern",
-          "usage": 22.76
+          "usage": 21.73
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 4.61
+          "usage": 4.39
         },
         {
           "name": "Broken Keel",
-          "usage": 0.49
+          "usage": 0.5
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "HP",
-            "usage": 53.72
+            "usage": 45.17
           },
           {
             "name": "DEF",
-            "usage": 33.77
+            "usage": 44.1
           },
           {
             "name": "ATK",
-            "usage": 8.93
+            "usage": 8.32
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 98.31
+          },
+          {
+            "name": "DEF",
+            "usage": 1.69
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 53.11
+          },
+          {
+            "name": "DEF",
+            "usage": 29.4
+          },
+          {
+            "name": "ATK",
+            "usage": 4.53
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 52.2
+          },
+          {
+            "name": "Break Effect",
+            "usage": 46.11
+          },
+          {
+            "name": "DEF",
+            "usage": 1.69
+          }
+        ]
+      }
+    },
+    "8007": {
+      "slug": "trailblazer-remembrance",
+      "count": 148,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Fly Into a Pink Tomorrow",
+          "usage": 71.49
+        },
+        {
+          "name": "Memory's Curtain Never Falls",
+          "usage": 13.21
+        },
+        {
+          "name": "Victory In a Blink",
+          "usage": 8.4
+        },
+        {
+          "name": "This Love, Forever",
+          "usage": 2.46
+        },
+        {
+          "name": "Shadowburn",
+          "usage": 1.54
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "World-Remaking Deliverer",
+          "usage": 34.51
+        },
+        {
+          "name": "Hero of Triumphant Song",
+          "usage": 20.64
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
+          "usage": 19.81
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 10.85
+        },
+        {
+          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
+          "usage": 3.88
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 39.15
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 25.76
+        },
+        {
+          "name": "Amphoreus, The Eternal Land",
+          "usage": 15.02
+        },
+        {
+          "name": "Broken Keel",
+          "usage": 6.97
+        },
+        {
+          "name": "Penacony, Land of the Dreams",
+          "usage": 2.81
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT DMG",
+            "usage": 93.44
+          },
+          {
+            "name": "HP",
+            "usage": 3.74
+          },
+          {
+            "name": "CRIT Rate",
+            "usage": 2.28
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 99.26
+          },
+          {
+            "name": "HP",
+            "usage": 0.66
+          },
+          {
+            "name": "DEF",
+            "usage": 0.08
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 39.52
+          },
+          {
+            "name": "Ice DMG Boost",
+            "usage": 29.4
+          },
+          {
+            "name": "ATK",
+            "usage": 10.78
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 92.43
+          },
+          {
+            "name": "ATK",
+            "usage": 4.26
+          },
+          {
+            "name": "HP",
+            "usage": 2.48
+          }
+        ]
+      }
+    },
+    "8008": {
+      "slug": "trailblazer-remembrance",
+      "count": 148,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Fly Into a Pink Tomorrow",
+          "usage": 71.49
+        },
+        {
+          "name": "Memory's Curtain Never Falls",
+          "usage": 13.21
+        },
+        {
+          "name": "Victory In a Blink",
+          "usage": 8.4
+        },
+        {
+          "name": "This Love, Forever",
+          "usage": 2.46
+        },
+        {
+          "name": "Shadowburn",
+          "usage": 1.54
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "World-Remaking Deliverer",
+          "usage": 34.51
+        },
+        {
+          "name": "Hero of Triumphant Song",
+          "usage": 20.64
+        },
+        {
+          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
+          "usage": 19.81
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 10.85
+        },
+        {
+          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
+          "usage": 3.88
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 39.15
+        },
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 25.76
+        },
+        {
+          "name": "Amphoreus, The Eternal Land",
+          "usage": 15.02
+        },
+        {
+          "name": "Broken Keel",
+          "usage": 6.97
+        },
+        {
+          "name": "Penacony, Land of the Dreams",
+          "usage": 2.81
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT DMG",
+            "usage": 93.44
+          },
+          {
+            "name": "HP",
+            "usage": 3.74
+          },
+          {
+            "name": "CRIT Rate",
+            "usage": 2.28
+          }
+        ],
+        "feet": [
+          {
+            "name": "SPD",
+            "usage": 99.26
+          },
+          {
+            "name": "HP",
+            "usage": 0.66
+          },
+          {
+            "name": "DEF",
+            "usage": 0.08
+          }
+        ],
+        "sphere": [
+          {
+            "name": "HP",
+            "usage": 39.52
+          },
+          {
+            "name": "Ice DMG Boost",
+            "usage": 29.4
+          },
+          {
+            "name": "ATK",
+            "usage": 10.78
+          }
+        ],
+        "rope": [
+          {
+            "name": "Energy Regeneration Rate",
+            "usage": 92.43
+          },
+          {
+            "name": "ATK",
+            "usage": 4.26
+          },
+          {
+            "name": "HP",
+            "usage": 2.48
+          }
+        ]
+      }
+    },
+    "8009": {
+      "slug": "trailblazer-elation",
+      "count": 469,
+      "mode": "Memory of Chaos",
+      "lightCones": [
+        {
+          "name": "Elation Brimming With Blessings",
+          "usage": 87.97
+        },
+        {
+          "name": "Mushy Shroomy's Adventures",
+          "usage": 7.65
+        },
+        {
+          "name": "Tomorrow, Together",
+          "usage": 3.32
+        },
+        {
+          "name": "When She Decided to See",
+          "usage": 0.49
+        },
+        {
+          "name": "Today's Good Luck",
+          "usage": 0.29
+        }
+      ],
+      "relicSets": [
+        {
+          "name": "Diviner of Distant Reach",
+          "usage": 43.45
+        },
+        {
+          "name": "Eagle of Twilight Line",
+          "usage": 16.01
+        },
+        {
+          "name": "Dreamlit Actor",
+          "usage": 14.4
+        },
+        {
+          "name": "Sacerdos' Relived Ordeal",
+          "usage": 11.11
+        },
+        {
+          "name": "Messenger Traversing Hackerspace",
+          "usage": 6.85
+        }
+      ],
+      "planarSets": [
+        {
+          "name": "Sprightly Vonwacq",
+          "usage": 44.52
+        },
+        {
+          "name": "Lushaka, the Sunken Seas",
+          "usage": 44.26
+        },
+        {
+          "name": "Broken Keel",
+          "usage": 4.01
+        },
+        {
+          "name": "City of Converging Stars",
+          "usage": 3.52
+        },
+        {
+          "name": "Punklorde Stage Zero",
+          "usage": 1.06
+        }
+      ],
+      "mainStats": {
+        "body": [
+          {
+            "name": "CRIT Rate",
+            "usage": 63.07
+          },
+          {
+            "name": "CRIT DMG",
+            "usage": 17.98
+          },
+          {
+            "name": "HP",
+            "usage": 6.23
           }
         ],
         "feet": [
@@ -8531,552 +8964,169 @@ export const PRYDWEN_BUILD_GUIDES = {
             "usage": 98.23
           },
           {
-            "name": "DEF",
-            "usage": 1.77
-          }
-        ],
-        "sphere": [
-          {
-            "name": "HP",
-            "usage": 52.65
-          },
-          {
-            "name": "DEF",
-            "usage": 22.2
-          },
-          {
             "name": "ATK",
-            "usage": 10.51
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 52.47
-          },
-          {
-            "name": "Break Effect",
-            "usage": 46.82
-          },
-          {
-            "name": "ATK",
-            "usage": 0.2
-          }
-        ]
-      }
-    },
-    "8007": {
-      "slug": "trailblazer-remembrance",
-      "count": 156,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Fly Into a Pink Tomorrow",
-          "usage": 72.84
-        },
-        {
-          "name": "Memory's Curtain Never Falls",
-          "usage": 11.95
-        },
-        {
-          "name": "Victory In a Blink",
-          "usage": 8.09
-        },
-        {
-          "name": "This Love, Forever",
-          "usage": 2.57
-        },
-        {
-          "name": "Shadowburn",
-          "usage": 1.72
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "World-Remaking Deliverer",
-          "usage": 33.33
-        },
-        {
-          "name": "Hero of Triumphant Song",
-          "usage": 21.84
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 20.59
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 9.77
-        },
-        {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 3.87
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 39.37
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 25.59
-        },
-        {
-          "name": "Amphoreus, The Eternal Land",
-          "usage": 14.63
-        },
-        {
-          "name": "Broken Keel",
-          "usage": 7.81
-        },
-        {
-          "name": "The Wondrous BananAmusement Park",
-          "usage": 3.2
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT DMG",
-            "usage": 94.93
+            "usage": 0.95
           },
           {
             "name": "HP",
-            "usage": 3.29
-          },
-          {
-            "name": "CRIT Rate",
-            "usage": 0.76
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 97.6
-          },
-          {
-            "name": "ATK",
-            "usage": 1.52
-          },
-          {
-            "name": "HP",
-            "usage": 0.8
-          }
-        ],
-        "sphere": [
-          {
-            "name": "HP",
-            "usage": 44.99
-          },
-          {
-            "name": "Ice DMG Boost",
-            "usage": 28.01
-          },
-          {
-            "name": "ATK",
-            "usage": 6.78
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 91.09
-          },
-          {
-            "name": "ATK",
-            "usage": 4.91
-          },
-          {
-            "name": "HP",
-            "usage": 3.92
-          }
-        ]
-      }
-    },
-    "8008": {
-      "slug": "trailblazer-remembrance",
-      "count": 156,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Fly Into a Pink Tomorrow",
-          "usage": 72.84
-        },
-        {
-          "name": "Memory's Curtain Never Falls",
-          "usage": 11.95
-        },
-        {
-          "name": "Victory In a Blink",
-          "usage": 8.09
-        },
-        {
-          "name": "This Love, Forever",
-          "usage": 2.57
-        },
-        {
-          "name": "Shadowburn",
-          "usage": 1.72
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "World-Remaking Deliverer",
-          "usage": 33.33
-        },
-        {
-          "name": "Hero of Triumphant Song",
-          "usage": 21.84
-        },
-        {
-          "name": "Messenger Traversing Hackerspace, Sacerdos' Relived Ordeal",
-          "usage": 20.59
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 9.77
-        },
-        {
-          "name": "Warrior Goddess of Sun and Thunder, Messenger Traversing Hackerspace",
-          "usage": 3.87
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 39.37
-        },
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 25.59
-        },
-        {
-          "name": "Amphoreus, The Eternal Land",
-          "usage": 14.63
-        },
-        {
-          "name": "Broken Keel",
-          "usage": 7.81
-        },
-        {
-          "name": "The Wondrous BananAmusement Park",
-          "usage": 3.2
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT DMG",
-            "usage": 94.93
-          },
-          {
-            "name": "HP",
-            "usage": 3.29
-          },
-          {
-            "name": "CRIT Rate",
-            "usage": 0.76
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 97.6
-          },
-          {
-            "name": "ATK",
-            "usage": 1.52
-          },
-          {
-            "name": "HP",
-            "usage": 0.8
-          }
-        ],
-        "sphere": [
-          {
-            "name": "HP",
-            "usage": 44.99
-          },
-          {
-            "name": "Ice DMG Boost",
-            "usage": 28.01
-          },
-          {
-            "name": "ATK",
-            "usage": 6.78
-          }
-        ],
-        "rope": [
-          {
-            "name": "Energy Regeneration Rate",
-            "usage": 91.09
-          },
-          {
-            "name": "ATK",
-            "usage": 4.91
-          },
-          {
-            "name": "HP",
-            "usage": 3.92
-          }
-        ]
-      }
-    },
-    "8009": {
-      "slug": "trailblazer-elation",
-      "count": 431,
-      "mode": "Memory of Chaos",
-      "lightCones": [
-        {
-          "name": "Elation Brimming With Blessings",
-          "usage": 88.69
-        },
-        {
-          "name": "Mushy Shroomy's Adventures",
-          "usage": 7.19
-        },
-        {
-          "name": "Tomorrow, Together",
-          "usage": 2.99
-        },
-        {
-          "name": "When She Decided to See",
-          "usage": 0.57
-        },
-        {
-          "name": "Today's Good Luck",
-          "usage": 0.26
-        }
-      ],
-      "relicSets": [
-        {
-          "name": "Diviner of Distant Reach",
-          "usage": 44.08
-        },
-        {
-          "name": "Eagle of Twilight Line",
-          "usage": 17.34
-        },
-        {
-          "name": "Sacerdos' Relived Ordeal",
-          "usage": 12.45
-        },
-        {
-          "name": "Dreamlit Actor",
-          "usage": 10.04
-        },
-        {
-          "name": "Messenger Traversing Hackerspace",
-          "usage": 7.82
-        }
-      ],
-      "planarSets": [
-        {
-          "name": "Sprightly Vonwacq",
-          "usage": 44.43
-        },
-        {
-          "name": "Lushaka, the Sunken Seas",
-          "usage": 44.27
-        },
-        {
-          "name": "Broken Keel",
-          "usage": 4.55
-        },
-        {
-          "name": "City of Converging Stars",
-          "usage": 3.17
-        },
-        {
-          "name": "Punklorde Stage Zero",
-          "usage": 0.99
-        }
-      ],
-      "mainStats": {
-        "body": [
-          {
-            "name": "CRIT Rate",
-            "usage": 62.43
-          },
-          {
-            "name": "CRIT DMG",
-            "usage": 19.01
-          },
-          {
-            "name": "HP",
-            "usage": 7.1
-          }
-        ],
-        "feet": [
-          {
-            "name": "SPD",
-            "usage": 98.38
-          },
-          {
-            "name": "ATK",
-            "usage": 0.85
-          },
-          {
-            "name": "HP",
-            "usage": 0.44
+            "usage": 0.64
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 48.46
+            "usage": 51.57
           },
           {
             "name": "HP",
-            "usage": 27.51
+            "usage": 27.18
           },
           {
             "name": "DEF",
-            "usage": 11.41
+            "usage": 10.39
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 92.96
+            "usage": 94.1
           },
           {
             "name": "ATK",
-            "usage": 5.59
+            "usage": 4.26
           },
           {
             "name": "HP",
-            "usage": 1.09
+            "usage": 1.03
           }
         ]
       }
     },
     "8010": {
       "slug": "trailblazer-elation",
-      "count": 431,
+      "count": 469,
       "mode": "Memory of Chaos",
       "lightCones": [
         {
           "name": "Elation Brimming With Blessings",
-          "usage": 88.69
+          "usage": 87.97
         },
         {
           "name": "Mushy Shroomy's Adventures",
-          "usage": 7.19
+          "usage": 7.65
         },
         {
           "name": "Tomorrow, Together",
-          "usage": 2.99
+          "usage": 3.32
         },
         {
           "name": "When She Decided to See",
-          "usage": 0.57
+          "usage": 0.49
         },
         {
           "name": "Today's Good Luck",
-          "usage": 0.26
+          "usage": 0.29
         }
       ],
       "relicSets": [
         {
           "name": "Diviner of Distant Reach",
-          "usage": 44.08
+          "usage": 43.45
         },
         {
           "name": "Eagle of Twilight Line",
-          "usage": 17.34
-        },
-        {
-          "name": "Sacerdos' Relived Ordeal",
-          "usage": 12.45
+          "usage": 16.01
         },
         {
           "name": "Dreamlit Actor",
-          "usage": 10.04
+          "usage": 14.4
+        },
+        {
+          "name": "Sacerdos' Relived Ordeal",
+          "usage": 11.11
         },
         {
           "name": "Messenger Traversing Hackerspace",
-          "usage": 7.82
+          "usage": 6.85
         }
       ],
       "planarSets": [
         {
           "name": "Sprightly Vonwacq",
-          "usage": 44.43
+          "usage": 44.52
         },
         {
           "name": "Lushaka, the Sunken Seas",
-          "usage": 44.27
+          "usage": 44.26
         },
         {
           "name": "Broken Keel",
-          "usage": 4.55
+          "usage": 4.01
         },
         {
           "name": "City of Converging Stars",
-          "usage": 3.17
+          "usage": 3.52
         },
         {
           "name": "Punklorde Stage Zero",
-          "usage": 0.99
+          "usage": 1.06
         }
       ],
       "mainStats": {
         "body": [
           {
             "name": "CRIT Rate",
-            "usage": 62.43
+            "usage": 63.07
           },
           {
             "name": "CRIT DMG",
-            "usage": 19.01
+            "usage": 17.98
           },
           {
             "name": "HP",
-            "usage": 7.1
+            "usage": 6.23
           }
         ],
         "feet": [
           {
             "name": "SPD",
-            "usage": 98.38
+            "usage": 98.23
           },
           {
             "name": "ATK",
-            "usage": 0.85
+            "usage": 0.95
           },
           {
             "name": "HP",
-            "usage": 0.44
+            "usage": 0.64
           }
         ],
         "sphere": [
           {
             "name": "ATK",
-            "usage": 48.46
+            "usage": 51.57
           },
           {
             "name": "HP",
-            "usage": 27.51
+            "usage": 27.18
           },
           {
             "name": "DEF",
-            "usage": 11.41
+            "usage": 10.39
           }
         ],
         "rope": [
           {
             "name": "Energy Regeneration Rate",
-            "usage": 92.96
+            "usage": 94.1
           },
           {
             "name": "ATK",
-            "usage": 5.59
+            "usage": 4.26
           },
           {
             "name": "HP",
-            "usage": 1.09
+            "usage": 1.03
           }
         ]
       }

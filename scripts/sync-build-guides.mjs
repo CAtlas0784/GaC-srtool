@@ -3,10 +3,10 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const avatarSource = await readFile(resolve(repoRoot, 'js/avatars-data.js'), 'utf8');
-const metadataMatch = avatarSource.match(/export const AVATAR_METADATA = (\{[\s\S]*?\n\});/);
-if (!metadataMatch) throw new Error('Could not read AVATAR_METADATA from js/avatars-data.js');
-const avatarMetadata = JSON.parse(metadataMatch[1]);
+const readJson = async (path) => JSON.parse(await readFile(resolve(repoRoot, path), 'utf8'));
+const avatarMetadata = await readJson('assets/data/avatars.json');
+// Prydwen slugs that cannot be derived from the English name.
+const slugOverrides = (await readJson('scripts/data/overrides.json')).prydwenSlugs || {};
 
 const headers = { 'User-Agent': 'GaC-Srtool build guide data sync' };
 const treeResponse = await fetch('https://huggingface.co/api/datasets/LvlUrArti/MocDataProcessed/tree/main?recursive=true', { headers });
@@ -31,32 +31,6 @@ const snapshot = config[version];
 if (!snapshot?.collect_date || !Array.isArray(sourceBuilds)) {
   throw new Error(`Snapshot ${version} is missing its date or build rows`);
 }
-
-const slugOverrides = {
-  '1001': 'march-7th',
-  '1112': 'topaz',
-  '1213': 'imbibitor-lunae',
-  '1225': 'tingyun-fugue',
-  '1224': 'march-7th-swordmaster',
-  '1413': 'march-7th-evernight',
-  '1414': 'dan-heng-permansor-terrae',
-  '1506': 'silver-wolf-lv-999',
-  '1507': 'blade-mortenax',
-  '1510': 'himeko-nova',
-  '1511': 'aeon-aha',
-  '1512': 'robin-summeretto',
-  '1513': 'aventurine-waveflair',
-  '8001': 'trailblazer-destruction',
-  '8002': 'trailblazer-destruction',
-  '8003': 'trailblazer-preservation',
-  '8004': 'trailblazer-preservation',
-  '8005': 'trailblazer-harmony',
-  '8006': 'trailblazer-harmony',
-  '8007': 'trailblazer-remembrance',
-  '8008': 'trailblazer-remembrance',
-  '8009': 'trailblazer-elation',
-  '8010': 'trailblazer-elation'
-};
 
 function slugify(name = '') {
   return name.toLowerCase()

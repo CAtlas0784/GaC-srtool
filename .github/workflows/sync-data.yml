@@ -1,0 +1,67 @@
+name: Sync game data
+
+# Pulls new characters, light cones, relic sets and recommended builds once a
+# day. Nothing is committed unless the sync and the tests both pass, and an
+# unchanged day produces no commit at all.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-data
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Order matters: sync-data reads the usage statistics and hashes the
+      # endgame catalog, so both are refreshed first.
+      - name: Sync player usage statistics
+        run: node scripts/sync-build-guides.mjs
+      - name: Sync endgame rooms and monsters
+        run: node scripts/build-firefly-endgame-data.cjs "$RUNNER_TEMP/endgame-cache"
+      - name: Sync characters, light cones, relics and builds
+        run: node scripts/sync-data.mjs
+      - name: Run tests
+        run: node --test tests/*.test.cjs
+      - name: Commit changes
+        id: commit
+        run: |
+          git add assets/data assets/firefly-endgame.json js/build-guides-data.js
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data changes."
+            exit 0
+          fi
+          version=$(node -p "require('./assets/data/manifest.json').game.latest")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(data): sync game data ${version}"
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # A push made with the workflow token does not start other workflows, so the
+  # Pages deploy is called directly.
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml

@@ -1,0 +1,23 @@
+{
+  "version": "906475933f38",
+  "updatedAt": "2026-11-15T20:23:36.016Z",
+  "game": {
+    "live": "4.7",
+    "latest": "4.7.51"
+  },
+  "counts": {
+    "avatars": 101,
+    "lightcones": 174,
+    "relicSets": 64
+  },
+  "files": {
+    "avatars.json": "4636c327621c",
+    "lightcones.json": "c54b638df72a",
+    "relic-sets.json": "632e8502e80e",
+    "builds.json": "57f5524f6318"
+  },
+  "assets": {
+    "firefly-endgame.json": "ca55ae639c40",
+    "item-catalog.json": "448bc845c316"
+  }
+}

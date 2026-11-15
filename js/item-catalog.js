@@ -1,6 +1,8 @@
-import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.28';
+import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.29';
+import { assetVersion } from './game-data.js?v=1';
 
-const CATALOG_URL = new URL('../assets/item-catalog.json?v=2', import.meta.url);
+// Versioned by content hash (see scripts/sync-data.mjs), not by hand.
+const CATALOG_URL = new URL(`../assets/item-catalog.json?v=${assetVersion('item-catalog.json')}`, import.meta.url);
 const PAGE_SIZE = 48;
 let catalog = null;
 let catalogLoading = null;

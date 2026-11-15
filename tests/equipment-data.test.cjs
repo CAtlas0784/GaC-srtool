@@ -21,18 +21,13 @@ test('4.6 equipment metadata and bundled artwork are available', async () => {
   }
 });
 
-test('Aha recommends Dreamlit Actor and the captured God\'s Moment of Joy set', () => {
-  const source = fs.readFileSync(path.join(__dirname, '../js/app.js'), 'utf8');
-  const start = source.indexOf('const CHARACTER_OPTIMAL_BUILDS =');
-  const end = source.indexOf('// Recommended Relic Builds by Path', start);
-  assert.ok(start >= 0 && end > start);
-  const context = vm.createContext({});
-  vm.runInContext(source.slice(start, end) + '\nthis.build = getOptimalBuildForAvatar(1511);', context);
-  assert.equal(context.build.cavern, 133);
-  assert.equal(context.build.planar, 329);
+test('Aha recommends the captured God\'s Moment of Joy set', () => {
+  const build = require('../assets/data/builds.json')[1511].build;
+  assert.equal(build.cavern, 133);
+  assert.equal(build.planar, 329);
   const capture = require('../assets/relic-client-capture.json');
-  for (const [slot, id] of [[5, context.build.sphere], [6, context.build.rope]]) {
-    const piece = capture.relics.find(row => row.SetID === context.build.planar && row.Type === slot);
+  for (const [slot, id] of [[5, build.sphere], [6, build.rope]]) {
+    const piece = capture.relics.find(row => row.SetID === build.planar && row.Type === slot);
     assert.ok(piece && capture.main_affixes.some(row => row.GroupID === piece.MainAffixGroup && row.AffixID === id));
   }
 });

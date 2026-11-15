@@ -1,10 +1,11 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
-import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.24';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.30';
-import { initializeItemCatalog } from './item-catalog.js?v=7';
-import { initializeUnstuck } from './unstuck.js?v=6';
+import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.25';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.31';
+import { initializeItemCatalog } from './item-catalog.js?v=8';
+import { initializeUnstuck } from './unstuck.js?v=7';
+import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.28';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.29';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
@@ -3107,168 +3108,15 @@ async function maxSingleAvatar(avatarId) {
 let selectedLcRank = 5;
 
 // Modal Sub-tabs Handler
-// Authoritative Signature / Best-in-Slot Light Cones dictionary for all characters
-const SIGNATURE_LIGHTCONES = {
-  1001: 21001, // March 7th -> Day One of My New Life
-  1002: 21000, // Dan Heng -> Only Silence Remains
-  1003: 23000, // Himeko -> Night on the Milky Way
-  1004: 23004, // Welt -> In the Name of the World
-  1005: 23006, // Kafka -> Patience Is All You Need
-  1006: 23007, // Silver Wolf -> Incessant Rain
-  1008: 21007, // Arlan -> A Secret Vow
-  1009: 21021, // Asta -> Dance! Dance! Dance!
-  1013: 24004, // Herta -> Eternal Calculus
-  1014: 24000, // Saber -> On the Fall of an Aeon
-  1015: 24001, // Archer -> Cruising in the Stellar Sea
-  1101: 23003, // Bronya -> But the Battle Isn't Over
-  1102: 23001, // Seele -> In the Night
-  1103: 21009, // Serval -> Make the World Clamor
-  1104: 23005, // Gepard -> Moment of Victory
-  1105: 21010, // Natasha -> Post-Op Conversation
-  1106: 22000, // Pela -> Before the Tutorial Mission Starts (BiS standard)
-  1107: 23002, // Clara -> Something Irreplaceable
-  1108: 21011, // Sampo -> Eyes of the Prey
-  1109: 21012, // Hook -> The Moles Welcome You
-  1110: 21010, // Lynx -> Post-Op Conversation
-  1111: 21014, // Luka -> Resolution Shines As Pearls of Sweat
-  1112: 23016, // Topaz -> Worrisome, Blissful
-  1201: 21015, // Qingque -> Today Is Another Peaceful Day
-  1202: 21021, // Tingyun -> Dance! Dance! Dance!
-  1203: 23008, // Luocha -> Echoes of the Coffin
-  1204: 23010, // Jing Yuan -> Before Dawn
-  1205: 23009, // Blade -> The Unreachable Side
-  1206: 21017, // Sushang -> Swordplay
-  1207: 21018, // Yukong -> Past and Future
-  1208: 23011, // Fu Xuan -> She Already Shut Her Eyes
-  1209: 23012, // Yanqing -> Sleep Like the Dead
-  1210: 21011, // Guinaifen -> Eyes of the Prey
-  1211: 23013, // Bailu -> Time Waits for No One
-  1212: 23014, // Jingliu -> I Shall Be My Own Sword
-  1213: 23015, // Dan Heng IL -> Brighter Than the Sun
-  1214: 21035, // Xueyi -> Indelible Promise
-  1215: 21021, // Hanya -> Dance! Dance! Dance!
-  1217: 23017, // Huohuo -> Night of Fright
-  1218: 23029, // Jiaoqiu -> Those Many Springs
-  1220: 23031, // Feixiao -> I Venture Forth to Hunt
-  1221: 23030, // Yunli -> Dance at Sunset
-  1222: 23032, // Lingsha -> Scent Alone Stays True
-  1223: 21017, // Moze -> Swordplay
-  1224: 21017, // March 7th (Hunt) -> Swordplay
-  1225: 23035, // Fugue -> Long Road Leads Home
-  1301: 21022, // Gallagher -> What Is Real?
-  1302: 23018, // Argenti -> An Instant Before A Gaze
-  1303: 23019, // Ruan Mei -> Past Self in Mirror
-  1304: 23023, // Aventurine -> Inherently Unjust Destiny
-  1305: 23020, // Dr. Ratio -> Baptism of Pure Thought
-  1306: 23021, // Sparkle -> Earthly Escapade
-  1307: 23022, // Black Swan -> Reforged Remembrance
-  1308: 23024, // Acheron -> Along the Passing Shore
-  1309: 23026, // Robin -> Flowing Nightglow
-  1310: 23025, // Firefly -> Whereabouts Should Dreams Rest
-  1312: 21035, // Misha -> Indelible Promise
-  1313: 23034, // Sunday -> A Grounded Ascent
-  1314: 23028, // Jade -> Yet Hope Is Priceless
-  1315: 23027, // Boothill -> Sailing Towards a Second Life
-  1317: 23033, // Rappa -> Ninjutsu Inscription: Dazzling Evilbreaker
-  1321: 23022, // The Dahlia -> Reforged Remembrance
-  1401: 23037, // The Herta -> Into the Unreachable Veil
-  1402: 23036, // Aglaea -> Time Woven into Gold
-  1403: 23038, // Tribbie -> If Time Were a Flower
-  1404: 23039, // Mydei -> Flame of Blood, Blaze My Path
-  1405: 23041, // Anaxa -> Life Should Be Cast to Flames
-  1406: 23022, // Cipher
-  1407: 23040, // Castorice -> Make Farewells More Beautiful
-  1408: 23042, // Phainon
-  1511: 23065, // Aeon ★ Aha -> Upon the First Echo of "Aha"
-  1514: 23066, // Ellen -> No Shifts on Rainy Days
-  1515: 23067, // Astra Yao -> Shine Bright Like Her
-  8001: 24000, // Trailblazer Male Destruction -> On the Fall of an Aeon
-  8002: 24000, // Trailblazer Female Destruction
-  8003: 24002, // Trailblazer Male Preservation -> Texture of Memories
-  8004: 24002, // Trailblazer Female Preservation
-  8005: 21016, // Trailblazer Male Harmony -> Memories of the Past
-  8006: 21016, // Trailblazer Female Harmony
-  8007: 21040, // Trailblazer Remembrance
-  8008: 21040
-};
-
-// Comprehensive Meta Optimal Relic Builds (Cavern, Planar, Main Affixes & Top Substats)
-// Substats ID reference:
-// 1: Flat HP, 2: Flat ATK, 3: Flat DEF, 4: HP%, 5: ATK%, 6: DEF%
-// 7: SPD, 8: CRIT Rate%, 9: CRIT DMG%, 10: EHR%, 11: Effect RES%, 12: Break Effect%
-const CHARACTER_OPTIMAL_BUILDS = {
-  1511: { cavern: 133, planar: 329, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 7, 5] }, // Aeon ★ Aha
-  1514: { cavern: 134, planar: 317, body: 4, feet: 4, sphere: 6, rope: 2, substats: [8, 9, 5, 7] }, // Ellen
-  1515: { cavern: 134, planar: 317, body: 5, feet: 4, sphere: 9, rope: 2, substats: [8, 9, 5, 7] }, // Astra Yao
-  1308: { cavern: 117, planar: 313, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Acheron
-  1310: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 2, rope: 1, substats: [12, 7, 5, 11] }, // Firefly
-  1220: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Feixiao
-  1315: { cavern: 119, planar: 305, body: 4, feet: 4, sphere: 4, rope: 1, substats: [12, 7, 8, 9] }, // Boothill
-  1221: { cavern: 120, planar: 314, body: 4, feet: 2, sphere: 4, rope: 4, substats: [8, 9, 5, 1] }, // Yunli
-  1313: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // Sunday
-  1401: { cavern: 122, planar: 317, body: 4, feet: 2, sphere: 6, rope: 4, substats: [8, 9, 5, 7] }, // The Herta
-  1106: { cavern: 110, planar: 312, body: 7, feet: 4, sphere: 1, rope: 2, substats: [7, 10, 11, 4] }, // Pela
-  1006: { cavern: 117, planar: 312, body: 7, feet: 4, sphere: 9, rope: 2, substats: [7, 10, 8, 9] }, // Silver Wolf
-  1303: { cavern: 118, planar: 307, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // Ruan Mei
-  1309: { cavern: 114, planar: 316, body: 2, feet: 2, sphere: 4, rope: 2, substats: [5, 7, 11, 4] }, // Robin
-  1306: { cavern: 114, planar: 310, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // Sparkle
-  1101: { cavern: 114, planar: 310, body: 5, feet: 4, sphere: 8, rope: 2, substats: [9, 7, 11, 6] }, // Bronya
-  1202: { cavern: 114, planar: 307, body: 2, feet: 4, sphere: 2, rope: 2, substats: [7, 5, 11, 4] }, // Tingyun
-  1304: { cavern: 103, planar: 314, body: 5, feet: 4, sphere: 10, rope: 5, substats: [6, 9, 8, 7] }, // Aventurine
-  1208: { cavern: 113, planar: 302, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 6, 11] }, // Fu Xuan
-  1217: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Huohuo
-  1222: { cavern: 119, planar: 315, body: 6, feet: 4, sphere: 2, rope: 2, substats: [12, 7, 5, 11] }, // Lingsha
-  1301: { cavern: 119, planar: 315, body: 6, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // Gallagher
-  1203: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 2, rope: 2, substats: [7, 5, 11, 4] }, // Luocha
-  1005: { cavern: 116, planar: 311, body: 2, feet: 4, sphere: 7, rope: 4, substats: [7, 5, 10, 12] }, // Kafka
-  1307: { cavern: 116, planar: 308, body: 7, feet: 4, sphere: 8, rope: 4, substats: [10, 7, 5, 12] }, // Black Swan
-  1218: { cavern: 116, planar: 308, body: 7, feet: 4, sphere: 5, rope: 2, substats: [10, 7, 11, 5] }, // Jiaoqiu
-  1212: { cavern: 104, planar: 309, body: 5, feet: 4, sphere: 6, rope: 4, substats: [9, 8, 7, 5] }, // Jingliu
-  1213: { cavern: 102, planar: 309, body: 4, feet: 2, sphere: 10, rope: 4, substats: [8, 9, 5, 7] }, // Dan Heng IL
-  1305: { cavern: 117, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // Dr. Ratio
-  1112: { cavern: 115, planar: 314, body: 4, feet: 4, sphere: 5, rope: 4, substats: [8, 9, 7, 5] }, // Topaz
-  1314: { cavern: 115, planar: 314, body: 4, feet: 2, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Jade
-  1317: { cavern: 119, planar: 315, body: 2, feet: 4, sphere: 10, rope: 1, substats: [12, 7, 5, 11] }, // Rappa
-  1225: { cavern: 119, planar: 315, body: 7, feet: 4, sphere: 5, rope: 1, substats: [12, 7, 10, 11] }, // Fugue
-  1402: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Aglaea
-  1407: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 7, 5] }, // Castorice
-  1405: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Anaxa
-  1403: { cavern: 122, planar: 317, body: 4, feet: 4, sphere: 9, rope: 2, substats: [8, 9, 7, 4] }, // Tribbie
-  1404: { cavern: 120, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // Mydei
-  1102: { cavern: 108, planar: 309, body: 4, feet: 2, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Seele
-  1204: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Jing Yuan
-  1205: { cavern: 113, planar: 306, body: 4, feet: 1, sphere: 8, rope: 3, substats: [8, 9, 4, 7] }, // Blade
-  1302: { cavern: 106, planar: 306, body: 5, feet: 4, sphere: 4, rope: 2, substats: [8, 9, 7, 5] }, // Argenti
-  1107: { cavern: 106, planar: 314, body: 4, feet: 2, sphere: 4, rope: 4, substats: [8, 9, 5, 1] }, // Clara
-  1003: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 5, rope: 4, substats: [8, 9, 5, 7] }, // Himeko
-  1004: { cavern: 117, planar: 308, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 10] }, // Welt
-  1104: { cavern: 103, planar: 304, body: 3, feet: 4, sphere: 3, rope: 2, substats: [6, 7, 11, 10] }, // Gepard
-  1211: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Bailu
-  1209: { cavern: 104, planar: 306, body: 5, feet: 4, sphere: 6, rope: 4, substats: [9, 8, 7, 5] }, // Yanqing
-  1013: { cavern: 115, planar: 306, body: 4, feet: 2, sphere: 6, rope: 4, substats: [8, 9, 5, 7] }, // Herta
-  1224: { cavern: 102, planar: 314, body: 4, feet: 4, sphere: 10, rope: 4, substats: [8, 9, 7, 5] }, // March 7th (Hunt)
-  8005: { cavern: 118, planar: 305, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // TB Harmony (M)
-  8006: { cavern: 118, planar: 305, body: 1, feet: 4, sphere: 1, rope: 2, substats: [12, 7, 11, 4] }, // TB Harmony (F)
-  8007: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] }, // TB Remembrance
-  8008: { cavern: 121, planar: 316, body: 5, feet: 4, sphere: 1, rope: 2, substats: [9, 7, 11, 4] },
-  1223: { cavern: 117, planar: 314, body: 4, feet: 2, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Moze
-  1201: { cavern: 108, planar: 309, body: 4, feet: 4, sphere: 9, rope: 4, substats: [8, 9, 5, 7] }, // Qingque
-  1214: { cavern: 119, planar: 305, body: 4, feet: 4, sphere: 9, rope: 1, substats: [12, 8, 9, 7] }, // Xueyi
-  1210: { cavern: 116, planar: 311, body: 2, feet: 4, sphere: 5, rope: 4, substats: [10, 7, 5, 12] }, // Guinaifen
-  1111: { cavern: 106, planar: 311, body: 2, feet: 4, sphere: 4, rope: 4, substats: [7, 5, 10, 12] }, // Luka
-  1108: { cavern: 116, planar: 308, body: 2, feet: 4, sphere: 8, rope: 4, substats: [10, 7, 5, 12] }, // Sampo
-  1103: { cavern: 112, planar: 306, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 7, 5] }, // Serval
-  1002: { cavern: 110, planar: 309, body: 4, feet: 4, sphere: 8, rope: 4, substats: [8, 9, 7, 5] }, // Dan Heng
-  1206: { cavern: 106, planar: 309, body: 4, feet: 4, sphere: 4, rope: 4, substats: [8, 9, 7, 12] }, // Sushang
-  1109: { cavern: 109, planar: 306, body: 4, feet: 2, sphere: 5, rope: 4, substats: [8, 9, 5, 7] }, // Hook
-  1008: { cavern: 113, planar: 306, body: 4, feet: 4, sphere: 7, rope: 4, substats: [8, 9, 5, 7] }, // Arlan
-  1110: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Lynx
-  1105: { cavern: 101, planar: 302, body: 6, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Natasha
-  1215: { cavern: 114, planar: 310, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Hanya
-  1207: { cavern: 114, planar: 310, body: 4, feet: 4, sphere: 10, rope: 2, substats: [7, 8, 9, 11] }, // Yukong
-  1009: { cavern: 114, planar: 302, body: 1, feet: 4, sphere: 1, rope: 2, substats: [7, 4, 11, 6] }, // Asta
-  1312: { cavern: 104, planar: 306, body: 4, feet: 4, sphere: 6, rope: 4, substats: [8, 9, 7, 5] } // Misha
-};
+// Signature light cones and recommended builds are generated by
+// scripts/sync-data.mjs. Per character it keeps the hand-written entry from
+// scripts/data/overrides.json when there is one, otherwise the game's own
+// recommendation adjusted by player usage data.
+const GAME_BUILDS = await loadGameData('builds.json');
+const SIGNATURE_LIGHTCONES = Object.fromEntries(Object.entries(GAME_BUILDS)
+  .filter(([, record]) => record.signature).map(([id, record]) => [id, record.signature]));
+const CHARACTER_OPTIMAL_BUILDS = Object.fromEntries(Object.entries(GAME_BUILDS)
+  .filter(([, record]) => record.build).map(([id, record]) => [id, record.build]));
 
 function getOptimalBuildForAvatar(avatarId) {
   const aid = parseInt(avatarId, 10);
@@ -3419,6 +3267,51 @@ const BUILD_GUIDE_MODE_KEYS = {
   'Anomaly Arbitration': 'buildGuideModeAa'
 };
 
+const BUILD_SOURCE_KEYS = {
+  manual: 'buildGuideSourceManual',
+  usage: 'buildGuideSourceUsage',
+  ingame: 'buildGuideSourceIngame',
+  path: 'buildGuideSourcePath'
+};
+
+// The game ships its own recommended sets and stats for every character,
+// including unreleased ones, so a new character has guidance before any
+// player statistics exist.
+function renderIngameRecommendation(avatarId) {
+  const record = GAME_BUILDS[String(avatarId)];
+  const ingame = record?.ingame;
+  if (!ingame) return '';
+  const list = (items) => `<ol class="build-guide-ranked-list">${items.map(item => `<li><span>${item}</span></li>`).join('')}</ol>`;
+  const sets = (ids) => list(ids.map(id => `<img class="game-inline-icon" src="${escapeHtml(getRelicImage(id))}" alt=""> ${escapeHtml(getRelicSetInfo(id).name)}`));
+  const stats = (slot, ids) => list(ids.map(id => escapeHtml(getRelicMainAffixName(slot, id))));
+  const lightCones = (record.lightcones || []).map(id => escapeHtml(getLightconeInfo(id).name));
+  const sourceKey = BUILD_SOURCE_KEYS[record.source] || BUILD_SOURCE_KEYS.path;
+  return `
+    <div class="build-guide-topline">
+      <div>
+        <div class="build-guide-title">${escapeHtml(t('buildGuideIngameTitle'))}</div>
+        <div class="build-guide-meta">${escapeHtml(t('buildGuideIngameNote'))}</div>
+      </div>
+    </div>
+    ${AVATAR_METADATA[String(avatarId)]?.beta ? `<div class="build-guide-low-sample">${escapeHtml(t('buildGuideBeta'))}</div>` : ''}
+    <div class="build-guide-grid">
+      <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideIngameLightCones'))}</h4>${list(lightCones)}</section>
+      <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideIngameRelicSets'))}</h4>${sets(ingame.cavern)}</section>
+      <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideIngamePlanarSets'))}</h4>${sets(ingame.planar)}</section>
+      <section class="build-guide-card"><h4>${escapeHtml(t('buildGuideIngameMainStats'))}</h4>
+        <div class="build-guide-stat-grid">
+          <div><span>${escapeHtml(t('buildGuideBody'))}</span>${stats(3, ingame.body)}</div>
+          <div><span>${escapeHtml(t('buildGuideFeet'))}</span>${stats(4, ingame.feet)}</div>
+          <div><span>${escapeHtml(t('buildGuideSphere'))}</span>${stats(5, ingame.sphere)}</div>
+          <div><span>${escapeHtml(t('buildGuideRope'))}</span>${stats(6, ingame.rope)}</div>
+          <div><span>${escapeHtml(t('buildGuideSubstats'))}</span>${list(ingame.substats.map(id => escapeHtml(getRelicSubAffixName(id))))}</div>
+        </div>
+      </section>
+    </div>
+    <div class="build-guide-sample">${escapeHtml(t('buildGuideAutoSource', { source: t(sourceKey) }))}</div>
+  `;
+}
+
 function renderCharacterBuildGuide(avatarId) {
   const container = document.getElementById('build-guide-content');
   if (!container) return;
@@ -3460,6 +3353,7 @@ function renderCharacterBuildGuide(avatarId) {
         </section>
       </div>
     ` : `<div class="build-guide-no-data">${escapeHtml(t('buildGuideNoData'))}</div>`}
+    ${renderIngameRecommendation(avatarId)}
     <div class="build-guide-footer">
       <span>${escapeHtml(t('buildGuideCredit', { credit: source.credit }))} <a href="https://huggingface.co/datasets/LvlUrArti/MocDataProcessed" target="_blank" rel="noopener noreferrer">${escapeHtml(source.dataset)}</a></span>
       <button type="button" class="btn btn-sm btn-primary" id="btn-guide-open-equipment">${escapeHtml(t('buildGuideOpenEquipment'))}</button>
@@ -3498,7 +3392,7 @@ function getLightconePassiveDesc(lcId, rank = 5) {
   const meta = LIGHTCONE_METADATA[id];
   if (meta?.passive) {
     const values = meta.passive.values[r - 1];
-    return (meta.passive[getCurrentLanguage()] || meta.passive.en).replace(/\{(\d+)\}/g, (_, index) => values[Number(index)]);
+    return (meta.passive[getCurrentLanguage()] || meta.passive.en).replace(/\{(\d+)\}(%?)/g, (_, index, percent) => `<strong>${values[Number(index)]}${percent}</strong>`);
   }
 
   // The rank-scaled descriptions below are authored in Thai. Other locales use
@@ -7335,7 +7229,8 @@ function openAddLcModal() {
   if (el.addLcPromotion) el.addLcPromotion.value = 6;
   if (el.addLcRank) el.addLcRank.value = 5;
 
-  const defaultId = LIGHTCONE_METADATA[23067] ? 23067 : (LIGHTCONE_METADATA[23065] ? 23065 : 23001);
+  // Newest limited 5-star light cone (ids 23xxx), so a new version needs no edit here.
+  const defaultId = Math.max(23001, ...Object.keys(LIGHTCONE_METADATA).map(Number).filter((id) => id >= 23000 && id < 24000));
   updateAddLcPreview(defaultId);
   renderAddLcVisualGrid();
 
@@ -8583,7 +8478,9 @@ async function ensureFireflyEndgameCatalog({ force = false } = {}) {
 
   editor.catalogPromise = (async () => {
     try {
-      const res = await fetch(FIREFLY_ENDGAME_CATALOG_URL, { cache: 'force-cache' });
+      // The content hash in the URL lets the browser cache this file
+      // indefinitely and still pick up a new season the day it is synced.
+      const res = await fetch(`${FIREFLY_ENDGAME_CATALOG_URL}?v=${assetVersion('firefly-endgame.json')}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const catalog = await res.json();
       editor.catalog = catalog;
@@ -12022,4 +11919,10 @@ async function init() {
 }
 
 // Run on DOM load
-window.addEventListener('DOMContentLoaded', init);
+// The data modules are loaded with top-level await, so this module can finish
+// evaluating after DOMContentLoaded has already fired.
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
