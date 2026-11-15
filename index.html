@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GaCy-Srtool</title>
-  <link rel="stylesheet" href="css/styles.css?v=2.36">
+  <link rel="stylesheet" href="css/styles.css?v=2.37">
   <link rel="stylesheet" href="css/item-catalog.css?v=3">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -913,6 +913,16 @@
                 <button type="submit" class="btn btn-success" style="flex: 1;" data-i18n="btnSaveSettings">💾 บันทึกการตั้งค่า</button>
               </div>
             </form>
+
+            <div class="api-check" id="api-check">
+              <div class="api-check-head">
+                <span class="form-label" data-i18n="apiCheckTitle">🩺 ตรวจ API</span>
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-api-check" data-i18n="apiCheckRun">🩺 ตรวจ API ทั้งหมด</button>
+              </div>
+              <div class="form-hint api-check-hint" data-i18n="apiCheckHint">เรียกทุก endpoint ที่หน้าเว็บใช้ในโหมดนี้</div>
+              <div id="api-check-summary" class="api-check-summary" aria-live="polite"></div>
+              <ul id="api-check-results" class="api-check-results"></ul>
+            </div>
           </div>
 
           <!-- Card 2: Battle & Gameplay Preferences -->
@@ -2079,6 +2089,6 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.35"></script>
+  <script type="module" src="js/app.js?v=3.37"></script>
 </body>
 </html>

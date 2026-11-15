@@ -4,7 +4,7 @@ import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetIn
 import { initializeItemCatalog } from './item-catalog.js?v=7';
 import { initializeUnstuck } from './unstuck.js?v=6';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.27';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.28';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
@@ -530,8 +530,31 @@ async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
 
 // The connect probe: no `data` key, so FireflyGo only reports its state and
 // returns the current extra_data without overwriting the save file.
+// A real FireflyGo /sync reply carries { status, message, extra_data, warnings,
+// stats }. Servers without /sync often answer every unknown path with an SDK
+// fallback ({ retcode: 0, message: 'OK', data: { token } }), which used to be
+// reported as "connected" although nothing could ever be synced.
+function classifyFireflyReply(reply) {
+  if (!reply || typeof reply !== 'object') return 'unknown';
+  if ('extra_data' in reply || 'warnings' in reply || 'stats' in reply || 'status' in reply) return 'sync';
+  // SDK-style envelope ({ retcode, message[, data] }): GaCy GO and the
+  // reconstructed FFGO server both answer unknown paths, /sync included, so.
+  if ('retcode' in reply) return 'sdk-fallback';
+  return 'unknown';
+}
+
+function fireflyReplyKindLabel(kind) {
+  return kind === 'sdk-fallback' ? t('fireflyReplySdkFallback') : t('fireflyReplyUnknown');
+}
+
 async function probeFirefly({ silent = false } = {}) {
   const result = await fireflyRequest({ username: '', password: '' });
+  const kind = classifyFireflyReply(result);
+  if (kind !== 'sync') {
+    state.fireflyConnected = false;
+    setConnectionStatus(false);
+    throw new Error(t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(kind) }));
+  }
   state.fireflyConnected = true;
   setConnectionStatus(true);
 
@@ -553,6 +576,89 @@ async function probeFirefly({ silent = false } = {}) {
     }
   }
   return result;
+}
+
+// API check: calls every endpoint this page reads in the current mode and
+// shows what each one actually answered (status, time, server error text).
+const API_CHECKS = {
+  gac: [
+    { path: '/api/status', method: 'GET' },
+    { path: '/api/freesr', method: 'GET' },
+    { path: '/api/persistent', method: 'GET' },
+    { path: '/api/monster-settings/catalog', method: 'GET' },
+    { path: '/api/monster-settings/aa-round', method: 'GET' },
+    { path: '/api/aha-help', method: 'GET' },
+    { path: '/api/battle_report', method: 'GET' }
+  ],
+  firefly: [
+    { path: '/sync', method: 'POST', body: { username: '', password: '' }, firefly: true }
+  ]
+};
+
+function apiCheckBodyError(parsed, text) {
+  if (parsed && typeof parsed === 'object') {
+    if (typeof parsed.error === 'string' && parsed.error) return parsed.error;
+    if (Number(parsed.status) >= 400) return typeof parsed.message === 'string' ? parsed.message : `status ${parsed.status}`;
+    if (parsed.ok === false || parsed.success === false) return typeof parsed.message === 'string' ? parsed.message : 'ok=false';
+    return '';
+  }
+  return '';
+}
+
+async function runOneApiCheck(base, check) {
+  const url = check.firefly ? fireflySyncUrl(base) : `${base}${check.path}`;
+  const t0 = performance.now();
+  try {
+    const res = await fetch(url, {
+      method: check.method,
+      cache: 'no-store',
+      headers: check.firefly ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
+      body: check.body ? JSON.stringify(check.body) : undefined,
+      signal: AbortSignal.timeout(6000)
+    });
+    const ms = Math.round(performance.now() - t0);
+    const text = await res.text();
+    let parsed = null;
+    try { parsed = text ? JSON.parse(text) : null; } catch (e) { parsed = null; }
+    let problem = '';
+    if (!res.ok) {
+      problem = apiCheckBodyError(parsed, text) || text.slice(0, 160) || res.statusText;
+    } else if (check.firefly) {
+      const kind = classifyFireflyReply(parsed);
+      if (kind !== 'sync') problem = t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(kind) });
+    } else {
+      problem = apiCheckBodyError(parsed, text);
+      if (problem) problem = t('apiCheckServerError', { message: problem });
+    }
+    return { ...check, url, status: res.status, ms, ok: !problem, detail: problem };
+  } catch (err) {
+    return { ...check, url, status: 0, ms: Math.round(performance.now() - t0), ok: false, detail: t('apiCheckNoReply', { message: err.message }) };
+  }
+}
+
+async function runApiCheck() {
+  const list = document.getElementById('api-check-results');
+  const summary = document.getElementById('api-check-summary');
+  const button = document.getElementById('btn-api-check');
+  if (!list || !summary) return;
+  const base = (el.settingApiUrl?.value || state.apiUrl || '').trim().replace(/\/+$/, '');
+  const checks = API_CHECKS[state.serverMode] || API_CHECKS.gac;
+  if (button) button.disabled = true;
+  summary.textContent = t('apiCheckRunning');
+  summary.dataset.state = 'running';
+  list.innerHTML = '';
+  const results = await Promise.all(checks.map((check) => runOneApiCheck(base, check)));
+  const passed = results.filter((r) => r.ok).length;
+  summary.textContent = t('apiCheckSummary', { ok: passed, total: results.length });
+  summary.dataset.state = passed === results.length ? 'ok' : 'error';
+  list.innerHTML = results.map((r) => `
+    <li class="api-check-row" data-state="${r.ok ? 'ok' : 'error'}">
+      <span class="api-check-icon">${r.ok ? '✅' : '❌'}</span>
+      <code class="api-check-path">${escapeHtml(r.method)} ${escapeHtml(r.path)}</code>
+      <span class="api-check-meta">${r.status ? `HTTP ${r.status}` : '—'} · ${r.ms} ms · ${escapeHtml(r.ok ? t('apiCheckOk') : t('apiCheckFail'))}</span>
+      ${r.detail ? `<div class="api-check-detail">${escapeHtml(r.detail)}</div>` : ''}
+    </li>`).join('');
+  if (button) button.disabled = false;
 }
 
 // Explicit, expiring custom-battle connection. The backend returns its TTL.
@@ -10849,6 +10955,8 @@ function setupEvents() {
       }
     });
   });
+
+  document.getElementById('btn-api-check')?.addEventListener('click', () => { runApiCheck(); });
 
   // Ping Latency Test
   if (el.btnTestConnection) {

@@ -5083,3 +5083,18 @@ input:checked + .slider:before {
   #card-firefly-extras .btn { flex: 1 1 100%; }
   #card-firefly-extras .json-textarea { min-height: 96px; }
 }
+
+/* API check (Settings) */
+.api-check { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color, rgba(255,255,255,0.08)); }
+.api-check-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.api-check-hint { margin-top: 0.35rem; font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; }
+.api-check-summary { margin-top: 0.6rem; font-weight: 600; font-size: 0.85rem; }
+.api-check-summary[data-state="ok"] { color: var(--accent-green); }
+.api-check-summary[data-state="error"] { color: #ef4444; }
+.api-check-results { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
+.api-check-row { display: grid; grid-template-columns: auto 1fr; column-gap: 0.5rem; row-gap: 0.2rem; padding: 0.45rem 0.6rem; border-radius: 8px; background: var(--bg-card); font-size: 0.8rem; }
+.api-check-row[data-state="error"] { box-shadow: inset 3px 0 0 #ef4444; }
+.api-check-row[data-state="ok"] { box-shadow: inset 3px 0 0 var(--accent-green); }
+.api-check-path { color: var(--accent-cyan); overflow-wrap: anywhere; }
+.api-check-meta { grid-column: 2; color: var(--text-muted); }
+.api-check-detail { grid-column: 2; color: #fca5a5; overflow-wrap: anywhere; white-space: pre-wrap; }
