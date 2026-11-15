@@ -33,22 +33,21 @@ function refreshGameData() {
   for (const name of dataPaths) {
     fs.cpSync(path.join(root, name), path.join(backup, name), { recursive: true });
   }
-  const steps = [
-    ['scripts/sync-build-guides.mjs'],
-    ['scripts/build-firefly-endgame-data.cjs', path.join(backup, 'endgame-cache')],
-    ['scripts/sync-data.mjs'],
-    ['--test', 'tests/sync-data.test.cjs', 'tests/equipment-data.test.cjs']
-  ];
-  for (const args of steps) {
-    const result = spawnSync(process.execPath, args, { cwd: root, stdio: 'inherit' });
-    if (result.status !== 0) {
-      console.warn(`[build-vercel] Data refresh failed at "${args.join(' ')}"; using the committed data.`);
-      for (const name of dataPaths) {
-        fs.rmSync(path.join(root, name), { recursive: true, force: true });
-        fs.cpSync(path.join(backup, name), path.join(root, name), { recursive: true });
-      }
-      return;
+  const run = (...args) => spawnSync(process.execPath, args, { cwd: root, stdio: 'inherit' }).status === 0;
+  // Each source is refreshed on its own, so one that is down or refuses the
+  // request only keeps its own data at the committed version (these two
+  // scripts write only on success).
+  if (!run('scripts/sync-build-guides.mjs')) console.warn('[build-vercel] Usage statistics not refreshed.');
+  if (!run('scripts/build-firefly-endgame-data.cjs', path.join(backup, 'endgame-cache'))) {
+    console.warn('[build-vercel] Endgame rooms not refreshed.');
+  }
+  if (!run('scripts/sync-data.mjs') || !run('--test', 'tests/sync-data.test.cjs', 'tests/equipment-data.test.cjs')) {
+    console.warn('[build-vercel] Data refresh failed; using the committed data.');
+    for (const name of dataPaths) {
+      fs.rmSync(path.join(root, name), { recursive: true, force: true });
+      fs.cpSync(path.join(backup, name), path.join(root, name), { recursive: true });
     }
+    return;
   }
   console.log('[build-vercel] Game data refreshed.');
 }

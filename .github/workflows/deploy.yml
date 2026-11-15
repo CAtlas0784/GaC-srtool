@@ -52,16 +52,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      # Order matters: sync-data reads the usage statistics and hashes the
-      # endgame catalog, so both are refreshed first. If any source is down
-      # or the tests fail, the site is published with the committed data
-      # rather than not at all.
+      # Each source is refreshed on its own, so one that is down or refuses
+      # the request only keeps its own data at the committed version (these
+      # scripts write only on success). Order matters: sync-data reads the
+      # usage statistics and hashes the endgame catalog.
       - name: Refresh game data
         run: |
-          if node scripts/sync-build-guides.mjs \
-            && node scripts/build-firefly-endgame-data.cjs "$RUNNER_TEMP/endgame-cache" \
-            && node scripts/sync-data.mjs \
-            && node --test tests/*.test.cjs; then
+          node scripts/sync-build-guides.mjs \
+            || echo "::warning::Usage statistics not refreshed; keeping the committed version."
+          node scripts/build-firefly-endgame-data.cjs "$RUNNER_TEMP/endgame-cache" \
+            || echo "::warning::Endgame rooms not refreshed; keeping the committed version."
+          if node scripts/sync-data.mjs && node --test tests/*.test.cjs; then
             echo "Game data refreshed."
           else
             echo "::warning::Game data refresh failed; publishing the committed data instead."
