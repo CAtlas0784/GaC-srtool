@@ -28,6 +28,9 @@ jobs:
   # data itself (scripts/build-vercel.cjs). Skipped until the
   # VERCEL_DEPLOY_HOOK secret exists. The hook URL can only start a rebuild.
   vercel:
+    # After the Pages deploy: the Vercel build reads the endgame catalog that
+    # the Pages build has just refreshed.
+    needs: deploy
     if: github.event_name != 'push' && github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
     env:

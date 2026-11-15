@@ -38,7 +38,10 @@ function refreshGameData() {
   // request only keeps its own data at the committed version (these two
   // scripts write only on success).
   if (!run('scripts/sync-build-guides.mjs')) console.warn('[build-vercel] Usage statistics not refreshed.');
-  if (!run('scripts/build-firefly-endgame-data.cjs', path.join(backup, 'endgame-cache'))) {
+  // The endgame source refuses Vercel's build machines, so the copy that the
+  // GitHub Pages build refreshes daily is the fallback.
+  if (!run('scripts/build-firefly-endgame-data.cjs', path.join(backup, 'endgame-cache'))
+    && !run('scripts/fetch-published-endgame.mjs')) {
     console.warn('[build-vercel] Endgame rooms not refreshed.');
   }
   if (!run('scripts/sync-data.mjs') || !run('--test', 'tests/sync-data.test.cjs', 'tests/equipment-data.test.cjs')) {
