@@ -1,8 +1,23 @@
 name: Sync game data
 
-# Pulls new characters, light cones, relic sets and recommended builds once a
-# day. Nothing is committed unless the sync and the tests both pass, and an
-# unchanged day produces no commit at all.
+# Pulls new characters, light cones, relic sets, builds, usage statistics and
+# endgame rooms once a day. Nothing is committed unless the sync and the tests
+# both pass, and an unchanged day produces no commit at all.
+#
+# Gitea is the source of truth and GitHub is its mirror. Gitea's push mirror
+# force-pushes to GitHub, so a commit that only existed on GitHub would be
+# erased by the next mirror run. To keep both sides identical this job
+#   1. fast-forwards to Gitea's main before doing anything,
+#   2. pushes the new commit to Gitea first, and
+#   3. pushes the same commit to GitHub only after Gitea accepted it.
+#
+# Repository secrets (Settings -> Secrets and variables -> Actions):
+#   GITEA_REPO_URL  https://<gitea host>/<owner>/<repo>.git
+#   GITEA_USER      Gitea user name that owns the token
+#   GITEA_TOKEN     Gitea access token with repository write permission
+#   TS_AUTHKEY      optional: Tailscale auth key, only needed when the Gitea
+#                   host is reachable through the tailnet alone
+# Without the GITEA_* secrets the job still works against GitHub only.
 on:
   schedule:
     - cron: "17 3 * * *"
@@ -17,7 +32,14 @@ concurrency:
 
 jobs:
   sync:
+    # The mirrored copy of this file on Gitea must not run a second sync.
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
+    env:
+      GITEA_REPO_URL: ${{ secrets.GITEA_REPO_URL }}
+      GITEA_USER: ${{ secrets.GITEA_USER }}
+      GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+      TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
     steps:
@@ -25,6 +47,20 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
+      - name: Connect to the tailnet
+        if: env.TS_AUTHKEY != ''
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+      - name: Fast-forward to Gitea
+        if: env.GITEA_TOKEN != ''
+        run: |
+          host_path="${GITEA_REPO_URL#https://}"
+          git remote add gitea "https://${GITEA_USER}:${GITEA_TOKEN}@${host_path}"
+          git fetch gitea main
+          # Fails when GitHub has commits Gitea lacks; that needs a person.
+          git merge --ff-only gitea/main
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -44,16 +80,25 @@ jobs:
         run: |
           git add assets/data assets/firefly-endgame.json js/build-guides-data.js
           if git diff --cached --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No data changes."
-            exit 0
+          else
+            version=$(node -p "require('./assets/data/manifest.json').game.latest")
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore(data): sync game data ${version}"
           fi
-          version=$(node -p "require('./assets/data/manifest.json').game.latest")
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(data): sync game data ${version}"
-          git push origin HEAD:main
-          echo "changed=true" >> "$GITHUB_OUTPUT"
+          # Also true when the fast-forward brought in commits from Gitea.
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Push to Gitea
+        if: steps.commit.outputs.changed == 'true' && env.GITEA_TOKEN != ''
+        run: git push gitea HEAD:main
+      - name: Push to GitHub
+        if: steps.commit.outputs.changed == 'true'
+        run: git push origin HEAD:main
 
   # A push made with the workflow token does not start other workflows, so the
   # Pages deploy is called directly.

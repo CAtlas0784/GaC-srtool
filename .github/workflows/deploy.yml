@@ -17,7 +17,9 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # GitHub only: the copy of this file mirrored to Gitea must not try to
+    # deploy GitHub Pages.
+    if: github.ref == 'refs/heads/main' && github.server_url == 'https://github.com'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
