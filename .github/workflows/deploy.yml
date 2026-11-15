@@ -1,10 +1,17 @@
 name: Deploy GaC-Srtool to GitHub Pages
 
+# GitHub is a one-way mirror of the Gitea repository, so nothing here may
+# commit: a commit made on GitHub would be erased by the next mirror push.
+# Instead the game data is refreshed inside the build, just before the site is
+# uploaded. The daily schedule therefore publishes new characters, light
+# cones, relic sets, builds and endgame rooms without touching the repository
+# and without any secrets.
 on:
   push:
     branches: ["main"]
+  schedule:
+    - cron: "17 3 * * *"
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: read
@@ -17,8 +24,8 @@ concurrency:
 
 jobs:
   deploy:
-    # GitHub only: the copy of this file mirrored to Gitea must not try to
-    # deploy GitHub Pages.
+    # GitHub only: the copy of this file on Gitea must not try to deploy
+    # GitHub Pages.
     if: github.ref == 'refs/heads/main' && github.server_url == 'https://github.com'
     environment:
       name: github-pages
@@ -27,10 +34,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          # Always the tip of main: when called from the data sync, the
-          # triggering commit is older than the commit the sync just pushed.
-          ref: main
+          node-version: 22
+      # Order matters: sync-data reads the usage statistics and hashes the
+      # endgame catalog, so both are refreshed first. If any source is down
+      # or the tests fail, the site is published with the committed data
+      # rather than not at all.
+      - name: Refresh game data
+        run: |
+          if node scripts/sync-build-guides.mjs \
+            && node scripts/build-firefly-endgame-data.cjs "$RUNNER_TEMP/endgame-cache" \
+            && node scripts/sync-data.mjs \
+            && node --test tests/*.test.cjs; then
+            echo "Game data refreshed."
+          else
+            echo "::warning::Game data refresh failed; publishing the committed data instead."
+            git checkout -- .
+            git clean -fdq assets/data
+          fi
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Generate deployment branch metadata
