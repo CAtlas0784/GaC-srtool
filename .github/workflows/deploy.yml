@@ -23,6 +23,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Vercel only builds when something is pushed, so the daily schedule asks it
+  # to rebuild through a Deploy Hook; the Vercel build then refreshes the game
+  # data itself (scripts/build-vercel.cjs). Skipped until the
+  # VERCEL_DEPLOY_HOOK secret exists. The hook URL can only start a rebuild.
+  vercel:
+    if: github.event_name != 'push' && github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+    steps:
+      - name: Ask Vercel to rebuild
+        if: env.VERCEL_DEPLOY_HOOK != ''
+        run: curl --fail --silent --show-error -X POST "$VERCEL_DEPLOY_HOOK" > /dev/null
+
   deploy:
     # GitHub only: the copy of this file on Gitea must not try to deploy
     # GitHub Pages.
