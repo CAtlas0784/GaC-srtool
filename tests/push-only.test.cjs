@@ -51,7 +51,8 @@ test('push-only servers are probed automatically while not connected', () => {
   assert.match(app, /state\.serverMode === 'firefly' && !state\.fireflyConnected/);
   assert.match(app, /state\.serverMode === 'robin' && !state\.robinConnected/);
   // refreshStatus starts the probe without waiting for it.
-  assert.match(app, /\n\s*autoProbePushServer\(\);\n/);
+  // \r?: a Windows checkout writes CRLF line endings.
+  assert.match(app, /\n\s*autoProbePushServer\(\);\r?\n/);
   assert.equal(app.includes('robinProbed'), false);
 });
 
