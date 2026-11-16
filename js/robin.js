@@ -7,13 +7,25 @@
 // Content-Type header, so no custom headers may be sent.
 // Reference: https://git.neonteam.dev/amizing/robinsr (sdkserver/src/services/sr_tools.rs)
 
-import { buildSyncPayload } from './firefly.js?v=1';
+import { buildSyncPayload, relicSetIdFromRelicId } from './firefly.js?v=4';
+import { SKILL_POINT_ANCHORS, skillPointMaxLevel } from './skills.js?v=1';
 
 export const ROBIN_SRTOOLS_PATH = '/srtools';
 export const ROBIN_DEFAULT_BASE_URL = 'http://localhost:21000';
 
 // The only battle_type names RobinSR's serde enum accepts.
 export const ROBIN_BATTLE_TYPES = ['DEFAULT', 'MOC', 'PF', 'SU', 'AS', 'AA'];
+
+// The endgame picker stores FireflyGo's names in battle_config. RobinSR calls
+// Anomaly Arbitration "AA", and a hand-built encounter is a DEFAULT battle.
+const ROBIN_BATTLE_TYPE_ALIASES = { PEAK: 'AA', CE: 'DEFAULT' };
+
+// RobinSR copies battle_config.stage_id straight into the battle it sends to
+// the game and never checks it, so a 0 (what the custom-wave editor stores)
+// leaves the client stuck on the battle transition. These are the values of
+// RobinSR's own BattleConfig::default().
+export const ROBIN_DEFAULT_STAGE_ID = 201012311;
+const ROBIN_DEFAULT_WAVES = [[{ level: 60, monster_id: 3014022 }]];
 
 const U32_MAX = 4294967295;
 
@@ -41,17 +53,37 @@ function u32Map(value) {
   return out;
 }
 
+function robinSkills(value) {
+  const out = {};
+  Object.entries(u32Map(value)).forEach(([pointId, level]) => {
+    out[pointId] = Math.min(Math.max(1, level), skillPointMaxLevel(pointId));
+  });
+  return out;
+}
+
+// Anchors mirror the skill levels; recompute the ones the skills can answer
+// for and pass any other through, so a capped level never disagrees with it.
+function robinAnchors(rawAnchors, skills) {
+  const out = u32Map(rawAnchors);
+  Object.entries(skills).forEach(([pointId, level]) => {
+    const anchor = SKILL_POINT_ANCHORS[String(pointId).slice(-3)];
+    if (anchor) out[String(anchor)] = level;
+  });
+  return out;
+}
+
 function hasNumber(value) {
   return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
 }
 
 function robinAvatar(avatar, original) {
+  const skills = robinSkills(avatar.data?.skills);
   const out = {
     avatar_id: u32(avatar.avatar_id),
     data: {
       rank: u32(avatar.data?.rank),
-      skills: u32Map(avatar.data?.skills),
-      skills_by_anchor_type: u32Map(avatar.data?.skills_by_anchor_type)
+      skills,
+      skills_by_anchor_type: robinAnchors(avatar.data?.skills_by_anchor_type, skills)
     },
     level: u32(avatar.level),
     promotion: u32(avatar.promotion),
@@ -131,36 +163,46 @@ export function buildRobinPayload(freesr) {
     avatars[key] = robinAvatar(avatar, source.avatars?.[key]);
   });
 
-  const lightcones = base.lightcones.map((lc) => ({
+  // internal_uid is renumbered per list on the wire: the server derives item
+  // ids from it, so a duplicate would make one item replace another. The
+  // server is push-only, so the ids do not need to stay stable between pushes.
+  const lightcones = base.lightcones.map((lc, index) => ({
     level: u32(lc.level),
     item_id: u32(lc.item_id),
     equip_avatar: u32(lc.equip_avatar),
     rank: u32(lc.rank),
     promotion: u32(lc.promotion),
-    internal_uid: u32(lc.internal_uid)
+    internal_uid: index
   }));
 
-  const relics = base.relics.map((relic) => ({
+  // relic_set_id is not part of RobinSR's struct (it ignores unknown keys),
+  // but servers that speak the same protocol, such as ppSR, store it and treat
+  // 0 as "no set". Saves that never carried it get it from the relic id.
+  const relics = base.relics.map((relic, index) => ({
     level: u32(relic.level),
     relic_id: u32(relic.relic_id),
+    relic_set_id: u32(relic.relic_set_id) || relicSetIdFromRelicId(relic.relic_id),
     main_affix_id: u32(relic.main_affix_id),
     sub_affixes: robinSubAffixes(relic.sub_affixes),
-    internal_uid: u32(relic.internal_uid),
+    internal_uid: index,
     equip_avatar: u32(relic.equip_avatar)
   }));
 
   const sourceConfig = source.battle_config && typeof source.battle_config === 'object' ? source.battle_config : {};
   const config = base.battle_config;
-  const battleType = String(config.battle_type || '').toUpperCase();
+  const rawType = String(config.battle_type || '').toUpperCase();
+  const battleType = ROBIN_BATTLE_TYPE_ALIASES[rawType] || rawType;
   const battleConfig = {
     battle_type: ROBIN_BATTLE_TYPES.includes(battleType) ? battleType : 'DEFAULT',
     blessings: config.blessings.map(robinBlessing),
     custom_stats: robinSubAffixes(config.custom_stats),
     cycle_count: u32(config.cycle_count),
-    stage_id: u32(config.stage_id),
+    stage_id: u32(config.stage_id) || ROBIN_DEFAULT_STAGE_ID,
     path_resonance_id: u32(config.path_resonance_id),
     monsters: robinWaves(config.monsters, sourceConfig.monsters)
   };
+  // A battle with no monsters cannot start either.
+  if (battleConfig.monsters.length === 0) battleConfig.monsters = ROBIN_DEFAULT_WAVES.map((wave) => wave.map((m) => ({ ...m })));
   const lineup = robinLineup(sourceConfig.custom_battle_lineup ?? source.custom_battle_lineup);
   if (lineup) battleConfig.custom_battle_lineup = lineup;
   if (Array.isArray(sourceConfig.scepters) && sourceConfig.scepters.length > 0) {

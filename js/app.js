@@ -5,11 +5,12 @@ import { initializeItemCatalog } from './item-catalog.js?v=8';
 import { initializeUnstuck } from './unstuck.js?v=7';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.30';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.35';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
-import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
-import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
-import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=1';
+import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
+import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
+import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=8';
+import { maxAvatarSkills } from './skills.js?v=1';
 import {
   ENDGAME_MODES,
   FIREFLY_ENDGAME_CATALOG_URL,
@@ -21,8 +22,9 @@ import {
   groupList,
   monsterInfo,
   resolveEndgameSelection,
-  summarizeEndgameSelection
-} from './endgame.js?v=1';
+  summarizeEndgameSelection,
+  listStagePresets
+} from './endgame.js?v=2';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -53,7 +55,6 @@ const state = {
   fireflyConnected: false,
   // RobinSR is push-only too: tracks the last explicit POST /srtools result.
   robinConnected: false,
-  robinProbed: false,
   fireflyExtraData: readStoredFireflyExtra(),
   statusData: null,
   avatarsList: [],
@@ -512,20 +513,21 @@ async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
       try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
     }
     if (!res.ok) {
-      let serverMessage = parsed && typeof parsed.message === 'string' ? parsed.message : '';
-      if (/player data is not loaded yet/i.test(serverMessage)) {
-        serverMessage = t('fireflyPlayerNotLoaded');
-      }
-      throw new Error(serverMessage || `HTTP ${res.status}: ${res.statusText}`);
+      const serverMessage = parsed && typeof parsed === 'object'
+        ? (typeof parsed.message === 'string' && parsed.message) || (typeof parsed.error === 'string' && parsed.error) || ''
+        : '';
+      throw new Error(fireflyServerMessage(serverMessage) || `HTTP ${res.status}: ${res.statusText}`);
     }
-    if (parsed && (parsed.ok === false || parsed.success === false)) {
-      throw new Error(typeof parsed.message === 'string' && parsed.message ? parsed.message : t('fireflyRequestFailed'));
-    }
+    const problem = fireflyReplyProblem(parsed, text);
+    if (problem) throw new Error(problem);
     return parsed || {};
   } catch (err) {
     if (err.name === 'AbortError') throw new Error(t('fireflyTimeout'));
-    if (typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) {
-      throw new Error(`${err.message} (${t('fireflyMixedContentHint')})`);
+    if (err instanceof TypeError) {
+      // fetch only says "Failed to fetch": name the address so a wrong host or
+      // port is obvious, and keep the https -> http hint where it applies.
+      const mixed = typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url);
+      throw new Error(`${err.message} (${url})${mixed ? ` (${t('fireflyMixedContentHint')})` : ''}`);
     }
     throw err;
   } finally {
@@ -533,41 +535,50 @@ async function fireflyRequest(body, { timeoutMs = 8000 } = {}) {
   }
 }
 
-// The connect probe: no `data` key, so FireflyGo only reports its state and
-// returns the current extra_data without overwriting the save file.
-// A real FireflyGo /sync reply carries { status, message, extra_data, warnings,
-// stats }. Servers without /sync often answer every unknown path with an SDK
-// fallback ({ retcode: 0, message: 'OK', data: { token } }), which used to be
-// reported as "connected" although nothing could ever be synced.
-function classifyFireflyReply(reply) {
-  if (!reply || typeof reply !== 'object') return 'unknown';
-  if ('extra_data' in reply || 'warnings' in reply || 'stats' in reply || 'status' in reply) return 'sync';
-  // SDK-style envelope ({ retcode, message[, data] }): GaCy GO and the
-  // reconstructed FFGO server both answer unknown paths, /sync included, so.
-  if ('retcode' in reply) return 'sdk-fallback';
-  return 'unknown';
+function fireflyServerMessage(message) {
+  return /player data is not loaded yet/i.test(message || '') ? t('fireflyPlayerNotLoaded') : (message || '');
 }
 
 function fireflyReplyKindLabel(kind) {
   return kind === 'sdk-fallback' ? t('fireflyReplySdkFallback') : t('fireflyReplyUnknown');
 }
 
-async function probeFirefly({ silent = false } = {}) {
-  const result = await fireflyRequest({ username: '', password: '' });
-  const kind = classifyFireflyReply(result);
-  if (kind !== 'sync') {
-    state.fireflyConnected = false;
-    setConnectionStatus(false);
-    throw new Error(t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(kind) }));
+// A real FireflyGo /sync reply carries { status, message, extra_data, warnings,
+// stats } and may report a failure in the body while HTTP says 200. Servers
+// without /sync answer with an SDK fallback ({ retcode: 0, message: 'OK' }) or
+// an HTML page. Both used to be reported as "connected" although nothing was
+// saved; see inspectFireflyReply in firefly.js.
+function fireflyReplyProblem(parsed, text) {
+  const verdict = inspectFireflyReply(parsed, text);
+  if (verdict.kind === 'ok') return '';
+  if (verdict.kind === 'error') return fireflyServerMessage(verdict.message) || t('fireflyRequestFailed');
+  return t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(verdict.kind) });
+}
+
+function setFireflyConnected(connected) {
+  state.fireflyConnected = connected;
+  setConnectionStatus(connected, connected ? '' : t('offline'));
+}
+
+// The connect probe: no `data` key, so FireflyGo only reports its state and
+// returns the current extra_data without overwriting the save file.
+async function probeFirefly({ silent = false, auto = false } = {}) {
+  let result;
+  try {
+    result = await fireflyRequest({ username: '', password: '' }, { timeoutMs: auto ? 2500 : 8000 });
+  } catch (err) {
+    setFireflyConnected(false);
+    throw err;
   }
-  state.fireflyConnected = true;
-  setConnectionStatus(true);
+  setFireflyConnected(true);
 
   const extra = normalizeExtraData(result?.extra_data);
-  if (extra) {
+  // The server holds the real settings, so an automatic connect loads them too,
+  // unless the form has edits that were not sent yet.
+  if (extra && !(auto && fireflyExtrasDirty)) {
     state.fireflyExtraData = extra;
     persistFireflyExtra(extra);
-    renderFireflyExtras({ force: true });
+    renderFireflyExtras({ force: !auto });
   }
 
   const warnings = Array.isArray(result?.warnings)
@@ -627,8 +638,11 @@ async function robinRequest(body, { timeoutMs = 8000 } = {}) {
     return parsed;
   } catch (err) {
     if (err.name === 'AbortError') throw new Error(t('robinTimeout'));
-    if (err instanceof TypeError && typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) {
-      throw new Error(`${err.message} (${t('fireflyMixedContentHint')})`);
+    if (err instanceof TypeError) {
+      // fetch only says "Failed to fetch": name the address so a wrong host or
+      // port is obvious, and keep the https -> http hint where it applies.
+      const mixed = typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url);
+      throw new Error(`${err.message} (${url})${mixed ? ` (${t('fireflyMixedContentHint')})` : ''}`);
     }
     throw err;
   } finally {
@@ -637,16 +651,15 @@ async function robinRequest(body, { timeoutMs = 8000 } = {}) {
 }
 
 function setRobinConnected(connected) {
-  state.robinProbed = true;
   state.robinConnected = connected;
   setConnectionStatus(connected, connected ? '' : t('offline'));
 }
 
 // The connect probe: no `data` key, so RobinSR answers OK without touching
 // freesr-data.json.
-async function probeRobin({ silent = false } = {}) {
+async function probeRobin({ silent = false, auto = false } = {}) {
   try {
-    const result = await robinRequest({});
+    const result = await robinRequest({}, { timeoutMs: auto ? 2500 : 8000 });
     setRobinConnected(true);
     if (!silent) showToast(t('robinProbeSuccess'), 'success');
     return result;
@@ -667,6 +680,27 @@ async function pushRobinSync({ silent = false } = {}) {
     setRobinConnected(false);
     throw err;
   }
+}
+
+// Push-only servers have no read endpoint, so "connected" only means the last
+// probe or push worked. Probe (write-free) whenever we are not connected, so the
+// indicator corrects itself without pressing Test connection, for example when
+// the server starts after the page loaded.
+let pushServerProbe = null;
+function autoProbePushServer() {
+  if (pushServerProbe) return pushServerProbe;
+  let probe = null;
+  if (state.serverMode === 'firefly' && !state.fireflyConnected) probe = probeFirefly({ silent: true, auto: true });
+  else if (state.serverMode === 'robin' && !state.robinConnected) probe = probeRobin({ silent: true, auto: true });
+  if (!probe) return null;
+  pushServerProbe = probe.catch(() => {}).finally(() => { pushServerProbe = null; });
+  return pushServerProbe;
+}
+
+// A changed address or an explicit refresh must be checked again from scratch.
+function resetPushServerState() {
+  state.fireflyConnected = false;
+  state.robinConnected = false;
 }
 
 // API check: calls every endpoint this page reads in the current mode and
@@ -718,8 +752,7 @@ async function runOneApiCheck(base, check) {
     if (!res.ok) {
       problem = apiCheckBodyError(parsed, text) || text.slice(0, 160) || res.statusText;
     } else if (check.firefly) {
-      const kind = classifyFireflyReply(parsed);
-      if (kind !== 'sync') problem = t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(kind) });
+      problem = fireflyReplyProblem(parsed, text);
     } else if (check.robin) {
       problem = robinReplyProblem(parsed);
     } else {
@@ -1494,6 +1527,16 @@ function setupLanguageSelector() {
   });
 }
 
+// The endgame room picker is shared by every push-only server that reads
+// battle_config. Its intro texts name the server, so RobinSR gets its own keys.
+function usesEndgamePicker() {
+  return modeSupports('fireflyEndgame', state.serverMode);
+}
+
+function endgameTextKey(name) {
+  return `${state.serverMode === 'robin' ? 'robinEndgame' : 'ffEndgame'}${name}`;
+}
+
 // Server Mode Setup
 let serverModesBound = false;
 
@@ -1565,6 +1608,14 @@ function applyModeDisplay(mode) {
   const fireflyMonster = document.getElementById('monster-settings-firefly');
   if (gacMonster) gacMonster.hidden = !caps.monsterSettings;
   if (fireflyMonster) fireflyMonster.hidden = !caps.fireflyEndgame;
+  // Point the intro texts at the keys for this server; data-i18n is updated
+  // too so a language switch keeps the right wording.
+  for (const [id, name] of [['ff-endgame-title', 'Title'], ['ff-endgame-description', 'Description'], ['ff-endgame-rule', 'Rule']]) {
+    const node = document.getElementById(id);
+    if (!node) continue;
+    node.setAttribute('data-i18n', endgameTextKey(name));
+    node.textContent = t(endgameTextKey(name));
+  }
 
   // JSON editor: only offer file modes the backend can round-trip.
   if (!caps.jsonModes.includes(state.currentJsonMode)) {
@@ -1596,7 +1647,6 @@ function setupServerModes() {
     // FireflyGo is push-only, so its connection state must never carry over.
     state.fireflyConnected = false;
     state.robinConnected = false;
-    state.robinProbed = false;
     showToast(t('toastServerSwitched', { mode: MODE_LABELS[next] }), 'info');
     refreshStatus();
   };
@@ -1678,10 +1728,8 @@ async function refreshStatus() {
       // FreeSR snapshot and the ping loop never touches the network.
       // `state.fireflyConnected` / `state.robinConnected` track the last
       // explicit push result instead.
-      if (state.serverMode === 'robin' && !state.robinProbed) {
-        // One write-free probe per URL/mode; later ticks reuse its result.
-        await probeRobin({ silent: true }).catch(() => {});
-      }
+      // Not awaited: the dashboard must not wait for a slow or missing server.
+      autoProbePushServer();
       const freesr = state.fullFreesrData;
       if (freesr) {
         data = {
@@ -2508,7 +2556,7 @@ async function addLineupSlot() {
     }
   }
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     if (state.serverMode === 'gac') {
       await apiCall('/api/persistent', 'POST', { lineups: currentLineup }).catch(() => {});
     } else {
@@ -2553,7 +2601,7 @@ async function removeLineupSlot(slotIndex) {
     }
   }
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     if (state.serverMode === 'gac') {
       await apiCall('/api/persistent', 'POST', { lineups: newLineup }).catch(() => {});
     } else {
@@ -3036,19 +3084,7 @@ async function setAvatarE0S1(avatarId) {
   av.promotion = 6;
   av.data = av.data || {};
   av.data.rank = 0;
-  av.data.skills = {
-    [`${aid}001`]: 6,
-    [`${aid}002`]: 10,
-    [`${aid}003`]: 10,
-    [`${aid}004`]: 10,
-    [`${aid}007`]: 1,
-    [`${aid}101`]: 1,
-    [`${aid}102`]: 1,
-    [`${aid}103`]: 1
-  };
-  av.data.skills_by_anchor_type = {
-    "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
-  };
+  maxAvatarSkills(av.data, aid, avatarPath(aid));
 
   const lcId = SIGNATURE_LIGHTCONES[aid] || 21001;
 
@@ -3076,7 +3112,7 @@ async function setAvatarE0S1(avatarId) {
   renderAvatarsGrid();
   loadEquipment();
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     try {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/rank', 'POST', { avatar_id: aid, rank: 0 });
@@ -3128,19 +3164,7 @@ async function setAvatarE6S5(avatarId) {
   av.promotion = 6;
   av.data = av.data || {};
   av.data.rank = 6;
-  av.data.skills = {
-    [`${aid}001`]: 6,
-    [`${aid}002`]: 10,
-    [`${aid}003`]: 10,
-    [`${aid}004`]: 10,
-    [`${aid}007`]: 1,
-    [`${aid}101`]: 1,
-    [`${aid}102`]: 1,
-    [`${aid}103`]: 1
-  };
-  av.data.skills_by_anchor_type = {
-    "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
-  };
+  maxAvatarSkills(av.data, aid, avatarPath(aid));
 
   const lcId = SIGNATURE_LIGHTCONES[aid] || 21001;
 
@@ -3168,7 +3192,7 @@ async function setAvatarE6S5(avatarId) {
   renderAvatarsGrid();
   loadEquipment();
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     try {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/rank', 'POST', { avatar_id: aid, rank: 6 });
@@ -4238,7 +4262,7 @@ function renderModalRelicsTab(avatarId) {
       box.querySelector('.btn-slot-unequip-corner')?.addEventListener('click', async (e) => {
         e.stopPropagation();
         equipped.equip_avatar = 0;
-        if (state.isConnected) await saveFreesrChangesToServer();
+        if (canPushFreesr()) await saveFreesrChangesToServer();
         renderModalRelicsTab(aid);
         renderModalOverviewTab(aid);
         renderShowcaseCard(aid);
@@ -4403,7 +4427,7 @@ async function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
 
       document.getElementById('btn-slot-picker-unequip')?.addEventListener('click', async () => {
         currentRelic.equip_avatar = 0;
-        if (state.isConnected) await saveFreesrChangesToServer();
+        if (canPushFreesr()) await saveFreesrChangesToServer();
         renderModalRelicsTab(aid);
         renderModalOverviewTab(aid);
         renderShowcaseCard(aid);
@@ -4936,7 +4960,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
           }
         });
         r.equip_avatar = aid;
-        if (state.isConnected) await saveFreesrChangesToServer();
+        if (canPushFreesr()) await saveFreesrChangesToServer();
         renderModalRelicsTab(aid);
         renderModalOverviewTab(aid);
         renderShowcaseCard(aid);
@@ -5003,7 +5027,7 @@ async function equipCustomSlotRelic(avatarId, slotNum, setId, mainAffixId, custo
   };
   state.fullFreesrData.relics.push(newRelic);
 
-  if (state.isConnected) await saveFreesrChangesToServer();
+  if (canPushFreesr()) await saveFreesrChangesToServer();
   renderModalRelicsTab(aid);
   renderModalOverviewTab(aid);
   renderShowcaseCard(aid);
@@ -5028,7 +5052,7 @@ async function saveEditedRelicSubstats(relic, newSetId, newMainAffixId, newSubAf
     step: 2
   }));
 
-  if (state.isConnected) await saveFreesrChangesToServer();
+  if (canPushFreesr()) await saveFreesrChangesToServer();
   if (relic.equip_avatar) {
     renderModalRelicsTab(relic.equip_avatar);
     renderModalOverviewTab(relic.equip_avatar);
@@ -5231,7 +5255,7 @@ async function equipLightconeToAvatar(avatarId, lcId, rank = 5, level = 80) {
     targetLc.promotion = 6;
   }
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     await saveFreesrChangesToServer().catch(() => {});
   }
 
@@ -5251,13 +5275,18 @@ async function unequipLightconeFromAvatar(avatarId) {
     state.fullFreesrData.lightcones.forEach(lc => {
       if (lc.equip_avatar === aid) lc.equip_avatar = 0;
     });
-    if (state.isConnected) await saveFreesrChangesToServer().catch(() => {});
+    if (canPushFreesr()) await saveFreesrChangesToServer().catch(() => {});
     renderModalOverviewTab(aid);
     renderModalRelicsTab(aid);
     renderShowcaseCard(aid);
     renderLightconesGrid();
   showToast(t('toastLightConeUnequipped', { character: meta.name }), 'info');
   }
+}
+
+// Path name of a character ("Elation", "Remembrance", ...), used to pick its skill points.
+function avatarPath(avatarId) {
+  return AVATAR_METADATA[avatarId]?.path || '';
 }
 
 // Quick Set All Avatars to E0S1 Standard (Lv.80, Prom 6, E0, S1 Signature LC)
@@ -5269,7 +5298,7 @@ async function quickSetAllAvatarsE0S1() {
     state.fullFreesrData.avatars = state.fullFreesrData.avatars || {};
     state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
 
-    const allAvatarIds = Object.keys(AVATARS_DATA).map(id => parseInt(id, 10));
+    const allAvatarIds = Object.keys(AVATAR_METADATA).map(id => parseInt(id, 10));
 
     let nextUniqueId = 1000;
     state.fullFreesrData.lightcones.forEach(lc => {
@@ -5288,20 +5317,8 @@ async function quickSetAllAvatarsE0S1() {
           sp_value: 70,
           data: {
             rank: 0,
-            skills: {
-              [`${aid}001`]: 6,
-              [`${aid}002`]: 10,
-              [`${aid}003`]: 10,
-              [`${aid}004`]: 10,
-              [`${aid}007`]: 1,
-              [`${aid}101`]: 1,
-              [`${aid}102`]: 1,
-              [`${aid}103`]: 1,
-              [`${aid}201`]: 1
-            },
-            skills_by_anchor_type: {
-              "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
-            }
+            skills: {},
+            skills_by_anchor_type: {}
           }
         };
       } else {
@@ -5312,6 +5329,8 @@ async function quickSetAllAvatarsE0S1() {
         av.data.rank = 0;
         if (!av.sp_value) av.sp_value = 70;
       }
+      // Points added to the game later are filled in without touching levels already set.
+      maxAvatarSkills(state.fullFreesrData.avatars[aid].data, aid, avatarPath(aid), { keepExisting: true });
 
       // Equip S1 Signature Lightcone
       const sigLcId = SIGNATURE_LIGHTCONES[aid] || 21001;
@@ -5332,6 +5351,9 @@ async function quickSetAllAvatarsE0S1() {
           equip_avatar: aid
         });
       }
+
+      // E0S1 is a full standard build: recommended relics included.
+      setRecommendedRelicsLocal(aid);
     }
 
     initAvatarsList();
@@ -5341,11 +5363,14 @@ async function quickSetAllAvatarsE0S1() {
       a.rank = 0;
     });
 
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       await saveFreesrChangesToServer().catch(() => {});
+    } else {
+      await saveFreesrCache(state.fullFreesrData);
     }
 
     renderAvatarsGrid();
+    loadEquipment();
     if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
     showToast(t('toastAllCharactersE0S1'), 'success');
   } catch (err) {
@@ -5565,7 +5590,7 @@ async function setAvatarRank(avatarId, rank) {
     renderModalEidolonPips(rank);
   }
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     try {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/rank', 'POST', { avatar_id: avatarId, rank });
@@ -5739,6 +5764,10 @@ async function saveAvatarDetails(closeModal = true) {
     "18": statVal
   };
 
+  // The form has no fields for path-specific points (Elation skill, memosprite
+  // skills, ...): keep their levels, or add them at maximum if the save lacks them.
+  maxAvatarSkills(av.data, aid, avatarPath(aid), { keepExisting: true });
+
   // Lightcone update
   state.fullFreesrData.lightcones = state.fullFreesrData.lightcones || [];
   const lcId = parseInt(el.modalLcId?.value, 10);
@@ -5773,7 +5802,7 @@ async function saveAvatarDetails(closeModal = true) {
     el.modalAvatarDetail.classList.remove('active');
   }
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     try {
       // Save the complete avatar record once. The full payload includes skills
       // and Trace values; a preceding rank-only request can trigger live sync
@@ -6118,6 +6147,27 @@ function renderShowcaseCard(avatarId) {
 
 // Auto-equip recommended 6-piece relics for avatar
 async function autoEquipRecommendedRelics(avatarId, notify = true) {
+  const aid = parseInt(avatarId, 10);
+  const meta = getAvatarInfo(aid);
+  setRecommendedRelicsLocal(aid);
+
+  if (canPushFreesr()) {
+    await saveFreesrChangesToServer();
+  }
+  loadEquipment();
+  renderShowcaseCard(aid);
+  if (state.selectedAvatarDetail?.avatar_id === aid) {
+    renderModalRelicsTab(aid);
+    renderModalOverviewTab(aid);
+  }
+  if (notify) {
+    showToast(t('toastRelicsEquipped', { name: meta.name }), 'success');
+  }
+}
+
+// Replaces one avatar's relics with its recommended 6-piece set in the local
+// snapshot only. Bulk actions call this per avatar and push once at the end.
+function setRecommendedRelicsLocal(avatarId) {
   if (!state.fullFreesrData) {
     state.fullFreesrData = { avatars: {}, lightcones: [], relics: [] };
   }
@@ -6177,24 +6227,12 @@ async function autoEquipRecommendedRelics(avatarId, notify = true) {
     state.fullFreesrData.relics.push({
       internal_uid: nextUid++,
       relic_id: relicId,
+      relic_set_id: setId,
       level: 15,
       equip_avatar: aid,
       main_affix_id: mainAffixId,
       sub_affixes: subAffixes
     });
-  }
-
-  if (state.isConnected) {
-    await saveFreesrChangesToServer();
-  }
-  loadEquipment();
-  renderShowcaseCard(aid);
-  if (state.selectedAvatarDetail?.avatar_id === aid) {
-    renderModalRelicsTab(aid);
-    renderModalOverviewTab(aid);
-  }
-  if (notify) {
-    showToast(t('toastRelicsEquipped', { name: meta.name }), 'success');
   }
 }
 
@@ -6486,7 +6524,7 @@ async function saveLineupToServer(lineupData) {
     }
   }
 
-  if (state.isConnected && state.serverMode !== 'gac') {
+  if (canPushFreesr() && state.serverMode !== 'gac') {
     await saveFreesrChangesToServer().catch(() => {});
   }
 }
@@ -6556,20 +6594,8 @@ async function quickUnlockAllAvatars() {
           sp_value: 70, // 50% standard starting energy
           data: {
             rank: 6,
-            skills: {
-              [`${aid}001`]: 6,
-              [`${aid}002`]: 10,
-              [`${aid}003`]: 10,
-              [`${aid}004`]: 10,
-              [`${aid}007`]: 1,
-              [`${aid}101`]: 1,
-              [`${aid}102`]: 1,
-              [`${aid}103`]: 1,
-              [`${aid}201`]: 1
-            },
-            skills_by_anchor_type: {
-              "1": 6, "2": 10, "3": 10, "4": 10, "5": 1, "6": 1, "7": 1, "8": 1, "9": 1
-            }
+            skills: {},
+            skills_by_anchor_type: {}
           }
         };
       } else {
@@ -6580,6 +6606,7 @@ async function quickUnlockAllAvatars() {
         av.data.rank = 6;
         if (!av.sp_value) av.sp_value = 70;
       }
+      maxAvatarSkills(state.fullFreesrData.avatars[aid].data, aid, avatarPath(aid), { keepExisting: true });
     });
 
     initAvatarsList();
@@ -6589,7 +6616,7 @@ async function quickUnlockAllAvatars() {
       a.rank = 6;
     });
 
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/max_all', 'POST', {}).catch(() => {});
         await saveFreesrChangesToServer().catch(() => {});
@@ -6638,7 +6665,7 @@ async function quickAddAll5StarLightcones() {
       }
     }
 
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       await saveFreesrChangesToServer();
     }
     loadEquipment();
@@ -6674,7 +6701,7 @@ async function quickTeleportAstralExpress() {
       };
     }
 
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       if (state.serverMode === 'gac') {
         await apiCall('/api/teleport', 'POST', trainLoc).catch(async () => {
           await apiCall('/api/persistent', 'POST', {
@@ -6747,15 +6774,13 @@ async function maxAllAvatars({ englishOnly = false } = {}) {
       av.level = 80;
       av.promotion = 6;
       av.data.rank = 6;
-      if (av.data.skills) {
-        for (const k in av.data.skills) av.data.skills[k] = 10;
-      }
+      maxAvatarSkills(av.data, Number(aid), avatarPath(aid));
     }
   }
 
   renderAvatarsGrid();
 
-  if (state.isConnected) {
+  if (canPushFreesr()) {
     try {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/max_all', 'POST', {});
@@ -6785,19 +6810,18 @@ async function pushFireflySync({ silent = false } = {}) {
   // Creative Mode *is* FireflyGo's theory_craft.mode, so the flag is always
   // taken from the app state instead of whatever the form last held.
   const extra = normalizeExtraData(state.fireflyExtraData) || normalizeExtraData(FIREFLY_EXTRA_FALLBACK);
-  const theory = extra.theory_craft || {};
-  extra.theory_craft = {
-    hp: theory.hp && typeof theory.hp === 'object' ? theory.hp : {},
-    cycle_count: theory.cycle_count || 0,
-    mode: state.creativeMode === true,
-    stage_id: theory.stage_id || 0,
-    custom_lineup: Array.isArray(theory.custom_lineup) ? theory.custom_lineup : []
-  };
-  payload.extra_data = extra;
+  extra.theory_craft = { ...(extra.theory_craft || {}), mode: state.creativeMode === true };
+  payload.extra_data = buildSyncExtraData(extra, { creativeMode: state.creativeMode === true });
 
-  const result = await fireflyRequest(payload);
-  state.fireflyConnected = true;
-  setConnectionStatus(true);
+  let result;
+  try {
+    result = await fireflyRequest(payload);
+  } catch (err) {
+    // A rejected push must not leave the header saying "connected".
+    setFireflyConnected(false);
+    throw err;
+  }
+  setFireflyConnected(true);
 
   state.fireflyExtraData = extra;
   persistFireflyExtra(extra);
@@ -6812,20 +6836,39 @@ async function pushFireflySync({ silent = false } = {}) {
   return result;
 }
 
+// Whether an edit should be pushed to the server. Push-only servers are always
+// tried: the indicator can be stale (the page may have loaded before the server)
+// and a failed push is reported by the transport layer anyway.
+function canPushFreesr() {
+  return state.isConnected || modeSupports('pushOnly', state.serverMode);
+}
+
 // Push local freesr changes to server and save to local browser cache
 async function saveFreesrChangesToServer() {
   if (!state.fullFreesrData) return;
   await saveFreesrCache(state.fullFreesrData);
 
   // FireflyGo only understands POST /sync; there is no freesr/persistent API.
+  // Both push-only modes report a failed push here: most callers swallow the
+  // rejection, which used to leave an unsaved change looking saved.
   if (state.serverMode === 'firefly') {
-    await pushFireflySync();
+    try {
+      await pushFireflySync();
+    } catch (err) {
+      showToast(t('syncPushFailed', { server: MODE_LABELS.firefly, message: err.message }), 'error');
+      throw err;
+    }
     return;
   }
 
   // RobinSR only understands POST /srtools with { data } and no custom headers.
   if (state.serverMode === 'robin') {
-    await pushRobinSync({ silent: true });
+    try {
+      await pushRobinSync({ silent: true });
+    } catch (err) {
+      showToast(t('syncPushFailed', { server: MODE_LABELS.robin, message: err.message }), 'error');
+      throw err;
+    }
     return;
   }
 
@@ -7140,7 +7183,7 @@ function showLcInspector(lc) {
       });
     }
     lc.equip_avatar = newAvatarId;
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       await saveFreesrChangesToServer();
     }
     showToast(t('toastInventoryLightConeUpdated', { lightcone: lcInfo.name }), 'success');
@@ -7152,7 +7195,7 @@ function showLcInspector(lc) {
     if (!confirm(t('confirmDeleteLightCone', { name: lcInfo.name }))) return;
     if (state.fullFreesrData?.lightcones) {
       state.fullFreesrData.lightcones = state.fullFreesrData.lightcones.filter(l => l.internal_uid !== lc.internal_uid);
-      if (state.isConnected) {
+      if (canPushFreesr()) {
         await saveFreesrChangesToServer();
       }
       el.eqInspectorCard.style.display = 'none';
@@ -7268,7 +7311,7 @@ function showRelicInspector(relic) {
       });
     }
     relic.equip_avatar = newAvatarId;
-    if (state.isConnected) {
+    if (canPushFreesr()) {
       await saveFreesrChangesToServer();
     }
     showToast(t('toastRelicEquipped', { name: rInfo.name }), 'success');
@@ -7280,7 +7323,7 @@ function showRelicInspector(relic) {
     if (!confirm(t('confirmDeleteRelic', { name: rInfo.name }))) return;
     if (state.fullFreesrData?.relics) {
       state.fullFreesrData.relics = state.fullFreesrData.relics.filter(r => r.internal_uid !== relic.internal_uid);
-      if (state.isConnected) {
+      if (canPushFreesr()) {
         await saveFreesrChangesToServer();
       }
       el.eqInspectorCard.style.display = 'none';
@@ -8187,7 +8230,7 @@ function renderMonsterCustomEditor() {
 }
 
 function renderMonsterSettings() {
-  if (state.serverMode === 'firefly') {
+  if (usesEndgamePicker()) {
     renderFireflyEndgame();
     return;
   }
@@ -8219,8 +8262,9 @@ function renderMonsterSettings() {
 
 async function loadMonsterSettings() {
   // FireflyGo has no /api/monster-settings; its picker is built from the
-  // bundled endgame catalog plus the local FreeSR save.
-  if (state.serverMode === 'firefly') {
+  // bundled endgame catalog plus the local FreeSR save. RobinSR-style servers
+  // read the same battle_config, so they share the picker.
+  if (usesEndgamePicker()) {
     await loadFireflyEndgame();
     return;
   }
@@ -8479,7 +8523,8 @@ function defaultFireflyCustomSelection() {
   return {
     mode: 'custom',
     customWaves: [[{ monster_id: '', level: '80', amount: '1' }]],
-    customCycle: 0
+    customCycle: 0,
+    customStageId: 0
   };
 }
 
@@ -8615,7 +8660,8 @@ function syncFireflyEndgameSelectionFromSave() {
     editor.selections.custom = {
       mode: 'custom',
       customWaves: waves.length ? waves : defaultFireflyCustomSelection().customWaves,
-      customCycle: Number(config.cycle_count) || 0
+      customCycle: Number(config.cycle_count) || 0,
+      customStageId: Number(config.stage_id) || 0
     };
     return;
   }
@@ -8887,7 +8933,7 @@ function renderFireflyCustomEditor(root) {
     selection.customWaves = defaultFireflyCustomSelection().customWaves;
   }
 
-  root.append(monsterElement('p', 'card-subtitle', t('ffEndgameCustomDescription')));
+  root.append(monsterElement('p', 'card-subtitle', t(endgameTextKey('CustomDescription'))));
 
   const list = monsterElement('div', 'ff-endgame-custom-waves');
   selection.customWaves.forEach((wave, waveIndex) => {
@@ -8944,7 +8990,39 @@ function renderFireflyCustomEditor(root) {
   cycleInput.setAttribute('aria-label', t('ffEndgameCycleCount'));
   cycleField.append(cycleInput);
   actions.append(cycleField);
+
+  // The stage id decides which map the battle loads. Empty or 0 leaves the
+  // choice to the server (RobinSR-style servers get their default stage).
+  const stageField = monsterElement('label', 'ff-field');
+  stageField.append(monsterElement('span', 'form-label', t('ffEndgameCustomStage')));
+  const stageInput = document.createElement('input');
+  stageInput.type = 'text';
+  stageInput.inputMode = 'numeric';
+  stageInput.className = 'form-input';
+  stageInput.value = Number(selection.customStageId) > 0 ? String(selection.customStageId) : '';
+  stageInput.placeholder = t('ffEndgameCustomStagePlaceholder');
+  stageInput.dataset.ffCustomStage = 'true';
+  stageInput.setAttribute('list', 'ff-endgame-stage-options');
+  stageInput.setAttribute('aria-label', t('ffEndgameCustomStage'));
+  stageField.append(stageInput);
+  actions.append(stageField);
   root.append(actions);
+  root.append(monsterElement('p', 'card-subtitle', t('ffEndgameCustomStageHint')));
+
+  const stageList = document.createElement('datalist');
+  stageList.id = 'ff-endgame-stage-options';
+  for (const preset of listStagePresets(catalog)) {
+    const option = document.createElement('option');
+    option.value = String(preset.stageId);
+    option.label = [
+      t({ moc: 'monsterModeMoc', pf: 'monsterModePf', as: 'monsterModeAs' }[preset.mode] || 'ffEndgameModePeak'),
+      fireflyLocalizedText(preset.group?.name),
+      preset.level ? fireflyEndgameLevelLabel(preset.level) : '',
+      fireflyLocalizedText(preset.stage?.name)
+    ].filter(Boolean).join(' · ');
+    stageList.append(option);
+  }
+  root.append(stageList);
 
   const summary = monsterElement('div', 'ff-endgame-summary');
   summary.id = 'ff-endgame-custom-summary';
@@ -8993,7 +9071,8 @@ async function applyFireflyEndgame({ sync = false } = {}) {
   }
 
   state.fullFreesrData.battle_config = config;
-  if (selection.mode === 'peak') {
+  // extra_data.challenge only exists on FireflyGo.
+  if (selection.mode === 'peak' && modeSupports('extraData', state.serverMode)) {
     const extra = normalizeExtraData(state.fireflyExtraData) || normalizeExtraData(FIREFLY_EXTRA_FALLBACK);
     if (extra) {
       extra.challenge = buildFireflyChallenge(selection, extra.challenge);
@@ -9007,8 +9086,9 @@ async function applyFireflyEndgame({ sync = false } = {}) {
   try {
     if (sync) await saveFreesrChangesToServer();
     else await saveFreesrCache(state.fullFreesrData);
-    setFireflyEndgameStatus(sync ? 'ffEndgameSynced' : 'ffEndgameSaved', 'saved');
-    showToast(t(sync ? 'ffEndgameSynced' : 'ffEndgameSaved'), 'success');
+    const doneKey = sync ? endgameTextKey('Synced') : 'ffEndgameSaved';
+    setFireflyEndgameStatus(doneKey, 'saved');
+    showToast(t(doneKey), 'success');
   } catch (error) {
     setFireflyEndgameStatus('ffEndgameSyncError', 'error', { error: error.message });
     showToast(t('ffEndgameSyncError', { error: error.message }), 'error');
@@ -9116,6 +9196,15 @@ function setupFireflyEndgameEvents() {
   });
 
   section.addEventListener('input', (event) => {
+    const stageInput = event.target.closest('[data-ff-custom-stage]');
+    if (stageInput) {
+      const stageId = Math.trunc(Number(String(stageInput.value).trim()));
+      fireflyEndgameSelection('custom').customStageId = Number.isFinite(stageId) && stageId > 0 ? stageId : 0;
+      updateFireflyEndgameControls();
+      refreshFireflyCustomSummary();
+      return;
+    }
+
     const cycleInput = event.target.closest('[data-ff-custom-cycle]');
     if (cycleInput) {
       fireflyEndgameSelection('custom').customCycle = Number(cycleInput.value) || 0;
@@ -10064,6 +10153,32 @@ function setupFireflyExtrasEvents() {
   card.addEventListener('input', markDirty);
   card.addEventListener('change', markDirty);
 
+  // With Auto-Sync on, a changed setting is sent by itself. `change` fires when
+  // a toggle flips or a text field is left, so typing is not sent key by key;
+  // a short delay folds several quick changes into one request.
+  let autoSyncTimer = null;
+  card.addEventListener('change', () => {
+    if (!state.autoSync || state.serverMode !== 'firefly') return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(async () => {
+      try {
+        saveFireflyExtrasFromForm();
+      } catch (err) {
+        // Invalid input (for example the HP JSON) stays in the form for fixing.
+        setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+        return;
+      }
+      setFireflyExtraStatus('fireflySyncing', {}, 'info');
+      try {
+        await pushFireflySync({ silent: true });
+        setFireflyExtraStatus('fireflyAutoSynced', {}, 'success');
+      } catch (err) {
+        setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
+        showToast(t('syncPushFailed', { server: MODE_LABELS.firefly, message: err.message }), 'error');
+      }
+    }, 600);
+  });
+
   // Theory Craft is the FireflyGo name for Creative Mode.
   const theoryToggle = document.getElementById('ff-theory-mode');
   if (theoryToggle) {
@@ -10269,7 +10384,7 @@ function setupEvents() {
   // Quick Ping & Refresh
   el.btnQuickPing.addEventListener('click', () => {
     showToast(t('checking'), 'info');
-    state.robinProbed = false;
+    resetPushServerState();
     refreshStatus();
   });
 
@@ -10289,7 +10404,7 @@ function setupEvents() {
       localStorage.setItem('gac_srtool_api_url', newUrl);
       el.modalSettings.classList.remove('active');
       showToast(t('settingsSaved'), 'success');
-      state.robinProbed = false;
+      resetPushServerState();
       refreshStatus();
     }
   });
@@ -10389,7 +10504,7 @@ function setupEvents() {
       }
     });
     if (unequippedCount > 0) {
-      if (state.isConnected) await saveFreesrChangesToServer();
+      if (canPushFreesr()) await saveFreesrChangesToServer();
       showToast(t('toastRelicsCleared', { count: unequippedCount }) || `ถอดรีลิกส์เรียบร้อย (${unequippedCount} ชิ้น)`, 'info');
       renderModalRelicsTab(aid);
       renderModalOverviewTab(aid);
@@ -10996,7 +11111,7 @@ function setupEvents() {
       state.apiUrl = el.settingApiUrl.value.trim().replace(/\/+$/, '') || 'http://localhost:21000';
       localStorage.setItem('gac_srtool_api_url', state.apiUrl);
       showToast(t('settingsSaved'), 'success');
-      state.robinProbed = false;
+      resetPushServerState();
       refreshStatus();
     });
   }
@@ -11153,7 +11268,7 @@ function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
     'tab-avatars': `👥 ${t('tabAvatars')} | GaCy-Srtool`,
     'tab-equipment': `🗡️ ${t('tabEquipment')} | GaCy-Srtool`,
     'tab-inventory': `🎒 ${t('tabInventory')} | GaCy-Srtool`,
-    'tab-monster-settings': `${state.serverMode === 'firefly' ? '🦋' : '👾'} ${t(state.serverMode === 'firefly' ? 'ffEndgameTitle' : 'tabMonsterSettings')} | GaCy-Srtool`,
+    'tab-monster-settings': `${usesEndgamePicker() ? t(endgameTextKey('Title')) : `👾 ${t('tabMonsterSettings')}`} | GaCy-Srtool`,
     'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaCy-Srtool`,
     'tab-persistent': `💾 ${t('tabPersistent')} | GaCy-Srtool`,
     'tab-exrank': `⚡ ${t('tabExrank')} | GaCy-Srtool`,

@@ -42,7 +42,9 @@ test('FireflyGo hides every GaCy-only feature and exposes extra_data', async () 
   assert.equal(modeSupports('fireflyEndgame', 'firefly'), true);
   assert.equal(modeSupports('monsterSettings', 'firefly'), false);
   assert.equal(modeSupports('fireflyEndgame', 'gac'), false);
-  assert.equal(modeSupports('fireflyEndgame', 'robin'), false);
+  // RobinSR-style servers read the same battle_config, so they share the picker.
+  assert.equal(modeSupports('fireflyEndgame', 'robin'), true);
+  assert.equal(modeSupports('extraData', 'robin'), false);
 });
 
 test('unknown modes fall back to GaCy GO', async () => {
@@ -61,7 +63,10 @@ test('mode UI strings exist in Thai and English', async () => {
     'serverModeFirefly',
     'apiUrlHintGaC', 'apiUrlHintFirefly', 'apiUrlHintRobin',
     'serverModeRobin', 'robinProbeSuccess', 'robinSyncSuccess', 'robinTimeout',
-    'robinNotSrtoolsServer', 'robinServerError',
+    'robinNotSrtoolsServer', 'robinServerError', 'syncPushFailed', 'fireflyAutoSynced',
+    'robinEndgameTitle', 'robinEndgameDescription', 'robinEndgameRule',
+    'robinEndgameSynced', 'robinEndgameCustomDescription',
+    'ffEndgameCustomStage', 'ffEndgameCustomStagePlaceholder', 'ffEndgameCustomStageHint',
     'enkaImportTitle', 'enkaImportSubtitle', 'enkaUidLabel', 'enkaUidPlaceholder',
     'enkaUidInvalid', 'enkaModeMerge', 'enkaModeReplace', 'btnEnkaFetch',
     'enkaPasteLabel', 'enkaPastePlaceholder', 'btnEnkaParsePaste',
@@ -110,6 +115,11 @@ test('the removed paused notice is no longer referenced', () => {
   assert.equal(app.includes('serverModesPausedNotice'), false);
 });
 
+test('app.js does not use the undeclared AVATARS_DATA name', () => {
+  const app = fs.readFileSync(path.join(__dirname, '../js/app.js'), 'utf8');
+  assert.equal(/\bAVATARS_DATA\b/.test(app), false);
+});
+
 test('mode-gated DOM hooks exist in index.html', () => {
   const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
   for (const id of [
@@ -126,7 +136,8 @@ test('mode-gated DOM hooks exist in index.html', () => {
     'btn-firefly-sync', 'firefly-extra-status',
     'monster-settings-gac', 'monster-settings-firefly', 'ff-endgame-tabs',
     'ff-endgame-status', 'ff-endgame-view', 'ff-endgame-reset',
-    'ff-endgame-apply', 'ff-endgame-apply-sync'
+    'ff-endgame-apply', 'ff-endgame-apply-sync',
+    'ff-endgame-title', 'ff-endgame-description', 'ff-endgame-rule'
   ]) {
     assert.ok(html.includes(`id="${id}"`), `index.html must contain #${id}`);
   }

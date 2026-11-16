@@ -28,6 +28,8 @@ export const MODE_CAPABILITIES = {
     gmConsole: true,
     battleSummary: true,
     toolSession: true,
+    // FireflyGo and RobinSR only accept pushes: there is nothing to read back.
+    pushOnly: false,
     extraData: false,
     ownedAvatarsOnly: false,
     // data-in-game.json is a FireflyGo artifact, so GaCy keeps only its own
@@ -45,6 +47,7 @@ export const MODE_CAPABILITIES = {
     gmConsole: false,
     battleSummary: false,
     toolSession: false,
+    pushOnly: true,
     extraData: true,
     ownedAvatarsOnly: true,
     jsonModes: ['freesr']
@@ -54,12 +57,13 @@ export const MODE_CAPABILITIES = {
     exranks: false,
     inventory: false,
     monsterSettings: false,
-    fireflyEndgame: false,
+    fireflyEndgame: true,
     damageAnalyst: false,
     sceneCard: false,
     gmConsole: false,
     battleSummary: false,
     toolSession: false,
+    pushOnly: true,
     extraData: false,
     ownedAvatarsOnly: false,
     jsonModes: ['freesr']

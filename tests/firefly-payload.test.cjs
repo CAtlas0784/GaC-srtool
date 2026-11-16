@@ -131,7 +131,7 @@ test('buildSyncPayload emits the FreeSR shape FireflyGo expects', async () => {
   const { buildSyncPayload } = await load();
   const payload = buildSyncPayload(sampleFreesr());
 
-  assert.deepEqual(Object.keys(payload).sort(), ['avatars', 'battle_config', 'lightcones', 'loadout', 'relics']);
+  assert.deepEqual(Object.keys(payload).sort(), ['avatars', 'battle_config', 'lightcones', 'relics']);
   assert.equal(payload.extra_data, undefined);
 
   const avatar = payload.avatars['1506'];
@@ -231,4 +231,37 @@ test('buildSyncPayload survives empty or malformed documents', async () => {
 
   const malformed = buildSyncPayload({ avatars: { 1: null, 2: { avatar_id: 0 } } });
   assert.deepEqual(malformed.avatars, {});
+});
+
+test('inspectFireflyReply follows the reference client success rules', async () => {
+  const { inspectFireflyReply } = await load();
+  assert.equal(inspectFireflyReply({ status: 200, message: 'OK', extra_data: {} }).kind, 'ok');
+  assert.equal(inspectFireflyReply({ extra_data: {} }).kind, 'ok');
+  // HTTP 200 with a failing status in the body is still a failure.
+  assert.deepEqual(inspectFireflyReply({ status: 400, message: 'player data is not loaded yet' }),
+    { kind: 'error', message: 'player data is not loaded yet' });
+  assert.equal(inspectFireflyReply({ status: 500 }).message, 'status 500');
+  assert.deepEqual(inspectFireflyReply({ error: 'bad payload' }), { kind: 'error', message: 'bad payload' });
+  assert.equal(inspectFireflyReply({ success: false, message: 'no' }).kind, 'error');
+  assert.equal(inspectFireflyReply({ retcode: 0, message: 'OK', data: { token: 'x' } }).kind, 'sdk-fallback');
+  assert.equal(inspectFireflyReply(null, '<!doctype html><html></html>').kind, 'html');
+  assert.equal(inspectFireflyReply(null).kind, 'unknown');
+  assert.equal(inspectFireflyReply({}).kind, 'unknown');
+});
+
+test('buildSyncExtraData matches what the reference client sends', async () => {
+  const { buildSyncExtraData } = await load();
+  const unset = buildSyncExtraData(null, { creativeMode: true });
+  assert.equal('multi_path' in unset, false);
+  assert.equal(unset.theory_craft.mode, true);
+  assert.deepEqual(unset.theory_craft.custom_lineup, []);
+
+  const chosen = buildSyncExtraData({
+    multi_path: { main: 8002, march_7: 0, multi_path_main: [], multi_path_march_7: [] },
+    theory_craft: { custom_lineup: [1506, '1502'], mode: true, cycle_count: 3, stage_id: 9, hp: { 1: [100] } }
+  });
+  assert.equal(chosen.multi_path.main, 8002);
+  assert.deepEqual(chosen.theory_craft.custom_lineup, ['1506', '1502']);
+  assert.equal(chosen.theory_craft.mode, false);
+  assert.deepEqual(chosen.theory_craft.hp, { 1: [100] });
 });

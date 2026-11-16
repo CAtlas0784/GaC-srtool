@@ -217,3 +217,34 @@ test('unknown modes and empty catalogs resolve to null', async () => {
   assert.equal(buildFireflyBattleConfig(sampleCatalog(), { mode: 'su' }), null);
   assert.equal(buildFireflyBattleConfig(sampleCatalog(), { mode: 'pf' }), null);
 });
+
+test('custom mode carries the chosen stage id as the battle map', async () => {
+  const { buildFireflyBattleConfig, summarizeEndgameSelection } = await load();
+  const selection = {
+    mode: 'custom',
+    customWaves: [[{ monster_id: 1002030, level: 80, amount: 1 }]],
+    customCycle: 5,
+    customStageId: 30501011
+  };
+  assert.equal(buildFireflyBattleConfig({}, selection).stage_id, 30501011);
+  assert.equal(summarizeEndgameSelection({}, selection).stageId, 30501011);
+  // No stage chosen: 0 leaves the map to the server.
+  assert.equal(buildFireflyBattleConfig({}, { ...selection, customStageId: undefined }).stage_id, 0);
+});
+
+test('listStagePresets offers every peak stage and the newest seasons, without repeats', async () => {
+  const { listStagePresets } = await load();
+  const side = (stageId) => ({ side: 'firstNode', stageId, level: 90, name: { en: `S${stageId}` }, waves: [[1]] });
+  const catalog = {
+    modes: {
+      moc: { groups: [1, 2, 3].map((id) => ({ id, name: { en: `M${id}` }, levels: [{ id: 1, floor: 1, sides: [side(100 + id)] }, { id: 2, floor: 2, sides: [side(200 + id), side(0)] }] })) },
+      peak: { groups: [{ id: 1, name: { en: 'P1' }, stages: [{ id: 1, stageId: 9001 }, { id: 2, stageId: 9001 }, { id: 3, stageId: 9002 }] }] }
+    }
+  };
+  const presets = listStagePresets(catalog, { groupsPerMode: 2 });
+  // Newest season first, highest floor first; group 1 is outside the limit.
+  assert.deepEqual(presets.map((p) => p.stageId), [203, 103, 202, 102, 9001, 9002]);
+  assert.equal(presets[0].mode, 'moc');
+  assert.equal(presets[0].group.id, 3);
+  assert.deepEqual(listStagePresets(null), []);
+});

@@ -128,6 +128,61 @@ export function normalizeExtraData(raw) {
   return extra;
 }
 
+/**
+ * Decides what a POST /sync reply means, the same way the reference client
+ * (Firefly_Srtools) does. FireflyGo can answer HTTP 200 while reporting a
+ * failure in the body, and servers without /sync answer with an SDK envelope
+ * or an HTML page, so the HTTP status alone proves nothing.
+ *
+ * Returns { kind, message } where kind is:
+ *   'ok'           - a /sync reply that accepted the request
+ *   'error'        - a /sync reply reporting a failure (message says why)
+ *   'sdk-fallback' - { retcode, ... } from a server without /sync
+ *   'html'         - an HTML page (wrong server or a proxy error page)
+ *   'unknown'      - anything else
+ */
+export function inspectFireflyReply(parsed, text = '') {
+  if (String(text ?? '').trim().startsWith('<')) return { kind: 'html', message: '' };
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return { kind: 'unknown', message: '' };
+
+  const message = typeof parsed.message === 'string' ? parsed.message : '';
+  if (typeof parsed.error === 'string' && parsed.error) return { kind: 'error', message: parsed.error };
+  if (typeof parsed.status === 'number' && (parsed.status < 200 || parsed.status > 299)) {
+    return { kind: 'error', message: message || `status ${parsed.status}` };
+  }
+  if (parsed.ok === false || parsed.success === false) return { kind: 'error', message };
+
+  if ('status' in parsed || 'extra_data' in parsed || 'warnings' in parsed || 'stats' in parsed) {
+    return { kind: 'ok', message };
+  }
+  if ('retcode' in parsed) return { kind: 'sdk-fallback', message };
+  return { kind: 'unknown', message };
+}
+
+/**
+ * The extra_data block as the reference client sends it: `multi_path` is left
+ * out unless a path is actually chosen (sending zeros would reset it), and
+ * `theory_craft.custom_lineup` is a list of strings.
+ */
+export function buildSyncExtraData(raw, { creativeMode = false } = {}) {
+  const extra = normalizeExtraData(raw) || normalizeExtraData(FIREFLY_EXTRA_FALLBACK);
+  const theory = extra.theory_craft || {};
+  extra.theory_craft = {
+    hp: theory.hp && typeof theory.hp === 'object' && !Array.isArray(theory.hp) ? theory.hp : {},
+    cycle_count: num(theory.cycle_count),
+    mode: creativeMode === true,
+    stage_id: num(theory.stage_id),
+    custom_lineup: numberList(theory.custom_lineup).map((id) => String(id))
+  };
+
+  const multiPath = extra.multi_path;
+  const multiPathUnset = !multiPath || (!multiPath.main && !multiPath.march_7
+    && multiPath.multi_path_main.length === 0 && multiPath.multi_path_march_7.length === 0);
+  if (multiPathUnset) delete extra.multi_path;
+
+  return extra;
+}
+
 function normalizeAnchorMap(skillsByAnchorType, skills) {
   if (skillsByAnchorType && typeof skillsByAnchorType === 'object' && !Array.isArray(skillsByAnchorType)) {
     const entries = Object.entries(skillsByAnchorType)
@@ -209,9 +264,50 @@ function normalizeBattleConfig(battleConfig) {
 }
 
 /**
- * Converts the app's FreeSR snapshot into the exact payload FireflyGo's
- * converter produces: avatars keyed by id, flat lightcone/relic arrays with
- * sequential internal uids, and a stripped battle_config.
+ * Relic ids are <rarity><set id><slot> (61031 -> set 103, 63281 -> set 328).
+ * The app's own relic builders never wrote a set id, and the servers store 0 as
+ * "no set", so every set bonus was lost; derive it whenever it is missing.
+ */
+export function relicSetIdFromRelicId(relicId) {
+  const digits = String(Math.trunc(Number(relicId) || 0));
+  return digits.length < 3 ? 0 : Number(digits.slice(1, -1)) || 0;
+}
+
+/**
+ * Puts items in the order the reference client (Firefly_Srtools) sends them:
+ * equipped items first, by avatar id, then by slot (light cone, relic slots
+ * 1-6). An avatar can hold one item per slot, so any extra item claiming an
+ * occupied slot is sent unequipped. Items nobody wears follow, unchanged.
+ */
+function orderForSync(items, slotOf) {
+  const taken = new Set();
+  const equipped = [];
+  const spare = [];
+  items.forEach((item) => {
+    const owner = num(item.equip_avatar);
+    const key = `${owner}:${slotOf(item)}`;
+    if (owner > 0 && !taken.has(key)) {
+      taken.add(key);
+      equipped.push(item);
+    } else {
+      spare.push(owner > 0 ? { ...item, equip_avatar: 0 } : item);
+    }
+  });
+  equipped.sort((a, b) => num(a.equip_avatar) - num(b.equip_avatar) || slotOf(a) - slotOf(b));
+  return [...equipped, ...spare];
+}
+
+/**
+ * Converts the app's FreeSR snapshot into the payload FireflyGo's reference
+ * client (Firefly_Srtools converterToFreeSRJson) produces: avatars keyed by id,
+ * flat lightcone/relic arrays, and a stripped battle_config.
+ *
+ * internal_uid is renumbered on every push, one counter per list starting at
+ * 0, exactly like the reference client. The app's own uids only ever grow (the
+ * relic presets use "highest uid + 1"), and FireflyGo builds the in-game bag
+ * from these numbers, so sending the stored ones left equipment out of step
+ * with the game. `loadout` is not sent: the reference client never sends it and
+ * it would point at the old uids.
  */
 export function buildSyncPayload(freesr) {
   const source = freesr && typeof freesr === 'object' ? freesr : {};
@@ -243,23 +339,23 @@ export function buildSyncPayload(freesr) {
     };
   });
 
-  const lightcones = (Array.isArray(source.lightcones) ? source.lightcones : [])
-    .filter((lc) => lc && num(lc.item_id) > 0)
+  const lightcones = orderForSync((Array.isArray(source.lightcones) ? source.lightcones : [])
+    .filter((lc) => lc && num(lc.item_id) > 0), () => 0)
     .map((lc, index) => ({
       level: num(lc.level),
       item_id: num(lc.item_id),
       equip_avatar: num(lc.equip_avatar),
       rank: num(lc.rank),
       promotion: num(lc.promotion),
-      internal_uid: Number.isFinite(Number(lc.internal_uid)) ? num(lc.internal_uid) : index
+      internal_uid: index
     }));
 
-  const relics = (Array.isArray(source.relics) ? source.relics : [])
-    .filter((relic) => relic && num(relic.relic_id) > 0)
+  const relics = orderForSync((Array.isArray(source.relics) ? source.relics : [])
+    .filter((relic) => relic && num(relic.relic_id) > 0), (relic) => num(relic.relic_id) % 10)
     .map((relic, index) => ({
       level: num(relic.level),
       relic_id: num(relic.relic_id),
-      relic_set_id: num(relic.relic_set_id),
+      relic_set_id: num(relic.relic_set_id) || relicSetIdFromRelicId(relic.relic_id),
       main_affix_id: num(relic.main_affix_id),
       sub_affixes: (Array.isArray(relic.sub_affixes) ? relic.sub_affixes : [])
         .map((sub) => ({
@@ -268,7 +364,7 @@ export function buildSyncPayload(freesr) {
           step: num(sub?.step)
         }))
         .filter((sub) => sub.sub_affix_id > 0),
-      internal_uid: Number.isFinite(Number(relic.internal_uid)) ? num(relic.internal_uid) : index,
+      internal_uid: index,
       equip_avatar: num(relic.equip_avatar)
     }));
 
@@ -278,8 +374,5 @@ export function buildSyncPayload(freesr) {
     avatars,
     battle_config: normalizeBattleConfig(source.battle_config)
   };
-  if (Array.isArray(source.loadout) && source.loadout.length > 0) {
-    payload.loadout = source.loadout;
-  }
   return payload;
 }

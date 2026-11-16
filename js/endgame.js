@@ -66,7 +66,9 @@ export function defaultEndgameSelection(catalog, mode) {
     return {
       mode,
       customWaves: [[{ monster_id: 0, level: 80 }]],
-      customCycle: 0
+      customCycle: 0,
+      // 0 = let the server use its own default stage (map).
+      customStageId: 0
     };
   }
 
@@ -128,6 +130,38 @@ export function resolveEndgameSelection(catalog, selection) {
   if (!sides.length) return null;
   const stage = sides.find((entry) => entry.side === selection.side) || sides[0];
   return { mode, group, level, sides, stage };
+}
+
+/**
+ * Stages a custom encounter can borrow its map from: every Anomaly
+ * Arbitration stage plus the newest seasons of the other modes. The stage id
+ * decides which scene the battle loads, so this doubles as a map list.
+ * Returns [{ stageId, mode, group, level, stage }], newest first, no repeats.
+ */
+export function listStagePresets(catalog, { groupsPerMode = 4 } = {}) {
+  const presets = [];
+  const seen = new Set();
+  const add = (mode, group, level, stage) => {
+    const stageId = num(stage?.stageId);
+    if (stageId <= 0 || seen.has(stageId)) return;
+    seen.add(stageId);
+    presets.push({ stageId, mode, group, level, stage });
+  };
+  for (const mode of ENDGAME_MODES) {
+    if (mode === 'custom') continue;
+    const groups = groupList(catalog, mode).slice().sort((a, b) => Number(b.id) - Number(a.id));
+    for (const group of mode === 'peak' ? groups : groups.slice(0, groupsPerMode)) {
+      if (mode === 'peak') {
+        for (const stage of Array.isArray(group.stages) ? group.stages : []) add(mode, group, null, stage);
+        continue;
+      }
+      const levels = (Array.isArray(group.levels) ? group.levels : []).slice().sort((a, b) => Number(b.floor) - Number(a.floor));
+      for (const level of levels) {
+        for (const side of Array.isArray(level.sides) ? level.sides : []) add(mode, group, level, side);
+      }
+    }
+  }
+  return presets;
 }
 
 export function monsterInfo(catalog, monsterId) {
@@ -211,7 +245,7 @@ export function buildFireflyBattleConfig(catalog, selection) {
       blessings: [],
       custom_stats: [],
       cycle_count: num(selection.customCycle),
-      stage_id: 0,
+      stage_id: num(selection.customStageId),
       path_resonance_id: 0,
       monsters: waves
     };
@@ -278,7 +312,7 @@ export function summarizeEndgameSelection(catalog, selection) {
     return {
       mode: 'custom',
       battleType: battleTypeForMode('custom'),
-      stageId: 0,
+      stageId: num(selection.customStageId),
       waveCount: waves.length,
       monsterCount: waves.reduce((sum, wave) => sum + wave.length, 0),
       blessings: 0,
