@@ -185,6 +185,9 @@ export function buildRobinPayload(freesr) {
  * { retcode: 0, message: 'OK', ... }.
  */
 export function classifyRobinReply(reply) {
-  // TODO(human): implement the classification described above.
-  return 'unknown';
+  if (!reply || typeof reply !== 'object' || Array.isArray(reply)) return 'unknown';
+  // Checked first: an SDK envelope also carries message 'OK'.
+  if ('retcode' in reply) return 'sdk-fallback';
+  if (typeof reply.status !== 'number' || typeof reply.message !== 'string') return 'unknown';
+  return reply.status === 200 ? 'ok' : 'error';
 }

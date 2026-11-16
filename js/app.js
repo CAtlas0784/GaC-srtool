@@ -5,10 +5,11 @@ import { initializeItemCatalog } from './item-catalog.js?v=8';
 import { initializeUnstuck } from './unstuck.js?v=7';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.29';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.30';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=1';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=1';
+import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=1';
 import {
   ENDGAME_MODES,
   FIREFLY_ENDGAME_CATALOG_URL,
@@ -50,6 +51,9 @@ const state = {
   pingIntervalSec: 10,
   isConnected: false,
   fireflyConnected: false,
+  // RobinSR is push-only too: tracks the last explicit POST /srtools result.
+  robinConnected: false,
+  robinProbed: false,
   fireflyExtraData: readStoredFireflyExtra(),
   statusData: null,
   avatarsList: [],
@@ -579,6 +583,92 @@ async function probeFirefly({ silent = false } = {}) {
   return result;
 }
 
+// RobinSR transport. Its sdkserver exposes a single POST /srtools endpoint
+// whose CORS layer only allows Content-Type, so no custom headers are sent.
+// The server answers HTTP 200 for every handled request and reports failures
+// in the body ({ message, status: 500 }); a body serde rejects comes back as a
+// plain-text 4xx that names the offending field.
+function robinReplyKindLabel(kind) {
+  return kind === 'sdk-fallback' ? t('fireflyReplySdkFallback') : t('fireflyReplyUnknown');
+}
+
+function robinReplyProblem(parsed) {
+  const kind = classifyRobinReply(parsed);
+  if (kind === 'ok') return '';
+  if (kind === 'error') {
+    return t('robinServerError', { message: typeof parsed?.message === 'string' && parsed.message ? parsed.message : `status ${parsed?.status}` });
+  }
+  return t('robinNotSrtoolsServer', { kind: robinReplyKindLabel(kind) });
+}
+
+async function robinRequest(body, { timeoutMs = 8000 } = {}) {
+  const url = robinSrtoolsUrl(state.apiUrl);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body ?? {}),
+      signal: controller.signal
+    });
+    const text = await res.text();
+    let parsed = null;
+    if (text) {
+      try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+    }
+    if (!res.ok) {
+      const detail = (parsed && typeof parsed.message === 'string' && parsed.message) || text.trim().slice(0, 200);
+      throw new Error(detail ? t('robinServerError', { message: detail }) : `HTTP ${res.status}: ${res.statusText}`);
+    }
+    const problem = robinReplyProblem(parsed);
+    if (problem) throw new Error(problem);
+    return parsed;
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error(t('robinTimeout'));
+    if (err instanceof TypeError && typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url)) {
+      throw new Error(`${err.message} (${t('fireflyMixedContentHint')})`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function setRobinConnected(connected) {
+  state.robinProbed = true;
+  state.robinConnected = connected;
+  setConnectionStatus(connected, connected ? '' : t('offline'));
+}
+
+// The connect probe: no `data` key, so RobinSR answers OK without touching
+// freesr-data.json.
+async function probeRobin({ silent = false } = {}) {
+  try {
+    const result = await robinRequest({});
+    setRobinConnected(true);
+    if (!silent) showToast(t('robinProbeSuccess'), 'success');
+    return result;
+  } catch (err) {
+    setRobinConnected(false);
+    throw err;
+  }
+}
+
+// Push the local FreeSR snapshot to RobinSR (POST /srtools).
+async function pushRobinSync({ silent = false } = {}) {
+  try {
+    const result = await robinRequest({ data: buildRobinPayload(state.fullFreesrData) });
+    setRobinConnected(true);
+    if (!silent) showToast(t('robinSyncSuccess'), 'success');
+    return result;
+  } catch (err) {
+    setRobinConnected(false);
+    throw err;
+  }
+}
+
 // API check: calls every endpoint this page reads in the current mode and
 // shows what each one actually answered (status, time, server error text).
 const API_CHECKS = {
@@ -593,6 +683,9 @@ const API_CHECKS = {
   ],
   firefly: [
     { path: '/sync', method: 'POST', body: { username: '', password: '' }, firefly: true }
+  ],
+  robin: [
+    { path: '/srtools', method: 'POST', body: {}, robin: true }
   ]
 };
 
@@ -607,13 +700,13 @@ function apiCheckBodyError(parsed, text) {
 }
 
 async function runOneApiCheck(base, check) {
-  const url = check.firefly ? fireflySyncUrl(base) : `${base}${check.path}`;
+  const url = check.firefly ? fireflySyncUrl(base) : check.robin ? robinSrtoolsUrl(base) : `${base}${check.path}`;
   const t0 = performance.now();
   try {
     const res = await fetch(url, {
       method: check.method,
       cache: 'no-store',
-      headers: check.firefly ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
+      headers: (check.firefly || check.robin) ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
       body: check.body ? JSON.stringify(check.body) : undefined,
       signal: AbortSignal.timeout(6000)
     });
@@ -627,6 +720,8 @@ async function runOneApiCheck(base, check) {
     } else if (check.firefly) {
       const kind = classifyFireflyReply(parsed);
       if (kind !== 'sync') problem = t('fireflyNotSyncServer', { kind: fireflyReplyKindLabel(kind) });
+    } else if (check.robin) {
+      problem = robinReplyProblem(parsed);
     } else {
       problem = apiCheckBodyError(parsed, text);
       if (problem) problem = t('apiCheckServerError', { message: problem });
@@ -668,7 +763,7 @@ let toolSessionConnected = false;
 let toolSessionGeneration = 0;
 async function syncToolSession(connected) {
   // Only the GaCy GO gateway implements /api/tool-session.
-  if (!modeSupports('toolSession')) {
+  if (!modeSupports('toolSession', state.serverMode)) {
     toolSessionConnected = connected;
     return;
   }
@@ -687,7 +782,7 @@ async function syncToolSession(connected) {
   }
 }
 window.addEventListener('pagehide', () => {
-  if (!toolSessionConnected || !modeSupports('toolSession')) return;
+  if (!toolSessionConnected || !modeSupports('toolSession', state.serverMode)) return;
   const base = state.apiUrl.replace(/\/+$/, '');
   navigator.sendBeacon(`${base}/api/tool-session`, JSON.stringify({ connected: false, client: 'GaC-Srtool' }));
 });
@@ -1500,6 +1595,8 @@ function setupServerModes() {
     }
     // FireflyGo is push-only, so its connection state must never carry over.
     state.fireflyConnected = false;
+    state.robinConnected = false;
+    state.robinProbed = false;
     showToast(t('toastServerSwitched', { mode: MODE_LABELS[next] }), 'info');
     refreshStatus();
   };
@@ -1575,11 +1672,16 @@ async function refreshStatus() {
         state.fullFreesrData = freesr.data;
         await saveFreesrCache(freesr.data);
       }
-    } else if (state.serverMode === 'firefly') {
-      // FireflyGo is push-only (POST /sync) and has no read endpoints, so the
-      // dashboard is rebuilt from the local FreeSR snapshot and the ping loop
-      // never touches the network. `state.fireflyConnected` tracks the last
-      // explicit /sync result instead.
+    } else {
+      // FireflyGo (POST /sync) and RobinSR (POST /srtools) are push-only and
+      // have no read endpoints, so the dashboard is rebuilt from the local
+      // FreeSR snapshot and the ping loop never touches the network.
+      // `state.fireflyConnected` / `state.robinConnected` track the last
+      // explicit push result instead.
+      if (state.serverMode === 'robin' && !state.robinProbed) {
+        // One write-free probe per URL/mode; later ticks reuse its result.
+        await probeRobin({ silent: true }).catch(() => {});
+      }
       const freesr = state.fullFreesrData;
       if (freesr) {
         data = {
@@ -1600,27 +1702,11 @@ async function refreshStatus() {
           ex_ranks: []
         };
       }
-    } else { // robin
-      const freesr = await apiCall('/api/freesr').catch(() => null);
-      if (freesr && freesr.data) {
-        state.fullFreesrData = freesr.data;
-        data = {
-          status: 200,
-          avatar_count: Object.keys(freesr.data.avatars || {}).length,
-          lightcone_count: (freesr.data.lightcones || []).length,
-          relic_count: (freesr.data.relics || []).length,
-          lineups: freesr.data.lineups || freesr.data.battle_config?.custom_battle_lineup || DEFAULT_LINEUP,
-          scene: freesr.data.scene,
-          position: freesr.data.position,
-          ex_ranks: []
-        };
-      } else {
-        throw new Error('Server not reachable');
-      }
     }
 
     state.statusData = data;
-    setConnectionStatus(state.serverMode === 'firefly' ? state.fireflyConnected : true);
+    setConnectionStatus(state.serverMode === 'firefly' ? state.fireflyConnected
+      : state.serverMode === 'robin' ? state.robinConnected : true);
 
     el.lblApiUrl.textContent = state.apiUrl;
     el.statAvatars.textContent = data.avatar_count ?? state.avatarsList.length;
@@ -1669,6 +1755,8 @@ async function refreshStatus() {
   } catch (err) {
     if (state.serverMode === 'firefly') {
       setConnectionStatus(state.fireflyConnected);
+    } else if (state.serverMode === 'robin') {
+      setConnectionStatus(state.robinConnected);
     } else {
       setConnectionStatus(false, t('offline'));
     }
@@ -6393,7 +6481,7 @@ async function saveLineupToServer(lineupData) {
     state.dataGameData = state.dataGameData || { ...DEFAULT_DATA_GAME };
     state.dataGameData.lineups = { ...lineupData };
     await saveDataGameCache(state.dataGameData);
-    if (state.isConnected) {
+    if (state.isConnected && state.serverMode !== 'robin') {
       await apiCall('/api/data-in-game', 'POST', state.dataGameData).catch(() => {});
     }
   }
@@ -6735,27 +6823,18 @@ async function saveFreesrChangesToServer() {
     return;
   }
 
+  // RobinSR only understands POST /srtools with { data } and no custom headers.
+  if (state.serverMode === 'robin') {
+    await pushRobinSync({ silent: true });
+    return;
+  }
+
   // Attempt to push to server
   let lastErr = null;
   const payloadWrapped = { data: state.fullFreesrData };
   const payloadDirect = state.fullFreesrData;
 
-  if (state.serverMode === 'robin') {
-    try {
-      await apiCall('/srtools', 'POST', payloadWrapped);
-      state.isConnected = true;
-      return;
-    } catch (e1) {
-      lastErr = e1;
-      try {
-        await apiCall('/api/freesr', 'POST', payloadDirect);
-        state.isConnected = true;
-        return;
-      } catch (e2) {
-        lastErr = e2;
-      }
-    }
-  } else {
+  {
     // gac or default
     try {
       await apiCall('/api/freesr', 'POST', payloadDirect);
@@ -6796,7 +6875,8 @@ async function loadEquipment() {
     if (state.fullFreesrData) {
       lcs = state.fullFreesrData.lightcones || [];
       relics = state.fullFreesrData.relics || [];
-    } else if (state.isConnected) {
+    } else if (state.isConnected && state.serverMode !== 'robin') {
+      // RobinSR has no read endpoint; it falls through to the browser cache.
       const res = await apiCall('/api/freesr').catch(async () => {
         return await apiCall('/srtools');
       }).catch(() => null);
@@ -9373,10 +9453,10 @@ async function loadJsonData(mode) {
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'freesr-data.json' });
     try {
-      if (state.fullFreesrData && (!state.isConnected || state.serverMode === 'firefly')) {
+      if (state.fullFreesrData && (!state.isConnected || state.serverMode === 'firefly' || state.serverMode === 'robin')) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
-      } else if (state.isConnected) {
+      } else if (state.isConnected && state.serverMode !== 'robin') {
         const res = await apiCall('/api/freesr');
         if (generation !== jsonLoadGeneration) return;
         if (!res.data || typeof res.data !== 'object' || Array.isArray(res.data)) throw new Error('invalid freesr response');
@@ -10189,6 +10269,7 @@ function setupEvents() {
   // Quick Ping & Refresh
   el.btnQuickPing.addEventListener('click', () => {
     showToast(t('checking'), 'info');
+    state.robinProbed = false;
     refreshStatus();
   });
 
@@ -10208,6 +10289,7 @@ function setupEvents() {
       localStorage.setItem('gac_srtool_api_url', newUrl);
       el.modalSettings.classList.remove('active');
       showToast(t('settingsSaved'), 'success');
+      state.robinProbed = false;
       refreshStatus();
     }
   });
@@ -10860,6 +10942,7 @@ function setupEvents() {
     el.btnTestConnection.addEventListener('click', async () => {
       const targetUrl = (el.settingApiUrl?.value || state.apiUrl).trim().replace(/\/+$/, '');
       const isFirefly = state.serverMode === 'firefly';
+      const isRobin = state.serverMode === 'robin';
       if (el.pingLatencyBadge) {
         el.pingLatencyBadge.style.display = 'inline-block';
         el.pingLatencyBadge.textContent = '⏳ ...';
@@ -10875,6 +10958,8 @@ function setupEvents() {
       try {
         if (isFirefly) {
           await probeFirefly({ silent: true });
+        } else if (isRobin) {
+          await probeRobin({ silent: true });
         } else {
           const res = await fetch(`${state.apiUrl}/api/status`, { signal: AbortSignal.timeout(3500) });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -10894,7 +10979,7 @@ function setupEvents() {
           el.pingLatencyBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
           el.pingLatencyBadge.style.color = '#ef4444';
         }
-        showToast(t('toastPingFailed'), 'error');
+        showToast(isRobin ? t('toastErrorMessage', { message: err.message }) : t('toastPingFailed'), 'error');
         if (isFirefly) {
           state.fireflyConnected = false;
           setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
@@ -10911,6 +10996,7 @@ function setupEvents() {
       state.apiUrl = el.settingApiUrl.value.trim().replace(/\/+$/, '') || 'http://localhost:21000';
       localStorage.setItem('gac_srtool_api_url', state.apiUrl);
       showToast(t('settingsSaved'), 'success');
+      state.robinProbed = false;
       refreshStatus();
     });
   }
@@ -11273,7 +11359,7 @@ function parseFireflySranalysisJson(json) {
 
 async function fetchLatestBattleReport(silent = false) {
   // Damage Analyst reads /api/battle_report, which only GaCy GO provides.
-  if (!modeSupports('damageAnalyst')) return;
+  if (!modeSupports('damageAnalyst', state.serverMode)) return;
   if (analystState.isFetching) return;
   analystState.isFetching = true;
   try {
@@ -11862,7 +11948,7 @@ function setupDamageAnalystEvents() {
   }
 
   const syncLatestWhenVisible = () => {
-    if (el.chkAnalystAutosync?.checked && state.isConnected && !document.hidden) {
+    if (el.chkAnalystAutosync?.checked && state.isConnected && !document.hidden && modeSupports('damageAnalyst', state.serverMode)) {
       fetchLatestBattleReport(true);
     }
   };

@@ -60,6 +60,8 @@ test('mode UI strings exist in Thai and English', async () => {
   const keys = [
     'serverModeFirefly',
     'apiUrlHintGaC', 'apiUrlHintFirefly', 'apiUrlHintRobin',
+    'serverModeRobin', 'robinProbeSuccess', 'robinSyncSuccess', 'robinTimeout',
+    'robinNotSrtoolsServer', 'robinServerError',
     'enkaImportTitle', 'enkaImportSubtitle', 'enkaUidLabel', 'enkaUidPlaceholder',
     'enkaUidInvalid', 'enkaModeMerge', 'enkaModeReplace', 'btnEnkaFetch',
     'enkaPasteLabel', 'enkaPastePlaceholder', 'btnEnkaParsePaste',
