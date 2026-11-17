@@ -1,11 +1,11 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
 import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.25';
 import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.31';
-import { initializeItemCatalog } from './item-catalog.js?v=8';
+import { initializeItemCatalog } from './item-catalog.js?v=15';
 import { initializeUnstuck } from './unstuck.js?v=7';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.35';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.49';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
@@ -38,6 +38,15 @@ import {
 
 // Expose image resolvers & error handlers to window for inline onclick/onerror attributes
 window.handleAvatarImgError = handleAvatarImgError;
+
+const IMAGE_FALLBACK_SRC = 'assets/logo.png';
+document.addEventListener('error', (event) => {
+  const img = event.target;
+  if (!(img instanceof HTMLImageElement) || img.hasAttribute('onerror')) return;
+  if (!img.getAttribute('src') || img.dataset.fallbackApplied) return;
+  img.dataset.fallbackApplied = '1';
+  img.src = IMAGE_FALLBACK_SRC;
+}, true);
 window.handleAvatarPortraitError = handleAvatarPortraitError;
 window.handleLcImgError = handleLcImgError;
 window.getAvatarIconUrl = getAvatarIconUrl;
@@ -62,7 +71,7 @@ const state = {
   persistentData: null,
   dataGameData: null,
   currentJsonMode: 'freesr',
-  activeTab: 'tab-dashboard',
+  activeTab: 'tab-avatars',
   selectedLineupSlot: null,
   selectedAvatarDetail: null,
   creativeMode: localStorage.getItem('gac_srtool_creative_mode') === 'true' || localStorage.getItem('gac_srtool_default_creative') === 'true',
@@ -173,6 +182,7 @@ const el = {
 
   // Avatars
   avatarsGrid: document.getElementById('avatars-grid'),
+  avatarsSummary: document.getElementById('avatars-summary'),
   avatarSearch: document.getElementById('avatar-search'),
   avatarFilterRarity: document.getElementById('avatar-filter-rarity'),
   avatarFilterElement: document.getElementById('avatar-filter-element'),
@@ -227,6 +237,7 @@ const el = {
   tabBtnPersistent: document.getElementById('tab-btn-persistent'),
   cardPersistentChars: document.getElementById('card-persistent-chars'),
   cardPersistentGlobal: document.getElementById('card-persistent-global'),
+  cardPersistentCamera: document.getElementById('card-persistent-camera'),
   formPersistentChars: document.getElementById('form-persistent-chars'),
   persistentMcSelect: document.getElementById('persistent-mc-select'),
   persistentMarchSelect: document.getElementById('persistent-march-select'),
@@ -239,6 +250,7 @@ const el = {
   tabBtnInventory: document.getElementById('tab-btn-inventory'),
   tabBtnMonsterSettings: document.getElementById('tab-btn-monster-settings'),
   cardFireflyExtras: document.getElementById('card-firefly-extras'),
+  tabBtnFireflyExtras: document.getElementById('tab-btn-firefly-extras'),
   apiUrlModeHint: document.getElementById('api-url-mode-hint'),
   badgePersistenceMode: document.getElementById('badge-persistence-mode'),
 
@@ -426,7 +438,11 @@ const el = {
   btnCancelAssignPicker: document.getElementById('btn-cancel-assign-picker'),
   btnConfirmAssignPicker: document.getElementById('btn-confirm-assign-picker'),
 
-  toastContainer: document.getElementById('toast-container')
+  toastContainer: document.getElementById('toast-container'),
+  syncStatus: document.getElementById('sync-status'),
+  syncStatusText: document.getElementById('sync-status-text'),
+  btnSyncRetry: document.getElementById('btn-sync-retry'),
+  badgeVersion: document.getElementById('badge-version')
 };
 
 // Toast notification helper
@@ -434,17 +450,7 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   
-  const icons = {
-    info: 'ℹ️',
-    success: '✅',
-    warning: '⚠️',
-    error: '❌'
-  };
-
-  toast.innerHTML = `
-    <span>${icons[type] || 'ℹ️'}</span>
-    <span style="flex: 1; word-break: break-word;">${message}</span>
-  `;
+  toast.innerHTML = `<span class="toast-message">${message}</span>`;
 
   el.toastContainer.appendChild(toast);
   setTimeout(() => {
@@ -782,7 +788,7 @@ async function runApiCheck() {
   summary.dataset.state = passed === results.length ? 'ok' : 'error';
   list.innerHTML = results.map((r) => `
     <li class="api-check-row" data-state="${r.ok ? 'ok' : 'error'}">
-      <span class="api-check-icon">${r.ok ? '✅' : '❌'}</span>
+      <span class="api-check-icon">${r.ok ? '' : ''}</span>
       <code class="api-check-path">${escapeHtml(r.method)} ${escapeHtml(r.path)}</code>
       <span class="api-check-meta">${r.status ? `HTTP ${r.status}` : '—'} · ${r.ms} ms · ${escapeHtml(r.ok ? t('apiCheckOk') : t('apiCheckFail'))}</span>
       ${r.detail ? `<div class="api-check-detail">${escapeHtml(r.detail)}</div>` : ''}
@@ -820,6 +826,26 @@ window.addEventListener('pagehide', () => {
   navigator.sendBeacon(`${base}/api/tool-session`, JSON.stringify({ connected: false, client: 'GaC-Srtool' }));
 });
 
+// One push status shared by every server mode. The header chip reads it, so a
+// failed push stays visible (with Retry) after its toast has faded. Declared
+// before setConnectionStatus, which runs during startup.
+const syncStatus = { state: 'idle', at: null, error: '', retry: null };
+el.btnSyncRetry?.addEventListener('click', () => syncStatus.retry?.());
+// Edits made in the character editor show on the roster as soon as it closes.
+const characterEditor = el.modalCharTitle?.closest('.modal-overlay');
+if (characterEditor) {
+  let editorWasOpen = false;
+  new MutationObserver(() => {
+    const open = characterEditor.classList.contains('active');
+    if (editorWasOpen && !open && state.activeTab === 'tab-avatars') renderAvatarsGrid();
+    editorWasOpen = open;
+  }).observe(characterEditor, { attributes: true, attributeFilter: ['class'] });
+}
+// The Bulk menu closes once one of its actions is chosen.
+document.querySelectorAll('.bulk-menu button').forEach(btn => {
+  btn.addEventListener('click', () => { btn.closest('details').open = false; });
+});
+
 // Update connection status UI
 function setConnectionStatus(connected, extraText = '') {
   const connectionChanged = state.isConnected !== connected;
@@ -833,7 +859,7 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('online');
     el.connectionStatusText.style.color = 'var(--accent-green)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = '● Server Online';
+      setI18nText(el.lblConsoleConnStatus, 'consoleConnOnline');
       el.lblConsoleConnStatus.style.color = 'var(--accent-green)';
     }
   } else {
@@ -841,10 +867,30 @@ function setConnectionStatus(connected, extraText = '') {
     el.connectionStatusText.textContent = extraText || t('offline');
     el.connectionStatusText.style.color = 'var(--accent-red)';
     if (el.lblConsoleConnStatus) {
-      el.lblConsoleConnStatus.textContent = '○ Offline (Local Mode)';
+      setI18nText(el.lblConsoleConnStatus, 'consoleConnOffline');
       el.lblConsoleConnStatus.style.color = 'var(--text-muted)';
     }
   }
+  // Every connection badge reads the same state, so none can claim "live" offline.
+  if (el.badgeVersion) {
+    setI18nText(el.badgeVersion, connected ? 'apiLive' : 'apiOffline');
+    el.badgeVersion.dataset.state = connected ? 'online' : 'offline';
+  }
+  if (el.badgeAnalystStatus?.dataset.idle === '1') renderAnalystIdleBadge();
+  // Push-only servers never "connect"; only GaCy edits made offline stay local.
+  const editsStayLocal = !connected && !modeSupports('pushOnly', state.serverMode);
+  if (editsStayLocal && syncStatus.state !== 'failed') {
+    setSyncStatus('local');
+  } else if (!editsStayLocal && syncStatus.state === 'local') {
+    setSyncStatus('idle');
+  }
+}
+
+// Set a node's text from a translation key and record the key, so the next
+// applyTranslations() pass re-renders the current state instead of a stale one.
+function setI18nText(node, key) {
+  node.setAttribute('data-i18n', key);
+  node.textContent = t(key);
 }
 
 // Helper to get element CSS class
@@ -1361,12 +1407,11 @@ function applyTranslations() {
     if (val && val !== key) {
       const icons = { substatPresetCrit: ['IconCriticalChance', 'IconCriticalDamage'], substatPresetSpeed: ['IconSpeed'], substatPresetBreak: ['IconBreakUp'], substatPresetTank: ['IconMaxHP', 'IconDefence'] }[key];
       if (icons) {
-        elem.textContent = val.replace(/^[🎯⚡🔨🛡️\s]+/u, '');
+        elem.textContent = val.replace(/^[\s]+/u, '');
         icons.slice().reverse().forEach(icon => elem.insertAdjacentHTML('afterbegin', getStatIconHtml(icon, 16, '')));
       } else {
         elem.textContent = val;
         const equipmentIcons = {
-          tabEquipment: './assets/lightcones/22009-icon.webp',
           modalAddLcTitle: './assets/lightcones/22009-icon.webp',
           eqLcTitle: './assets/lightcones/22009-icon.webp',
           overviewEquippedLc: './assets/lightcones/22009-icon.webp',
@@ -1450,6 +1495,7 @@ function applyTranslations() {
     renderEmptyDamageAnalyst();
   }
   updateDashboardBattleBanner();
+  renderSyncStatus();
   updateDocumentTitle();
   renderGMCommandPreview();
   if (state.activeTab === 'tab-monster-settings') {
@@ -1565,6 +1611,10 @@ function applyModeDisplay(mode) {
   setVisible(el.tabBtnDamageAnalyst, caps.damageAnalyst);
   setVisible(el.tabBtnPersistent, caps.saveManager);
   setVisible(el.tabBtnExrank, caps.exranks);
+  setVisible(el.tabBtnFireflyExtras, caps.extraData);
+  // Each server keeps its own last-received stamp.
+  if (syncStatus.state !== 'pending') syncStatus.state = 'idle';
+  renderSyncStatus();
 
   // Cards/panels driven by GaCy-only endpoints.
   setVisible(el.cardServerStatus, caps.sceneCard);
@@ -1572,6 +1622,7 @@ function applyModeDisplay(mode) {
   setVisible(el.cardBattleSummary, caps.battleSummary);
   setVisible(el.cardPersistentChars, caps.saveManager);
   setVisible(el.cardPersistentGlobal, caps.saveManager);
+  setVisible(el.cardPersistentCamera, caps.saveManager);
   setVisible(el.cardFireflyExtras, caps.extraData);
   setVisible(el.btnQuickSyncPersistent, caps.saveManager);
   setVisible(el.btnSelectPersistent, caps.saveManager);
@@ -1597,10 +1648,12 @@ function applyModeDisplay(mode) {
   if (!caps.damageAnalyst) hiddenTabs.push('tab-damage-analyst');
   if (!caps.saveManager) hiddenTabs.push('tab-persistent');
   if (!caps.exranks) hiddenTabs.push('tab-exrank');
+  if (!caps.extraData) hiddenTabs.push('tab-firefly-extras');
   const activeTabId = document.querySelector('.tab-btn.active')?.getAttribute('data-tab') || state.activeTab;
   if (hiddenTabs.includes(activeTabId)) {
-    const dashboardBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
-    if (dashboardBtn) dashboardBtn.click();
+    // Characters exists on every server, so it is the safe landing page.
+    const charactersBtn = document.querySelector('.tab-btn[data-tab="tab-avatars"]');
+    if (charactersBtn) charactersBtn.click();
   }
 
   // Only one backend's Monster Setting implementation is usable at a time.
@@ -1720,6 +1773,7 @@ async function refreshStatus() {
       // latest skills/Trace values instead of a stale browser cache.
       if (freesr?.data) {
         state.fullFreesrData = freesr.data;
+        resetReceivedBuilds();
         await saveFreesrCache(freesr.data);
       }
     } else {
@@ -1874,32 +1928,43 @@ function renderLineup(lineups) {
     const slotCard = document.createElement('div');
     slotCard.className = `lineup-slot-card ${avatarId ? 'filled' : ''}`;
     slotCard.title = t('slotTooltip');
+    // The slot opens the team picker, so it behaves as a button for keyboards too.
+    slotCard.setAttribute('role', 'button');
+    slotCard.tabIndex = 0;
 
     const removeSlotBtnHtml = state.creativeMode ? `
-      <button type="button" class="btn-lineup-remove-slot" title="${t('deleteItem') || 'ลบ'}" data-slot="${slot}">✕</button>
+      <button type="button" class="btn-lineup-remove-slot" title="${t('deleteItem')}" aria-label="${t('deleteItem')}" data-slot="${slot}"><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     ` : '';
 
     if (avatarId === 0) {
       slotCard.innerHTML = `
         <div class="lineup-slot-num">${t('slot')} ${slot + 1}</div>
         ${removeSlotBtnHtml}
-        <div style="font-size: 2.2rem; color: var(--text-muted); opacity: 0.5;">➕</div>
-        <div style="font-weight: 700; color: var(--text-muted); margin-top: 0.5rem;">${t('slotEmpty')}</div>
+        <span class="lineup-slot-plus" aria-hidden="true"></span>
+        <span class="lineup-slot-empty">${t('slotEmpty')}</span>
       `;
     } else {
       const info = getAvatarInfo(avatarId);
+      const element = normalizeElement(info.rawElement || info.element).toLowerCase();
+      const saved = state.fullFreesrData?.avatars?.[avatarId];
+      const listed = state.avatarsList.find(a => a.avatar_id === avatarId);
+      const level = saved?.level ?? listed?.level ?? 80;
+      const rank = saved?.data?.rank ?? listed?.rank ?? 0;
+      slotCard.style.setProperty('--entry-hl', `var(--hl-${element}, var(--hl-physical))`);
       slotCard.innerHTML = `
         <div class="lineup-slot-num">${t('slot')} ${slot + 1}</div>
         ${removeSlotBtnHtml}
         <img class="lineup-slot-img"
              src="${getAvatarIconSrc(avatarId)}"
              onerror="handleAvatarImgError(this, ${avatarId})"
-             alt="${info.name}">
-        <div style="font-weight: 800; font-size: 1rem; color: var(--text-highlight); margin-top: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${info.name}</div>
-        <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem; justify-content: center; align-items: center;">
+             alt="">
+        <span class="lineup-slot-name">${info.name}</span>
+        <span class="entry-hl" aria-hidden="true"></span>
+        <span class="entry-stats">LV ${level} · E${rank}</span>
+        <span class="lineup-slot-icons">
           ${getElementIconHtml(info.element, 20)}
           ${getPathIconHtml(info.path, 20)}
-        </div>
+        </span>
       `;
     }
 
@@ -1911,7 +1976,12 @@ function renderLineup(lineups) {
       }
       openLineupPicker(slot);
     });
-
+    slotCard.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === slotCard) {
+        e.preventDefault();
+        openLineupPicker(slot);
+      }
+    });
     el.lineupContainer.appendChild(slotCard);
   });
 
@@ -1919,13 +1989,18 @@ function renderLineup(lineups) {
   if (state.creativeMode) {
     const addSlotCard = document.createElement('div');
     addSlotCard.className = 'lineup-slot-card lineup-add-slot-card';
-    addSlotCard.title = t('btnAddSlot') || '+ เพิ่ม Slot';
+    addSlotCard.title = t('btnAddSlot');
+    addSlotCard.setAttribute('role', 'button');
+    addSlotCard.tabIndex = 0;
     addSlotCard.innerHTML = `
-      <div style="font-size: 2.2rem; color: var(--accent-green); line-height: 1;">➕</div>
-      <div style="font-weight: 700; color: var(--accent-green); margin-top: 0.5rem;">${t('btnAddSlot') || '+ เพิ่ม Slot'}</div>
+      <span class="lineup-slot-plus" aria-hidden="true"></span>
+      <span class="lineup-slot-empty">${t('btnAddSlot')}</span>
     `;
     addSlotCard.addEventListener('click', () => {
       addLineupSlot();
+    });
+    addSlotCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); addLineupSlot(); }
     });
     el.lineupContainer.appendChild(addSlotCard);
   }
@@ -1966,7 +2041,7 @@ function renderMiniBattleSummary() {
 
     el.miniBattleAvatarsList.innerHTML = `
       <div style="background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.1); border-radius: var(--radius-sm); padding: 0.85rem 1rem; text-align: center;">
-        <div style="font-size: 1.35rem; margin-bottom: 0.25rem;">⚔️</div>
+        <div style="font-size: 1.35rem; margin-bottom: 0.25rem;"></div>
         <div style="font-size: 0.85rem; font-weight: 700; color: #fff;">${t('miniNoBattleTitle')}</div>
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
           ${t('miniNoBattleDesc')}
@@ -1975,7 +2050,7 @@ function renderMiniBattleSummary() {
           <button type="button" class="btn btn-sm btn-secondary" onclick="window.fetchLatestBattleReport(false)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">
             ${t('miniBtnFetch')}
           </button>
-          <button type="button" class="btn btn-sm btn-primary" onclick="window.loadDemoBattleReport()" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8;">
+          <button type="button" class="btn btn-sm btn-secondary" onclick="window.loadDemoBattleReport()">
             ${t('miniBtnDemo')}
           </button>
         </div>
@@ -2558,7 +2633,7 @@ async function addLineupSlot() {
 
   if (canPushFreesr()) {
     if (state.serverMode === 'gac') {
-      await apiCall('/api/persistent', 'POST', { lineups: currentLineup }).catch(() => {});
+      await trackedPush(() => apiCall('/api/persistent', 'POST', { lineups: currentLineup })).catch(() => {});
     } else {
       await saveFreesrChangesToServer().catch(() => {});
     }
@@ -2603,7 +2678,7 @@ async function removeLineupSlot(slotIndex) {
 
   if (canPushFreesr()) {
     if (state.serverMode === 'gac') {
-      await apiCall('/api/persistent', 'POST', { lineups: newLineup }).catch(() => {});
+      await trackedPush(() => apiCall('/api/persistent', 'POST', { lineups: newLineup })).catch(() => {});
     } else {
       await saveFreesrChangesToServer().catch(() => {});
     }
@@ -2631,7 +2706,7 @@ function renderPickerGrid() {
   const removeCard = document.createElement('div');
   removeCard.className = 'picker-remove-card';
   removeCard.innerHTML = `
-    <span style="font-size: 1.15rem; line-height: 1;">❌</span>
+    <span style="font-size: 1.15rem; line-height: 1;"></span>
     <span>${t('removeFromTeam')}</span>
   `;
   removeCard.addEventListener('click', async () => {
@@ -2742,7 +2817,7 @@ function renderEquipTargetDisplay(kind) {
     btn.classList.add('is-empty');
     btn.title = '';
     btn.innerHTML = `
-      <span class="equip-target-avatar">🎒</span>
+      <span class="equip-target-avatar"></span>
       <span class="equip-target-body">
         <span class="equip-target-name">${t('assignKeepInventory')}</span>
         <span class="equip-target-sub">${t('assignChooseHint')}</span>
@@ -2772,7 +2847,7 @@ function renderEquipTargetDisplay(kind) {
         <span>${levelText}</span>
       </span>
     </span>
-    <span class="equip-target-cta${existing ? ' has-warning' : ''}">${existing ? '⚠ ' : ''}${t('assignChange')}</span>
+    <span class="equip-target-cta${existing ? ' has-warning' : ''}">${existing ? '' : ''}${t('assignChange')}</span>
   `;
 }
 
@@ -2810,7 +2885,7 @@ function renderAvatarAssignGrid() {
   inventoryCard.setAttribute('role', 'option');
   inventoryCard.setAttribute('aria-selected', avatarAssignState.pending === 0 ? 'true' : 'false');
   inventoryCard.innerHTML = `
-    <span class="assign-inventory-icon">🎒</span>
+    <span class="assign-inventory-icon"></span>
     <span class="assign-inventory-text">
       <strong>${t('assignKeepInventory')}</strong>
       <small>${t('assignKeepInventoryHint')}</small>
@@ -2850,7 +2925,7 @@ function renderAvatarAssignGrid() {
           ${getPathIconHtml(meta.path, 18)}
           <span style="font-weight: 600; margin-left: 0.2rem;">Lv. ${item.level} • E${item.rank}</span>
         </div>
-        ${equipped ? `<div class="assign-equipped-badge">⚠ ${t(kind === 'lc' ? 'assignReplaceLc' : 'assignReplaceRelic', { name: equipped.name })}</div>` : ''}
+        ${equipped ? `<div class="assign-equipped-badge">${t(kind === 'lc' ? 'assignReplaceLc' : 'assignReplaceRelic', { name: equipped.name })}</div>` : ''}
       </div>
     `;
 
@@ -2990,6 +3065,7 @@ function renderAvatarsGrid() {
     ? new Set(Object.keys(state.fullFreesrData?.avatars || {}).map(id => parseInt(id, 10)))
     : null;
 
+  const favorites = readFavorites();
   const filtered = state.avatarsList.filter(item => {
     if (ownedIds && !ownedIds.has(item.avatar_id)) return false;
     const meta = getAvatarInfo(item.avatar_id);
@@ -2999,56 +3075,178 @@ function renderAvatarsGrid() {
     const matchesElement = elementFilter === 'all' || elemCanonical === normalizeElement(elementFilter);
     const pathCanonical = normalizePath(meta.rawPath || meta.path);
     const matchesPath = pathFilter === 'all' || pathCanonical === normalizePath(pathFilter);
-    return matchesSearch && matchesRarity && matchesElement && matchesPath;
+    const matchesFavorite = !favoritesOnly || favorites.has(item.avatar_id);
+    return matchesSearch && matchesRarity && matchesElement && matchesPath && matchesFavorite;
   });
 
-  filtered.sort((a, b) => b.avatar_id - a.avatar_id);
+  // Favorites lead the list; within each group the newest characters come first.
+  filtered.sort((a, b) => (favorites.has(b.avatar_id) - favorites.has(a.avatar_id)) || (b.avatar_id - a.avatar_id));
+
+  const builds = snapshotBuilds();
+  const pending = pendingAvatarIds(builds);
+  renderAvatarsSummary(filtered.length, pending.size);
 
   if (filtered.length === 0) {
-    el.avatarsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">${t('noAvatarsFound')}</div>`;
+    el.avatarsGrid.innerHTML = `<div class="planner-empty">${t(favoritesOnly && !favorites.size ? 'favoritesEmpty' : 'noAvatarsFound')}</div>`;
     return;
   }
+
+  const lcByAvatar = new Map();
+  (state.fullFreesrData?.lightcones || []).forEach(lc => {
+    if (lc.equip_avatar) lcByAvatar.set(lc.equip_avatar, lc);
+  });
 
   el.avatarsGrid.innerHTML = '';
   filtered.forEach(item => {
     const meta = getAvatarInfo(item.avatar_id);
+    const element = normalizeElement(meta.rawElement || meta.element).toLowerCase();
+    const lc = lcByAvatar.get(item.avatar_id);
+    const lcLine = lc
+      ? `${getLightconeInfo(lc.item_id).name}`
+      : t('lcNoneEquipped');
+    // Show what will be pushed: the save data wins over the roster defaults.
+    const saved = state.fullFreesrData?.avatars?.[item.avatar_id];
+    const level = saved?.level ?? item.level;
+    const rank = saved?.data?.rank ?? item.rank;
+    const stats = `LV ${level} · E${rank}${lc ? ` · S${lc.rank || 1}` : ''}`;
+
+    // The entry holds two real buttons: open the editor, and star as a favorite.
+    const isFavorite = favorites.has(item.avatar_id);
     const card = document.createElement('div');
-    card.className = `card avatar-card card-rarity-${meta.rarity}`;
+    card.className = `card avatar-card planner-entry card-rarity-${meta.rarity}`;
+    card.classList.toggle('is-favorite', isFavorite);
+    card.dataset.avatarId = item.avatar_id;
+    card.style.setProperty('--entry-hl', `var(--hl-${element}, var(--hl-physical))`);
+    card.classList.toggle('is-pending', pending.has(item.avatar_id));
 
     card.innerHTML = `
-      <span class="avatar-badge-rarity rarity-${meta.rarity}">★ ${meta.rarity}</span>
-      <div class="avatar-header-info">
-        <div class="avatar-image-container">
-          <img class="avatar-img"
-               src="${getAvatarIconSrc(item.avatar_id)}"
-               onerror="handleAvatarImgError(this, ${item.avatar_id})"
-               alt="${meta.name}">
-          <div class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</div>
-        </div>
-        <div class="avatar-meta-details">
-          <div class="avatar-name" title="${meta.name}">${meta.name}</div>
-          <div class="avatar-subinfo">
-            ${getElementIconHtml(meta.element, 20)}
-            ${getPathIconHtml(meta.path, 20)}
-          </div>
-        </div>
-      </div>
-
-      <div class="avatar-card-footer">
-        <div class="avatar-status-pill">
-          <span class="avatar-lvl">Lv. ${item.level}</span>
-          <span class="avatar-eidolon ${item.rank === 6 ? 'e6' : ''}">E${item.rank}</span>
-        </div>
-      </div>
+      <button type="button" class="entry-main">
+      <span class="entry-portrait">
+        <img class="avatar-img"
+             src="${getAvatarIconSrc(item.avatar_id)}"
+             onerror="handleAvatarImgError(this, ${item.avatar_id})"
+             alt="">
+        <span class="avatar-icon-placeholder" style="display: none;">${meta.name.charAt(0)}</span>
+      </span>
+      <span class="entry-body">
+        <span class="entry-name">${meta.name}</span>
+        <span class="entry-hl" aria-hidden="true"></span>
+        <span class="entry-stats">${stats}</span>
+        <span class="entry-lc">${lcLine}</span>
+      </span>
+      <span class="entry-meta">
+        <span class="entry-rarity" data-rarity="${meta.rarity}" title="${meta.rarity}★"><svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z" fill="currentColor"/></svg>${meta.rarity}</span>
+        <span class="entry-icons">${getElementIconHtml(meta.element, 18)}${getPathIconHtml(meta.path, 18)}</span>
+      </span>
+      <span class="entry-pending">${t('entryPendingLabel')}</span>
+      </button>
+      <button type="button" class="entry-fav" aria-pressed="${isFavorite}"
+              aria-label="${t(isFavorite ? 'favoriteRemove' : 'favoriteAdd', { name: meta.name })}"
+              title="${t(isFavorite ? 'favoriteRemove' : 'favoriteAdd', { name: meta.name })}">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.6l1.95 4 4.4.62-3.18 3.1.75 4.38L8 11.64l-3.92 2.06.75-4.38L1.65 6.22l4.4-.62z"/></svg>
+      </button>
     `;
 
-    // Clicking card opens full character build modal
-    card.addEventListener('click', () => {
+    // The main button opens the full character editor.
+    card.querySelector('.entry-main').addEventListener('click', () => {
       openAvatarDetailModal(item);
+    });
+    card.querySelector('.entry-fav').addEventListener('click', () => {
+      toggleFavorite(item.avatar_id);
     });
 
     el.avatarsGrid.appendChild(card);
   });
+}
+
+// ---------------------------------------------------------------------------
+// Favorites: kept per viewer in this browser, they sort first and can be
+// filtered on their own.
+// ---------------------------------------------------------------------------
+const FAVORITES_KEY = 'gacy.favoriteAvatars';
+let favoritesOnly = false;
+
+function readFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+    return new Set(Array.isArray(stored) ? stored.map(Number).filter(Number.isFinite) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function toggleFavorite(avatarId) {
+  const favorites = readFavorites();
+  if (favorites.has(avatarId)) favorites.delete(avatarId);
+  else favorites.add(avatarId);
+  try { localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites])); } catch {}
+  renderAvatarsGrid();
+  // The entry moved; keep keyboard focus on its star.
+  el.avatarsGrid.querySelector(`.planner-entry[data-avatar-id="${avatarId}"] .entry-fav`)?.focus();
+}
+
+// ---------------------------------------------------------------------------
+// Pending marks: an entry is "not sent" while its build differs from what the
+// server last received. Before any push, the loaded data is the baseline.
+// ---------------------------------------------------------------------------
+let receivedBuilds = null;
+
+function snapshotBuilds() {
+  const data = state.fullFreesrData;
+  const builds = new Map();
+  if (!data?.avatars) return builds;
+  const gear = new Map();
+  const add = (aid, item) => {
+    if (!aid) return;
+    if (!gear.has(aid)) gear.set(aid, []);
+    gear.get(aid).push(item);
+  };
+  (data.lightcones || []).forEach(lc => add(lc.equip_avatar, lc));
+  (data.relics || []).forEach(relic => add(relic.equip_avatar, relic));
+  Object.entries(data.avatars).forEach(([id, av]) => {
+    const aid = parseInt(id, 10);
+    builds.set(aid, JSON.stringify([av.level, av.promotion, av.data, gear.get(aid) || []]));
+  });
+  return builds;
+}
+
+function pendingAvatarIds(builds = snapshotBuilds()) {
+  if (!receivedBuilds) receivedBuilds = new Map(builds);
+  const pending = new Set();
+  builds.forEach((signature, aid) => {
+    // An entry the baseline has never seen joins it as-is (it came from a load).
+    if (!receivedBuilds.has(aid)) receivedBuilds.set(aid, signature);
+    else if (receivedBuilds.get(aid) !== signature) pending.add(aid);
+  });
+  return pending;
+}
+
+// The server now holds exactly what the browser holds.
+function markBuildsReceived() {
+  receivedBuilds = snapshotBuilds();
+  refreshPendingMarks();
+}
+
+// Data was replaced by a load (server, cache or file): start a fresh baseline.
+function resetReceivedBuilds() {
+  receivedBuilds = null;
+}
+
+function refreshPendingMarks() {
+  if (!el.avatarsGrid) return;
+  const pending = pendingAvatarIds();
+  el.avatarsGrid.querySelectorAll('.planner-entry').forEach(card => {
+    card.classList.toggle('is-pending', pending.has(parseInt(card.dataset.avatarId, 10)));
+  });
+  renderAvatarsSummary(el.avatarsGrid.querySelectorAll('.planner-entry').length, pending.size);
+}
+
+function renderAvatarsSummary(count, pendingCount) {
+  if (!el.avatarsSummary) return;
+  el.avatarsSummary.textContent = pendingCount
+    ? t('avatarsSummaryPending', { count, pending: pendingCount })
+    : t('avatarsSummary', { count });
+  el.avatarsSummary.classList.toggle('has-pending', pendingCount > 0);
 }
 
 // Quick Set Single Avatar to E0S1 (Lv 80 + Prom 6 + E0 + Max Skills + S1 Signature Light Cone)
@@ -4247,7 +4445,7 @@ function renderModalRelicsTab(avatarId) {
             <span class="relic-slot-title" title="${rInfo.name}">${rInfo.name}</span>
             <span class="relic-slot-lvl">+15</span>
           </div>
-          <div class="relic-slot-main">✦ ${mainAffixName}</div>
+          <div class="relic-slot-main">${mainAffixName}</div>
           <div class="relic-slot-subs" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.72rem; color: var(--accent-cyan);" title="${subsSnippetHtml}">
             ${subsSnippetHtml}
           </div>
@@ -4484,7 +4682,7 @@ async function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
              style="width: 52px; height: 52px; object-fit: contain;">
         <div>
           <div style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 800; text-transform: uppercase;">
-            ⭐ ${t('recommendedBadge')}: ${recSetInfo.name} (+15 5★)
+            ${t('recommendedBadge')}: ${recSetInfo.name} (+15 5★)
           </div>
           <div style="font-size: 0.95rem; font-weight: 800; color: #fff; margin-top: 2px;">
             ✦ ${recMainName}
@@ -4495,7 +4693,7 @@ async function openSlotPicker(avatarId, slotNum, targetRelicToEdit = null) {
         </div>
       </div>
       <button type="button" class="btn btn-primary" id="btn-slot-picker-quick-rec" style="font-weight: 800; padding: 0.55rem 1.15rem; font-size: 0.875rem;">
-        ⚡ ${t('btnEquipInstant')}
+        ${t('btnEquipInstant')}
       </button>
     `;
 
@@ -4789,7 +4987,7 @@ function renderSlotPickerSetGrid(slot, recSetId) {
       <img src="${getRelicImage(sId, slot)}"
            onerror="this.src='./assets/logo.png'" alt="${sInfo.name}">
       <span title="${sInfo.name}">${sInfo.name}</span>
-      ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">⭐ ${t('recommendedBadge')}</span>` : ''}
+      ${sId === recSetId ? `<span style="font-size: 0.65rem; color: var(--accent-gold); font-weight: 800;">${t('recommendedBadge')}</span>` : ''}
     `;
 
     if (!canCreateRelicSet(sId)) {
@@ -4864,7 +5062,7 @@ function renderSlotPickerMainStatPills(slot, recMainStat) {
     pill.type = 'button';
     pill.className = `slot-picker-pill ${isSelected ? 'selected' : ''} ${isRec ? 'recommended' : ''}`;
     pill.innerHTML = `
-      ${isRec ? '⭐ ' : ''}<span>${item.name}</span>
+      ${isRec ? '' : ''}<span>${item.name}</span>
     `;
 
     pill.addEventListener('click', () => {
@@ -4892,7 +5090,7 @@ function renderSlotPickerInventoryGrid(aid, slot) {
   if (matchingRelics.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;"></div>
         <div style="font-size: 1rem; font-weight: 700; color: #fff;">${t('relicEmptyInventoryTitle')}</div>
         <div style="font-size: 0.8rem; margin-top: 0.25rem;">
           ${t('relicEmptyInventoryHint')}
@@ -5255,16 +5453,15 @@ async function equipLightconeToAvatar(avatarId, lcId, rank = 5, level = 80) {
     targetLc.promotion = 6;
   }
 
-  if (canPushFreesr()) {
-    await saveFreesrChangesToServer().catch(() => {});
-  }
+  const pushed = canPushFreesr() ? await trySaveFreesr() : true;
 
   renderModalOverviewTab(aid);
   renderModalRelicsTab(aid);
   renderShowcaseCard(aid);
   renderLightconesGrid();
 
-  showToast(t('toastLightConeEquipped', { lightcone: lcInfo.name, character: meta.name }), 'success');
+  // A failed push has already reported itself; never follow it with success.
+  if (pushed) showToast(t('toastLightConeEquipped', { lightcone: lcInfo.name, character: meta.name }), 'success');
 }
 
 // Unequip Lightcone from Avatar
@@ -5275,12 +5472,12 @@ async function unequipLightconeFromAvatar(avatarId) {
     state.fullFreesrData.lightcones.forEach(lc => {
       if (lc.equip_avatar === aid) lc.equip_avatar = 0;
     });
-    if (canPushFreesr()) await saveFreesrChangesToServer().catch(() => {});
+    const pushed = canPushFreesr() ? await trySaveFreesr() : true;
     renderModalOverviewTab(aid);
     renderModalRelicsTab(aid);
     renderShowcaseCard(aid);
     renderLightconesGrid();
-  showToast(t('toastLightConeUnequipped', { character: meta.name }), 'info');
+    if (pushed) showToast(t('toastLightConeUnequipped', { character: meta.name }), 'info');
   }
 }
 
@@ -5363,8 +5560,9 @@ async function quickSetAllAvatarsE0S1() {
       a.rank = 0;
     });
 
+    let pushed = true;
     if (canPushFreesr()) {
-      await saveFreesrChangesToServer().catch(() => {});
+      pushed = await trySaveFreesr();
     } else {
       await saveFreesrCache(state.fullFreesrData);
     }
@@ -5372,7 +5570,7 @@ async function quickSetAllAvatarsE0S1() {
     renderAvatarsGrid();
     loadEquipment();
     if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
-    showToast(t('toastAllCharactersE0S1'), 'success');
+    if (pushed) showToast(t('toastAllCharactersE0S1'), 'success');
   } catch (err) {
     showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
@@ -5560,7 +5758,8 @@ function renderModalEidolonPips(currentRank) {
   for (let r = 0; r <= 6; r++) {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = `eidolon-pip modal-eidolon-pip ${currentRank >= r ? 'active' : ''}`;
+    btn.className = `eidolon-pip modal-eidolon-pip ${currentRank >= r ? 'active' : ''} ${r === currentRank ? 'is-current' : ''}`;
+    btn.setAttribute('aria-pressed', String(r === currentRank));
     btn.textContent = `E${r}`;
     btn.title = `Eidolon ${r}`;
     btn.addEventListener('click', () => {
@@ -6470,7 +6669,7 @@ async function exportShowcaseImage(avatarId) {
     </head>
     <body>
       <div class="print-btn-bar">
-        <button onclick="window.print()">🖨️ ${t('printSavePdf')}</button>
+        <button onclick="window.print()">${t('printSavePdf')}</button>
         <button onclick="window.close()" style="background: #334155; color: #fff;">✕ ${t('printClose')}</button>
       </div>
       <div style="max-width: 960px; width: 100%;">
@@ -6494,7 +6693,7 @@ async function saveLineupToServer(lineupData) {
       savePersistentCache(state.persistentData);
     }
     if (state.isConnected) {
-      await apiCall('/api/persistent', 'POST', { lineups: lineupData }).catch(() => {});
+      await trackedPush(() => apiCall('/api/persistent', 'POST', { lineups: lineupData })).catch(() => {});
     }
   }
 
@@ -6616,10 +6815,11 @@ async function quickUnlockAllAvatars() {
       a.rank = 6;
     });
 
+    let pushed = true;
     if (canPushFreesr()) {
       if (state.serverMode === 'gac') {
         await apiCall('/api/avatar/max_all', 'POST', {}).catch(() => {});
-        await saveFreesrChangesToServer().catch(() => {});
+        pushed = await trySaveFreesr();
       } else {
         await saveFreesrChangesToServer();
       }
@@ -6627,7 +6827,7 @@ async function quickUnlockAllAvatars() {
 
     renderAvatarsGrid();
     if (el.statAvatars) el.statAvatars.textContent = Object.keys(state.fullFreesrData.avatars).length;
-    showToast(t('toastUnlockedAll') || 'ปลดล็อกตัวละครครบทุกตัว (70+ ตัว E6) เรียบร้อยแล้ว', 'success');
+    if (pushed) showToast(t('toastUnlockedAll') || 'ปลดล็อกตัวละครครบทุกตัว (70+ ตัว E6) เรียบร้อยแล้ว', 'success');
   } catch (err) {
     showToast(t('toastErrorMessage', { message: err.message }), 'error');
   }
@@ -6843,17 +7043,111 @@ function canPushFreesr() {
   return state.isConnected || modeSupports('pushOnly', state.serverMode);
 }
 
+function setSyncStatus(next, { error = '', retry = null } = {}) {
+  syncStatus.state = next;
+  syncStatus.error = error;
+  syncStatus.retry = retry;
+  if (next === 'saved') {
+    syncStatus.at = new Date();
+    try { localStorage.setItem(lastReceivedKey(), syncStatus.at.toISOString()); } catch {}
+  }
+  renderSyncStatus();
+  // Entries the server has not received keep their pending mark in step.
+  refreshPendingMarks();
+}
+
+// The stamp stays on the page at rest: it shows when this server last received
+// a push (remembered per server mode in this browser), or that nothing was sent.
+function lastReceivedKey() {
+  return `gacy.lastReceived.${state.serverMode}`;
+}
+
+function readLastReceived() {
+  try {
+    const stored = localStorage.getItem(lastReceivedKey());
+    const date = stored ? new Date(stored) : null;
+    return date && !Number.isNaN(date.getTime()) ? date : null;
+  } catch {
+    return null;
+  }
+}
+
+function formatStampTime(date) {
+  const sameDay = date.toDateString() === new Date().toDateString();
+  const options = sameDay
+    ? { hour: '2-digit', minute: '2-digit' }
+    : { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' };
+  return new Intl.DateTimeFormat(getCurrentLanguage(), options).format(date);
+}
+
+function renderSyncStatus() {
+  if (!el.syncStatus) return;
+  const { error } = syncStatus;
+  let current = syncStatus.state;
+  let at = syncStatus.at;
+  if (current === 'idle') {
+    at = readLastReceived();
+    current = at ? 'saved' : 'none';
+  }
+  el.syncStatus.hidden = false;
+  el.syncStatus.dataset.state = current;
+  const time = at ? formatStampTime(at) : '';
+  const labels = {
+    pending: t('syncStatusPending'),
+    saved: t('syncStatusSaved', { time }),
+    failed: t('syncStatusFailed'),
+    local: t('syncStatusLocal'),
+    none: t('syncStatusNone')
+  };
+  el.syncStatusText.textContent = labels[current] || '';
+  el.syncStatus.title = current === 'failed' ? error : '';
+  el.btnSyncRetry.hidden = current !== 'failed' || !syncStatus.retry;
+}
+
+// Run one push and record its outcome. `retry` is what the Retry button runs;
+// it defaults to the push itself.
+async function trackedPush(push, retry = push) {
+  setSyncStatus('pending');
+  try {
+    const result = await push();
+    setSyncStatus('saved');
+    return result;
+  } catch (err) {
+    setSyncStatus('failed', { error: err.message, retry });
+    throw err;
+  }
+}
+
+// For callers that must not stop on a failed push but still need to know
+// whether the server got it (so they never toast success for a lost change).
+async function trySaveFreesr() {
+  try {
+    await saveFreesrChangesToServer();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Decide what a failed GaCy GO push tells the player. Runs once per failure,
+// after the header chip has already switched to "Push failed".
+function reportGacPushFailure(err) {
+  // TODO(human)
+}
+
 // Push local freesr changes to server and save to local browser cache
 async function saveFreesrChangesToServer() {
   if (!state.fullFreesrData) return;
   await saveFreesrCache(state.fullFreesrData);
+  const retry = () => saveFreesrChangesToServer().catch(() => {});
 
   // FireflyGo only understands POST /sync; there is no freesr/persistent API.
   // Both push-only modes report a failed push here: most callers swallow the
   // rejection, which used to leave an unsaved change looking saved.
   if (state.serverMode === 'firefly') {
     try {
-      await pushFireflySync();
+      await trackedPush(() => pushFireflySync(), retry);
+      markBuildsReceived();
     } catch (err) {
       showToast(t('syncPushFailed', { server: MODE_LABELS.firefly, message: err.message }), 'error');
       throw err;
@@ -6864,7 +7158,8 @@ async function saveFreesrChangesToServer() {
   // RobinSR only understands POST /srtools with { data } and no custom headers.
   if (state.serverMode === 'robin') {
     try {
-      await pushRobinSync({ silent: true });
+      await trackedPush(() => pushRobinSync({ silent: true }), retry);
+      markBuildsReceived();
     } catch (err) {
       showToast(t('syncPushFailed', { server: MODE_LABELS.robin, message: err.message }), 'error');
       throw err;
@@ -6872,30 +7167,23 @@ async function saveFreesrChangesToServer() {
     return;
   }
 
-  // Attempt to push to server
-  let lastErr = null;
+  // GaCy GO: try /api/freesr first, then the srtools-compatible endpoint.
   const payloadWrapped = { data: state.fullFreesrData };
   const payloadDirect = state.fullFreesrData;
-
-  {
-    // gac or default
-    try {
-      await apiCall('/api/freesr', 'POST', payloadDirect);
-      state.isConnected = true;
-      return;
-    } catch (e1) {
-      lastErr = e1;
+  try {
+    await trackedPush(async () => {
       try {
+        await apiCall('/api/freesr', 'POST', payloadDirect);
+      } catch {
         await apiCall('/srtools', 'POST', payloadWrapped);
-        state.isConnected = true;
-        return;
-      } catch (e2) {
-        lastErr = e2;
       }
-    }
+    }, retry);
+    state.isConnected = true;
+    markBuildsReceived();
+  } catch (err) {
+    reportGacPushFailure(err);
+    throw err;
   }
-
-  if (lastErr) throw lastErr;
 }
 
 // Equipment Sub-tab & Filter Helpers (Matching srtools neonteam)
@@ -6925,6 +7213,7 @@ async function loadEquipment() {
       }).catch(() => null);
       if (res && res.data) {
         state.fullFreesrData = res.data;
+        resetReceivedBuilds();
         await saveFreesrCache(res.data);
         lcs = res.data.lightcones || [];
         relics = res.data.relics || [];
@@ -6963,6 +7252,16 @@ function renderEquipment() {
 }
 
 // Render Light Cones Grid
+// Who wears an item, by portrait and name; or that it is in the inventory.
+function equipWearerHtml(avatarId) {
+  if (!avatarId) return `<span class="eq-item-wearer is-free">${t('filterInInventory')}</span>`;
+  const name = getAvatarInfo(avatarId).name;
+  return `<span class="eq-item-wearer">
+      <img src="${getAvatarIconSrc(avatarId)}" onerror="handleAvatarImgError(this, ${avatarId})" alt="">
+      <span>${name}</span>
+    </span>`;
+}
+
 function renderLightconesGrid() {
   if (!el.lightconesGrid) return;
   const lcs = state.fullFreesrData?.lightcones || [];
@@ -6991,27 +7290,23 @@ function renderLightconesGrid() {
   filtered.forEach(lc => {
     const meta = getLightconeInfo(lc.item_id);
     const roman = ROMAN_RANKS[lc.rank] || `S${lc.rank || 1}`;
-    const card = document.createElement('div');
-    card.className = `eq-tile-card rarity-${meta.rarity || 4}`;
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `eq-tile-card eq-item rarity-${meta.rarity || 4}`;
     card.setAttribute('data-uid', lc.internal_uid);
-    card.title = `${meta.name} (★${meta.rarity} ${meta.path || ''})`;
-
-    const wearerBadgeHtml = lc.equip_avatar ? `
-      <div class="eq-tile-wearer-badge" title="${t('equippedBy')}: ${getAvatarInfo(lc.equip_avatar).name}">
-        <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(lc.equip_avatar)}" onerror="handleAvatarImgError(this, ${lc.equip_avatar})" alt="Wearer">
-      </div>
-    ` : '';
+    card.title = `${meta.name} (${meta.rarity}★ ${meta.path || ''})`;
 
     const primaryImg = getLightconeIconSrc(lc.item_id);
 
     card.innerHTML = `
-      <img class="eq-tile-img" src="${primaryImg}" onerror="handleLcImgError(this, ${lc.item_id})" alt="${meta.name}">
-      <div class="eq-tile-top-tag">${roman}</div>
-      ${wearerBadgeHtml}
-      <div class="eq-tile-bottom-bar">
-        <span class="eq-tile-level">Lv.${lc.level || 80}</span>
-        <span class="eq-tile-name-snippet">${meta.name}</span>
-      </div>
+      <span class="eq-item-art">
+        <img class="eq-tile-img" src="${primaryImg}" onerror="handleLcImgError(this, ${lc.item_id})" alt="">
+      </span>
+      <span class="eq-item-body">
+        <span class="eq-item-name">${meta.name}</span>
+        <span class="eq-item-stats"><span class="eq-item-rarity" data-rarity="${meta.rarity || 4}"><svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z" fill="currentColor"/></svg>${meta.rarity || 4}</span> LV ${lc.level || 80} · S${lc.rank || 1}</span>
+        ${equipWearerHtml(lc.equip_avatar)}
+      </span>
     `;
 
     card.addEventListener('click', () => {
@@ -7058,28 +7353,27 @@ function renderRelicsGrid() {
     const rInfo = getRelicSetInfo(setId);
     const slotName = RELIC_SLOT_NAMES[slotNum] ? t(RELIC_SLOT_NAMES[slotNum]) : `${t('slot')} ${slotNum}`;
 
-    const card = document.createElement('div');
-    card.className = 'eq-tile-card rarity-5';
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'eq-tile-card eq-item eq-item--relic rarity-5';
     card.setAttribute('data-uid', r.internal_uid);
     card.title = `${rInfo.name} (${slotName})`;
-
-    const wearerBadgeHtml = r.equip_avatar ? `
-      <div class="eq-tile-wearer-badge" title="${t('equippedBy')}: ${getAvatarInfo(r.equip_avatar).name}">
-        <img class="eq-tile-wearer-img" src="${getAvatarIconSrc(r.equip_avatar)}" onerror="handleAvatarImgError(this, ${r.equip_avatar})" alt="Wearer">
-      </div>
-    ` : '';
+    const mainStat = getRelicMainAffixName(slotNum, r.main_affix_id);
 
     const primaryImg = getRelicImage(setId, slotNum);
     const fallbackImg = './assets/logo.png';
 
     card.innerHTML = `
-      <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="${rInfo.name}">
-      <div class="eq-tile-top-tag">${slotName}</div>
-      ${wearerBadgeHtml}
-      <div class="eq-tile-bottom-bar">
-        <span class="eq-tile-level">+${r.level || 15}</span>
-        <span class="eq-tile-name-snippet">${rInfo.name}</span>
-      </div>
+      <span class="eq-item-art">
+        <img class="eq-tile-img" src="${primaryImg}" onerror="if(this.src!=='${fallbackImg}')this.src='${fallbackImg}';else this.src='./assets/logo.png';" alt="">
+        <span class="eq-item-slot">${slotName}</span>
+      </span>
+      <span class="eq-item-body">
+        <span class="eq-item-name">${rInfo.name}</span>
+        <span class="eq-item-main">${mainStat}</span>
+        <span class="eq-item-stats">+${r.level || 15}</span>
+        ${equipWearerHtml(r.equip_avatar)}
+      </span>
     `;
 
     card.addEventListener('click', () => {
@@ -7120,7 +7414,7 @@ function showLcInspector(lc) {
         <img class="eq-inspector-thumb" src="${primaryThumb}" onerror="handleLcImgError(this, ${lc.item_id})" alt="${lcInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${lcInfo.name}</div>
-          <div class="eq-inspector-stars">${'★'.repeat(lcInfo.rarity || 5)}</div>
+          <div class="eq-inspector-stars eq-item-rarity" data-rarity="${lcInfo.rarity || 5}"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z" fill="currentColor"/></svg>${lcInfo.rarity || 5}</div>
           <div style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700; margin-top: 0.25rem;">
             ${getPathIconHtml(lcInfo.path, 16)} ${lcInfo.path || 'All'} • Lv. ${lc.level || 80}/80
           </div>
@@ -7129,22 +7423,22 @@ function showLcInspector(lc) {
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-sm btn-secondary" id="btn-close-eq-inspector" style="padding: 0.2rem 0.5rem; border-radius: 6px;">✕</button>
+      <button type="button" class="btn btn-sm btn-secondary eq-inspector-close" id="btn-close-eq-inspector" aria-label="${t('itemCatalogClose')}" title="${t('itemCatalogClose')}"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     </div>
 
     <!-- Stats Box -->
     <div class="eq-inspector-stats">
       <div class="eq-inspector-stat-row">
         <span style="color: var(--text-muted);">${getStatIconHtml('IconMaxHP', 18, '')} HP</span>
-        <strong style="color: #fff; font-family: monospace;">+${hp}</strong>
+        <strong style="color: #fff; font-family: var(--font-label);">+${hp}</strong>
       </div>
       <div class="eq-inspector-stat-row">
         <span style="color: var(--text-muted);">${getStatIconHtml('IconAttack', 18, '')} ATK</span>
-        <strong style="color: #fff; font-family: monospace;">+${atk}</strong>
+        <strong style="color: #fff; font-family: var(--font-label);">+${atk}</strong>
       </div>
       <div class="eq-inspector-stat-row">
         <span style="color: var(--text-muted);">${getStatIconHtml('IconDefence', 18, '')} DEF</span>
-        <strong style="color: #fff; font-family: monospace;">+${def}</strong>
+        <strong style="color: #fff; font-family: var(--font-label);">+${def}</strong>
       </div>
     </div>
 
@@ -7230,7 +7524,7 @@ function showRelicInspector(relic) {
         <img class="eq-inspector-thumb" src="${getRelicImage(setId, slotNum)}" onerror="this.src='./assets/logo.png'" alt="${rInfo.name}">
         <div class="eq-inspector-info">
           <div class="eq-inspector-title">${rInfo.name}</div>
-          <div class="eq-inspector-stars">★★★★★</div>
+          <div class="eq-inspector-stars eq-item-rarity" data-rarity="5"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z" fill="currentColor"/></svg>5</div>
           <div style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 700; margin-top: 0.25rem;">
             ${slotName} • +${relic.level || 15}
           </div>
@@ -7239,14 +7533,14 @@ function showRelicInspector(relic) {
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-sm btn-secondary" id="btn-close-eq-inspector" style="padding: 0.2rem 0.5rem; border-radius: 6px;">✕</button>
+      <button type="button" class="btn btn-sm btn-secondary eq-inspector-close" id="btn-close-eq-inspector" aria-label="${t('itemCatalogClose')}" title="${t('itemCatalogClose')}"><svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
     </div>
 
     <!-- Real Stats Box -->
     <div class="eq-inspector-stats">
       <div class="eq-inspector-stat-row" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem; margin-bottom: 0.35rem;">
         <span style="color: var(--text-highlight); font-weight: 700;">${t('eqMainStatLabel')}</span>
-        <strong style="color: var(--accent-cyan); font-family: monospace;">✦ ${mainAffixName}</strong>
+        <strong style="color: var(--accent-cyan); font-family: var(--font-label);">${mainAffixName}</strong>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.25rem;">
         ${t('eqSubstatsLabel')}
@@ -7258,7 +7552,7 @@ function showRelicInspector(relic) {
         return `
           <div class="eq-inspector-stat-row">
             <span>• ${sName}</span>
-            <strong style="color: var(--accent-gold); font-family: monospace;">
+            <strong style="color: var(--accent-gold); font-family: var(--font-label);">
               +${val} <span style="font-size: 0.65rem; background: rgba(234,179,8,0.2); color: #fbbf24; border-radius: 3px; padding: 1px 4px; font-weight: 800;">+${rolls}</span>
             </strong>
           </div>
@@ -7273,7 +7567,7 @@ function showRelicInspector(relic) {
 
     <!-- Set Description -->
     <div class="eq-inspector-ability" style="margin-top: 0.4rem;">
-      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">Set Bonus (${rInfo.name})</div>
+      <div style="font-weight: 800; color: var(--accent-cyan); margin-bottom: 0.25rem;">${t('eqSetBonusTitle', { name: rInfo.name })}</div>
       <div>2-Piece: ${rInfo.desc2 || t('eqSet2Fallback')}<br>4-Piece: ${rInfo.desc4 || t('eqSet4Fallback')}</div>
     </div>
 
@@ -7730,7 +8024,6 @@ async function loadAhaHelpSettings() {
       const selectedMark = document.createElement('span');
       selectedMark.className = 'aha-help-option-check';
       selectedMark.setAttribute('aria-hidden', 'true');
-      selectedMark.textContent = '✓';
       button.append(title, detail, selectedMark);
       options.append(button);
     }
@@ -7816,7 +8109,7 @@ function monsterName(monsterId) {
 function makeMonsterIdentity(monsterId, variant = '') {
   const metadata = state.monsterSettings.catalog?.monsters?.[String(monsterId)];
   const item = monsterElement('span', `monster-settings-monster${variant ? ` ${variant}` : ''}`);
-  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '👾');
+  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '');
   if (metadata?.icon_url) {
     const image = document.createElement('img');
     image.src = metadata.icon_url;
@@ -8168,7 +8461,8 @@ function renderMonsterCustomWaves() {
         makeInput(waveIndex, monsterIndex, 'level', 'monsterCustomLevel', monster.level, { list: 'monster-level-options' }),
         makeInput(waveIndex, monsterIndex, 'max_hp', 'monsterCustomMaxHP', monster.max_hp, { min: '0', placeholder: 'monsterCustomNaturalHP' })
       );
-      const remove = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-remove', '×');
+      const remove = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-remove', '');
+      remove.innerHTML = '<svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       remove.type = 'button';
       remove.dataset.customAction = 'remove-monster';
       remove.dataset.waveIndex = String(waveIndex);
@@ -8179,7 +8473,7 @@ function renderMonsterCustomWaves() {
       rows.append(row);
     });
     section.append(rows);
-    const addEnemy = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-add-enemy', '＋ ' + t('monsterCustomAddEnemy'));
+    const addEnemy = monsterElement('button', 'btn btn-sm btn-secondary monster-custom-add-enemy', '' + t('monsterCustomAddEnemy'));
     addEnemy.type = 'button';
     addEnemy.dataset.customAction = 'add-monster';
     addEnemy.dataset.waveIndex = String(waveIndex);
@@ -8210,7 +8504,7 @@ function renderMonsterCustomEditor() {
   card.append(levels);
   const toolbar = monsterElement('div', 'monster-custom-toolbar');
   const actions = monsterElement('div', 'monster-custom-actions');
-  const add = monsterElement('button', 'btn btn-secondary', '＋ ' + t('monsterCustomAddWave'));
+  const add = monsterElement('button', 'btn btn-secondary', '' + t('monsterCustomAddWave'));
   add.type = 'button'; add.id = 'monster-custom-add-wave';
   const reset = monsterElement('button', 'btn btn-secondary', '↺ ' + t('monsterCustomUseClient'));
   reset.type = 'button'; reset.id = 'monster-custom-reset';
@@ -8220,7 +8514,7 @@ function renderMonsterCustomEditor() {
   const dirty = monsterWavesFingerprint() !== editor.savedFingerprint;
   status.id = 'monster-custom-status'; status.dataset.state = dirty ? 'unsaved' : editor.canEdit ? 'saved' : 'unavailable';
   status.textContent = t(dirty ? 'monsterCustomUnsaved' : editor.canEdit ? 'monsterCustomSaved' : 'monsterCustomConnect');
-  const save = monsterElement('button', 'btn btn-success', '💾 ' + t('monsterCustomSave'));
+  const save = monsterElement('button', 'btn btn-success', '' + t('monsterCustomSave'));
   save.type = 'button'; save.id = 'monster-custom-save';
   saveActions.append(status, save);
   toolbar.append(actions, saveActions);
@@ -8572,7 +8866,7 @@ function fireflyEndgameLevelLabel(level) {
 function makeFireflyMonsterChip(catalog, monsterId) {
   const info = monsterInfo(catalog, monsterId);
   const item = monsterElement('span', 'monster-settings-monster compact');
-  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '👾');
+  const portrait = monsterElement('span', 'monster-settings-monster-portrait', '');
   if (info?.icon) {
     const image = document.createElement('img');
     image.src = info.icon;
@@ -8952,7 +9246,8 @@ function renderFireflyCustomEditor(root) {
       row.append(makeFireflyCustomInput('monster_id', waveIndex, monsterIndex, monster.monster_id, t('ffEndgameMonsterId')));
       row.append(makeFireflyCustomInput('level', waveIndex, monsterIndex, monster.level, t('ffEndgameMonsterLevel'), 'number'));
       row.append(makeFireflyCustomInput('amount', waveIndex, monsterIndex, monster.amount, t('ffEndgameMonsterAmount'), 'number'));
-      const remove = monsterElement('button', 'btn btn-secondary btn-sm ff-endgame-remove', '✕');
+      const remove = monsterElement('button', 'btn btn-secondary btn-sm ff-endgame-remove', '');
+      remove.innerHTML = '<svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       remove.type = 'button';
       remove.title = t('ffEndgameRemoveMonster');
       remove.setAttribute('aria-label', t('ffEndgameRemoveMonster'));
@@ -8963,7 +9258,7 @@ function renderFireflyCustomEditor(root) {
       card.append(row);
     });
 
-    const addMonster = monsterElement('button', 'btn btn-secondary btn-sm', `＋ ${t('ffEndgameAddMonster')}`);
+    const addMonster = monsterElement('button', 'btn btn-secondary btn-sm', `${t('ffEndgameAddMonster')}`);
     addMonster.type = 'button';
     addMonster.dataset.ffCustomAction = 'add-monster';
     addMonster.dataset.waveIndex = String(waveIndex);
@@ -8973,7 +9268,7 @@ function renderFireflyCustomEditor(root) {
   root.append(list);
 
   const actions = monsterElement('div', 'ff-endgame-custom-actions');
-  const addWave = monsterElement('button', 'btn btn-secondary', `＋ ${t('ffEndgameAddWave')}`);
+  const addWave = monsterElement('button', 'btn btn-secondary', `${t('ffEndgameAddWave')}`);
   addWave.type = 'button';
   addWave.dataset.ffCustomAction = 'add-wave';
   actions.append(addWave);
@@ -9310,8 +9605,8 @@ function renderCameraModeOptions() {
   if (!container || !select) return;
 
   const choices = [
-    { value: 'freecam', icon: '🎥', title: t('cameraModeFreecam'), detail: t('cameraModeFreecamDesc') },
-    { value: 'facecam', icon: '🙂', title: t('cameraModeFacecam'), detail: t('cameraModeFacecamDesc') }
+    { value: 'freecam', icon: '', title: t('cameraModeFreecam'), detail: t('cameraModeFreecamDesc') },
+    { value: 'facecam', icon: '', title: t('cameraModeFacecam'), detail: t('cameraModeFacecamDesc') }
   ];
 
   container.replaceChildren();
@@ -9321,11 +9616,6 @@ function renderCameraModeOptions() {
     button.className = 'camera-mode-option';
     button.dataset.value = choice.value;
     button.setAttribute('aria-pressed', 'false');
-
-    const icon = document.createElement('span');
-    icon.className = 'camera-mode-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = choice.icon;
 
     const text = document.createElement('span');
     text.className = 'camera-mode-text';
@@ -9340,9 +9630,8 @@ function renderCameraModeOptions() {
     const check = document.createElement('span');
     check.className = 'camera-mode-check';
     check.setAttribute('aria-hidden', 'true');
-    check.textContent = '✓';
 
-    button.append(icon, text, check);
+    button.append(text, check);
     container.append(button);
   }
 
@@ -9454,57 +9743,57 @@ function initCameraSettings() {
   syncCameraUi();
 }
 
-// Render Ex-Rank Cards
+// Render Ex-Rank entries: one planner entry per character, a switch each.
 function renderExRanks(exList) {
   if (!el.exrankList) return;
+  const summary = document.getElementById('exrank-summary');
   el.exrankList.innerHTML = '';
   if (!exList || exList.length === 0) {
-    el.exrankList.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 2rem;">${t('exRankNoData')}</div>`;
+    if (summary) summary.textContent = '';
+    el.exrankList.innerHTML = `<div class="planner-empty">${t('exRankNoData')}</div>`;
     return;
+  }
+  if (summary) {
+    summary.textContent = t('exRankSummary', { on: exList.filter(ex => ex.unlocked).length, total: exList.length });
   }
 
   exList.forEach(ex => {
-    const item = document.createElement('div');
-    item.className = 'card exrank-item';
-    item.style.padding = '1.25rem';
-    item.style.display = 'flex';
-    item.style.justifyContent = 'space-between';
-    item.style.alignItems = 'center';
-    item.style.flexWrap = 'wrap';
-    item.style.gap = '1rem';
-
     const info = getAvatarInfo(ex.avatar_id);
-
+    const element = normalizeElement(info.rawElement || info.element).toLowerCase();
+    const item = document.createElement('div');
+    item.className = 'exrank-entry' + (ex.unlocked ? ' is-on' : '');
+    item.style.setProperty('--entry-hl', `var(--hl-${element}, var(--hl-physical))`);
     item.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <div class="avatar-image-container" style="width: 52px; height: 52px;">
-          <img class="avatar-img"
-               src="${getAvatarIconSrc(ex.avatar_id)}"
-               onerror="handleAvatarImgError(this, ${ex.avatar_id})"
-               alt="${info.name}">
-        </div>
-        <div>
-          <div style="font-weight: 800; font-size: 1.05rem;">${info.name}</div>
-          <div style="display: flex; gap: 0.4rem; margin-top: 0.35rem; align-items: center;">
-            ${getElementIconHtml(info.element, 20)}
-            ${getPathIconHtml(info.path, 20)}
-            <span style="font-size: 0.775rem; color: var(--text-muted); margin-left: 0.25rem;">Ex-Rank ID: ${ex.ex_rank_id}</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <button class="btn btn-sm ${ex.unlocked ? 'btn-success' : 'btn-secondary'} btn-toggle-ex"
-                data-avatar="${ex.avatar_id}"
-                data-unlocked="${ex.unlocked}">
-          ${ex.unlocked ? `⚡ ${t('exRankEnabled')}` : `🔒 ${t('exRankDisabled')}`}
-        </button>
-      </div>
+      <span class="exrank-portrait">
+        <img src="${getAvatarIconSrc(ex.avatar_id)}" onerror="handleAvatarImgError(this, ${ex.avatar_id})" alt="">
+      </span>
+      <span class="exrank-body">
+        <span class="exrank-name">${escapeHtml(info.name)}</span>
+        <span class="entry-hl" aria-hidden="true"></span>
+        <span class="exrank-meta">
+          ${getElementIconHtml(info.element, 18)}
+          ${getPathIconHtml(info.path, 18)}
+          <span class="entry-stats">${t('exRankIdLabel', { id: ex.ex_rank_id })}</span>
+        </span>
+      </span>
+      <span class="exrank-control">
+        <span class="exrank-state">${t(ex.unlocked ? 'exRankEnabled' : 'exRankDisabled')}</span>
+        <label class="switch">
+          <input type="checkbox" class="exrank-toggle" data-avatar="${ex.avatar_id}" ${ex.unlocked ? 'checked' : ''}
+                 aria-label="${escapeHtml(t('exRankToggleLabel', { name: info.name }))}">
+          <span class="slider"></span>
+        </label>
+      </span>
     `;
 
-    item.querySelector('.btn-toggle-ex').addEventListener('click', async (e) => {
-      const aid = parseInt(e.target.getAttribute('data-avatar'), 10);
-      const cur = e.target.getAttribute('data-unlocked') === 'true';
-      await toggleSingleExRank(aid, !cur);
+    const input = item.querySelector('.exrank-toggle');
+    input.addEventListener('change', async () => {
+      const unlock = input.checked;
+      input.disabled = true;
+      const ok = await toggleSingleExRank(ex.avatar_id, unlock);
+      // A failed request leaves the server as it was, so the switch goes back.
+      if (!ok) input.checked = !unlock;
+      input.disabled = false;
     });
 
     el.exrankList.appendChild(item);
@@ -9519,8 +9808,10 @@ async function toggleSingleExRank(avatarId, unlock) {
       status: t(unlock ? 'enabled' : 'disabled')
     }), 'success');
     refreshStatus();
+    return true;
   } catch (err) {
     showToast(t('toastErrorMessage', { message: err.message }), 'error');
+    return false;
   }
 }
 
@@ -9550,6 +9841,7 @@ async function loadJsonData(mode) {
         if (generation !== jsonLoadGeneration) return;
         if (!res.data || typeof res.data !== 'object' || Array.isArray(res.data)) throw new Error('invalid freesr response');
         state.fullFreesrData = res.data;
+        resetReceivedBuilds();
         saveFreesrCache(res.data);
         el.jsonEditor.value = JSON.stringify(res.data, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusServer', { file: 'freesr-data.json' });
@@ -9878,7 +10170,7 @@ function renderMaterialsInventory() {
   el.inventoryPageLabel.textContent = t('inventoryPage', { page: state.inventoryPage + 1, pages: pageCount, count: ids.length });
 
   if (!pageIds.length) {
-    el.inventoryBody.innerHTML = `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text-muted);">${t('inventoryNoMatch')}</td></tr>`;
+    el.inventoryBody.innerHTML = `<tr><td colspan="2" class="inventory-empty">${t('inventoryNoMatch')}</td></tr>`;
     return;
   }
   el.inventoryBody.innerHTML = pageIds.map(id => {
@@ -9890,9 +10182,9 @@ function renderMaterialsInventory() {
     const changed = Object.prototype.hasOwnProperty.call(state.inventoryDraft, key)
       && (value === null ? hasSaved : (!hasSaved || value !== state.inventorySaved[key]));
     const displayValue = value === null ? '' : value;
-    return `<tr style="border-top:1px solid var(--border-color);${changed ? 'background:rgba(245,158,11,.08);' : ''}">
-      <td style="padding:.55rem 1rem;font-family:monospace;">${id}</td>
-      <td style="padding:.4rem 1rem;"><input type="number" class="form-input inventory-count-input" data-item-id="${id}" min="0" max="4294967295" step="1" value="${displayValue}" placeholder="${t('inventoryDefaultPlaceholder')}" aria-label="${t('inventoryCountFor', { id })}" style="max-width:220px;"></td>
+    return `<tr class="${changed ? 'is-pending' : ''}">
+      <td class="inventory-id">${id}${changed ? `<span class="inventory-row-pending">${t('entryPendingLabel')}</span>` : ''}</td>
+      <td><input type="number" class="form-input inventory-count-input" data-item-id="${id}" min="0" max="4294967295" step="1" value="${displayValue}" placeholder="${t('inventoryDefaultPlaceholder')}" aria-label="${t('inventoryCountFor', { id })}"></td>
     </tr>`;
   }).join('');
 }
@@ -9915,7 +10207,7 @@ async function loadMaterialsInventory() {
     renderMaterialsInventory();
   } catch (error) {
     el.inventoryStatus.textContent = `${t('inventoryLoadFailed')}: ${error.message}`;
-    el.inventoryBody.innerHTML = `<tr><td colspan="2" style="padding:1.5rem;text-align:center;color:var(--text-muted);">${t('inventoryLoadFailed')}</td></tr>`;
+    el.inventoryBody.innerHTML = `<tr><td colspan="2" class="inventory-empty">${t('inventoryLoadFailed')}</td></tr>`;
   }
 }
 
@@ -10022,13 +10314,11 @@ function setFireflyExtraStatus(messageKey, vars = {}, tone = 'info') {
   if (!node) return;
   if (!messageKey) {
     node.textContent = '';
-    node.style.color = '';
+    delete node.dataset.tone;
     return;
   }
   node.textContent = t(messageKey, vars);
-  node.style.color = tone === 'error' ? 'var(--accent-red)'
-    : tone === 'success' ? 'var(--accent-green)'
-      : tone === 'warning' ? 'var(--accent-gold)' : 'var(--text-muted)';
+  node.dataset.tone = tone;
 }
 
 // Fills the extra_data form from the last known server/local values.
@@ -10059,8 +10349,6 @@ function renderFireflyExtras({ force = false } = {}) {
   setVal('ff-multi-path-march7-list', listText(multiPath.multi_path_march_7));
 
   setChk('ff-setting-censorship', setting.censorship);
-  setChk('ff-setting-cm', setting.cm);
-  setChk('ff-setting-first-person', setting.first_person);
   setChk('ff-setting-hide-ui', setting.hide_ui);
   setVal('ff-setting-invasion-percent', setting.invasion_percent ?? 0);
 
@@ -10107,6 +10395,9 @@ function readFireflyExtrasForm() {
   }
 
   const luaRaw = val('ff-lua');
+  // FireflyGo keeps cm and first_person in its settings but the game has no
+  // such options, so the form leaves them as the server last had them.
+  const knownSetting = normalizeExtraData(state.fireflyExtraData)?.setting || {};
   return normalizeExtraData({
     multi_path: {
       main: Number(val('ff-multi-path-main')) || 0,
@@ -10116,8 +10407,8 @@ function readFireflyExtrasForm() {
     },
     setting: {
       censorship: chk('ff-setting-censorship'),
-      cm: chk('ff-setting-cm'),
-      first_person: chk('ff-setting-first-person'),
+      cm: knownSetting.cm === true,
+      first_person: knownSetting.first_person === true,
       hide_ui: chk('ff-setting-hide-ui'),
       invasion_percent: Number(val('ff-setting-invasion-percent')) || 0
     },
@@ -10246,13 +10537,11 @@ function setEnkaStatus(messageKey, vars = {}, tone = 'info') {
   if (!node) return;
   if (!messageKey) {
     node.textContent = '';
-    node.style.color = '';
+    delete node.dataset.tone;
     return;
   }
   node.textContent = t(messageKey, vars);
-  node.style.color = tone === 'error' ? 'var(--accent-red)'
-    : tone === 'success' ? 'var(--accent-green)'
-      : tone === 'warning' ? 'var(--accent-gold)' : 'var(--text-muted)';
+  node.dataset.tone = tone;
 }
 
 // enka.network does not send CORS headers, so the browser goes through the
@@ -10667,10 +10956,12 @@ function setupEvents() {
           await apiCall('/api/data-in-game', 'POST', state.dataGameData);
           serverUpdated = true;
         } catch (e) {
-          await saveFreesrChangesToServer().catch(() => {});
+          serverUpdated = await trySaveFreesr();
         }
       }
-      showToast(t('toastCharacterSettingsSaved'), 'success');
+      // Offline edits are saved locally (the header chip says so); a failed
+      // push while connected has already reported itself.
+      if (serverUpdated || !state.isConnected) showToast(t('toastCharacterSettingsSaved'), 'success');
       refreshStatus();
       return;
     }
@@ -10856,6 +11147,20 @@ function setupEvents() {
   el.avatarSearch.addEventListener('input', renderAvatarsGrid);
   el.avatarFilterRarity.addEventListener('change', renderAvatarsGrid);
   el.avatarFilterElement.addEventListener('change', renderAvatarsGrid);
+  document.getElementById('avatar-filter-favorites')?.addEventListener('click', (event) => {
+    favoritesOnly = !favoritesOnly;
+    event.currentTarget.setAttribute('aria-pressed', String(favoritesOnly));
+    renderAvatarsGrid();
+  });
+  document.querySelectorAll('#avatar-element-chips .element-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      el.avatarFilterElement.value = chip.dataset.element;
+      document.querySelectorAll('#avatar-element-chips .element-chip').forEach(other => {
+        other.setAttribute('aria-pressed', String(other === chip));
+      });
+      el.avatarFilterElement.dispatchEvent(new Event('change'));
+    });
+  });
   el.avatarFilterPath?.addEventListener('change', renderAvatarsGrid);
   el.btnReloadAvatars.addEventListener('click', loadAvatars);
 
@@ -10905,7 +11210,12 @@ function setupEvents() {
     const blob = new Blob([text], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `${state.currentJsonMode}-${Date.now()}.json`;
+    // Name it after the real file and the local time, e.g. freesr-data-2026-11-17-1530.json
+    const base = { freesr: 'freesr-data', persistent: 'persistent', datagame: 'data-in-game' }[state.currentJsonMode] || state.currentJsonMode;
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+    a.download = `${base}-${stamp}.json`;
     a.click();
     showToast(t('toastFileDownloaded', { file: a.download }), 'success');
   });
@@ -11060,7 +11370,7 @@ function setupEvents() {
       const isRobin = state.serverMode === 'robin';
       if (el.pingLatencyBadge) {
         el.pingLatencyBadge.style.display = 'inline-block';
-        el.pingLatencyBadge.textContent = '⏳ ...';
+        el.pingLatencyBadge.textContent = '...';
         el.pingLatencyBadge.style.backgroundColor = 'var(--bg-card)';
         el.pingLatencyBadge.style.color = 'var(--text-muted)';
       }
@@ -11257,88 +11567,27 @@ function setupEvents() {
 }
 
 // ==========================================
-// Git Branch Detection & Browser Tab Title
+// Browser Tab Title
 // ==========================================
-let currentGitBranch = '';
 
 function updateDocumentTitle(tabId = state.activeTab || 'tab-dashboard') {
-  const branchPrefix = currentGitBranch ? `[${currentGitBranch}] ` : '';
   const tabNames = {
     'tab-dashboard': `GaCy-Srtool — ${t('appSubtitle')}`,
-    'tab-avatars': `👥 ${t('tabAvatars')} | GaCy-Srtool`,
-    'tab-equipment': `🗡️ ${t('tabEquipment')} | GaCy-Srtool`,
-    'tab-inventory': `🎒 ${t('tabInventory')} | GaCy-Srtool`,
-    'tab-monster-settings': `${usesEndgamePicker() ? t(endgameTextKey('Title')) : `👾 ${t('tabMonsterSettings')}`} | GaCy-Srtool`,
-    'tab-damage-analyst': `💥 ${t('tabDamageAnalyst')} | GaCy-Srtool`,
-    'tab-persistent': `💾 ${t('tabPersistent')} | GaCy-Srtool`,
-    'tab-exrank': `⚡ ${t('tabExrank')} | GaCy-Srtool`,
-    'tab-json': `📝 ${t('tabJson')} | GaCy-Srtool`,
-    'tab-settings': `⚙️ ${t('tabSettings')} | GaCy-Srtool`
+    'tab-avatars': `${t('tabAvatars')} | GaCy-Srtool`,
+    'tab-equipment': `${t('tabEquipment')} | GaCy-Srtool`,
+    'tab-inventory': `${t('tabInventory')} | GaCy-Srtool`,
+    'tab-monster-settings': `${usesEndgamePicker() ? t(endgameTextKey('Title')) : `${t('tabMonsterSettings')}`} | GaCy-Srtool`,
+    'tab-damage-analyst': `${t('tabDamageAnalyst')} | GaCy-Srtool`,
+    'tab-persistent': `${t('tabPersistent')} | GaCy-Srtool`,
+    'tab-exrank': `${t('tabExrank')} | GaCy-Srtool`,
+    'tab-json': `${t('tabJson')} | GaCy-Srtool`,
+    'tab-firefly-extras': `${t('tabFireflyExtras')} | GaCy-Srtool`,
+    'tab-settings': `${t('tabSettings')} | GaCy-Srtool`
   };
   const titleBody = tabNames[tabId] || `GaCy-Srtool — ${t('appSubtitle')}`;
-  document.title = `${branchPrefix}${titleBody}`;
+  document.title = titleBody;
 }
 
-function applyBranchToUI(branch) {
-  state.currentBranch = branch;
-  currentGitBranch = branch;
-
-  // 1. Browser Tab Title (<title> & document.title)
-  updateDocumentTitle();
-
-  // 2. Header Brand Badge
-  const headerBadge = document.getElementById('header-branch-badge');
-  if (headerBadge) {
-    headerBadge.textContent = branch || '';
-    headerBadge.style.display = branch ? 'inline-flex' : 'none';
-  }
-
-  // 3. Nav Tabs Branch Indicator
-  const navPill = document.getElementById('nav-branch-pill');
-  const navBadge = document.getElementById('nav-branch-name');
-  if (navPill) navPill.style.display = branch ? 'inline-flex' : 'none';
-  if (navBadge) {
-    navBadge.textContent = branch || '';
-  }
-}
-
-async function initGitBranchDisplay() {
-  // 1. URL Query Param ?branch=...
-  const urlParams = new URLSearchParams(window.location.search);
-  const branchFromUrl = urlParams.get('branch');
-  if (branchFromUrl) {
-    applyBranchToUI(branchFromUrl.trim());
-    return;
-  }
-
-  // 2. version.json (Generated by sync-branch or git commit)
-  try {
-    const res = await fetch('version.json?t=' + Date.now());
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.branch) {
-        applyBranchToUI(data.branch.trim());
-        return;
-      }
-    }
-  } catch (_) {}
-
-  // 3. .git/HEAD (if served locally by dev server)
-  try {
-    const headRes = await fetch('.git/HEAD?t=' + Date.now());
-    if (headRes.ok) {
-      const headText = await headRes.text();
-      const match = headText.match(/ref:\s*refs\/heads\/([^\r\n]+)/);
-      if (match && match[1]) {
-        applyBranchToUI(match[1].trim());
-        return;
-      }
-    }
-  } catch (_) {}
-
-  // 4. Fallback
-  applyBranchToUI(currentGitBranch);
-}
 
 // ==========================================
 // In-Game Battle Telemetry & Damage Analyst
@@ -11517,6 +11766,16 @@ async function fetchLatestBattleReport(silent = false) {
   }
 }
 
+// With no battle report loaded, the badge says whether the game can send one.
+function renderAnalystIdleBadge() {
+  const badge = el.badgeAnalystStatus;
+  if (!badge) return;
+  badge.dataset.idle = '1';
+  setI18nText(badge, state.isConnected ? 'analystStatusReady' : 'analystStatusOffline');
+  badge.style.background = state.isConnected ? 'rgba(34, 197, 94, 0.15)' : 'rgba(142, 155, 181, 0.15)';
+  badge.style.color = state.isConnected ? '#4ade80' : 'var(--text-muted)';
+}
+
 function renderEmptyDamageAnalyst() {
   if (el.analystTeamDamage) el.analystTeamDamage.textContent = '0';
   if (el.analystCycles) el.analystCycles.textContent = t('analystCycleValue', { count: 0 });
@@ -11526,14 +11785,10 @@ function renderEmptyDamageAnalyst() {
   if (el.analystDamageAv) el.analystDamageAv.textContent = '—';
   if (el.analystBattleMeta) el.analystBattleMeta.textContent = t('analystBattleMeta', { stage: '—', battle: '—' });
 
-  if (el.badgeAnalystStatus) {
-    el.badgeAnalystStatus.textContent = t('analystStatusReady');
-    el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.15)';
-    el.badgeAnalystStatus.style.color = '#4ade80';
-  }
+  renderAnalystIdleBadge();
 
   if (el.analystShareBarContainer) {
-    el.analystShareBarContainer.innerHTML = '<div style="width: 100%; background: rgba(255,255,255,0.05); height: 100%;"></div>';
+    el.analystShareBarContainer.innerHTML = '';
   }
   if (el.analystTotalShareLabel) el.analystTotalShareLabel.textContent = t('analystShareTotal');
   if (el.analystShareLegend) {
@@ -11541,11 +11796,10 @@ function renderEmptyDamageAnalyst() {
   }
   if (el.analystCharactersContainer) {
     el.analystCharactersContainer.innerHTML = `
-      <div style="grid-column: 1/-1; text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-        <div style="font-size: 3rem; margin-bottom: 0.75rem;">⚔️</div>
-        <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">${t('analystNoBattle')}</div>
-        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
-          <button type="button" class="btn btn-primary" id="btn-empty-analyst-fetch" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">${t('analystFetchBtn')}</button>
+      <div class="planner-empty analyst-empty">
+        <div class="analyst-empty-title">${t('analystNoBattle')}</div>
+        <div class="analyst-empty-actions">
+          <button type="button" class="btn btn-primary" id="btn-empty-analyst-fetch">${t('analystFetchBtn')}</button>
           <button type="button" class="btn btn-secondary" id="btn-empty-analyst-demo">${t('miniBtnDemo')}</button>
         </div>
       </div>
@@ -11624,6 +11878,8 @@ function renderDamageAnalyst() {
   }
 
   if (el.badgeAnalystStatus) {
+    el.badgeAnalystStatus.dataset.idle = '0';
+    el.badgeAnalystStatus.removeAttribute('data-i18n');
     if (analystState.isLive || report.end_status === 'LIVE') {
       el.badgeAnalystStatus.textContent = t('analystStatusLive');
       el.badgeAnalystStatus.style.background = 'rgba(34, 197, 94, 0.2)';
@@ -11643,39 +11899,40 @@ function renderDamageAnalyst() {
     }
   }
 
-  const colors = [
-    '#ef4444', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#ec4899',
-    '#f97316', '#14b8a6', '#a855f7', '#06b6d4', '#eab308', '#f43f5e'
-  ];
+  // Each character wears its element's highlighter, the same colour it has on the roster.
+  const hlFor = (a) => {
+    const info = getAvatarInfo(a.avatar_id);
+    const element = normalizeElement(info.rawElement || info.element).toLowerCase();
+    return `var(--hl-${element}, var(--hl-physical))`;
+  };
+  const breakdownRow = (label, value) => `<div><dt>${label}</dt><dd>${value}</dd></div>`;
 
   // Team Share Bar
   if (el.analystShareBarContainer) {
     if (analystAvatars.length > 0 && hasAvatarDamage) {
-      el.analystShareBarContainer.innerHTML = analystAvatars.map((a, idx) => {
-        const color = colors[idx % colors.length];
+      el.analystShareBarContainer.innerHTML = analystAvatars.map((a) => {
         const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage) || 0;
         const info = getAvatarInfo(a.avatar_id);
-        return `<div style="width: ${pct}%; background: ${color}; height: 100%; transition: width 0.4s ease;" title="${info.name}: ${pct.toFixed(1)}% (${formatNumber(a.total_damage)})"></div>`;
+        return `<span class="analyst-share-seg" style="width: ${pct}%; background: ${hlFor(a)};" title="${info.name}: ${pct.toFixed(1)}% (${formatNumber(a.total_damage)})"></span>`;
       }).join('');
     } else {
-      el.analystShareBarContainer.innerHTML = '<div style="width: 100%; background: rgba(255,255,255,0.05); height: 100%;"></div>';
+      el.analystShareBarContainer.innerHTML = '';
     }
   }
 
   // Legend
   if (el.analystShareLegend) {
     if (analystAvatars.length > 0) {
-      el.analystShareLegend.innerHTML = analystAvatars.map((a, idx) => {
-        const color = colors[idx % colors.length];
+      el.analystShareLegend.innerHTML = analystAvatars.map((a) => {
         const info = getAvatarInfo(a.avatar_id);
         const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage);
         return `
-          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.825rem;">
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: ${color}; box-shadow: 0 0 6px ${color}88;"></div>
-            <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid ${color};">
-            <span style="font-weight: 700; color: var(--text-highlight);">${info.name}</span>
-            <span style="font-weight: 800; color: ${color};">${pct === null ? '—' : `${pct.toFixed(1)}%`}</span>
-            <span style="color: var(--text-muted); font-size: 0.75rem;">(${hasAvatarDamage ? formatNumber(a.total_damage) : '—'})</span>
+          <div class="analyst-legend-item" style="--entry-hl: ${hlFor(a)};">
+            <span class="analyst-legend-swatch" aria-hidden="true"></span>
+            <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" alt="">
+            <span class="analyst-legend-name">${info.name}</span>
+            <strong>${pct === null ? '—' : `${pct.toFixed(1)}%`}</strong>
+            <span class="analyst-legend-dmg">${hasAvatarDamage ? formatNumber(a.total_damage) : '—'}</span>
           </div>
         `;
       }).join('');
@@ -11687,14 +11944,9 @@ function renderDamageAnalyst() {
   // Characters Detailed Cards Grid
   if (el.analystCharactersContainer) {
     if (analystAvatars.length === 0) {
-      el.analystCharactersContainer.innerHTML = `
-        <div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-muted);">
-          ${t('analystNoBattle')}
-        </div>
-      `;
+      el.analystCharactersContainer.innerHTML = `<div class="planner-empty">${t('analystNoBattle')}</div>`;
     } else {
-      el.analystCharactersContainer.innerHTML = analystAvatars.map((a, idx) => {
-        const color = colors[idx % colors.length];
+      el.analystCharactersContainer.innerHTML = analystAvatars.map((a) => {
         const info = getAvatarInfo(a.avatar_id);
         const pct = getAvatarDamagePercent(a, teamDmg, hasAvatarDamage);
         const hasDamageBreakdown = hasAvatarDamageBreakdownData(a);
@@ -11710,109 +11962,63 @@ function renderDamageAnalyst() {
         const { normal: dNormal, skill: dSkill, ultimate: dUlt, breakDamage: dBreak, other: dOther } = damageBreakdownForAvatar(a);
         const dFollowup = (a.attack_type_damage?.Insert || 0) + (a.attack_type_damage?.Pursued || 0);
         const dDot = a.attack_type_damage?.DOT || 0;
+        const rankLabel = report.is_currency_wars ? `${a.rank || 1}★` : `E${a.rank !== undefined ? a.rank : 0}`;
+        const extraRows = Object.entries(a.attack_type_damage || {})
+          .filter(([type, damage]) => Number(damage) > 0 && !['Normal', 'BPSkill', 'Skill', 'Ultra', 'Ultimate', 'BreakDamage', 'Insert', 'Pursued', 'DOT'].includes(type))
+          .map(([type, damage]) => breakdownRow(escapeHtml(type.replace(/([a-z])([A-Z])/g, '$1 $2')), formatNumber(Number(damage))))
+          .join('');
 
         return `
-          <div class="card" style="padding: 1.25rem; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(20,20,30,0.8) 100%); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: ${color};"></div>
+          <article class="card analyst-char" style="--entry-hl: ${hlFor(a)};">
+            <header class="analyst-char-head">
+              <span class="analyst-char-portrait">
+                <img src="${getAvatarIconSrc(a.avatar_id)}" onerror="handleAvatarImgError(this, ${a.avatar_id})" alt="">
+                ${info.element ? `<span class="analyst-char-el">${getElementIconHtml(info.element, 14)}</span>` : ''}
+              </span>
+              <span class="analyst-char-id">
+                <span class="analyst-char-name">${info.name}</span>
+                <span class="entry-stats">LV ${a.level || 80} · ${rankLabel}</span>
+                <span class="analyst-char-sub">${translatePath(info.path)} · ${translateElement(info.element)}</span>
+              </span>
+              <span class="analyst-char-share">
+                <strong>${pct === null ? '—' : `${pct.toFixed(1)}%`}</strong>
+                <span>${t('analystDpsShareLabel')}</span>
+              </span>
+            </header>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="position: relative; width: 48px; height: 48px; flex-shrink: 0;">
-                  <img src="${getAvatarIconSrc(a.avatar_id)}"
-                       onerror="handleAvatarImgError(this, ${a.avatar_id})"
-                       style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid ${color};">
-                  ${info.element ? `
-                    <div style="position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px; border-radius: 50%; background: #0f172a; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2);">
-                      ${getElementIconHtml(info.element, 14)}
-                    </div>
-                  ` : ''}
-                </div>
-                <div>
-                  <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-highlight); display: flex; align-items: center; gap: 0.45rem;">
-                    <span>${info.name}</span>
-                    <span style="font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(255,255,255,0.08); color: var(--text-muted); font-weight: 700;">Lv.${a.level || 80} ${report.is_currency_wars ? `${a.rank || 1}★` : `E${a.rank !== undefined ? a.rank : 0}`}</span>
-                  </div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
-                    ${translatePath(info.path)} • ${translateElement(info.element)}
-                  </div>
-                </div>
-              </div>
+            <div class="analyst-share-track" aria-hidden="true"><span style="width: ${pct ?? 0}%;"></span></div>
 
-              <div style="text-align: right;">
-                <div style="font-size: 1.4rem; font-weight: 900; color: ${color}; letter-spacing: -0.5px;">${pct === null ? '—' : `${pct.toFixed(1)}%`}</div>
-              <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">${t('analystDpsShareLabel')}</div>
-              </div>
-            </div>
-
-            <div style="padding: 0.75rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+            <dl class="analyst-totals">
               <div>
-                <div style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${t('analystTotalDamage')}</div>
-                <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">${hasAvatarDamage ? formatNumber(a.total_damage) : '—'}</div>
-                ${Number(a.memosprite_damage) > 0 ? `<div style="font-size: 0.7rem; color: var(--text-muted);">Memosprite: ${formatNumber(a.memosprite_damage)} (included)</div>` : ''}
+                <dt>${t('analystTotalDamage')}</dt>
+                <dd>${hasAvatarDamage ? formatNumber(a.total_damage) : '—'}</dd>
+                ${Number(a.memosprite_damage) > 0 ? `<span class="analyst-note">${t('analystMemospriteIncluded', { value: formatNumber(a.memosprite_damage) })}</span>` : ''}
               </div>
-              <div style="text-align: right;">
-                <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystMaxHit')}</div>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #f87171;">${hasMaxHit ? formatNumber(maxHit) : '—'}</div>
+              <div>
+                <dt>${t('analystMaxHit')}</dt>
+                <dd>${hasMaxHit ? formatNumber(maxHit) : '—'}</dd>
               </div>
-            </div>
+            </dl>
 
-            <div style="height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 1rem;">
-              <div style="height: 100%; width: ${pct ?? 0}%; background: ${color}; border-radius: 3px;"></div>
-            </div>
+            <div class="dash-subhead">${t('analystBreakdownTitle')}</div>
+            <dl class="analyst-breakdown">
+              ${breakdownRow(t('analystDmgNormal'), hasDamageBreakdown ? formatNumber(dNormal) : '—')}
+              ${breakdownRow(t('analystDmgSkill'), hasDamageBreakdown ? formatNumber(dSkill) : '—')}
+              ${breakdownRow(t('analystDmgUlt'), hasDamageBreakdown ? formatNumber(dUlt) : '—')}
+              ${breakdownRow(t('analystDmgBreak'), hasDamageBreakdown ? formatNumber(dBreak) : '—')}
+              ${breakdownRow(t('analystDmgOther'), hasAvatarDamage ? formatNumber(dOther) : '—')}
+              ${dFollowup > 0 ? breakdownRow(t('analystDmgFollowup'), formatNumber(dFollowup)) : ''}
+              ${dDot > 0 ? breakdownRow(t('analystDmgDot'), formatNumber(dDot)) : ''}
+              ${extraRows}
+            </dl>
 
-            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">
-              ${t('analystBreakdownTitle')}
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 1rem;">
-              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                <span style="color: var(--text-muted);">${t('analystDmgNormal')}</span>
-                <span style="font-weight: 700; color: var(--text-main);">${hasDamageBreakdown ? formatNumber(dNormal) : '—'}</span>
-              </div>
-              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                <span style="color: var(--text-muted);">${t('analystDmgSkill')}</span>
-                <span style="font-weight: 700; color: #38bdf8;">${hasDamageBreakdown ? formatNumber(dSkill) : '—'}</span>
-              </div>
-              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                <span style="color: var(--text-muted);">${t('analystDmgUlt')}</span>
-                <span style="font-weight: 700; color: #c084fc;">${hasDamageBreakdown ? formatNumber(dUlt) : '—'}</span>
-              </div>
-              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                <span style="color: var(--text-muted);">${t('analystDmgBreak')}</span>
-                <span style="font-weight: 700; color: #fbbf24;">${hasDamageBreakdown ? formatNumber(dBreak) : '—'}</span>
-              </div>
-              <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                <span style="color: var(--text-muted);">Other</span>
-                <span style="font-weight: 700; color: #f472b6;">${hasAvatarDamage ? formatNumber(dOther) : '—'}</span>
-              </div>
-              ${dFollowup > 0 ? `
-                <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                  <span style="color: var(--text-muted);">${t('analystDmgFollowup')}</span>
-                  <span style="font-weight: 700; color: #f472b6;">${formatNumber(dFollowup)}</span>
-                </div>
-              ` : ''}
-              ${dDot > 0 ? `
-                <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; font-size: 0.775rem;">
-                  <span style="color: var(--text-muted);">${t('analystDmgDot')}</span>
-                  <span style="font-weight: 700; color: #a78bfa;">${formatNumber(dDot)}</span>
-                </div>
-              ` : ''}
-              ${Object.entries(a.attack_type_damage || {})
-                .filter(([type, damage]) => Number(damage) > 0 && !['Normal', 'BPSkill', 'Skill', 'Ultra', 'Ultimate', 'BreakDamage', 'Insert', 'Pursued', 'DOT'].includes(type))
-                .map(([type, damage]) => `
-                  <div style="padding: 0.4rem 0.6rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.775rem;">
-                    <span style="color: var(--text-muted);">${escapeHtml(type.replace(/([a-z])([A-Z])/g, '$1 $2'))}</span>
-                    <span style="font-weight: 700; color: #f472b6;">${formatNumber(Number(damage))}</span>
-                  </div>
-                `).join('')}
-            </div>
-
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.75rem; color: var(--text-muted);">
-              <div>⏱️ ${t('analystTurnsTaken')}: <strong style="color: #fff;">${hasAvatarStats ? a.total_turns || 0 : '—'}</strong> ${hasAvatarStats && a.extra_turns ? `(+${a.extra_turns})` : ''}</div>
-                <div>${getStatIconHtml('IconDefence', 16)} ${t('analystShield')}: <strong style="color: #38bdf8;">${hasAvatarStats ? formatNumber(a.total_shield) : '—'}</strong></div>
-                <div>${getStatIconHtml('IconHealRatio', 16)} ${t('analystHealing')}: <strong style="color: #34d399;">${hasAvatarStats ? formatNumber(a.total_heal) : '—'}</strong></div>
-                <div>${getStatIconHtml('IconMaxHP', 16)} ${t('analystDamageTaken')}: <strong style="color: #f87171;">${hasAvatarStats ? formatNumber(a.total_damage_taken) : '—'}</strong></div>
-            </div>
-          </div>
+            <footer class="analyst-char-foot">
+              <span>${t('analystTurnsTaken')}: <strong>${hasAvatarStats ? a.total_turns || 0 : '—'}</strong> ${hasAvatarStats && a.extra_turns ? `(+${a.extra_turns})` : ''}</span>
+              <span>${getStatIconHtml('IconDefence', 16)} ${t('analystShield')}: <strong>${hasAvatarStats ? formatNumber(a.total_shield) : '—'}</strong></span>
+              <span>${getStatIconHtml('IconHealRatio', 16)} ${t('analystHealing')}: <strong>${hasAvatarStats ? formatNumber(a.total_heal) : '—'}</strong></span>
+              <span>${getStatIconHtml('IconMaxHP', 16)} ${t('analystDamageTaken')}: <strong>${hasAvatarStats ? formatNumber(a.total_damage_taken) : '—'}</strong></span>
+            </footer>
+          </article>
         `;
       }).join('');
     }
@@ -11823,17 +12029,14 @@ function renderDamageAnalyst() {
     if (report.monsters && report.monsters.length > 0) {
       el.analystEnemiesCard.style.display = 'block';
       el.analystEnemiesContainer.innerHTML = report.monsters.map(m => `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.85rem; border-radius: 6px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); font-size: 0.825rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="font-size: 1.2rem;">👾</span>
-            <div>
-              <div style="font-weight: 700; color: var(--text-highlight);">${t('analystMonsterName', { id: m.monster_id || m.entity_id })}</div>
-              <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystWaveEntity', { wave: m.wave || 1, entity: m.entity_id })}</div>
-            </div>
+        <div class="analyst-enemy">
+          <div>
+            <div class="analyst-enemy-name">${t('analystMonsterName', { id: m.monster_id || m.entity_id })}</div>
+            <div class="analyst-note">${t('analystWaveEntity', { wave: m.wave || 1, entity: m.entity_id })}</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-weight: 800; color: #f87171;">${t('analystEnemyDmgTaken')}: ${formatNumber(m.total_damage_taken)}</div>
-            <div style="font-size: 0.725rem; color: var(--text-muted);">${t('analystTurnValue', { count: m.total_turns || 0 })} (${t('analystDamageDealt')}: ${formatNumber(m.total_damage)})</div>
+          <div class="analyst-enemy-dmg">
+            <div>${t('analystEnemyDmgTaken')}: <strong>${formatNumber(m.total_damage_taken)}</strong></div>
+            <div class="analyst-note">${t('analystTurnValue', { count: m.total_turns || 0 })} (${t('analystDamageDealt')}: ${formatNumber(m.total_damage)})</div>
           </div>
         </div>
       `).join('');
@@ -12092,7 +12295,7 @@ function startPingLoop() {
 
 // Initialize Application
 async function init() {
-  await initGitBranchDisplay();
+  updateDocumentTitle();
   initAvatarsList();
   await loadCachedStorageData();
   setupServerModes();

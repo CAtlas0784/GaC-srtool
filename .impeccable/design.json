@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T11:44:14.362Z",
+  "title": "Design System: GaCy-srtool",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Planner Paper",
+        "canonical": "#16161b",
+        "tonalRamp": [
+          "oklch(15% 0.002 285.5)",
+          "oklch(26% 0.004 285.5)",
+          "oklch(37% 0.007 285.5)",
+          "oklch(48% 0.009 285.5)",
+          "oklch(60% 0.01 285.5)",
+          "oklch(72% 0.007 285.5)",
+          "oklch(84% 0.004 285.5)",
+          "oklch(95% 0.002 285.5)"
+        ]
+      },
+      "paper-raised": {
+        "role": "neutral",
+        "displayName": "Raised Page",
+        "canonical": "#1d1d23",
+        "tonalRamp": [
+          "oklch(15% 0.003 285.5)",
+          "oklch(26% 0.005 285.5)",
+          "oklch(37% 0.008 285.5)",
+          "oklch(48% 0.011 285.5)",
+          "oklch(60% 0.011 285.5)",
+          "oklch(72% 0.008 285.5)",
+          "oklch(84% 0.005 285.5)",
+          "oklch(95% 0.003 285.5)"
+        ]
+      },
+      "paper-hover": {
+        "role": "neutral",
+        "displayName": "Pressed Page",
+        "canonical": "#222229",
+        "tonalRamp": [
+          "oklch(15% 0.003 285.4)",
+          "oklch(26% 0.005 285.4)",
+          "oklch(37% 0.009 285.4)",
+          "oklch(48% 0.012 285.4)",
+          "oklch(60% 0.013 285.4)",
+          "oklch(72% 0.009 285.4)",
+          "oklch(84% 0.005 285.4)",
+          "oklch(95% 0.003 285.4)"
+        ]
+      },
+      "paper-sunk": {
+        "role": "neutral",
+        "displayName": "Sunk Page",
+        "canonical": "#111115",
+        "tonalRamp": [
+          "oklch(15% 0.002 285.5)",
+          "oklch(26% 0.003 285.5)",
+          "oklch(37% 0.006 285.5)",
+          "oklch(48% 0.008 285.5)",
+          "oklch(60% 0.008 285.5)",
+          "oklch(72% 0.006 285.5)",
+          "oklch(84% 0.003 285.5)",
+          "oklch(95% 0.002 285.5)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Ruled Line",
+        "canonical": "#2c2c33",
+        "tonalRamp": [
+          "oklch(15% 0.003 285.6)",
+          "oklch(26% 0.005 285.6)",
+          "oklch(37% 0.008 285.6)",
+          "oklch(48% 0.012 285.6)",
+          "oklch(60% 0.013 285.6)",
+          "oklch(72% 0.009 285.6)",
+          "oklch(84% 0.005 285.6)",
+          "oklch(95% 0.003 285.6)"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "#43434c",
+        "tonalRamp": [
+          "oklch(15% 0.004 285.7)",
+          "oklch(26% 0.006 285.7)",
+          "oklch(37% 0.01 285.7)",
+          "oklch(48% 0.014 285.7)",
+          "oklch(60% 0.015 285.7)",
+          "oklch(72% 0.011 285.7)",
+          "oklch(84% 0.006 285.7)",
+          "oklch(95% 0.004 285.7)"
+        ]
+      },
+      "dot": {
+        "role": "neutral",
+        "displayName": "Dot",
+        "canonical": "#303038",
+        "tonalRamp": [
+          "oklch(15% 0.004 285.5)",
+          "oklch(26% 0.006 285.5)",
+          "oklch(37% 0.01 285.5)",
+          "oklch(48% 0.013 285.5)",
+          "oklch(60% 0.014 285.5)",
+          "oklch(72% 0.01 285.5)",
+          "oklch(84% 0.006 285.5)",
+          "oklch(95% 0.004 285.5)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Gel-Pen White",
+        "canonical": "#ecebe4",
+        "tonalRamp": [
+          "oklch(15% 0.002 100)",
+          "oklch(26% 0.004 100)",
+          "oklch(37% 0.006 100)",
+          "oklch(48% 0.009 100)",
+          "oklch(60% 0.009 100)",
+          "oklch(72% 0.007 100)",
+          "oklch(84% 0.004 100)",
+          "oklch(95% 0.002 100)"
+        ]
+      },
+      "ink-2": {
+        "role": "primary",
+        "displayName": "Faded Ink",
+        "canonical": "#a9a8a0",
+        "tonalRamp": [
+          "oklch(15% 0.003 100.9)",
+          "oklch(26% 0.005 100.9)",
+          "oklch(37% 0.008 100.9)",
+          "oklch(48% 0.011 100.9)",
+          "oklch(60% 0.011 100.9)",
+          "oklch(72% 0.008 100.9)",
+          "oklch(84% 0.005 100.9)",
+          "oklch(95% 0.003 100.9)"
+        ]
+      },
+      "hl-fire": {
+        "role": "secondary",
+        "displayName": "Fire Highlighter",
+        "canonical": "#ff9b85",
+        "tonalRamp": [
+          "oklch(15% 0.031 33.2)",
+          "oklch(26% 0.05 33.2)",
+          "oklch(37% 0.084 33.2)",
+          "oklch(48% 0.118 33.2)",
+          "oklch(60% 0.125 33.2)",
+          "oklch(72% 0.087 33.2)",
+          "oklch(84% 0.05 33.2)",
+          "oklch(95% 0.031 33.2)"
+        ]
+      },
+      "hl-ice": {
+        "role": "secondary",
+        "displayName": "Ice Highlighter",
+        "canonical": "#9ed8f0",
+        "tonalRamp": [
+          "oklch(15% 0.017 225.5)",
+          "oklch(26% 0.027 225.5)",
+          "oklch(37% 0.046 225.5)",
+          "oklch(48% 0.065 225.5)",
+          "oklch(60% 0.068 225.5)",
+          "oklch(72% 0.048 225.5)",
+          "oklch(84% 0.027 225.5)",
+          "oklch(95% 0.017 225.5)"
+        ]
+      },
+      "hl-lightning": {
+        "role": "secondary",
+        "displayName": "Lightning Highlighter",
+        "canonical": "#c8a6ff",
+        "tonalRamp": [
+          "oklch(15% 0.032 301.1)",
+          "oklch(26% 0.051 301.1)",
+          "oklch(37% 0.086 301.1)",
+          "oklch(48% 0.122 301.1)",
+          "oklch(60% 0.128 301.1)",
+          "oklch(72% 0.09 301.1)",
+          "oklch(84% 0.051 301.1)",
+          "oklch(95% 0.032 301.1)"
+        ]
+      },
+      "hl-wind": {
+        "role": "secondary",
+        "displayName": "Wind Highlighter",
+        "canonical": "#9fe3b8",
+        "tonalRamp": [
+          "oklch(15% 0.023 156.2)",
+          "oklch(26% 0.036 156.2)",
+          "oklch(37% 0.061 156.2)",
+          "oklch(48% 0.086 156.2)",
+          "oklch(60% 0.091 156.2)",
+          "oklch(72% 0.064 156.2)",
+          "oklch(84% 0.036 156.2)",
+          "oklch(95% 0.023 156.2)"
+        ]
+      },
+      "hl-quantum": {
+        "role": "secondary",
+        "displayName": "Quantum Highlighter",
+        "canonical": "#a7a3ff",
+        "tonalRamp": [
+          "oklch(15% 0.033 284.8)",
+          "oklch(26% 0.052 284.8)",
+          "oklch(37% 0.088 284.8)",
+          "oklch(48% 0.124 284.8)",
+          "oklch(60% 0.131 284.8)",
+          "oklch(72% 0.092 284.8)",
+          "oklch(84% 0.052 284.8)",
+          "oklch(95% 0.033 284.8)"
+        ]
+      },
+      "hl-imaginary": {
+        "role": "secondary",
+        "displayName": "Imaginary Highlighter",
+        "canonical": "#ffe28a",
+        "tonalRamp": [
+          "oklch(15% 0.028 91.8)",
+          "oklch(26% 0.045 91.8)",
+          "oklch(37% 0.076 91.8)",
+          "oklch(48% 0.107 91.8)",
+          "oklch(60% 0.112 91.8)",
+          "oklch(72% 0.079 91.8)",
+          "oklch(84% 0.045 91.8)",
+          "oklch(95% 0.028 91.8)"
+        ]
+      },
+      "hl-physical": {
+        "role": "secondary",
+        "displayName": "Physical Highlighter",
+        "canonical": "#d4d3cc",
+        "tonalRamp": [
+          "oklch(15% 0.002 100)",
+          "oklch(26% 0.004 100)",
+          "oklch(37% 0.006 100)",
+          "oklch(48% 0.009 100)",
+          "oklch(60% 0.01 100)",
+          "oklch(72% 0.007 100)",
+          "oklch(84% 0.004 100)",
+          "oklch(95% 0.002 100)"
+        ]
+      },
+      "pending": {
+        "role": "tertiary",
+        "displayName": "Pending Highlighter",
+        "canonical": "#ffb347",
+        "tonalRamp": [
+          "oklch(15% 0.037 72.1)",
+          "oklch(26% 0.059 72.1)",
+          "oklch(37% 0.1 72.1)",
+          "oklch(48% 0.141 72.1)",
+          "oklch(60% 0.149 72.1)",
+          "oklch(72% 0.104 72.1)",
+          "oklch(84% 0.059 72.1)",
+          "oklch(95% 0.037 72.1)"
+        ]
+      },
+      "received": {
+        "role": "tertiary",
+        "displayName": "Stamp Green",
+        "canonical": "#9fe3b8",
+        "tonalRamp": [
+          "oklch(15% 0.023 156.2)",
+          "oklch(26% 0.036 156.2)",
+          "oklch(37% 0.061 156.2)",
+          "oklch(48% 0.086 156.2)",
+          "oklch(60% 0.091 156.2)",
+          "oklch(72% 0.064 156.2)",
+          "oklch(84% 0.036 156.2)",
+          "oklch(95% 0.023 156.2)"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Correction Red",
+        "canonical": "#ff8a80",
+        "tonalRamp": [
+          "oklch(15% 0.036 26.1)",
+          "oklch(26% 0.057 26.1)",
+          "oklch(37% 0.097 26.1)",
+          "oklch(48% 0.136 26.1)",
+          "oklch(60% 0.144 26.1)",
+          "oklch(72% 0.1 26.1)",
+          "oklch(84% 0.057 26.1)",
+          "oklch(95% 0.036 26.1)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page Title",
+        "purpose": "The page title at the head of each tab. 1.6rem at 480px and below."
+      },
+      "title": {
+        "displayName": "Entry Name",
+        "purpose": "Character names on planner entries, on one line with an ellipsis."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base reading text in Anuphan, Thai first."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form and stat labels, sentence case, no tracking."
+      },
+      "mark": {
+        "displayName": "Mark",
+        "purpose": "Stats line, stat numbers and the push stamp. The pending tag uses 0.72rem 700 with 0.06em tracking."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-sheet",
+        "value": "0 12px 28px rgba(0, 0, 0, 0.45)",
+        "purpose": "Toasts and the Bulk menu. Floating layers only."
+      },
+      {
+        "name": "dialog",
+        "value": "0 24px 60px rgba(0, 0, 0, 0.6)",
+        "purpose": "Modal content over a flat rgba(8, 8, 10, 0.78) scrim with no blur. The character editor is a full page and casts none."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Default easing for all state transitions."
+      },
+      {
+        "name": "transition-state",
+        "value": "background-color 0.18s, border-color 0.18s, color 0.18s",
+        "purpose": "Hover and selection changes on buttons, chips, tabs and inputs."
+      },
+      {
+        "name": "stamp-settle",
+        "value": "transform 0.24s",
+        "purpose": "The received stamp rotating to -2deg. Removed under reduced motion."
+      },
+      {
+        "name": "pending-pulse",
+        "value": "opacity 1 to 0.35, 1s ease-in-out infinite alternate",
+        "purpose": "The pending stamp dot while a push is in flight. Stopped under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-narrow",
+        "value": "480px"
+      },
+      {
+        "name": "phone",
+        "value": "768px"
+      },
+      {
+        "name": "tablet-stack",
+        "value": "900px"
+      },
+      {
+        "name": "rail",
+        "value": "1025px"
+      },
+      {
+        "name": "split-stack",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one filled ink action in a region, such as Push or Save.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Push to server</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.15rem; border-radius: var(--radius-sm, 6px); font-family: var(--font-family); font-size: 0.875rem; font-weight: 600; border: 1px solid transparent; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary { background: var(--ink); color: var(--paper); border-color: var(--ink); } .ds-btn-primary:hover { background: #ffffff; border-color: #ffffff; } .ds-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-btn:disabled { opacity: 0.45; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined ink button for everyday actions such as Reload and the Bulk menu trigger.",
+      "html": "<button class=\"ds-btn-secondary\">Reload</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; padding: 0.6rem 1.15rem; border-radius: var(--radius-sm, 6px); font-family: var(--font-family); font-size: 0.875rem; font-weight: 600; background: transparent; color: var(--ink); border: 1px solid var(--rule-strong); cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-secondary:hover { background: var(--paper-raised); border-color: var(--ink-2); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Search and form fields on sunk paper.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search name or ID\">",
+      "css": ".ds-input { width: 100%; padding: 0.65rem 0.85rem; background: var(--paper-sunk); border: 1px solid var(--rule-strong); border-radius: var(--radius-sm, 6px); color: var(--ink); font-family: var(--font-family); font-size: 0.9rem; outline: none; } .ds-input::placeholder { color: var(--ink-2); opacity: 1; } .ds-input:focus { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }"
+    },
+    {
+      "name": "Index Tabs",
+      "kind": "nav",
+      "refersTo": "index-tab",
+      "description": "Planner index tabs in the left rail, with an Imaginary highlighter bar on the active tab.",
+      "html": "<nav class=\"ds-rail\"><button class=\"ds-tab ds-tab-active\">Characters</button><button class=\"ds-tab\">Team &amp; Battle</button><button class=\"ds-tab\">Light Cones &amp; Relics</button></nav>",
+      "css": ".ds-rail { display: flex; flex-direction: column; gap: 2px; width: 220px; padding: 1.25rem 0; background: var(--paper); border-right: 1px solid var(--rule); } .ds-tab { position: relative; text-align: left; padding: 0.7rem 1.25rem 0.7rem 1.6rem; border: 0; background: transparent; color: var(--ink-2); font-family: var(--font-family); font-size: 0.875rem; font-weight: 500; cursor: pointer; } .ds-tab::before { content: \"\"; position: absolute; left: 0; top: 0.45rem; bottom: 0.45rem; width: 4px; border-radius: 1px; background: transparent; } .ds-tab:hover { color: var(--ink); background: var(--paper-raised); } .ds-tab-active { color: var(--ink); background: var(--paper-raised); font-weight: 600; } .ds-tab-active::before { background: var(--hl-imaginary); } .ds-tab:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Element Chip",
+      "kind": "chip",
+      "refersTo": "element-chip",
+      "description": "Pill-shaped element filter. The selected chip inverts to ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">All elements</button><button class=\"ds-chip\" aria-pressed=\"false\" aria-label=\"Fire\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-5 0-9z\" fill=\"#ff9b85\"/></svg></button></div>",
+      "css": ".ds-chips { display: flex; gap: 0.35rem; } .ds-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 36px; padding: 0 0.7rem; border: 1px solid var(--rule-strong); border-radius: 999px; background: transparent; color: var(--ink-2); font-family: var(--font-family); font-size: 0.85rem; font-weight: 500; cursor: pointer; } .ds-chip:hover { border-color: var(--ink-2); color: var(--ink); } .ds-chip[aria-pressed=\"true\"] { background: var(--ink); border-color: var(--ink); color: var(--paper); } .ds-chip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat raised-paper container. Hover strengthens the rule only.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Lineup</div><div class=\"ds-card-sub\">4 characters</div></div>",
+      "css": ".ds-card { background: var(--paper-raised); border: 1px solid var(--rule); border-radius: var(--radius-lg, 10px); padding: 1.25rem; color: var(--ink); font-family: var(--font-family); } .ds-card:hover { border-color: var(--rule-strong); } .ds-card-title { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.35rem; } .ds-card-sub { color: var(--ink-2); font-size: 0.8rem; }"
+    },
+    {
+      "name": "Planner Entry",
+      "kind": "custom",
+      "refersTo": "planner-entry",
+      "description": "A character row: portrait, name, element highlighter band, stats line and light cone, with the pending mark shown.",
+      "html": "<button class=\"ds-entry ds-entry-is-pending\" style=\"--entry-hl: var(--hl-quantum)\"><span class=\"ds-portrait\"></span><span class=\"ds-entry-body\"><span class=\"ds-entry-name\">Seele</span><span class=\"ds-entry-hl\"></span><span class=\"ds-entry-stats\">LV 80 · E2 · S1</span><span class=\"ds-entry-lc\">In the Night</span></span><span class=\"ds-entry-rarity\"><svg viewBox=\"0 0 12 12\" width=\"11\" height=\"11\" aria-hidden=\"true\"><path d=\"M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z\" fill=\"currentColor\"/></svg>5</span><span class=\"ds-entry-pending\">Not sent</span></button>",
+      "css": ".ds-entry { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 0.85rem; width: 300px; padding: 0.75rem 0.9rem 0.75rem 0.75rem; border: 1px solid var(--rule); border-radius: var(--radius-md, 8px); background: var(--paper-raised); color: var(--ink); font-family: var(--font-family); text-align: left; cursor: pointer; } .ds-entry:hover { background: var(--paper-hover, #222229); border-color: var(--rule-strong); } .ds-entry:active { background: var(--paper); } .ds-entry:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-portrait { width: 64px; height: 64px; border-radius: 50%; background: var(--paper-sunk); } .ds-entry-body { display: flex; flex-direction: column; min-width: 0; } .ds-entry-name { font-family: var(--font-label); font-size: 1.05rem; font-weight: 700; line-height: 1.2; } .ds-entry-hl { display: block; width: 56px; height: 7px; margin: 0.4rem 0 0.35rem; border-radius: 2px; background: var(--entry-hl, var(--hl-physical)); } .ds-entry-stats { font-family: var(--font-label); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); font-variant-numeric: tabular-nums; } .ds-entry-lc { font-size: 0.78rem; color: var(--ink-2); } .ds-entry-rarity { align-self: start; display: inline-flex; gap: 2px; align-items: center; font-family: var(--font-label); font-size: 0.75rem; font-weight: 700; color: var(--hl-imaginary); } .ds-entry-pending { display: none; } .ds-entry-is-pending .ds-entry-pending { display: block; grid-column: 1 / -1; justify-self: start; padding: 1px 8px; border-radius: 2px; background: var(--pending); color: var(--paper); font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; } .ds-entry.ds-entry-is-pending { border-color: var(--pending); }"
+    },
+    {
+      "name": "Push Stamp",
+      "kind": "custom",
+      "refersTo": "push-stamp-received",
+      "description": "Header status stamp: received (rotated, green), pending (orange with a pulsing dot), and none or local (dashed).",
+      "html": "<div class=\"ds-stamps\"><div class=\"ds-stamp\" data-state=\"saved\">Received · 16:52</div><div class=\"ds-stamp\" data-state=\"pending\"><span class=\"ds-stamp-dot\"></span>Sending</div><div class=\"ds-stamp\" data-state=\"none\">Nothing sent yet</div></div>",
+      "css": ".ds-stamps { display: flex; gap: 0.75rem; align-items: center; } .ds-stamp { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.85rem; border: 1px solid var(--rule); border-radius: 4px; background: transparent; font-family: var(--font-label); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); white-space: nowrap; transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-stamp[data-state=\"saved\"] { color: var(--received); border: 2px solid var(--received); transform: rotate(-2deg); } .ds-stamp[data-state=\"pending\"] { color: var(--pending); border-color: var(--pending); } .ds-stamp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pending); animation: ds-pulse 1s ease-in-out infinite alternate; } .ds-stamp[data-state=\"none\"] { border-style: dashed; } @keyframes ds-pulse { from { opacity: 1; } to { opacity: 0.35; } } @media (prefers-reduced-motion: reduce) { .ds-stamp { transition: none; } .ds-stamp-dot { animation: none; } }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive resets only, set apart below a rule.",
+      "html": "<button class=\"ds-btn ds-btn-danger\">Reset all settings</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; padding: 0.6rem 1.15rem; border-radius: 6px; font-family: var(--font-family); font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); } .ds-btn-danger:hover { background: var(--danger); color: var(--paper); } .ds-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Favorite Star",
+      "kind": "button",
+      "refersTo": "favorite-star",
+      "description": "A sibling button in the top-right corner of a planner entry; filled Imaginary when on.",
+      "html": "<span style=\"display:inline-flex;gap:0.5rem\"><button class=\"ds-fav\" aria-pressed=\"false\" aria-label=\"Add to favorites\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z\"/></svg></button><button class=\"ds-fav\" aria-pressed=\"true\" aria-label=\"Remove from favorites\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z\"/></svg></button></span>",
+      "css": ".ds-fav { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-fav svg { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; } .ds-fav:hover { color: var(--ink); background: var(--paper); } .ds-fav[aria-pressed=\"true\"] { color: var(--hl-imaginary); } .ds-fav[aria-pressed=\"true\"] svg { fill: currentColor; } .ds-fav:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Settings Row and Switch",
+      "kind": "control",
+      "refersTo": "settings-row",
+      "description": "Title and description left, switch right; ruled between rows. On is Stamp Green.",
+      "html": "<div class=\"ds-srow\"><div><div class=\"ds-srow-t\">Auto sync</div><div class=\"ds-srow-d\">Push each edit to the server as soon as it is saved.</div></div><label class=\"ds-switch\"><input type=\"checkbox\" checked><span></span></label></div><div class=\"ds-srow\"><div><div class=\"ds-srow-t\">Compact roster</div><div class=\"ds-srow-d\">Smaller entries on wide screens.</div></div><label class=\"ds-switch\"><input type=\"checkbox\"><span></span></label></div>",
+      "css": ".ds-srow { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 0; border-top: 1px solid var(--rule); font-family: var(--font-family); color: var(--ink); } .ds-srow:first-child { border-top: 0; } .ds-srow-t { font-weight: 600; font-size: 0.95rem; } .ds-srow-d { margin-top: 0.15rem; font-size: 0.84rem; color: var(--ink-2); } .ds-switch { position: relative; flex-shrink: 0; width: 44px; height: 24px; } .ds-switch input { position: absolute; opacity: 0; width: 0; height: 0; } .ds-switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--rule-strong); cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch span::before { content: \"\"; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch input:checked + span { background: var(--received); } .ds-switch input:checked + span::before { background: var(--paper); transform: translateX(20px); } .ds-switch input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Switch",
+      "kind": "control",
+      "refersTo": "segmented-switch",
+      "description": "Two views of one list, each with its count in Mark type.",
+      "html": "<div class=\"ds-seg\"><button class=\"is-on\">Light cones <b>412</b></button><button>Relics <b>1,208</b></button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--rule-strong); border-radius: 8px; } .ds-seg button { display: inline-flex; gap: 0.5rem; padding: 0.45rem 0.8rem; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2); font-family: var(--font-family); font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-seg button:hover { color: var(--ink); } .ds-seg button.is-on { background: var(--ink); color: var(--paper); } .ds-seg b { font-family: var(--font-label); font-size: 0.78rem; opacity: 0.75; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Equipment Tile",
+      "kind": "card",
+      "refersTo": "equipment-tile",
+      "description": "A light cone or relic as a real button: art above, full name, main stat, rarity and wearer below.",
+      "html": "<button class=\"ds-eq\"><span class=\"ds-eq-art\"><span class=\"ds-eq-slot\">BODY</span></span><span class=\"ds-eq-body\"><span class=\"ds-eq-name\">Watchmaker, Master of Dream Machinations</span><span class=\"ds-eq-main\">CRIT DMG</span><span class=\"ds-eq-stats\">5&#9733; · +15</span><span class=\"ds-eq-wear\">Free</span></span></button>",
+      "css": ".ds-eq { display: flex; flex-direction: column; width: 220px; padding: 0; overflow: hidden; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink); font-family: var(--font-family); text-align: left; cursor: pointer; } .ds-eq:hover { border-color: var(--rule-strong); background: #222229; } .ds-eq:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-eq-art { position: relative; display: block; aspect-ratio: 16 / 10; background: var(--paper-sunk); } .ds-eq-slot { position: absolute; left: 0.5rem; top: 0.5rem; padding: 1px 8px; border-radius: 2px; background: var(--paper); font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; } .ds-eq-body { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.65rem 0.75rem 0.75rem; } .ds-eq-name { font-family: var(--font-label); font-size: 0.92rem; font-weight: 700; line-height: 1.25; } .ds-eq-main { font-size: 0.82rem; font-weight: 600; color: var(--hl-imaginary); } .ds-eq-stats { font-family: var(--font-label); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); } .ds-eq-wear { margin-top: 0.3rem; font-size: 0.8rem; color: var(--ink-2); }"
+    },
+    {
+      "name": "Metrics Row",
+      "kind": "data",
+      "refersTo": "metrics-row",
+      "description": "Battle numbers as one ruled row: ink values in Mark type, never coloured boxes.",
+      "html": "<div class=\"ds-met\"><div><div class=\"ds-met-l\">Team damage</div><div class=\"ds-met-v\">1,284,902</div></div><div><div class=\"ds-met-l\">Cycles</div><div class=\"ds-met-v\">3</div></div><div><div class=\"ds-met-l\">Turns</div><div class=\"ds-met-v\">27</div></div><div><div class=\"ds-met-l\">Duration</div><div class=\"ds-met-v\">04:12</div></div></div>",
+      "css": ".ds-met { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 10px; font-family: var(--font-family); } .ds-met > div { padding: 1rem 1.25rem; border-right: 1px solid var(--rule); } .ds-met > div:last-child { border-right: 0; } .ds-met-l { font-size: 0.85rem; font-weight: 500; color: var(--ink-2); } .ds-met-v { margin-top: 0.2rem; font-family: var(--font-label); font-size: 1.75rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Lineup Slot",
+      "kind": "card",
+      "refersTo": "lineup-slot-empty",
+      "description": "Empty slots are a dashed outline with a drawn plus; filled slots reuse the entry vocabulary.",
+      "html": "<div style=\"display:flex;gap:0.75rem\"><div class=\"ds-slot\" role=\"button\" tabindex=\"0\"><span class=\"ds-slot-n\">1</span><span class=\"ds-slot-plus\"></span><span class=\"ds-slot-e\">Add character</span></div><div class=\"ds-slot is-filled\" role=\"button\" tabindex=\"0\"><span class=\"ds-slot-n\">2</span><span class=\"ds-slot-img\"></span><b>Firefly</b><i class=\"ds-slot-hl\"></i><span class=\"ds-slot-st\">LV 80 · E2</span></div></div>",
+      "css": ".ds-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; width: 190px; padding: 2.4rem 1rem 1rem; border: 1px dashed var(--rule-strong); border-radius: 8px; color: var(--ink-2); font-family: var(--font-family); cursor: pointer; } .ds-slot:hover { border-color: var(--ink-2); } .ds-slot:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-slot.is-filled { border-style: solid; border-color: var(--rule); background: var(--paper); color: var(--ink); } .ds-slot-n { position: absolute; top: 0.6rem; left: 0.6rem; padding: 1px 8px; border-radius: 2px; background: var(--paper-raised); color: var(--ink-2); font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; } .ds-slot-plus { position: relative; width: 28px; height: 28px; } .ds-slot-plus::before, .ds-slot-plus::after { content: \"\"; position: absolute; left: 50%; top: 50%; background: var(--ink-2); transform: translate(-50%, -50%); } .ds-slot-plus::before { width: 22px; height: 2px; } .ds-slot-plus::after { width: 2px; height: 22px; } .ds-slot-img { width: 84px; height: 84px; margin-bottom: 0.5rem; border-radius: 50%; background: var(--paper-sunk); } .ds-slot b { font-family: var(--font-label); } .ds-slot-hl { width: 56px; height: 7px; border-radius: 2px; background: var(--hl-fire); } .ds-slot-st { font-family: var(--font-label); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Pull Planner",
+    "overview": "The account is a planner kept on the desk beside the game. Each character is an entry written in white gel pen on black planner paper. A flat band in that character's element colour marks the entry, and a rubber stamp in the header records when the server last received a push. The interface reads as one notebook in one material, not as a wall of glowing tiles. This world replaced the earlier glowing navy dashboard. It was chosen for this project and not seeded from a catalog world.\n\nThe density suits short, repeated round trips: tweak an entry, push it, check the game, come back. Entries are compact rows in a responsive grid. Status is never a decoration. Pending orange means the server has not received something yet, and the green stamp means it has. Game art (portraits, element and path icons) is the only full-colour imagery. The ink stays neutral so the art and the highlighters can carry the colour.\n\nThe world refuses the gamer dashboard of equal-weight neon cards: no glows, no glass, no gradient fills, no tracked uppercase labels. Its depth comes from three paper tones and one-pixel rules. Only floating layers cast a shadow.",
+    "keyCharacteristics": [
+      "Black planner paper with a faint 22px dot grid, the only background image.",
+      "Gel-pen ink in two working values (`ink`, `ink-2`) on three paper tones.",
+      "Element colours applied as flat highlighter bands, never as glows or fills behind text.",
+      "One reserved pending highlighter, plus a received stamp tied to the real sync tracker.",
+      "Anuphan for UI and Thai text. Chakra Petch for names, stats, titles and stamps.",
+      "One-pixel rules and small radii (2 to 10px). Pills are kept for chips and circles for portraits."
+    ],
+    "rules": [
+      {
+        "name": "The Reserved Highlighter Rule",
+        "body": "`pending` means \"the server has not received this\" and nothing else. Never use it for warnings, emphasis or decoration. If it appears, the stamp and at least one entry must agree.",
+        "section": "colors"
+      },
+      {
+        "name": "The Highlighter Not Glow Rule",
+        "body": "Element colour goes on a flat band, a chip icon or a rarity mark. It never becomes a glow, a gradient, a tinted card background, or the colour of body text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Hands Rule",
+        "body": "Anuphan writes and Chakra Petch marks. If a string is read as a sentence, it is Anuphan. If it is scanned as a name, number or status, it is Chakra Petch.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "UI labels are sentence case with no added tracking, so Thai and Latin sit at the same weight. Only Chakra Petch marks carry tracking (0.04 to 0.06em).",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Page Rule",
+        "body": "Nothing that sits in the page flow casts a shadow, including on hover. A shadow means the layer floats above the planner.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the page on `paper` with the 22px `dot` grid as its only background image.",
+      "Do colour an entry through `--entry-hl` from its element, as one flat 7px band.",
+      "Do keep `pending` tied to `pendingAvatarIds` / `setSyncStatus`. When the server receives a push, the stamp turns `received` and the marks clear together.",
+      "Do separate surfaces with paper tone and 1px `rule` / `rule-strong` lines. Hover changes tone or rule, never position.",
+      "Do set names, stats, titles and stamps in Chakra Petch, and everything read as prose in Anuphan, in sentence case.",
+      "Do route every visible string, including stamp and pending labels, through `js/i18n.js` (th and en), and bump the `?v=` query when CSS or JS changes.",
+      "Do draw icons as inline SVG or use the game's own element, path and avatar art.",
+      "Do open every tab with .page-head and let its grid fill the width; never cap a tab in a fixed-width centred column.",
+      "Do make every clickable tile, slot or entry a real button (or role=\"button\" with Enter and Space); put secondary actions such as the favorite star in sibling buttons.",
+      "Do colour a character wherever it appears with the same --entry-hl element highlighter."
+    ],
+    "donts": [
+      "Don't add glows, glass or blur, or gradient fills. The dot grid is the one native gradient.",
+      "Don't put a shadow on anything in the page flow. Shadows belong only to toasts, menus and dialogs.",
+      "Don't use `pending` orange for anything but unsent edits, or show it without the sync tracker behind it.",
+      "Don't set UI labels in tracked uppercase, or add kickers or eyebrows above titles.",
+      "Don't use emoji or text glyphs as icons.",
+      "Don't tint whole cards or text with element colours. The highlighter band carries the identity.",
+      "Don't confirm a push with a success toast before the server answers.",
+      "Don't add inline style=\"\" layout to markup; give it a class in the planner layer.",
+      "Don't reintroduce the logo mark or branch status in the header or rail."
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.35';
+import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.49';
 import { assetVersion } from './game-data.js?v=1';
 
 // Versioned by content hash (see scripts/sync-data.mjs), not by hand.
@@ -78,13 +78,21 @@ function visibleItems() {
   });
 }
 
+const STAR_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>';
+
+function rarityMarkup(item) {
+  const rarity = Number(item.rarity);
+  if (!Number.isInteger(rarity) || rarity < 1 || rarity > 5) return '';
+  return '<span class="item-catalog-rarity" data-rarity="' + rarity + '">' + STAR_SVG + rarity + '</span>';
+}
+
 function imageMarkup(item, source) {
   const src = assetUrl(item.icon, source.assetBaseUrl);
   if (!src) {
-    return '<button type="button" class="item-catalog-art-button" data-item-catalog-id="' + item.id + '" aria-label="' + escapeHtml(t('itemCatalogOpenDetails', { name: displayName(item) })) + '"><span class="item-catalog-art item-catalog-art-missing" title="' + escapeHtml(t('itemCatalogNoImage')) + '"><span aria-hidden="true">✦</span><small>' + escapeHtml(t('itemCatalogNoImage')) + '</small></span></button>';
+    return '<span class="item-catalog-art item-catalog-art-missing"><small>' + escapeHtml(t('itemCatalogNoImage')) + '</small></span>';
   }
   const fallback = assetUrl(item.icon, source.assetFallbackBaseUrl);
-  return '<button type="button" class="item-catalog-art-button" data-item-catalog-id="' + item.id + '" aria-label="' + escapeHtml(t('itemCatalogOpenDetails', { name: displayName(item) })) + '"><span class="item-catalog-art"><img class="item-catalog-image" src="' + escapeHtml(src) + '" data-fallback="' + escapeHtml(fallback) + '" alt="" loading="lazy" decoding="async"></span></button>';
+  return '<span class="item-catalog-art"><img class="item-catalog-image" src="' + escapeHtml(src) + '" data-fallback="' + escapeHtml(fallback) + '" alt="" loading="lazy" decoding="async"></span>';
 }
 
 function localizedItemText(item, field) {
@@ -102,19 +110,16 @@ function openItemDetails(itemId) {
   const fallback = assetUrl(item.icon, catalog.source.assetFallbackBaseUrl);
   const description = localizedItemText(item, 'descriptions');
   const lore = localizedItemText(item, 'backgroundDescriptions');
-  const rarity = Number(item.rarity);
-  const rarityText = Number.isInteger(rarity) && rarity > 0 && rarity <= 5 ? '★'.repeat(rarity) : '';
   const category = itemCategoryLabel(item.category);
   const type = [item.type, item.subType].filter((value, index, values) => value && values.indexOf(value) === index).join(' · ');
   const path = item.path ? translatePath(item.path) : '';
   const slot = item.slot ? translatePath(item.slot) : '';
-  const meta = [category, type, slot, path, rarityText].filter(Boolean).join(' · ');
+  const meta = [category, type, slot, path].filter(Boolean).join(' · ');
 
   el.detailName.textContent = name;
   el.detailId.textContent = t('itemCatalogItemId', { id: item.id });
   el.detailSource.textContent = (item.sourceTables || []).map(path => path.split('/').pop()).join(', ') || t('itemCatalogNoDetails');
-  el.detailMeta.textContent = meta || t('itemCatalogNoDetails');
-  el.detailMeta.dataset.rarity = rarityText ? String(rarity) : '';
+  el.detailMeta.innerHTML = escapeHtml(meta || t('itemCatalogNoDetails')) + (rarityMarkup(item) ? ' ' + rarityMarkup(item) : '');
   el.detailDescription.textContent = plainGameText(description || lore || t('itemCatalogNoDescription'));
   el.detailLoreSection.hidden = !description || !lore || description === lore;
   el.detailLore.textContent = el.detailLoreSection.hidden ? '' : plainGameText(lore);
@@ -181,19 +186,17 @@ function renderCatalog() {
     const category = itemCategoryLabel(item.category);
     const subtype = item.slot || item.subType || item.type || '';
     const path = item.path ? translatePath(item.path) : '';
-    const rarity = Number(item.rarity);
-    const rarityText = Number.isInteger(rarity) && rarity > 0 && rarity <= 5 ? '★'.repeat(rarity) : '';
-    const details = [category, subtype, path, rarityText].filter(Boolean).join(' · ');
+    const details = [category, subtype, path].filter(Boolean).join(' · ');
     const supportText = item.supported ? t('itemCatalogSupportedTag') : t('itemCatalogBrowseOnlyTag');
-    return '<article class="item-catalog-card">' +
+    return '<button type="button" class="item-catalog-card" data-item-catalog-id="' + item.id + '" aria-label="' + escapeHtml(t('itemCatalogOpenDetails', { name })) + '">' +
       imageMarkup(item, catalog.source) +
-      '<div class="item-catalog-info">' +
-        '<div class="item-catalog-name" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</div>' +
-        '<div class="item-catalog-id">ID ' + item.id + '</div>' +
-        '<div class="item-catalog-details" title="' + escapeHtml(details) + '">' + escapeHtml(details) + '</div>' +
+      '<span class="item-catalog-info">' +
+        '<span class="item-catalog-name" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</span>' +
+        '<span class="item-catalog-id">ID ' + item.id + rarityMarkup(item) + '</span>' +
+        '<span class="item-catalog-details" title="' + escapeHtml(details) + '">' + escapeHtml(details) + '</span>' +
         '<span class="item-catalog-support ' + (item.supported ? 'is-supported' : 'is-browse-only') + '">' + escapeHtml(supportText) + '</span>' +
-      '</div>' +
-    '</article>';
+      '</span>' +
+    '</button>';
   }).join('');
 
   el.grid.querySelectorAll('.item-catalog-image').forEach(image => {
@@ -203,15 +206,11 @@ function renderCatalog() {
         image.src = image.dataset.fallback;
         return;
       }
-      const placeholder = document.createElement('div');
+      const placeholder = document.createElement('span');
       placeholder.className = 'item-catalog-art item-catalog-art-missing';
-      placeholder.title = t('itemCatalogNoImage');
-      const mark = document.createElement('span');
-      mark.setAttribute('aria-hidden', 'true');
-      mark.textContent = '✦';
       const label = document.createElement('small');
       label.textContent = t('itemCatalogNoImage');
-      placeholder.append(mark, label);
+      placeholder.append(label);
       image.parentElement.replaceWith(placeholder);
     });
   });
@@ -231,7 +230,7 @@ async function loadCatalog() {
   }).then(data => {
     if (!Array.isArray(data.items) || !data.source?.assetBaseUrl) throw new Error('Invalid catalog data');
     catalog = data;
-    el.status.textContent = t('inventoryItemTotal', { count: data.counts.total });
+    el.status.textContent = '';
     renderCatalog();
     return catalog;
   }).catch(error => {

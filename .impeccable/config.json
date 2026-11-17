@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-17T11:23:11.394Z",
+        "reason": "Claude: unchosen decision-round sketch drawn in another world's fonts on purpose; not shipped and not part of the built system"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-goods.html"
+        ],
+        "createdAt": "2026-11-17T11:23:11.499Z",
+        "reason": "Claude: unchosen decision-round sketch drawn in another world's fonts on purpose; not shipped and not part of the built system"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-17T11:23:11.619Z",
+        "reason": "Claude: unchosen decision-round sketch drawn in another world's fonts on purpose; not shipped and not part of the built system"
+      }
+    ]
+  }
+}

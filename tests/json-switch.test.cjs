@@ -16,7 +16,7 @@ function createEditor(apiCall, connected = true) {
   const state = { isConnected: connected, fullFreesrData: null, persistentData: null, dataGameData: null };
   const context = vm.createContext({
     el, state, apiCall, t: (key, vars = {}) => `${key}:${vars.file || ''}`,
-    savePersistentCache() {}, saveFreesrCache() {}, saveDataGameCache() {},
+    savePersistentCache() {}, saveFreesrCache() {}, saveDataGameCache() {}, resetReceivedBuilds() {},
     localStorage: { getItem() { return null; } }, DEFAULT_DATA_GAME: {}, DEFAULT_LINEUP: {}
   });
   vm.runInContext(source.slice(start, end) + '\nthis.loadJsonData = loadJsonData;', context);
