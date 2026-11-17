@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-17T11:44:14.362Z",
+  "generatedAt": "2026-11-17T15:28:28.494Z",
   "title": "Design System: GaCy-srtool",
   "extensions": {
     "colorMeta": {
@@ -489,6 +489,46 @@
       "description": "Empty slots are a dashed outline with a drawn plus; filled slots reuse the entry vocabulary.",
       "html": "<div style=\"display:flex;gap:0.75rem\"><div class=\"ds-slot\" role=\"button\" tabindex=\"0\"><span class=\"ds-slot-n\">1</span><span class=\"ds-slot-plus\"></span><span class=\"ds-slot-e\">Add character</span></div><div class=\"ds-slot is-filled\" role=\"button\" tabindex=\"0\"><span class=\"ds-slot-n\">2</span><span class=\"ds-slot-img\"></span><b>Firefly</b><i class=\"ds-slot-hl\"></i><span class=\"ds-slot-st\">LV 80 · E2</span></div></div>",
       "css": ".ds-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; width: 190px; padding: 2.4rem 1rem 1rem; border: 1px dashed var(--rule-strong); border-radius: 8px; color: var(--ink-2); font-family: var(--font-family); cursor: pointer; } .ds-slot:hover { border-color: var(--ink-2); } .ds-slot:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-slot.is-filled { border-style: solid; border-color: var(--rule); background: var(--paper); color: var(--ink); } .ds-slot-n { position: absolute; top: 0.6rem; left: 0.6rem; padding: 1px 8px; border-radius: 2px; background: var(--paper-raised); color: var(--ink-2); font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; } .ds-slot-plus { position: relative; width: 28px; height: 28px; } .ds-slot-plus::before, .ds-slot-plus::after { content: \"\"; position: absolute; left: 50%; top: 50%; background: var(--ink-2); transform: translate(-50%, -50%); } .ds-slot-plus::before { width: 22px; height: 2px; } .ds-slot-plus::after { width: 2px; height: 22px; } .ds-slot-img { width: 84px; height: 84px; margin-bottom: 0.5rem; border-radius: 50%; background: var(--paper-sunk); } .ds-slot b { font-family: var(--font-label); } .ds-slot-hl { width: 56px; height: 7px; border-radius: 2px; background: var(--hl-fire); } .ds-slot-st { font-family: var(--font-label); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); }"
+    },
+    {
+      "name": "Item Card",
+      "kind": "card",
+      "refersTo": "item-card",
+      "description": "One button per item in the item book; the support tag says whether the bag tool can write it.",
+      "html": "<div style=\"display:flex;gap:0.75rem;flex-wrap:wrap\"><button class=\"ds-item\"><span class=\"ds-item-art\"></span><span class=\"ds-item-info\"><b>Stellar Jade</b><span class=\"ds-item-id\">ID 1 <i class=\"ds-item-r\"><svg width=\"11\" height=\"11\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z\"/></svg>5</i></span><span class=\"ds-item-cat\">Item · Virtual</span><span class=\"ds-tag is-ok\">GaCy supported</span></span></button><button class=\"ds-item\"><span class=\"ds-item-art\"></span><span class=\"ds-item-info\"><b>Trailblaze Power</b><span class=\"ds-item-id\">ID 11</span><span class=\"ds-item-cat\">Item · Virtual</span><span class=\"ds-tag\">Browse only</span></span></button></div>",
+      "css": ".ds-item { display: grid; grid-template-columns: 68px minmax(0, 1fr); align-items: center; gap: 0.85rem; width: 260px; padding: 0.75rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink); font-family: var(--font-family); text-align: left; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-item:hover { background: #222229; border-color: var(--rule-strong); } .ds-item:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-item-art { width: 68px; height: 68px; border-radius: 6px; background: var(--paper-sunk); } .ds-item-info { display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem; } .ds-item-info b { font-family: var(--font-label); font-size: 0.92rem; } .ds-item-id { display: inline-flex; gap: 0.5rem; font-family: var(--font-label); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-2); } .ds-item-r { display: inline-flex; align-items: center; gap: 2px; font-style: normal; color: var(--hl-imaginary); } .ds-item-cat { font-size: 0.78rem; color: var(--ink-2); } .ds-tag { padding: 0 7px; border: 1px dashed var(--rule-strong); border-radius: 2px; color: var(--ink-2); font-family: var(--font-label); font-size: 0.72rem; font-weight: 600; line-height: 1.6; } .ds-tag.is-ok { border: 1px solid var(--received); color: var(--received); }"
+    },
+    {
+      "name": "Bag Count Sheet",
+      "kind": "data",
+      "refersTo": "bag-row-unsaved",
+      "description": "Ruled rows of item ID and count; an unsaved row carries the pending bar, tag and border.",
+      "html": "<table class=\"ds-bag\"><thead><tr><th>Item ID</th><th>Count</th></tr></thead><tbody><tr><td class=\"ds-bag-id\">1</td><td><input value=\"120000\"></td></tr><tr class=\"is-pending\"><td class=\"ds-bag-id\">2<span class=\"ds-bag-tag\">Not sent</span></td><td><input value=\"999999\"></td></tr><tr><td class=\"ds-bag-id\">101</td><td><input placeholder=\"Server default\"></td></tr></tbody></table>",
+      "css": ".ds-bag { width: 420px; border-collapse: collapse; background: var(--paper-raised); border: 1px solid var(--rule); font-family: var(--font-family); color: var(--ink); } .ds-bag th { padding: 0.7rem 1rem; border-bottom: 1px solid var(--rule-strong); color: var(--ink-2); font-size: 0.85rem; font-weight: 600; text-align: left; } .ds-bag td { padding: 0.4rem 1rem; border-top: 1px solid var(--rule); } .ds-bag-id { font-family: var(--font-label); font-weight: 600; font-variant-numeric: tabular-nums; } .ds-bag-tag { margin-left: 0.6rem; padding: 1px 8px; border-radius: 2px; background: var(--pending); color: var(--paper); font-family: var(--font-label); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; } .ds-bag input { width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--paper-sunk); color: var(--ink); } .ds-bag tr.is-pending td:first-child { box-shadow: inset 3px 0 0 var(--pending); } .ds-bag tr.is-pending input { border-color: var(--pending); }"
+    },
+    {
+      "name": "In-page Index Tabs",
+      "kind": "navigation",
+      "refersTo": "index-tab-inline",
+      "description": "Modes inside one page; the open one is ink with a 2px underline.",
+      "html": "<div class=\"ds-itabs\" role=\"tablist\"><button class=\"is-on\" role=\"tab\" aria-selected=\"true\">Memory of Chaos</button><button role=\"tab\">Pure Fiction</button><button role=\"tab\">Apocalyptic Shadow</button><button role=\"tab\">Custom Enemy</button></div>",
+      "css": ".ds-itabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--rule); } .ds-itabs button { flex: 0 0 auto; min-height: 44px; padding: 0.6rem 1rem; border: 0; background: transparent; color: var(--ink-2); font-family: var(--font-family); font-weight: 500; cursor: pointer; } .ds-itabs button:hover { color: var(--ink); } .ds-itabs button.is-on { color: var(--ink); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ink); } .ds-itabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }"
+    },
+    {
+      "name": "Choice Card",
+      "kind": "control",
+      "refersTo": "choice-card",
+      "description": "Pick one of a few; the chosen card is inked, with a drawn check.",
+      "html": "<div style=\"display:flex;gap:0.6rem\"><button class=\"ds-choice is-on\" aria-pressed=\"true\"><b>Freecam</b><span>Move the camera freely around the character.</span><i></i></button><button class=\"ds-choice\" aria-pressed=\"false\"><b>FaceCam</b><span>A close-up in front of the character.</span><i></i></button></div>",
+      "css": ".ds-choice { position: relative; display: flex; flex-direction: column; gap: 0.16rem; width: 220px; padding: 0.75rem 2.4rem 0.75rem 0.85rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink); font-family: var(--font-family); text-align: left; cursor: pointer; transition: background-color 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s cubic-bezier(0.22, 1, 0.36, 1); } .ds-choice:hover { background: #222229; border-color: var(--rule-strong); } .ds-choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; } .ds-choice b { font-family: var(--font-label); } .ds-choice span { font-size: 0.8rem; color: var(--ink-2); } .ds-choice i { position: absolute; top: 0.7rem; right: 0.7rem; display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--rule-strong); border-radius: 50%; } .ds-choice.is-on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); } .ds-choice.is-on i { border-color: var(--ink); background: var(--ink); } .ds-choice.is-on i::after { content: \"\"; width: 8px; height: 4px; margin-top: -2px; border-left: 2px solid var(--paper); border-bottom: 2px solid var(--paper); transform: rotate(-45deg); }"
+    },
+    {
+      "name": "Code Editor and Status Line",
+      "kind": "input",
+      "refersTo": "code-editor",
+      "description": "Raw file text in the code face on sunk paper; results reported by data-tone.",
+      "html": "<div style=\"display:flex;flex-direction:column;gap:0.6rem;width:460px\"><textarea class=\"ds-code\" spellcheck=\"false\">{\n  \"avatars\": {\n    \"1408\": { \"level\": 80, \"promotion\": 6 }\n  }\n}</textarea><div class=\"ds-bar\"><b>freesr-data.json</b><span>Edit and save to the server</span></div><div class=\"ds-status\" data-tone=\"success\">Imported 12 characters.</div><div class=\"ds-status\" data-tone=\"warning\">No JSON pasted yet.</div><div class=\"ds-status\" data-tone=\"error\">Could not reach enka.network.</div></div>",
+      "css": ".ds-code { height: 120px; padding: 1rem; border: 1px solid var(--rule-strong); border-radius: 8px; background: var(--paper-sunk); color: var(--ink); font-family: \"Fira Code\", Consolas, monospace; font-size: 0.85rem; line-height: 1.5; resize: vertical; } .ds-code:focus { outline: 0; border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); } .ds-bar { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--ink-2); } .ds-bar b { font-family: var(--font-label); color: var(--ink); } .ds-status { font-size: 0.86rem; color: var(--ink-2); } .ds-status[data-tone=\"success\"] { color: var(--received); } .ds-status[data-tone=\"error\"] { color: var(--danger); } .ds-status[data-tone=\"warning\"] { color: var(--hl-imaginary); }"
     }
   ],
   "narrative": {
@@ -505,7 +545,7 @@
     "rules": [
       {
         "name": "The Reserved Highlighter Rule",
-        "body": "`pending` means \"the server has not received this\" and nothing else. Never use it for warnings, emphasis or decoration. If it appears, the stamp and at least one entry must agree.",
+        "body": "pending means \"the server has not received this\" and nothing else. Never use it for warnings, emphasis or decoration, including \"browse only\" or \"boss\" tags. For pushed character data, the stamp and at least one entry must agree. For a panel with its own Save, it clears when that save succeeds.",
         "section": "colors"
       },
       {
@@ -539,18 +579,24 @@
       "Do draw icons as inline SVG or use the game's own element, path and avatar art.",
       "Do open every tab with .page-head and let its grid fill the width; never cap a tab in a fixed-width centred column.",
       "Do make every clickable tile, slot or entry a real button (or role=\"button\" with Enter and Space); put secondary actions such as the favorite star in sibling buttons.",
-      "Do colour a character wherever it appears with the same --entry-hl element highlighter."
+      "Do colour a character wherever it appears with the same --entry-hl element highlighter.",
+      "Do report a result by meaning (data-tone) and let CSS choose the colour.",
+      "Do put a switch back when its request fails, and label switch states as states, not actions.",
+      "Do reuse the Settings section, row and switch for any page of options, and the segmented switch for any two views of one list."
     ],
     "donts": [
       "Don't add glows, glass or blur, or gradient fills. The dot grid is the one native gradient.",
       "Don't put a shadow on anything in the page flow. Shadows belong only to toasts, menus and dialogs.",
-      "Don't use `pending` orange for anything but unsent edits, or show it without the sync tracker behind it.",
+      "Don't use pending orange for anything but edits the server has not received, or show it without a real tracker or Save behind it.",
       "Don't set UI labels in tracked uppercase, or add kickers or eyebrows above titles.",
       "Don't use emoji or text glyphs as icons.",
       "Don't tint whole cards or text with element colours. The highlighter band carries the identity.",
       "Don't confirm a push with a success toast before the server answers.",
       "Don't add inline style=\"\" layout to markup; give it a class in the planner layer.",
-      "Don't reintroduce the logo mark or branch status in the header or rail."
+      "Don't reintroduce the logo mark or branch status in the header or rail.",
+      "Don't set colours from JS (node.style.color); set a state attribute and style it.",
+      "Don't hide a file input with display: none; hide it visually so the keyboard still reaches it.",
+      "Don't show a control for a server option the game does not have; keep sending the value the server already holds."
     ]
   }
 }

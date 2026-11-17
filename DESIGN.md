@@ -196,6 +196,41 @@ components:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
     padding: "0.85rem 0"
+  item-card:
+    backgroundColor: "{colors.paper-raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "0.75rem"
+  support-tag:
+    backgroundColor: "transparent"
+    textColor: "{colors.received}"
+    typography: "{typography.mark}"
+    rounded: "{rounded.mark}"
+    padding: "0 7px"
+  bag-row-unsaved:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    padding: "0.4rem 1rem"
+  choice-card:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "0.75rem 2.4rem 0.75rem 0.85rem"
+  choice-card-selected:
+    backgroundColor: "{colors.paper}"
+    textColor: "{colors.ink}"
+  index-tab-inline:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-2}"
+    padding: "0.6rem 1rem"
+  index-tab-inline-active:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+  code-editor:
+    backgroundColor: "{colors.paper-sunk}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "1rem"
 ---
 
 # Design System: GaCy-srtool
@@ -232,7 +267,7 @@ The element highlighters are the colour identity of each entry, set per entry th
 - **Imaginary Highlighter** (`hl-imaginary`): the element band for Imaginary characters. It also serves as the planner's general marker: the active index-tab bar, text selection and the gold button. The 5-star rarity colour uses the same hex, and the 4-star rarity colour reuses Lightning.
 
 ### Tertiary
-- **Pending Highlighter** (`pending`): Reserved. It marks edits the server has not received: the "not sent" tag and border on an entry, the pending stamp and dot, and the pending count in the page summary. Nothing else uses it.
+- **Pending Highlighter** (`pending`): Reserved. It marks edits the server has not received. With the sync tracker, that is the "not sent" tag and border on an entry, the pending stamp and dot, and the pending count in the page summary. Panels that save on their own button use it the same way: unsaved inventory rows, the unsaved count, and the unsaved dot on the camera and Aha's Help panels. Nothing else uses it.
 - **Stamp Green** (`received`): The received stamp and success outlines (success toast, success button). It has the same hex as the Wind highlighter, but its role is "the server has this".
 - **Correction Red** (`danger`): The error toast outline and offline or failed text.
 
@@ -246,7 +281,7 @@ The element highlighters are the colour identity of each entry, set per entry th
 - **Dot** (`dot`): The 1px dots of the paper grid.
 
 ### Named Rules
-**The Reserved Highlighter Rule.** `pending` means "the server has not received this" and nothing else. Never use it for warnings, emphasis or decoration. If it appears, the stamp and at least one entry must agree.
+**The Reserved Highlighter Rule.** `pending` means "the server has not received this" and nothing else. Never use it for warnings, emphasis or decoration, including "browse only" or "boss" tags. For pushed character data, the stamp and at least one entry must agree. For a panel with its own Save, it clears when that save succeeds.
 
 **The Highlighter Not Glow Rule.** Element colour goes on a flat band, a chip icon or a rarity mark. It never becomes a glow, a gradient, a tinted card background, or the colour of body text.
 
@@ -284,6 +319,11 @@ Every tab opens with the same page head: an `h1.page-title` in Headline type, wi
 - **Dashboard & Team:** A one-line count summary in the page head. Next comes the team panel, whose slots use `auto-fit`, minimum 190px, so the team always spans the width. Below it is a session row: server and battle panels on the left, the console on the right. The session row stacks below 1100px, and the team drops to two columns at 640px.
 - **Damage Analyst:** An intro line, a toolbar, a four-cell metrics row (two by two below 900px), the team share panel, then character sheets in an `auto-fit` grid with a 320px minimum (one column at 480px), then an enemies panel.
 - **Settings:** Sections in an `auto-fit` grid with a 420px minimum. That gives four columns on very wide screens and two at 1440px. At 520px and below there is one column.
+- **Inventory:** A segmented switch between the item book and bag counts. The item book is an `auto-fill` grid with a 260px minimum (one column at 520px). Bag counts are a ruled table in one card, scrolling inside at 65vh with a sticky header.
+- **Monster Settings:** Mode tabs on a rule, then pickers in `auto-fill` grids (groups 290px, stages 310px), then the battle panel with ruled waves. Aha's Help and the FireflyGo room picker sit in the same column.
+- **Save manager, FireflyGo controls:** The Settings grid (`auto-fit`, 420px minimum). FireflyGo's Lua script takes a full-width section below the grid, and its actions sit in one row under a rule.
+- **Ex-Rank:** An `auto-fill` grid of entries with a 340px minimum (one column at 480px), under a toolbar with the two bulk buttons.
+- **JSON:** The editor card first, its height `max(480px, 100vh - 360px)`, then the Enka import in two columns (one below 768px).
 - **Character editor:** A full page, not a dialog. On wide screens it covers the content area beside the rail and below the header (`top: 64px; left: 220px`), so the index stays visible. It uses the same clamp gutter as the main column.
 
 Spacing works in rem steps (0.35, 0.6, 0.75, 1.25 and 1.75rem). The paper's 22px dot grid sets the background rhythm.
@@ -401,6 +441,34 @@ Battle numbers are written as one ruled row, not as coloured boxes. It has four 
 - **Note:** An informational note in a section is a dashed strong-rule box, set apart from the rows.
 - **Switch:** Off is a `rule-strong` track with an ink knob. On is a `received` track with a paper knob. It transitions over 0.18s, with no transition under reduced motion. The real checkbox is visually hidden, so `input:focus-visible + .slider` draws the 2px ink focus ring on the track.
 - **Actions:** Save is the primary button and fills the action row. Clearing the cache and resetting everything sit below a rule as a separate danger group.
+- **State label:** Where a switch needs a word beside it (Ex-Rank), the word names the state ("On" / "Off"), never the action. It is Mark type, `received` when on and `ink-2` when off.
+- **Failed toggle:** A switch that saves on change is disabled while the request runs, and goes back to its previous position if the request fails.
+
+### Item Card
+Each item in the item book is one `<button>` that opens its detail dialog. Nothing inside it is a nested button.
+- **Shape:** Raised paper, 1px rule, 8px radius, a 68px art well on sunk paper beside the facts.
+- **Facts:** The name in Chakra Petch 700 (two lines), the ID in Mark type with an inline SVG rarity star, the category line in `ink-2`.
+- **Support tag:** "GaCy supported" is a `received` outline; "Browse only" is a dashed `rule-strong` outline in `ink-2`. Neither uses `pending`.
+- **Missing art:** A dashed well with the "no image" label in text, no glyph.
+- **Detail dialog:** The planner dialog (paper, strong rule, 10px radius, dialog shadow, flat scrim with no blur), centred with `margin: auto`. Close and the quantity stepper use drawn SVG icons.
+
+### Bag Count Sheet
+A ruled table: the item ID in Mark type on the left, a 220px number input on the right. An unsaved row gets a 3px `pending` bar on its left edge, a "Not sent" tag beside the ID, and a `pending` input border. The unsaved count beside the search is the same tag.
+
+### Index Tabs (in page)
+Used for modes inside one page (Monster Settings). Borderless `ink-2` labels on a shared bottom rule. The open tab is ink at 600 with a 2px ink underline drawn by `box-shadow: inset 0 -2px 0`. On phones the strip scrolls sideways.
+
+### Choice Card
+For picking one option from a few (camera mode, Aha's Help level, stage and group picks, FireflyGo sides).
+- Paper or raised paper with a 1px rule and 8px radius. Hover strengthens the rule and moves to `paper-hover`.
+- The chosen card gets an ink border and a 1px ink ring. Where a mark is shown, it is a 20 to 22px circle that fills with ink and gets a CSS-drawn check in paper.
+- Boss stages mark only their tag line in `hl-imaginary`, not the whole card.
+
+### Code Editor
+The raw JSON editor and the FireflyGo HP/Lua fields. Sunk paper, strong rule, 8px radius, ink text in the code mono face (the only place it is used). Focus gives an ink border and a 1px ink ring. A status bar below shows the open file in Mark type and a hint in `ink-2`.
+
+### Status Line
+A line of text under a tool (Enka import, FireflyGo controls, Monster Settings) that reports the last result. The code sets only `data-tone` (`success`, `error`, `warning`, `info`); CSS picks the colour: `received`, `danger`, `hl-imaginary`, `ink-2`. It is empty, and takes no space, when there is nothing to say.
 
 ## Do's and Don'ts
 
@@ -416,14 +484,20 @@ Battle numbers are written as one ruled row, not as coloured boxes. It has four 
 - **Do** make every clickable tile, slot or entry a real button (or `role="button"` with Enter and Space), with the global focus ring. Put secondary actions such as the favorite star in sibling buttons.
 - **Do** colour a character wherever it appears (entry, lineup slot, analyst sheet, share segment) with the same `--entry-hl` element highlighter.
 - **Do** set a translated label from JS through `setI18nText(node, key)` or `t()`, so a language switch re-renders it.
+- **Do** report a result by meaning (`data-tone`) and let CSS choose the colour.
+- **Do** put a switch back when its request fails, and label switch states as states, not actions.
+- **Do** reuse the Settings section, row and switch for any page of options, and the segmented switch for any two views of one list.
 
 ### Don't:
 - **Don't** add glows, glass or blur, or gradient fills. The dot grid is the one native gradient.
 - **Don't** put a shadow on anything in the page flow. Shadows belong only to toasts, menus and dialogs.
-- **Don't** use `pending` orange for anything but unsent edits, or show it without the sync tracker behind it.
+- **Don't** use `pending` orange for anything but edits the server has not received, or show it without a real tracker or Save behind it.
 - **Don't** set UI labels in tracked uppercase, or add kickers or eyebrows above titles.
 - **Don't** use emoji or text glyphs as icons.
 - **Don't** tint whole cards or text with element colours. The highlighter band carries the identity.
 - **Don't** confirm a push with a success toast before the server answers. Gate the toast on the tracked push result.
 - **Don't** add inline `style=""` layout to the markup. Give it a class in the planner layer of `css/styles.css`.
 - **Don't** reintroduce the logo mark or branch status in the header or rail.
+- **Don't** set colours from JS (`node.style.color`). Set a state attribute and style it.
+- **Don't** hide a file input with `display: none`; hide it visually so the keyboard still reaches it.
+- **Don't** show a control for a server option the game does not have. Keep sending the value the server already holds.
