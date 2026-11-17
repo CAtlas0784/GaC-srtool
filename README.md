@@ -14,11 +14,9 @@
 
 ## เซิร์ฟเวอร์ที่รองรับ
 
-| โหมด | วิธีส่งข้อมูล | สิ่งที่ใช้ได้ |
-| --- | --- | --- |
-| **GaCy GO** | อ่านและเขียนผ่าน REST API (`/api/...`) | ทุกฟีเจอร์: ตัวละคร, อุปกรณ์, ไอเทม, มอนสเตอร์, ไฟล์เซฟ, Ex-Rank, Damage Analyst, GM Console |
-| **FireflyGo** | ส่งอย่างเดียวผ่าน `POST /sync` | ตัวละคร, อุปกรณ์, ห้อง Endgame, ตัวควบคุม FireflyGo (extra_data), ตัวแก้ JSON |
-| **RobinSR** | ส่งอย่างเดียวผ่าน `POST /srtools` | ตัวละคร, อุปกรณ์, ห้อง Endgame, ตัวแก้ JSON |
+- **GaCy GO:** อ่านและเขียนผ่าน REST API (`/api/...`) ใช้ได้ทุกฟีเจอร์ ได้แก่ ตัวละคร อุปกรณ์ ไอเทม มอนสเตอร์ ไฟล์เซฟ Ex-Rank Damage Analyst และ GM Console
+- **FireflyGo:** ส่งอย่างเดียวผ่าน `POST /sync` ใช้ได้กับตัวละคร อุปกรณ์ ห้อง Endgame ตัวควบคุม FireflyGo (extra_data) และตัวแก้ JSON
+- **RobinSR:** ส่งอย่างเดียวผ่าน `POST /srtools` ใช้ได้กับตัวละคร อุปกรณ์ ห้อง Endgame และตัวแก้ JSON
 
 แท็บที่เซิร์ฟเวอร์ไม่รองรับจะถูกซ่อนเองตามโหมดที่เลือก
 
@@ -124,21 +122,19 @@ npm test
 
 ## API ของ GaCy GO
 
-| Endpoint | Method | คำอธิบาย |
-| --- | --- | --- |
-| `/api/status` | GET | สถานะเซิร์ฟเวอร์ ทีม ตัวละคร และพิกัด |
-| `/api/freesr` | GET, POST | อ่านหรือเขียน `freesr-data.json` |
-| `/api/freesr/avatars` | GET, POST | อ่านหรือเขียนข้อมูลตัวละคร |
-| `/api/inventory/materials` | GET, POST | อ่าน item catalog ของ Client และบันทึกจำนวนไอเทมโดยไม่เขียนทับข้อมูลอื่น |
-| `/api/persistent` | GET, POST | อ่านหรือเขียนไฟล์ `persistent` |
-| `/api/battle_report` | GET, POST | รายงานการต่อสู้ล่าสุด |
-| `/api/battle_report/reset` | POST | ล้างประวัติการต่อสู้ |
-| `/api/exrank/toggle` | POST | เปิด/ปิด Ex-Rank |
-| `/api/avatar/rank` | POST | เปลี่ยน Eidolon |
-| `/api/avatar/max_all` | POST | ปรับทุกตัวเป็น Max E6 และสกิลเต็ม |
-| `/api/command` | POST | ส่งคำสั่ง GM |
-| `/api/command-completions` | GET | รายการสำหรับตัวช่วยพิมพ์คำสั่ง |
-| `/api/client/unstuck` | POST, GET | ปลด UI ที่ค้าง (POST ส่งคำสั่ง, GET รอผลจากเกม) |
+- `GET` `/api/status`: สถานะเซิร์ฟเวอร์ ทีม ตัวละคร และพิกัด
+- `GET POST` `/api/freesr`: อ่านหรือเขียน `freesr-data.json`
+- `GET POST` `/api/freesr/avatars`: อ่านหรือเขียนข้อมูลตัวละคร
+- `GET POST` `/api/inventory/materials`: อ่าน item catalog ของ Client และบันทึกจำนวนไอเทมโดยไม่เขียนทับข้อมูลอื่น
+- `GET POST` `/api/persistent`: อ่านหรือเขียนไฟล์ `persistent`
+- `GET POST` `/api/battle_report`: รายงานการต่อสู้ล่าสุด
+- `POST` `/api/battle_report/reset`: ล้างประวัติการต่อสู้
+- `POST` `/api/exrank/toggle`: เปิด/ปิด Ex-Rank
+- `POST` `/api/avatar/rank`: เปลี่ยน Eidolon
+- `POST` `/api/avatar/max_all`: ปรับทุกตัวเป็น Max E6 และสกิลเต็ม
+- `POST` `/api/command`: ส่งคำสั่ง GM
+- `GET` `/api/command-completions`: รายการสำหรับตัวช่วยพิมพ์คำสั่ง
+- `POST GET` `/api/client/unstuck`: ปลด UI ที่ค้าง (POST ส่งคำสั่ง, GET รอผลจากเกม)
 
 การบันทึกจากหน้าปรับแต่งตัวละครส่งข้อมูลทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวม `data.skills` และ `data.skills_by_anchor_type` ของร่องรอย เพื่อไม่ให้เซิร์ฟเวอร์ซิงค์เลเวลหรือ Eidolon ระหว่างทางก่อนร่องรอยถูกบันทึก ถ้าเซิร์ฟเวอร์ตอบผิดพลาดจะแจ้งว่าบันทึกไม่สำเร็จ
 

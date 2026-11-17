@@ -14,11 +14,9 @@
 
 ## 支持的服务器
 
-| 模式 | 数据传输方式 | 可用功能 |
-| --- | --- | --- |
-| **GaCy GO** | 通过 REST API（`/api/...`）读写 | 全部功能：角色、装备、物品、怪物、存档、Ex-Rank、Damage Analyst、GM 控制台 |
-| **FireflyGo** | 仅推送，`POST /sync` | 角色、装备、终局关卡、FireflyGo 控制（extra_data）、JSON 编辑器 |
-| **RobinSR** | 仅推送，`POST /srtools` | 角色、装备、终局关卡、JSON 编辑器 |
+- **GaCy GO：** 通过 REST API（`/api/...`）读写，可使用全部功能：角色、装备、物品、怪物、存档、Ex-Rank、Damage Analyst 和 GM 控制台。
+- **FireflyGo：** 仅推送，`POST /sync`。可用：角色、装备、终局关卡、FireflyGo 控制（extra_data）和 JSON 编辑器。
+- **RobinSR：** 仅推送，`POST /srtools`。可用：角色、装备、终局关卡和 JSON 编辑器。
 
 所选服务器不支持的标签页会自动隐藏。
 
@@ -124,21 +122,19 @@ npm test
 
 ## GaCy GO API
 
-| 接口 | 方法 | 说明 |
-| --- | --- | --- |
-| `/api/status` | GET | 服务器状态、编队、角色和位置 |
-| `/api/freesr` | GET, POST | 读取或写入 `freesr-data.json` |
-| `/api/freesr/avatars` | GET, POST | 读取或写入角色数据 |
-| `/api/inventory/materials` | GET, POST | 读取客户端物品目录，并只保存物品数量 |
-| `/api/persistent` | GET, POST | 读取或写入 `persistent` 文件 |
-| `/api/battle_report` | GET, POST | 最近一次战斗报告 |
-| `/api/battle_report/reset` | POST | 清除战斗记录 |
-| `/api/exrank/toggle` | POST | 开启或关闭 Ex-Rank |
-| `/api/avatar/rank` | POST | 修改星魂 |
-| `/api/avatar/max_all` | POST | 将所有角色设为满星魂 E6 并满技能 |
-| `/api/command` | POST | 发送 GM 命令 |
-| `/api/command-completions` | GET | 命令助手使用的列表 |
-| `/api/client/unstuck` | POST, GET | 解除卡住的界面（POST 发送，GET 等待游戏回应） |
+- `GET` `/api/status`: 服务器状态、编队、角色和位置
+- `GET POST` `/api/freesr`: 读取或写入 `freesr-data.json`
+- `GET POST` `/api/freesr/avatars`: 读取或写入角色数据
+- `GET POST` `/api/inventory/materials`: 读取客户端物品目录，并只保存物品数量
+- `GET POST` `/api/persistent`: 读取或写入 `persistent` 文件
+- `GET POST` `/api/battle_report`: 最近一次战斗报告
+- `POST` `/api/battle_report/reset`: 清除战斗记录
+- `POST` `/api/exrank/toggle`: 开启或关闭 Ex-Rank
+- `POST` `/api/avatar/rank`: 修改星魂
+- `POST` `/api/avatar/max_all`: 将所有角色设为满星魂 E6 并满技能
+- `POST` `/api/command`: 发送 GM 命令
+- `GET` `/api/command-completions`: 命令助手使用的列表
+- `POST GET` `/api/client/unstuck`: 解除卡住的界面（POST 发送，GET 等待游戏回应）
 
 在角色编辑器中保存时，会通过 `/api/freesr` 一次性发送整个角色，包括 `data.skills` 和 `data.skills_by_anchor_type` 中的行迹，避免服务器在行迹保存前同步等级或星魂。服务器返回错误时，编辑器会提示保存失败。
 

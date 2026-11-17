@@ -14,11 +14,9 @@ Use it at [gacy-srtool.vercel.app](https://gacy-srtool.vercel.app/), then open *
 
 ## Supported servers
 
-| Mode | How data is sent | What is available |
-| --- | --- | --- |
-| **GaCy GO** | Read and write over the REST API (`/api/...`) | Everything: characters, equipment, items, monsters, save files, Ex-Rank, Damage Analyst, GM Console |
-| **FireflyGo** | Push only, over `POST /sync` | Characters, equipment, Endgame rooms, FireflyGo controls (extra_data), JSON editor |
-| **RobinSR** | Push only, over `POST /srtools` | Characters, equipment, Endgame rooms, JSON editor |
+- **GaCy GO:** reads and writes over the REST API (`/api/...`). Everything is available: characters, equipment, items, monsters, save files, Ex-Rank, Damage Analyst and the GM Console.
+- **FireflyGo:** push only, over `POST /sync`. Characters, equipment, Endgame rooms, FireflyGo controls (extra_data) and the JSON editor.
+- **RobinSR:** push only, over `POST /srtools`. Characters, equipment, Endgame rooms and the JSON editor.
 
 Tabs the selected server does not support are hidden automatically.
 
@@ -124,21 +122,19 @@ npm test
 
 ## GaCy GO API
 
-| Endpoint | Method | Description |
-| --- | --- | --- |
-| `/api/status` | GET | Server status, team, characters and position |
-| `/api/freesr` | GET, POST | Read or write `freesr-data.json` |
-| `/api/freesr/avatars` | GET, POST | Read or write character data |
-| `/api/inventory/materials` | GET, POST | Read the client item catalog and save item counts without touching other data |
-| `/api/persistent` | GET, POST | Read or write the `persistent` file |
-| `/api/battle_report` | GET, POST | The latest battle report |
-| `/api/battle_report/reset` | POST | Clear the battle history |
-| `/api/exrank/toggle` | POST | Turn Ex-Rank on or off |
-| `/api/avatar/rank` | POST | Change Eidolon |
-| `/api/avatar/max_all` | POST | Set everyone to Max E6 with full skills |
-| `/api/command` | POST | Send a GM command |
-| `/api/command-completions` | GET | Lists for the command assistant |
-| `/api/client/unstuck` | POST, GET | Clear a stuck UI (POST sends it, GET waits for the game's reply) |
+- `GET` `/api/status`: server status, team, characters and position
+- `GET POST` `/api/freesr`: read or write `freesr-data.json`
+- `GET POST` `/api/freesr/avatars`: read or write character data
+- `GET POST` `/api/inventory/materials`: read the client item catalog and save item counts without touching other data
+- `GET POST` `/api/persistent`: read or write the `persistent` file
+- `GET POST` `/api/battle_report`: the latest battle report
+- `POST` `/api/battle_report/reset`: clear the battle history
+- `POST` `/api/exrank/toggle`: turn Ex-Rank on or off
+- `POST` `/api/avatar/rank`: change Eidolon
+- `POST` `/api/avatar/max_all`: set everyone to Max E6 with full skills
+- `POST` `/api/command`: send a GM command
+- `GET` `/api/command-completions`: lists for the command assistant
+- `POST GET` `/api/client/unstuck`: clear a stuck UI (POST sends it, GET waits for the game's reply)
 
 Saving from the character editor sends the whole character through `/api/freesr` in one request, including the traces in `data.skills` and `data.skills_by_anchor_type`, so the server cannot sync level or Eidolon before the traces are saved. If the server answers with an error, the editor says the save failed.
 
