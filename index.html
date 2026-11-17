@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=2.60">
+  <link rel="stylesheet" href="css/styles.css?v=2.61">
   <link rel="stylesheet" href="css/item-catalog.css?v=6">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -882,22 +882,6 @@
           </div>
 
           <div class="card settings-section ff-group">
-            <div class="card-title ff-group-title" data-i18n="fireflySettingTitle">In-game settings</div>
-            <label class="ff-toggle">
-              <span data-i18n="fireflySettingCensorship">Censorship</span>
-              <span class="switch"><input type="checkbox" id="ff-setting-censorship"><span class="slider"></span></span>
-            </label>
-            <label class="ff-toggle">
-              <span data-i18n="fireflySettingHideUi">Hide UI</span>
-              <span class="switch"><input type="checkbox" id="ff-setting-hide-ui"><span class="slider"></span></span>
-            </label>
-            <div class="ff-field">
-              <label class="form-label" for="ff-setting-invasion-percent" data-i18n="fireflySettingInvasion">Invasion percent</label>
-              <input type="number" id="ff-setting-invasion-percent" class="form-input" min="0" step="1" value="0">
-            </div>
-          </div>
-
-          <div class="card settings-section ff-group">
             <div class="card-title ff-group-title" data-i18n="fireflyChallengeTitle">Challenge Peak</div>
             <div class="ff-field">
               <label class="form-label" for="ff-challenge-skip-node" data-i18n="fireflyChallengeSkipNode">Skip node</label>
@@ -944,10 +928,62 @@
           </div>
         </div>
 
+        <div class="card settings-section ffx-features">
+          <div class="card-title" data-i18n="fireflySettingTitle">Extra features</div>
+          <p class="settings-row-desc ffx-section-desc" data-i18n="fireflySettingDesc">UI and in-game overrides</p>
+          <div class="settings-rows">
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-title" data-i18n="fireflySettingHideUi">Hide UI</div>
+                <div class="settings-row-desc" data-i18n="fireflySettingHideUiDesc">Hides the game UI.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="ff-setting-hide-ui" data-i18n-aria-label="fireflySettingHideUi">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-title" data-i18n="fireflySettingCensorship">Disable censorship</div>
+                <div class="settings-row-desc" data-i18n="fireflySettingCensorshipDesc">Turns off in-game censorship.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="ff-setting-censorship" data-i18n-aria-label="fireflySettingCensorship">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="settings-row ffx-aha">
+              <div class="ffx-aha-head">
+                <div>
+                  <label class="settings-row-title" for="ff-setting-invasion-percent" data-i18n="fireflySettingInvasion">Aha's Big Help</label>
+                  <div class="settings-row-desc" data-i18n="fireflySettingInvasionDesc">Invasion progress for Aha's assistance buff.</div>
+                </div>
+                <output class="ffx-aha-value" id="ff-setting-invasion-value" for="ff-setting-invasion-percent">0%</output>
+              </div>
+              <input type="range" id="ff-setting-invasion-percent" class="ffx-aha-range" min="0" max="100" step="1" value="0">
+              <div class="ffx-aha-presets" role="group" data-i18n-aria-label="fireflyInvasionPresets">
+                <button type="button" class="ffx-aha-preset" data-invasion-preset="0">0%</button>
+                <button type="button" class="ffx-aha-preset" data-invasion-preset="40">40%</button>
+                <button type="button" class="ffx-aha-preset" data-invasion-preset="70">70%</button>
+                <button type="button" class="ffx-aha-preset" data-invasion-preset="100">100%</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card settings-section ffx-lua">
-          <div class="ff-field">
-            <label class="form-label" for="ff-lua" data-i18n="fireflyLuaLabel">Lua script (optional)</label>
-            <textarea id="ff-lua" class="json-textarea ffx-code" spellcheck="false"
+          <div class="settings-row ffx-lua-head">
+            <div>
+              <div class="settings-row-title" data-i18n="fireflyLuaLabel">Lua script</div>
+              <div class="settings-row-desc" data-i18n="fireflyLuaDesc">Runs a custom Lua script in game.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="ff-lua-enabled" data-i18n-aria-label="fireflyLuaLabel">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="ffx-lua-editor" id="ff-lua-editor" hidden>
+            <textarea id="ff-lua" class="json-textarea ffx-code" spellcheck="false" data-i18n-aria-label="fireflyLuaLabel"
                     placeholder="-- custom lua" data-i18n-placeholder="fireflyLuaPlaceholder"></textarea>
           </div>
         </div>
@@ -2048,6 +2084,6 @@
   <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.71"></script>
+  <script type="module" src="js/app.js?v=3.73"></script>
 </body>
 </html>

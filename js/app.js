@@ -1,11 +1,11 @@
 import { COMMANDS, usage, inspectCommand, completeCommand, setCommandLanguage, describeCommand } from './command-assistant.mjs';
-import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.25';
-import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.31';
-import { initializeItemCatalog } from './item-catalog.js?v=15';
-import { initializeUnstuck } from './unstuck.js?v=7';
+import { AVATAR_METADATA, getAvatarInfo } from './avatars-data.js?v=2.26';
+import { LIGHTCONE_METADATA, RELIC_SET_METADATA, getLightconeInfo, getRelicSetInfo } from './equipment-data.js?v=2.32';
+import { initializeItemCatalog } from './item-catalog.js?v=16';
+import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.49';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.50';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
@@ -10352,7 +10352,7 @@ function renderFireflyExtras({ force = false } = {}) {
 
   setChk('ff-setting-censorship', setting.censorship);
   setChk('ff-setting-hide-ui', setting.hide_ui);
-  setVal('ff-setting-invasion-percent', setting.invasion_percent ?? 0);
+  setFireflyInvasionPercent(fireflyInvasionToPercent(setting.invasion_percent));
 
   setVal('ff-challenge-skip-node', challenge.skip_node ?? 0);
   setVal('ff-challenge-peak-group', challenge.challenge_peak_group_id ?? 0);
@@ -10364,7 +10364,12 @@ function renderFireflyExtras({ force = false } = {}) {
   setVal('ff-theory-lineup', listText(theory.custom_lineup));
   const hp = theory.hp;
   setVal('ff-theory-hp', hp && Object.keys(hp).length > 0 ? JSON.stringify(hp) : '');
-  setVal('ff-lua', extra.lua ?? '');
+  // With no script on record the switch goes off, but whatever is typed in
+  // the editor stays, so turning Lua off and saving does not lose it.
+  const hasLua = typeof extra.lua === 'string' && extra.lua.trim() !== '';
+  if (hasLua) setVal('ff-lua', extra.lua);
+  setChk('ff-lua-enabled', hasLua);
+  syncFireflyLuaEditor();
 
   fireflyExtrasDirty = false;
   setFireflyExtraStatus('');
@@ -10412,7 +10417,8 @@ function readFireflyExtrasForm() {
       cm: knownSetting.cm === true,
       first_person: knownSetting.first_person === true,
       hide_ui: chk('ff-setting-hide-ui'),
-      invasion_percent: Number(val('ff-setting-invasion-percent')) || 0
+      // The slider shows 0-100 but FireflyGo stores a 0-1 fraction.
+      invasion_percent: Number(((Number(val('ff-setting-invasion-percent')) || 0) / 100).toFixed(2))
     },
     challenge: {
       skip_node: Number(val('ff-challenge-skip-node')) || 0,
@@ -10426,8 +10432,34 @@ function readFireflyExtrasForm() {
       stage_id: Number(val('ff-theory-stage-id')) || 0,
       custom_lineup: nums('ff-theory-lineup')
     },
-    lua: luaRaw.trim() ? luaRaw : null
+    // Switching Lua off stops sending it; the text stays in the editor.
+    lua: chk('ff-lua-enabled') && luaRaw.trim() ? luaRaw : null
   });
+}
+
+// FireflyGo stores invasion_percent as 0-1. Older saves from this page held
+// whole numbers (40 for 40%), so anything above 1 is read as a percent.
+function fireflyInvasionToPercent(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(100, Math.round(n <= 1 ? n * 100 : n));
+}
+
+function setFireflyInvasionPercent(percent) {
+  const range = document.getElementById('ff-setting-invasion-percent');
+  if (range) range.value = String(percent);
+  const output = document.getElementById('ff-setting-invasion-value');
+  if (output) output.textContent = `${percent}%`;
+  document.querySelectorAll('[data-invasion-preset]').forEach(button => {
+    const active = Number(button.dataset.invasionPreset) === percent;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function syncFireflyLuaEditor() {
+  const editor = document.getElementById('ff-lua-editor');
+  if (editor) editor.hidden = document.getElementById('ff-lua-enabled')?.checked !== true;
 }
 
 function saveFireflyExtrasFromForm() {
@@ -10445,6 +10477,22 @@ function setupFireflyExtrasEvents() {
   const markDirty = () => { fireflyExtrasDirty = true; };
   card.addEventListener('input', markDirty);
   card.addEventListener('change', markDirty);
+
+  const invasionRange = document.getElementById('ff-setting-invasion-percent');
+  invasionRange?.addEventListener('input', () => setFireflyInvasionPercent(Number(invasionRange.value) || 0));
+  card.querySelectorAll('[data-invasion-preset]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!invasionRange) return;
+      setFireflyInvasionPercent(Number(button.dataset.invasionPreset) || 0);
+      // Same path as dragging, so the form is marked changed and Auto-Sync runs.
+      invasionRange.dispatchEvent(new Event('input', { bubbles: true }));
+      invasionRange.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+  document.getElementById('ff-lua-enabled')?.addEventListener('change', () => {
+    syncFireflyLuaEditor();
+    if (document.getElementById('ff-lua-enabled')?.checked) document.getElementById('ff-lua')?.focus();
+  });
 
   // With Auto-Sync on, a changed setting is sent by itself. `change` fires when
   // a toggle flips or a text field is left, so typing is not sent key by key;
