@@ -7736,3 +7736,41 @@ input:checked + .slider:before { background-color: var(--paper); }
   .ffx-actions .btn { flex: 1 1 100%; }
   .ffx-actions #btn-firefly-sync { margin-left: 0; }
 }
+
+
+/* Endgame room picker (FireflyGo / RobinSR): stages get the full row and
+   each card stacks the stage name over its first monster, so long names
+   such as "Paramount Bliss Inverted: Illwish Archlotus" never squeeze. */
+#tab-monster-settings .ff-endgame-stage-field { grid-column: 1 / -1; }
+
+#tab-monster-settings .ff-endgame-stage-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+
+#tab-monster-settings .ff-endgame-stage-grid .monster-settings-stage-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  min-height: 0;
+  padding: 0.85rem;
+}
+
+#tab-monster-settings .ff-endgame-stage-grid .monster-settings-stage-copy { flex: none; }
+
+#tab-monster-settings .ff-endgame-stage-grid .monster-settings-stage-copy strong {
+  font-size: 0.98rem;
+  line-height: 1.3;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+#tab-monster-settings .ff-endgame-stage-grid .monster-settings-monster {
+  width: 100%;
+  min-width: 0;
+}
+
+#tab-monster-settings .ff-endgame-stage-grid .monster-settings-monster-portrait {
+  flex-basis: 56px;
+  width: 56px;
+  height: 56px;
+}

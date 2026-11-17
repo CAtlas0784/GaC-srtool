@@ -9060,9 +9060,10 @@ function renderFireflyRoomEditor(root, mode) {
   if (mode === 'peak') {
     const stages = Array.isArray(group?.stages) ? group.stages : [];
     selection.stageIndex = Math.min(Math.max(Number(selection.stageIndex) || 0, 0), Math.max(stages.length - 1, 0));
-    const stageField = monsterElement('div', 'ff-field');
+    // Stages take the full row under the season picker.
+    const stageField = monsterElement('div', 'ff-field ff-endgame-stage-field');
     stageField.append(monsterElement('span', 'form-label', t('ffEndgameStage')));
-    const stageGrid = monsterElement('div', 'monster-settings-stage-grid');
+    const stageGrid = monsterElement('div', 'monster-settings-stage-grid ff-endgame-stage-grid');
     stages.forEach((stage, index) => {
       const active = index === selection.stageIndex;
       const isBoss = stage.kind === 'boss' || stage.kind === 'hard';
@@ -9070,13 +9071,14 @@ function renderFireflyRoomEditor(root, mode) {
       card.type = 'button';
       card.dataset.ffEndgameStage = String(index);
       card.setAttribute('aria-pressed', String(active));
-      const firstMonster = stage.waves?.[0]?.[0];
-      if (firstMonster) card.append(makeFireflyMonsterChip(catalog, firstMonster));
+      // Stage name first with the full width, the first monster under it.
       const copy = monsterElement('span', 'monster-settings-stage-copy');
       copy.append(monsterElement('strong', '', fireflyLocalizedText(stage.name) || t('ffEndgameStageValue', { id: stage.stageId })));
       copy.append(monsterElement('span', 'monster-settings-stage-meta',
         `${t(FIREFLY_PEAK_KIND_KEYS[stage.kind] || 'ffEndgameStageKindPre')} · ${t('monsterSettingsWaveCount', { count: stage.waves?.length || 0 })}`));
       card.append(copy);
+      const firstMonster = stage.waves?.[0]?.[0];
+      if (firstMonster) card.append(makeFireflyMonsterChip(catalog, firstMonster));
       stageGrid.append(card);
     });
     stageField.append(stageGrid);
