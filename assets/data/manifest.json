@@ -1,6 +1,6 @@
 {
-  "version": "906475933f38",
-  "updatedAt": "2026-11-15T20:23:36.016Z",
+  "version": "67cded9c4353",
+  "updatedAt": "2026-11-17T15:03:11.869Z",
   "game": {
     "live": "4.7",
     "latest": "4.7.51"
@@ -14,7 +14,7 @@
     "avatars.json": "4636c327621c",
     "lightcones.json": "c54b638df72a",
     "relic-sets.json": "632e8502e80e",
-    "builds.json": "57f5524f6318"
+    "builds.json": "cafc07b8b774"
   },
   "assets": {
     "firefly-endgame.json": "ca55ae639c40",

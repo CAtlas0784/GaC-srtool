@@ -1,6 +1,6 @@
 {
   "1001": {
-    "signature": 21001,
+    "signature": 21002,
     "lightcones": [
       21002,
       23005,
@@ -84,7 +84,7 @@
     }
   },
   "1002": {
-    "signature": 21000,
+    "signature": 24001,
     "lightcones": [
       24001,
       23001,
@@ -521,7 +521,7 @@
     }
   },
   "1008": {
-    "signature": 21007,
+    "signature": 21012,
     "lightcones": [
       21012,
       24000
@@ -586,7 +586,7 @@
     }
   },
   "1009": {
-    "signature": 21021,
+    "signature": 21032,
     "lightcones": [
       21032,
       21011
@@ -651,7 +651,7 @@
     }
   },
   "1013": {
-    "signature": 24004,
+    "signature": 23000,
     "lightcones": [
       23000,
       21034,
@@ -740,7 +740,7 @@
     }
   },
   "1014": {
-    "signature": 24000,
+    "signature": 23045,
     "lightcones": [
       23045,
       24000
@@ -828,7 +828,7 @@
     }
   },
   "1015": {
-    "signature": 24001,
+    "signature": 23046,
     "lightcones": [
       23046,
       24001
@@ -1089,7 +1089,7 @@
     }
   },
   "1103": {
-    "signature": 21009,
+    "signature": 21013,
     "lightcones": [
       21013,
       24004,
@@ -1242,7 +1242,7 @@
     }
   },
   "1105": {
-    "signature": 21010,
+    "signature": 21021,
     "lightcones": [
       21000,
       21007,
@@ -1325,7 +1325,7 @@
     }
   },
   "1106": {
-    "signature": 22000,
+    "signature": 21015,
     "lightcones": [
       21015,
       22000,
@@ -1488,7 +1488,7 @@
     }
   },
   "1108": {
-    "signature": 21011,
+    "signature": 21008,
     "lightcones": [
       21008,
       21001,
@@ -1637,7 +1637,7 @@
     }
   },
   "1110": {
-    "signature": 21010,
+    "signature": 21028,
     "lightcones": [
       21028,
       21000
@@ -1701,7 +1701,7 @@
     }
   },
   "1111": {
-    "signature": 21014,
+    "signature": 21015,
     "lightcones": [
       21015,
       21001
@@ -1852,7 +1852,7 @@
     }
   },
   "1201": {
-    "signature": 21015,
+    "signature": 21034,
     "lightcones": [
       21034,
       21027,
@@ -1938,7 +1938,7 @@
     }
   },
   "1202": {
-    "signature": 21021,
+    "signature": 21032,
     "lightcones": [
       21032,
       21018,
@@ -2561,7 +2561,7 @@
     }
   },
   "1210": {
-    "signature": 21011,
+    "signature": 21008,
     "lightcones": [
       21008,
       21001,
@@ -2882,7 +2882,7 @@
     }
   },
   "1214": {
-    "signature": 21035,
+    "signature": 21042,
     "lightcones": [
       21042,
       21019
@@ -2971,7 +2971,7 @@
     }
   },
   "1215": {
-    "signature": 21021,
+    "signature": 21011,
     "lightcones": [
       21011,
       21032
@@ -3694,7 +3694,7 @@
     }
   },
   "1301": {
-    "signature": 21022,
+    "signature": 21021,
     "lightcones": [
       21035,
       21021
@@ -4552,7 +4552,7 @@
     }
   },
   "1312": {
-    "signature": 21035,
+    "signature": 24000,
     "lightcones": [
       24000,
       21005
@@ -4971,7 +4971,7 @@
     }
   },
   "1321": {
-    "signature": 23022,
+    "signature": 23050,
     "lightcones": [
       23050,
       23035,
@@ -5495,7 +5495,7 @@
     }
   },
   "1406": {
-    "signature": 23022,
+    "signature": 23043,
     "lightcones": [
       23043,
       21015
@@ -5666,7 +5666,7 @@
     }
   },
   "1408": {
-    "signature": 23042,
+    "signature": 23044,
     "lightcones": [
       23044,
       24000,
@@ -7741,7 +7741,7 @@
     }
   },
   "8005": {
-    "signature": 21016,
+    "signature": 21018,
     "lightcones": [
       21056,
       23019,
@@ -7826,7 +7826,7 @@
     }
   },
   "8006": {
-    "signature": 21016,
+    "signature": 21018,
     "lightcones": [
       21056,
       23019,
@@ -7911,7 +7911,7 @@
     }
   },
   "8007": {
-    "signature": 21040,
+    "signature": 22006,
     "lightcones": [
       21050,
       24005
@@ -7996,7 +7996,7 @@
     }
   },
   "8008": {
-    "signature": 21040,
+    "signature": 22006,
     "lightcones": [
       21050,
       24005
@@ -8081,7 +8081,7 @@
     }
   },
   "8009": {
-    "signature": 23054,
+    "signature": 24006,
     "lightcones": [
       23054,
       24006,
@@ -8169,7 +8169,7 @@
     }
   },
   "8010": {
-    "signature": 23054,
+    "signature": 24006,
     "lightcones": [
       23054,
       24006,
