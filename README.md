@@ -1,4 +1,4 @@
-# GaCy-Srtool 🌌
+# GaCy-Srtool
 
 <div align="center">
 
@@ -6,184 +6,179 @@
 
 </div>
 
-ใช้งานเว็บได้ที่ [GaCy Srtool บน Vercel](https://gacy-srtool.vercel.app/) เปิดหน้าตั้งค่าเพื่อเชื่อมต่อ SDK ของเซิร์ฟเวอร์ที่ใช้งานอยู่
+เครื่องมือจัดการบัญชี Honkai: Star Rail สำหรับเซิร์ฟเวอร์ส่วนตัว ใช้เปิดคู่กับเกมที่รันอยู่: ปรับตัวละคร กรวยแสง รีลิกส์ แล้วส่งเข้าเซิร์ฟเวอร์ เข้าเกมดูผล แล้วกลับมาปรับต่อ
 
-ในโหมด GaCy หน้า **ตั้งค่าตัวละคร / สวิตช์ระบบพิเศษ** เลือก Freecam หรือ FaceCam และตั้งระยะเริ่มต้นของ FaceCam ได้ หลังบันทึกให้กด Tab ในเกมเพื่อเปิดหรือปิดกล้อง; ลูกกลิ้งปรับระยะชั่วคราวและกลับเป็นค่าที่ตั้งไว้เมื่อเปิดใหม่
-
-## Unstuck / แก้ตัวหมุนค้าง
-
-เมื่อเชื่อมต่อเซิร์ฟเวอร์ GaCy GO ใช้ปุ่ม **Unstuck** ใน GM Command Console หรือพิมพ์ `/unstuck` ได้ เว็บจะรอผลตอบรับจากเกมก่อนแสดงว่าสำเร็จ ต้องเปิดเกมและเชื่อมต่อเซิร์ฟเวอร์อยู่ คำสั่งนี้ปลดการบล็อก UI ระหว่างรอแพ็กเก็ตผ่าน heartbeat โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ และไม่แทนการแก้ handler ที่ขาด ต้องใช้ SDK server ที่รองรับ `/api/client/unstuck`
-
-เว็บแอปพลิเคชันแดชบอร์ด (Web Dashboard & Management Tool) สำหรับจัดการข้อมูลตัวละคร, จัดทีม, ปรับแต่งรีลิกส์/กรวยแสง, วิเคราะห์ดาเมจจากการต่อสู้จริง และจัดการไฟล์เซฟ (`freesr-data.json`, `persistent`) ของเซิร์ฟเวอร์ **GaCy GO** (และเซิร์ฟเวอร์มาตรฐาน FreeSR)
-
-ทำงานแบบ Client-side 100% สามารถเปิดใช้งานผ่านเบราว์เซอร์ได้ทันทีโดยไม่ต้องติดตั้งโปรแกรมเพิ่มเติม
+ใช้งานได้ทันทีที่ [gacy-srtool.vercel.app](https://gacy-srtool.vercel.app/) แล้วไปที่หน้า **ตั้งค่า** เพื่อเลือกเซิร์ฟเวอร์และใส่ URL ของ SDK ที่ใช้อยู่ ทำงานในเบราว์เซอร์ทั้งหมด ไม่ต้องติดตั้งโปรแกรม
 
 ---
 
-## ⚡ ฟังก์ชันหลัก (Features)
+## เซิร์ฟเวอร์ที่รองรับ
 
-### 📊 1. แดชบอร์ด & จัดทีม (Live Dashboard & Lineup)
-- **สถานะการเชื่อมต่อสด:** ตรวจจับสถานะการเชื่อมต่อกับเซิร์ฟเวอร์แบบ Real-time พร้อมแถบแสดงค่า Ping
-- **จัดการทีม 4 ตำแหน่ง:** แสดงสมาชิกในทีมพร้อมระดับ Eidolon, อาวุธประจำตัว, เลเวล และพิกัดในฉาก
-- **แสดงผล Git Branch ปัจจุบัน:** ระบุชื่อ Git Branch ที่รันอยู่ (เช่น `main`, `test-gay`) บน Header และ Browser Tab อย่างแม่นยำ
-- **สรุปภาพรวมทรัพยากร:** แสดงจำนวนตัวละคร, กรวยแสง และรีลิกส์ทั้งหมดในคลัง
+| โหมด | วิธีส่งข้อมูล | สิ่งที่ใช้ได้ |
+| --- | --- | --- |
+| **GaCy GO** | อ่านและเขียนผ่าน REST API (`/api/...`) | ทุกฟีเจอร์: ตัวละคร, อุปกรณ์, ไอเทม, มอนสเตอร์, ไฟล์เซฟ, Ex-Rank, Damage Analyst, GM Console |
+| **FireflyGo** | ส่งอย่างเดียวผ่าน `POST /sync` | ตัวละคร, อุปกรณ์, ห้อง Endgame, ตัวควบคุม FireflyGo (extra_data), ตัวแก้ JSON |
+| **RobinSR** | ส่งอย่างเดียวผ่าน `POST /srtools` | ตัวละคร, อุปกรณ์, ห้อง Endgame, ตัวแก้ JSON |
 
-### ⚔️ 2. ระบบวิเคราะห์ดาเมจแบบเรียลไทม์ (Real-time Damage Analyst)
-- **ดึงสถิติต่อสู้จากเซิร์ฟเวอร์สด:** ดึงรายงานการต่อสู้ล่าสุด (`/api/battle_report`) แบบเดียวกับ FireflyGo
-- **สรุปสถิติดาเมจภาพรวม:** ดาเมจรวมทั้งหมด (Total DMG), ดาเมจเฉลี่ยต่อวินาที (DPS), จำนวนแอ็กชัน (Action Count)
-- **จำแนกประเภทความเสียหาย:**
-  - ดาเมจปกติ (Normal DMG)
-  - ดาเมจทำลายจุดอ่อน (Break DMG)
-  - ซูเปอร์เบรก (Super Break DMG)
-  - ดาเมจต่อเนื่อง (Damage over Time / DoT)
-- **วิเคราะห์ประสิทธิภาพการคริติคอล:** คำนวณอัตราคริติคอลจริง (CRIT Rate) และดาเมจคริติคอล (CRIT DMG) แยกรายตัวละคร
-- **กราฟเปรียบเทียบสัดส่วน:** กราฟแท่งแสดงสัดส่วนการทำดาเมจของสมาชิกแต่ละคนในทีม
+แท็บที่เซิร์ฟเวอร์ไม่รองรับจะถูกซ่อนเองตามโหมดที่เลือก
 
-### 🎛️ 3. ปรับแต่งออฟรองรีลิกส์ขั้นสูง (Interactive Relic Substats Customizer)
-- **ปรับแต่งออฟรอง 4 แถวอิสระ:** รองรับทั้งชิ้นส่วนหัว, มือ, ลำตัว, รองเท้า, ลูกแก้ว และสายเชื่อมโยง
-- **ปุ่มปรับจำนวน Roll สเต็ปเปอร์ `[-] [+]`:** ควบคุมการลงออฟรองได้อย่างแม่นยำ พร้อมนับจำนวนครั้งที่ Roll (จำกัดรวมสูงสุด 5 ครั้งต่อชิ้นตามกลไกเกม HSR)
-- **คำนวณค่าสเต็ตจริงอัตโนมัติ:** แสดงค่าสเต็ตที่คำนวณตามสูตรฐานของเกม Honkai: Star Rail
-- **ระบบป้องกันออฟซ้ำ:** ล็อคไม่ให้เลือกออฟรองซ้ำกับออฟหลัก (Main Affix) หรือออฟรองแถวอื่น
-- **พรีเซ็ตออฟรองสำเร็จรูป 5 สาย:**
-  - 🎯 **Crit Focus (สายดาเมจคริ):** CRIT Rate, CRIT DMG, ATK%, SPD
-  - 💥 **Break Focus (สายทำลายจุดอ่อน):** Break Effect, SPD, ATK%, HP%
-  - ⚡ **SPD Tuner (สายจัดลำดับเทิร์น):** SPD สูงสุด, CRIT Rate, ATK%, Effect RES
-  - ☠️ **DoT Specialist (สายดาเมจต่อเนื่อง):** ATK%, SPD, Effect Hit Rate, Break Effect
-  - 🛡️ **Tank / Sustain (สายป้องกันและฟื้นฟู):** DEF%, HP%, Effect RES, SPD
-- **จัดการได้ทันที:** แก้ไขรีลิกส์ที่ตัวละครกำลังสวมใส่อยู่ หรือแก้ไขรีลิกส์ในคลังเพื่อนำไปใช้งาน
+## สถานะการส่งข้อมูล
 
-### 👥 4. ระบบจัดการตัวละคร (Avatars & Character Builder)
-- **ข้อมูลครบถ้วน:** ครอบคลุมตัวละครทั้งหมดในเกมตาม Resource มาตรฐานและเนื้อหาล่าสุด
-- **คู่มือ Build รายตัว:** เปิดดูกรวยแสง, เซ็ตรีลิกส์/มิติ และออฟหลักที่พบบ่อยจากข้อมูลตัวอย่าง Endgame พร้อมโหมด/จำนวนตัวอย่าง วันที่เก็บข้อมูล และลิงก์คู่มือเต็มของ Prydwen
-- **ปรับแต่งสถานะ:** เลเวล (1-80), เลื่อนขั้น (Ascension 0-6), ระดับ Eidolon (E0-E6), และร่องรอยสกิล (Traces 10/10)
-- **ปุ่มลัดจัดการด่วน:**
-  - ⚡ *ปรับ E0S1 ทุกตัว:* ตั้งค่าตัวละครทุกตัวเป็น E0 พร้อมกรวยแสงประจำตัว S1 เลเวล 80
-  - ⭐ *ปรับ Max E6 ทุกตัว:* ปลดล็อค E6 และร่องรอยสกิลเต็ม 10/10 ให้ตัวละครทุกตัว
-- **รูปภาพสแปลชอาร์ตความละเอียดสูง:** ดึงภาพ Splash Art เต็มตัวขนาด 2048x2048 ผ่าน StarRailRes jsDelivr CDN
-- **ระบบ Fallback รูปภาพอัจฉริยะ:** แก้ปัญหาภาพไม่แสดงผลหรือหน้าต่างตัวละครจอดำ ด้วยกลไกสำรองภาพหลายระดับ
+ทุกการแก้ไขบอกชัดว่าเซิร์ฟเวอร์ได้รับแล้วหรือยัง:
 
-### 🗡️ 5. กรวยแสง & อุปกรณ์ (Lightcones & Equipment)
-- **ปรับแต่งกรวยแสง:** สวมใส่, ปรับเลเวล 1-80, เลื่อนขั้น 0-6 และระดับการขัดเกลา Superimposition (S1-S5)
-- **สลับกรวยแสงประจำตัวอัตโนมัติ:** ตรวจจับและสลับใส่ Signature Lightcone ของแต่ละตัวละครได้ในคลิกเดียว
+- **ตราประทับที่หัวหน้าเว็บ** แสดง *กำลังส่ง*, *ได้รับแล้ว · เวลา* หรือ *ส่งไม่สำเร็จ* พร้อมปุ่มลองใหม่ เวลาที่ได้รับล่าสุดจำแยกตามโหมดเซิร์ฟเวอร์
+- **ตัวละครที่แก้แล้วแต่เซิร์ฟเวอร์ยังไม่ได้รับ** มีป้าย "ยังไม่ส่ง" สีส้ม และหน้าตัวละครนับจำนวนที่ยังค้างไว้
+- ข้อความแจ้งว่าสำเร็จจะขึ้นหลังเซิร์ฟเวอร์ตอบกลับเท่านั้น
 
-### 🎒 6. คลังไอเทม (Material Inventory)
-- ค้นหารายการจาก Item ID ใน catalog ของ Client ที่เซิร์ฟเวอร์กำลังใช้ พร้อมแก้จำนวนได้หลายรายการก่อนบันทึกครั้งเดียว
-- ค่าในช่องที่ว่างใช้ค่าที่เซิร์ฟเวอร์สร้างตามปกติ; ล้างค่าที่เคยกำหนดเองเพื่อกลับไปใช้ค่าเริ่มต้นได้
-- การบันทึกแก้เฉพาะจำนวนไอเทมใน `freesr-data.json` ไม่เขียนทับตัวละคร, LC, Relic หรือ Battle Config
-- รองรับเฉพาะ GaCy GO ผ่าน `/api/inventory/materials`; บันทึกลงไฟล์ทันทีและต้องเข้าเกมใหม่เพื่อโหลด session พร้อมจำนวนที่แก้แล้ว
+---
 
-### 👾 6.1 Monster Setting
-- แยก Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration เพื่อดูชื่อด่าน/มอนสเตอร์ รูป, level และ wave จาก metadata Nanoka ที่ตรงกับ `client_version` ของเซิร์ฟเวอร์และ resource `challenge_data.json` / `resources/StageConfig.json` (อ่านอย่างเดียว); เมื่อ Client เปลี่ยนเวอร์ชัน API จะดึง metadata ของเวอร์ชันนั้นให้อัตโนมัติ โดยไม่ใช้ข้อมูลจากเวอร์ชันอื่น
-- เปลี่ยนการเลือกกลุ่ม/ด่านเป็นการ์ด และ Custom Enemy ค้นมอนด้วยชื่อหรือ ID พร้อมรูป/ชื่อจาก Nanoka; พิมพ์ ID เองได้ และแสดงรูปตัวอย่างขนาดใหญ่ขึ้น
-- Anomaly Arbitration เป็นโหมด Endgame ที่อ่าน stage จาก resource เช่นเดียวกับโหมดอื่น ไม่ใช่ Custom Enemy; Aha's Help มีแท็บแยกจาก AA
-- แก้ Custom Enemy ได้เฉพาะ Golden / Crimson Calyx และต้องเชื่อมต่อ GaCy-Srtool; การกดใช้ stage จาก Client จะล้าง custom waves เพื่อให้กลับไปใช้ resource
-- Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ custom waves จากหน้านี้
+## ฟังก์ชันตามแท็บ
 
-### 💾 7. จัดการไฟล์เซฟ GaCy (Persistent & FreeSR Data)
-- **ตั้งค่าตัวเอก (ผู้บุกเบิก):** สลับเพศ (Caelus / Stelle) และเปลี่ยนธาตุ (กายภาพ, ไฟ, จินตภาพ, ความจำ)
-- **สลับพาธ March 7th:** เลือกระหว่างพาธการอนุรักษ์ (น้ำแข็ง) และพาธล่าสังหาร (จินตภาพ)
-- **สวิตช์ระบบพิเศษ Ex-Rank:** จัดการเปิด/ปิดความสามารถพิเศษ Ex-Rank สำหรับตัวละครเฉพาะ (เช่น Jing Yuan, Dan Heng • IL, Acheron)
-- **ตัวแก้ไข JSON ดิบ:** ตรวจสอบ แก้ไข จัดรูปแบบ และดาวน์โหลดสำรองไฟล์ `freesr-data.json` และ `persistent`
+### ตัวละคร
+- หน้าแรกของเว็บ ค้นหาด้วยชื่อหรือ ID กรองตามธาตุ ระดับดาว สาย และรายการโปรด
+- **รายการโปรด:** กดดาวที่มุมการ์ดเพื่อให้ตัวละครขึ้นไปอยู่บนสุด จำไว้ในเบราว์เซอร์
+- **หน้าปรับแต่งเต็มจอ:** เลเวล เลื่อนขั้น และ Eidolon อยู่ด้านบนให้เห็นตลอด สกิล ร่องรอย กรวยแสง และรีลิกส์อยู่ในแท็บย่อย ปุ่มบันทึกติดอยู่ด้านล่าง
+- **แนวทางบิลด์:** กรวยแสง เซ็ตรีลิกส์ และออฟหลักที่ผู้เล่นใช้บ่อย จากข้อมูล Endgame ของ Prydwen
+- **เมนูทั้งบัญชี:** ปรับทุกตัวเป็น E0S1 หรือ Max E6 พร้อมกรวยแสงประจำตัว
 
-### 💻 8. คอนโซลคำสั่ง GM (GM & Server Console)
-- ส่งคำสั่ง GM ไปยังเซิร์ฟเวอร์ได้โดยตรงผ่านหน้าเว็บ
-- ดูผลตอบกลับและตรวจสอบสถานะการทำงานของเซิร์ฟเวอร์แบบ Real-time
+### กรวยแสง & รีลิกส์
+- คลังอุปกรณ์แบบการ์ด แสดงชื่อเต็ม ระดับดาว ออฟหลักของรีลิกส์ และตัวละครที่สวมอยู่
+- แผงรายละเอียดด้านข้าง: สวมใส่ ถอด เลเวล เลื่อนขั้น Superimposition (S1-S5) และออฟรอง
+- **ปรับออฟรอง:** เลือก 4 แถว กำหนดจำนวน Roll (สูงสุด 5 ครั้งต่อชิ้นตามเกม) คำนวณค่าสเตตจริง กันเลือกออฟซ้ำกับออฟหลัก และมีพรีเซ็ต 5 แบบ: สายคริ, สายเบรก, สายความเร็ว, สาย DoT, สายป้องกัน/ฟื้นฟู
 
-### 🌐 9. รองรับ 13 ภาษาทั่วโลก (Multi-Language Support)
-- สลับเปลี่ยนภาษาได้ทันทีโดยไม่ต้องรีเฟรชหน้าเว็บ:
-  - 🇹🇭 ไทย (Thai)
-  - 🇺🇸 English
-  - 🇨🇳 简体中文 (Simplified Chinese)
-  - 🇹🇼 繁體中文 (Traditional Chinese)
-  - 🇯🇵 日本語 (Japanese)
-  - 🇰🇷 한국어 (Korean)
-  - 🇻🇳 Tiếng Việt (Vietnamese)
-  - 🇮🇩 Bahasa Indonesia
-  - 🇪🇸 Español (Spanish)
-  - 🇫🇷 Français (French)
-  - 🇩🇪 Deutsch (German)
-  - 🇷🇺 Русский (Russian)
-  - 🇵🇹 Português (Portuguese)
+### แดชบอร์ด & จัดทีม
+- ทีม 4 ช่อง แสดงตัวละคร เลเวล และ Eidolon กดช่องเพื่อเปลี่ยนตัวได้ด้วยเมาส์หรือคีย์บอร์ด
+- สถานะเซิร์ฟเวอร์ สรุปการต่อสู้ล่าสุด และ GM Console (GaCy GO)
+
+### Damage Analyst (GaCy GO)
+- ดึงรายงานการต่อสู้ล่าสุดจากเกม หรือนำเข้า/ส่งออกเป็น JSON
+- ดาเมจรวม จำนวนรอบ เทิร์น ระยะเวลา และสัดส่วนดาเมจของแต่ละตัวในทีม
+- แยกดาเมจปกติ สกิล ท่าไม้ตาย เบรก ติดตาม และ DoT รายตัวละคร พร้อมโล่ การฟื้นฟู และดาเมจที่ได้รับ
+- การ์ดเรียงตาม `report.avatars[].slot` ของการต่อสู้จริง ไม่เปลี่ยนตามทีมในโลก
+
+### ไอเทมในกระเป๋า (GaCy GO)
+- **สมุดรวมไอเทม:** ค้นชื่อหรือ ID ดูรูป ชนิด และคำอธิบายจากตารางเกม รายการที่มีป้าย "GaCy รองรับ" แก้จำนวนได้ ที่เหลือใช้ดูข้อมูลอย่างเดียว
+- **จัดการจำนวน:** แก้หลายรายการแล้วบันทึกครั้งเดียว รายการที่ยังไม่บันทึกมีแถบส้ม ช่องว่างหมายถึงใช้ค่าเริ่มต้นของเซิร์ฟเวอร์ บันทึกเฉพาะจำนวนไอเทมใน `freesr-data.json` ผ่าน `/api/inventory/materials` และต้องเข้าเกมใหม่เพื่อให้เห็นผล
+
+### ตั้งค่ามอนสเตอร์
+- **GaCy GO:** ดูด่านและ wave ของ Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration จาก resource ของ Client ตามเวอร์ชันที่เซิร์ฟเวอร์ใช้ (อ่านอย่างเดียว) แท็บ Aha's Help แยกจาก AA
+- **Custom Enemy:** ใช้ได้เฉพาะ Golden / Crimson Calyx ค้นมอนด้วยชื่อหรือ ID การกดใช้ stage จาก Client จะล้าง wave ที่ตั้งเอง Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ wave จากหน้านี้
+- **FireflyGo / RobinSR:** เลือกห้อง Endgame และ wave แล้วเขียนลง `battle_config`
+
+### จัดการเซฟ (GaCy GO)
+- เพศและธาตุของผู้บุกเบิก และสายของ March 7th
+- **กล้อง:** เลือก Freecam หรือ FaceCam และระยะเริ่มต้นของ FaceCam หลังบันทึกกด Tab ในเกมเพื่อเปิดหรือปิด ลูกกลิ้งเมาส์ปรับระยะชั่วคราว
+- สวิตช์ Global ของ Silver Wolf, Castorice และ Aha
+
+### Ex-Rank (GaCy GO)
+- เปิด/ปิด Ex-Rank รายตัวละครด้วยสวิตช์ หรือเปิด/ปิดทั้งหมดในครั้งเดียว ถ้าส่งไม่สำเร็จสวิตช์จะกลับตำแหน่งเดิม
+
+### จัดการไฟล์ JSON
+- แก้ `freesr-data.json` (และ `persistent` ใน GaCy GO) ได้โดยตรง จัดรูปแบบ อัปโหลด และบันทึกไปเซิร์ฟเวอร์
+- **ดาวน์โหลดไฟล์นี้:** บันทึกสิ่งที่อยู่ในตัวแก้ไขตอนนั้น รวมการแก้ที่ยังไม่ได้ส่ง ชื่อไฟล์เป็นชื่อไฟล์จริงตามด้วยวันเวลา เช่น `freesr-data-2026-11-17-1530.json`
+- **สร้างไฟล์จาก Enka:** ใส่ UID ของเกม หรือวาง JSON จาก enka.network เพื่อสร้าง `freesr-data.json` แบบรวมกับของเดิมหรือแทนที่ทั้งหมด ใช้ได้ทุกโหมด
+
+### ตัวควบคุม FireflyGo (FireflyGo)
+- ค่า `extra_data` ที่ส่งไปพร้อมทุกการซิงค์: Multi-Path ของผู้บุกเบิกและ March 7th, Censorship, ซ่อน UI, เปอร์เซ็นต์การบุกรุก, Challenge Peak, Theory Craft และสคริปต์ Lua
+- `cm` และ `first_person` ไม่มีในเกมจึงไม่มีในหน้านี้ ค่าที่เซิร์ฟเวอร์เก็บไว้จะถูกส่งกลับไปเหมือนเดิม
+
+### ตั้งค่า
+- เลือกโหมดเซิร์ฟเวอร์ URL ของ API ทดสอบการเชื่อมต่อ ภาษา และตัวเลือกการแสดงผล
+- ล้างแคชของเบราว์เซอร์ และคืนค่าเริ่มต้นทั้งหมด
+
+### GM Console (GaCy GO)
+- ส่งคำสั่ง GM ไปยังเซิร์ฟเวอร์และดูผลตอบกลับ
+- ตัวช่วยพิมพ์คำสั่ง: แสดงตัวอย่างและอธิบาย argument ที่กำลังพิมพ์ ใช้ ↑/↓ เลื่อนรายการ, Tab เติมค่าแล้วไปช่องถัดไป, Shift+Tab ย้อน, Esc ปิด และ Enter หรือ Run เพื่อส่ง Tab ไม่ส่งคำสั่ง
+- รายการไอเทม Plane Floor และของ CW มาจาก `GET /api/command-completions` ของ SDK
+- **Unstuck:** ปุ่ม Unstuck หรือ `/unstuck` ปลดการบล็อก UI ที่ค้างรอแพ็กเก็ต โดยไม่ลบเซฟ CW หรือเปลี่ยนแมพ ต้องเปิดเกมและใช้ SDK ที่รองรับ `/api/client/unstuck`
+- **คำสั่ง CW:** `/cw status`, `/cw gold <total>`, `/cw hp <total>` มีผลกับรอบ CW ที่กำลังเล่นเท่านั้น ค่าจะเข้าคิวและถูกใช้ตอนช่วง Preparation (รอระหว่างต่อสู้) gold กำหนดยอดรวม ไม่ได้บวกเพิ่ม และ hp ต้องไม่เกินขีดจำกัดของรอบ ตรวจผลได้จาก log `CW_GM applied` ของเซิร์ฟเวอร์
+
+### ภาษา
+รองรับ 13 ภาษา สลับได้ทันทีโดยไม่ต้องรีเฟรช: ไทย, English, 简体中文, 繁體中文, 日本語, 한국어, Tiếng Việt, Bahasa Indonesia, Español, Français, Deutsch, Русский, Português
 
 ---
 
 # THERES ONLY DARK MODE IF U ASK FOR LIGHT GO AWAY FROM ME
 
-## 💻 การเปิดใช้งานในเครื่อง (Local Usage)
+## รันในเครื่อง
 
-1. **เปิดผ่านเบราว์เซอร์โดยตรง:** ดับเบิลคลิกเปิดไฟล์ `index.html` ได้ทันที
-2. **หรือรันผ่าน Local Server:**
-   ```bash
-   npx serve .
-   ```
-   หรือใช้ Python:
-   ```bash
-   python -m http.server 3000
-   ```
+เว็บโหลดข้อมูลเกมจาก `assets/data` จึงต้องเปิดผ่าน local server (เปิด `index.html` ตรงๆ จากไฟล์ไม่ได้)
+
+```bash
+npm run dev:proxy
+```
+
+เปิดที่ `http://localhost:5173` ตัวนี้มี proxy ให้ปุ่มนำเข้า Enka ใช้งานได้ ถ้าไม่ใช้ Enka จะใช้แบบนี้ก็ได้:
+
+```bash
+npm run serve
+```
+
+รันเทสต์ทั้งหมด:
+
+```bash
+npm test
+```
 
 ---
 
-## 🔗 การเชื่อมต่อกับเซิร์ฟเวอร์ GaCy GO
-
-GaCy-Srtool สื่อสารกับเซิร์ฟเวอร์ GaCy GO ผ่าน REST API:
+## API ของ GaCy GO
 
 | Endpoint | Method | คำอธิบาย |
 | --- | --- | --- |
-| `/api/status` | GET | ข้อมูลสถานะเซิร์ฟเวอร์, ทีม, ตัวละคร และพิกัด |
-| `/api/freesr` | GET, POST | ดึงหรืออัปเดตข้อมูล `freesr-data.json` |
-| `/api/inventory/materials` | GET, POST | อ่าน Client item catalog และบันทึกจำนวนไอเทมแบบเจาะจงโดยไม่เขียนทับข้อมูลอื่น |
-| `/api/freesr/avatars` | GET, POST | ดึงหรืออัปเดตข้อมูลตัวละครและสถิติ |
-| `/api/persistent` | GET, POST | ดึงหรืออัปเดตข้อมูล `persistent` |
-| `/api/battle_report` | GET, POST | ดึงสถิติดาเมจและผลการต่อสู้ล่าสุด |
-| `/api/battle_report/reset` | POST | รีเซ็ตประวัติการต่อสู้ |
-| `/api/exrank/toggle` | POST | เปิด/ปิดสถานะ EX-Rank |
-| `/api/avatar/rank` | POST | เปลี่ยนระดับ Eidolon ของตัวละคร |
-| `/api/avatar/max_all` | POST | ปรับตัวละครทุกตัวเป็น Max E6 และสกิลเต็ม |
-| `/api/command` | POST | ส่งคำสั่ง GM ไปยังเซิร์ฟเวอร์ |
+| `/api/status` | GET | สถานะเซิร์ฟเวอร์ ทีม ตัวละคร และพิกัด |
+| `/api/freesr` | GET, POST | อ่านหรือเขียน `freesr-data.json` |
+| `/api/freesr/avatars` | GET, POST | อ่านหรือเขียนข้อมูลตัวละคร |
+| `/api/inventory/materials` | GET, POST | อ่าน item catalog ของ Client และบันทึกจำนวนไอเทมโดยไม่เขียนทับข้อมูลอื่น |
+| `/api/persistent` | GET, POST | อ่านหรือเขียนไฟล์ `persistent` |
+| `/api/battle_report` | GET, POST | รายงานการต่อสู้ล่าสุด |
+| `/api/battle_report/reset` | POST | ล้างประวัติการต่อสู้ |
+| `/api/exrank/toggle` | POST | เปิด/ปิด Ex-Rank |
+| `/api/avatar/rank` | POST | เปลี่ยน Eidolon |
+| `/api/avatar/max_all` | POST | ปรับทุกตัวเป็น Max E6 และสกิลเต็ม |
+| `/api/command` | POST | ส่งคำสั่ง GM |
+| `/api/command-completions` | GET | รายการสำหรับตัวช่วยพิมพ์คำสั่ง |
+| `/api/client/unstuck` | POST, GET | ปลด UI ที่ค้าง (POST ส่งคำสั่ง, GET รอผลจากเกม) |
 
-### บันทึกตัวละครและ Traces
+การบันทึกจากหน้าปรับแต่งตัวละครส่งข้อมูลทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวม `data.skills` และ `data.skills_by_anchor_type` ของร่องรอย เพื่อไม่ให้เซิร์ฟเวอร์ซิงค์เลเวลหรือ Eidolon ระหว่างทางก่อนร่องรอยถูกบันทึก ถ้าเซิร์ฟเวอร์ตอบผิดพลาดจะแจ้งว่าบันทึกไม่สำเร็จ
 
-Damage Analyst เรียงการ์ดตาม `report.avatars[].slot` จาก Battle จริง ไม่เปลี่ยนตามทีมหน้าโลก รายงานเก่าที่ไม่มี slot คงลำดับเดิม และแสดงประเภทดาเมจเพิ่มเติมที่ API ส่งมา เช่น Elation Damage / True Damage ทดสอบลำดับด้วย `node --test tests/damage-order.test.cjs` ข้อมูลสดต้องใช้ SDK และ `damage_analyst_live.lua` ฉบับที่อ่าน StatisticsComponent ของ Battle ปัจจุบัน
+---
 
-การบันทึกจากหน้ารายละเอียดส่งข้อมูลตัวละครทั้งชุดผ่าน `/api/freesr` ในคำขอเดียว รวมถึง `data.skills` และ `data.skills_by_anchor_type` สำหรับ Traces เพื่อไม่ให้ server sync ข้อมูลระดับ/Eidolon ระหว่างทางก่อนข้อมูล Trace จะถูกบันทึก `saveAvatarDetails(closeModal = true)` ยังรองรับการเรียกจากปุ่ม build ที่ไม่ต้องปิดหน้าต่าง ถ้า server ตอบผิดพลาดจะแสดงข้อความบันทึกไม่สำเร็จแทนการแจ้งว่าสำเร็จ
+## ข้อมูลและแหล่งที่มา
 
-### ข้อมูล Build และแหล่งที่มา
+### แนวทางบิลด์
+ตัวเลขในแนวทางบิลด์เป็นสัดส่วนการใช้งานในกลุ่มตัวอย่าง Endgame ไม่ใช่การจัดอันดับหรือคำแนะนำทางการ แต่ละตัวละครกำกับโหมด จำนวนตัวอย่าง และวันที่เก็บข้อมูลไว้ ตัวละครที่ไม่มีตัวอย่างจะแสดงลิงก์ไปคู่มือของ Prydwen แทน
 
-หน้า **รายละเอียดตัวละคร → แนวทางบิลด์** แสดงอุปกรณ์และออฟหลักที่พบบ่อยในตัวอย่าง Endgame จากข้อมูลที่แสดงบน Prydwen โดยใส่โหมด/จำนวนผู้เล่นและวันที่เก็บ snapshot ไว้กำกับ ตัวเลขเป็นสัดส่วนการใช้งานในกลุ่มตัวอย่าง ไม่ใช่คะแนนจัดอันดับหรือคำแนะนำทางการ ตัวละครที่ snapshot ไม่มีตัวอย่างจะแสดงลิงก์ไปคู่มือของ Prydwen แทนการแสดงข้อมูลสำรองที่อาจทำให้เข้าใจผิด
+ข้อมูลใน `js/build-guides-data.js` มาจากชุดข้อมูล MIT ของ [LvlUrArti/MocDataProcessed](https://huggingface.co/datasets/LvlUrArti/MocDataProcessed) ซึ่งประมวลผลจากเว็บไซต์ Prydwen โปรดให้เครดิต LvlUrArti เมื่อเผยแพร่หรือวิเคราะห์ข้อมูลต่อ อัปเดตด้วย:
 
-ข้อมูลที่สร้างไว้ใน `js/build-guides-data.js` ใช้ชุดข้อมูล MIT จาก [LvlUrArti/MocDataProcessed](https://huggingface.co/datasets/LvlUrArti/MocDataProcessed) ซึ่งระบุว่าเป็นข้อมูลที่ประมวลผลจากเว็บไซต์ Prydwen โปรดให้เครดิต LvlUrArti เมื่อเผยแพร่หรือวิเคราะห์ข้อมูลต่อ สามารถอัปเดต snapshot ด้วย `npm run sync-build-guides` ได้ โดยสคริปต์จะเลือกเวอร์ชันล่าสุดที่มีใน dataset และจับคู่ตัวละครตาม ID จาก `js/avatars-data.js`.
+```bash
+npm run sync-build-guides
+```
 
-### Item Book
+### กรวยแสงประจำตัวและบิลด์แนะนำ
+`assets/data/builds.json` สร้างจาก `scripts/sync-data.mjs` ค่าใน `scripts/data/overrides.json` มาก่อนเสมอ ถ้าไม่มีจะใช้คำแนะนำในเกมปรับด้วยข้อมูลการใช้งาน กรวยแสงประจำตัวต้องเป็นสายเดียวกับตัวละคร ซึ่ง `tests/signature-lightcones.test.cjs` ตรวจไว้ อัปเดตด้วย:
 
-The **Item Book** scans the pinned game-data revision for every `ItemConfig`-named table that contains item-definition rows. In this revision, 26 candidate tables were checked and 18 supplied item rows: 5,472 rows resolve to 5,414 unique item IDs. The **GaCy supported** badge is derived from the Go server's `InventoryItemConfig.json`; other entries are browse-only.
+```bash
+npm run sync-data
+```
 
-Click an item's image to open its details, including its ID, source table, type, game description, and a quantity selector. The selected quantity is local to the dialog and does not call the server or add an item. Where the game table defines `PileLimit`, the selector uses it as the maximum.
+### สมุดรวมไอเทม
+สร้างจากทุกตาราง `ItemConfig` ใน revision ของข้อมูลเกมที่ปักไว้: ตรวจ 26 ตาราง มี 18 ตารางที่มีข้อมูลไอเทม รวม 5,414 ID ป้าย "GaCy รองรับ" มาจาก `InventoryItemConfig.json` ของเซิร์ฟเวอร์ Go
 
-Names and descriptions come from the pinned game TextMap and StarRailRes indexes for all 13 Srtool languages. At this revision, 5,150 of 5,414 item names have source-localized text; missing source names fall back to English or the item ID. Icons load from the pinned StarRailRes revision: 5,261 entries have a verified image file, while the remaining 153 retain their original game icon paths and show the missing-image state. The installed client stores these missing images inside encrypted `.block` bundles, so they are not extracted by this catalog builder.
+ชื่อและคำอธิบายมาจาก TextMap ของเกมและดัชนี StarRailRes ครบ 13 ภาษา (มีชื่อตามภาษาของเกม 5,150 จาก 5,414 รายการ ที่เหลือใช้ภาษาอังกฤษหรือ ID) รูปมาจาก StarRailRes revision ที่ปักไว้ 5,261 รายการ อีก 153 รายการเก็บอยู่ในไฟล์ `.block` ที่เข้ารหัสของ Client จึงแสดงเป็นไม่มีรูป จำนวนในหน้าต่างรายละเอียดใช้ในหน้าต่างนั้นเท่านั้น ไม่ได้ส่งไปเซิร์ฟเวอร์
 
-Regenerate `assets/item-catalog.json` from the inventory catalog revision used by the Go server:
+สร้าง `assets/item-catalog.json` ใหม่จาก catalog ที่เซิร์ฟเวอร์ Go ใช้:
 
 ```bash
 python tools/build-item-catalog.py --inventory-config <path-to-GaC-hkrpg-go>/resources/InventoryItemConfig.json
 ```
 
-## CW GM commands
-
-In the connected GM Console: `/cw status`, `/cw gold <total>`, `/cw hp <total>`. Values affect only the active CW run. Changes are queued and applied during Preparation; they wait while fighting. Gold sets the total, rather than adding repeatedly. HP must fit the run limit. Check the server's `CW_GM applied` log or query status to confirm application. Commands are also included in console suggestions and `/help`.
-
-## ตัวช่วยคำสั่ง GM
-
-ช่อง Console แสดง preview คำสั่งและอธิบาย argument ที่กำลังพิมพ์ รองรับคำสั่ง GM, `/unstuck`, `/faketime` และคำสั่งย่อย `/cw` ทุกแบบใน SDK ปัจจุบัน ใช้ ↑/↓ เลื่อนรายการ, Tab เติมค่าที่เลือกและไปช่องถัดไป, Shift+Tab ย้อนรายการ และ Esc ปิดรายการ คลิกรายการเพื่อเติมค่าได้; Tab ไม่ส่งคำสั่ง ให้กด Enter หรือ Run เพื่อส่ง
-
-พิมพ์ชื่อหรือ ID เพื่อกรองตัวละคร รายการไอเท็ม/Plane/Floor/ของ CW มาจาก `GET /api/command-completions` ของ SDK จึงต้องเชื่อมต่อ SDK ฉบับที่รองรับก่อน รายการดาวของ CW กรองตาม Role ที่เลือก รองรับการแก้ argument กลางบรรทัดโดยเก็บข้อความช่องอื่นไว้
-
-ตรวจตัวช่วยแบบไม่รันคำสั่งเกม: `node --test tools/command-assistant.test.mjs`
-
-
+### ดีไซน์
+ระบบดีไซน์ของเว็บ (สี ตัวอักษร ส่วนประกอบ และกฎ) อยู่ใน [DESIGN.md](DESIGN.md) ข้อความที่แสดงในเว็บทั้งหมดอยู่ใน `js/i18n.js`
 
 ---
 
-## 📜 สัญญาอนุญาตและข้อกำหนดการใช้งาน (License & Attribution Notice)
+## สัญญาอนุญาตและข้อกำหนดการใช้งาน (License & Attribution Notice)
 
 โครงการนี้เผยแพร่ภายใต้เงื่อนไขตามแนวทางสัญญาอนุญาต **Apache License 2.0** และ **GNU General Public License v3 (GPL-3.0)** โดยมีข้อกำหนดเรื่อง **การระบุต้นฉบับ (Attribution)** และ **การระบุส่วนที่แก้ไข (State Changes)** อย่างเคร่งครัด
 
