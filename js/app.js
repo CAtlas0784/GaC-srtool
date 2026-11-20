@@ -5,7 +5,7 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.51';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.52';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
@@ -85,7 +85,7 @@ const state = {
   inventorySaved: {},
   inventoryDraft: {},
   inventoryPage: 0,
-  monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
+  monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', customStage: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
   fireflyEndgame: {
     activeMode: 'moc',
     catalog: null,
@@ -8490,6 +8490,25 @@ function renderMonsterCustomWaves() {
   updateMonsterEditorControls();
 }
 
+// Flatten the resource-backed catalog rooms (MOC/PF/AS/AA) into stage
+// suggestions for the custom editor's StageID field.
+function monsterStageOptions(catalog) {
+  const out = [];
+  const modeNames = { moc: 'MOC', pf: 'PF', as: 'AS', aa: 'AA' };
+  for (const [modeKey, groups] of Object.entries(catalog?.modes || {})) {
+    for (const group of groups || []) {
+      const groupLabel = group.names?.en || group.names?.th || ('#' + group.id);
+      for (const stage of group.stages || []) {
+        for (const battle of stage.battles || []) {
+          if (!battle.stage_id) continue;
+          out.push({ stageId: battle.stage_id, label: `${modeNames[modeKey] || modeKey} · ${groupLabel} · Lv.${battle.level}` });
+        }
+      }
+    }
+  }
+  return out;
+}
+
 function renderMonsterCustomEditor() {
   const root = document.getElementById('monster-settings-view');
   const editor = state.monsterSettings;
@@ -8508,6 +8527,33 @@ function renderMonsterCustomEditor() {
     const option = document.createElement('option'); option.value = String(value); levels.append(option);
   }
   card.append(levels);
+
+  // Stage selection: the custom battle reports this StageID. Free-form input
+  // with suggestions from the catalog; empty keeps the saved stage.
+  const stageRow = monsterElement('div', 'monster-custom-stage-row');
+  stageRow.style.cssText = 'display:flex;gap:10px;align-items:center;margin:10px 0;';
+  const stageLabel = monsterElement('label', 'monster-custom-field-label', t('monsterCustomStage'));
+  stageLabel.setAttribute('for', 'monster-custom-stage');
+  const stageInput = document.createElement('input');
+  stageInput.type = 'number';
+  stageInput.min = '1';
+  stageInput.id = 'monster-custom-stage';
+  stageInput.classList.add('monster-custom-stage-input');
+  stageInput.value = editor.customStage || '';
+  stageInput.placeholder = t('monsterCustomStageKeep');
+  stageInput.setAttribute('aria-label', t('monsterCustomStage'));
+  stageInput.addEventListener('input', () => { editor.customStage = stageInput.value.trim(); });
+  const stageOptions = document.createElement('datalist');
+  stageOptions.id = 'monster-stage-options';
+  for (const option of monsterStageOptions(editor.catalog)) {
+    const opt = document.createElement('option');
+    opt.value = String(option.stageId);
+    opt.label = option.label;
+    stageOptions.append(opt);
+  }
+  stageRow.append(stageLabel, stageInput, stageOptions);
+  card.append(stageRow);
+
   const toolbar = monsterElement('div', 'monster-custom-toolbar');
   const actions = monsterElement('div', 'monster-custom-actions');
   const add = monsterElement('button', 'btn btn-secondary', '' + t('monsterCustomAddWave'));
@@ -8632,6 +8678,7 @@ async function loadMonsterSettings() {
     } catch (_) { /* Keep the view read-only when no cache exists. */ }
   }
   editor.waves = readMonsterWaves(data?.battle_config?.monsters);
+  editor.customStage = data?.battle_config?.stage_id ? String(data.battle_config.stage_id) : '';
   editor.savedFingerprint = monsterWavesFingerprint();
   editor.canEdit = loadedFromServer && state.serverMode === 'gac' && state.isConnected;
   editor.ready = Boolean(data);
@@ -8768,7 +8815,13 @@ function setupMonsterSettingsEvents() {
     }
     const config = state.fullFreesrData.battle_config || (state.fullFreesrData.battle_config = {});
     const previous = config.monsters;
+    const previousStageId = config.stage_id;
     config.monsters = normalized;
+    // An empty stage field keeps the saved StageID; a number overrides it.
+    const stageId = Number(editor.customStage);
+    if (Number.isInteger(stageId) && stageId > 0 && stageId <= 4294967295) {
+      config.stage_id = stageId;
+    }
     button.disabled = true;
     try {
       await saveFreesrChangesToServer();
@@ -8780,6 +8833,8 @@ function setupMonsterSettingsEvents() {
     } catch (error) {
       if (previous === undefined) delete config.monsters;
       else config.monsters = previous;
+      if (previousStageId === undefined) delete config.stage_id;
+      else config.stage_id = previousStageId;
       await saveFreesrCache(state.fullFreesrData).catch(() => {});
       setMonsterEditorStatus('monsterCustomSaveError', 'error', { error: error.message });
       showToast(t('toastErrorMessage', { message: error.message }), 'error');
