@@ -8768,12 +8768,7 @@ function setupMonsterSettingsEvents() {
     }
     const config = state.fullFreesrData.battle_config || (state.fullFreesrData.battle_config = {});
     const previous = config.monsters;
-    const previousFlag = config.custom_monsters_enabled;
     config.monsters = normalized;
-    // The GaC server only applies custom waves to Calyx when this marker is
-    // set, so battle_config shapes written by other tools (endgame room
-    // pickers of other server modes) stay inert.
-    config.custom_monsters_enabled = normalized.length > 0;
     button.disabled = true;
     try {
       await saveFreesrChangesToServer();
@@ -8785,8 +8780,6 @@ function setupMonsterSettingsEvents() {
     } catch (error) {
       if (previous === undefined) delete config.monsters;
       else config.monsters = previous;
-      if (previousFlag === undefined) delete config.custom_monsters_enabled;
-      else config.custom_monsters_enabled = previousFlag;
       await saveFreesrCache(state.fullFreesrData).catch(() => {});
       setMonsterEditorStatus('monsterCustomSaveError', 'error', { error: error.message });
       showToast(t('toastErrorMessage', { message: error.message }), 'error');
