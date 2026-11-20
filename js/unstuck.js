@@ -1,4 +1,4 @@
-import { getCurrentLanguage } from './i18n.js?v=2.50';
+import { getCurrentLanguage } from './i18n.js?v=2.51';
 
 const strings = {
   en: {

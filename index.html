@@ -719,6 +719,40 @@
         </div>
         </div>
 
+        <!-- Time Scale -->
+        <div class="card settings-section camera-settings-card" id="card-persistent-time">
+        <div class="camera-settings">
+          <div class="camera-settings-head">
+            <div class="camera-settings-copy">
+              <div class="camera-settings-title" data-i18n="timeModTitle">Time Scale</div>
+              <div class="camera-settings-hint" data-i18n="timeModHint">กำหนดความเร็วเวลาของโลกเกม แล้วกด X ในเกมเพื่อสลับระหว่างปกติกับค่าที่ตั้งไว้ (0 = หยุดเวลานิ่ง)</div>
+            </div>
+          </div>
+
+          <div class="camera-distance-block" id="time-scale-block">
+            <div class="camera-distance-head">
+              <label class="camera-field-label" for="time-scale" data-i18n="timeModScale">ความเร็วเวลา (Speed ×)</label>
+              <output class="camera-distance-value" id="time-scale-value" for="time-scale">0.50×</output>
+            </div>
+            <input id="time-scale" class="camera-distance-range" type="range" min="0" max="5" step="0.05" value="0.5"
+                   data-i18n-aria-label="timeModScale">
+            <div class="camera-distance-scale" aria-hidden="true">
+              <span>0×</span>
+              <span>5×</span>
+            </div>
+            <p class="camera-distance-note" id="time-scale-note" data-i18n="timeModNote">กด X ในเกมเพื่อเปิด/ปิด — ปิดอัตโนมัติเมื่อเปลี่ยนฉาก</p>
+          </div>
+
+          <div class="camera-actions">
+            <span class="camera-save-state" id="time-save-state" data-state="idle">
+              <span class="camera-state-dot" aria-hidden="true"></span>
+              <span id="time-save-state-text" data-i18n="timeStatusIdle">พร้อมบันทึก</span>
+            </span>
+            <button type="button" class="btn btn-primary camera-save-button" id="btn-save-time" data-i18n="timeSave">บันทึกความเร็วเวลา</button>
+          </div>
+        </div>
+        </div>
+
         <!-- Global Features & Toggles -->
         <div class="card settings-section" id="card-persistent-global">
           <div class="card-title" data-i18n="persistentGlobalTitle">สวิตช์ระบบพิเศษของ GaCy</div>
@@ -2084,6 +2118,6 @@
   <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.73"></script>
+  <script type="module" src="js/app.js?v=3.76"></script>
 </body>
 </html>

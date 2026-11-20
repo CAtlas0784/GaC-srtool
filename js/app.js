@@ -5,7 +5,7 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.50';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.51';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
@@ -238,6 +238,7 @@ const el = {
   cardPersistentChars: document.getElementById('card-persistent-chars'),
   cardPersistentGlobal: document.getElementById('card-persistent-global'),
   cardPersistentCamera: document.getElementById('card-persistent-camera'),
+  cardPersistentTime: document.getElementById('card-persistent-time'),
   formPersistentChars: document.getElementById('form-persistent-chars'),
   persistentMcSelect: document.getElementById('persistent-mc-select'),
   persistentMarchSelect: document.getElementById('persistent-march-select'),
@@ -719,6 +720,7 @@ const API_CHECKS = {
     { path: '/api/monster-settings/catalog', method: 'GET' },
     { path: '/api/monster-settings/aa-round', method: 'GET' },
     { path: '/api/aha-help', method: 'GET' },
+    { path: '/api/time-mod', method: 'GET' },
     { path: '/api/battle_report', method: 'GET' }
   ],
   firefly: [
@@ -854,6 +856,7 @@ function setConnectionStatus(connected, extraText = '') {
   // FireflyGo's endgame picker is local-only, so only GaCy needs a reload here.
   if (connectionChanged && state.serverMode === 'gac' && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
   updateCameraSaveStatus();
+  updateTimeSaveStatus();
   if (connected) {
     el.statusDot.classList.add('connected');
     el.connectionStatusText.textContent = extraText || t('online');
@@ -1487,6 +1490,8 @@ function applyTranslations() {
   // Keep the camera panel (mode cards, distance readout, save state) translated.
   renderCameraModeOptions();
   syncCameraUi();
+  // Keep the time scale panel (readout, save state) in the active language.
+  syncTimeUi();
 
   loadEquipment();
   if (analystState.currentReport) {
@@ -1623,6 +1628,7 @@ function applyModeDisplay(mode) {
   setVisible(el.cardPersistentChars, caps.saveManager);
   setVisible(el.cardPersistentGlobal, caps.saveManager);
   setVisible(el.cardPersistentCamera, caps.saveManager);
+  setVisible(el.cardPersistentTime, caps.saveManager);
   setVisible(el.cardFireflyExtras, caps.extraData);
   setVisible(el.btnQuickSyncPersistent, caps.saveManager);
   setVisible(el.btnSelectPersistent, caps.saveManager);
@@ -8762,7 +8768,12 @@ function setupMonsterSettingsEvents() {
     }
     const config = state.fullFreesrData.battle_config || (state.fullFreesrData.battle_config = {});
     const previous = config.monsters;
+    const previousFlag = config.custom_monsters_enabled;
     config.monsters = normalized;
+    // The GaC server only applies custom waves to Calyx when this marker is
+    // set, so battle_config shapes written by other tools (endgame room
+    // pickers of other server modes) stay inert.
+    config.custom_monsters_enabled = normalized.length > 0;
     button.disabled = true;
     try {
       await saveFreesrChangesToServer();
@@ -8774,6 +8785,8 @@ function setupMonsterSettingsEvents() {
     } catch (error) {
       if (previous === undefined) delete config.monsters;
       else config.monsters = previous;
+      if (previousFlag === undefined) delete config.custom_monsters_enabled;
+      else config.custom_monsters_enabled = previousFlag;
       await saveFreesrCache(state.fullFreesrData).catch(() => {});
       setMonsterEditorStatus('monsterCustomSaveError', 'error', { error: error.message });
       showToast(t('toastErrorMessage', { message: error.message }), 'error');
@@ -9564,6 +9577,7 @@ async function loadPersistentSettings() {
     if (!data) return;
 
     applyCameraSettings(data.camera_settings);
+    applyTimeSettings(data.time_mod_settings);
 
     if (data.main_character && el.persistentMcSelect) {
       el.persistentMcSelect.value = data.main_character;
@@ -9743,6 +9757,88 @@ function initCameraSettings() {
   renderCameraModeOptions();
   getCameraDistanceInput()?.addEventListener('input', () => syncCameraUi({ dirty: true }));
   syncCameraUi();
+}
+
+/**
+ * Time Scale settings panel (the single X hotkey in game; the scale value is
+ * configured here). Reuses the camera panel markup classes and save-state flow.
+ */
+const timeSettingsCache = { busy: false, dirty: false, error: false };
+
+function getTimeScaleInput() {
+  return document.getElementById('time-scale');
+}
+
+function clampTimeScale(value) {
+  const numeric = Number(value);
+  const safe = Number.isFinite(numeric) ? numeric : 0.5;
+  return Math.min(5, Math.max(0, Math.round(safe * 100) / 100));
+}
+
+function readTimeForm() {
+  return { scale: clampTimeScale(getTimeScaleInput()?.value) };
+}
+
+function setTimeSaveStatus(stateName, messageKey) {
+  const wrapper = document.getElementById('time-save-state');
+  const text = document.getElementById('time-save-state-text');
+  if (wrapper) wrapper.dataset.state = stateName;
+  if (text) text.textContent = t(messageKey);
+}
+
+function updateTimeSaveStatus() {
+  const button = document.getElementById('btn-save-time');
+  const online = state.isConnected && state.serverMode === 'gac';
+
+  if (timeSettingsCache.busy) {
+    setTimeSaveStatus('saving', 'timeStatusSaving');
+    if (button) button.disabled = true;
+    return;
+  }
+  if (!online) {
+    setTimeSaveStatus('offline', 'timeStatusOffline');
+    if (button) button.disabled = true;
+    return;
+  }
+  if (timeSettingsCache.error) setTimeSaveStatus('error', 'timeStatusError');
+  else if (timeSettingsCache.dirty) setTimeSaveStatus('unsaved', 'timeStatusUnsaved');
+  else if (state.persistentData?.time_mod_settings) setTimeSaveStatus('saved', 'timeStatusSaved');
+  else setTimeSaveStatus('idle', 'timeStatusIdle');
+  if (button) button.disabled = false;
+}
+
+function timeFormDiffersFromSaved() {
+  const saved = state.persistentData?.time_mod_settings;
+  if (!saved) return true;
+  return Math.abs(readTimeForm().scale - clampTimeScale(saved.scale)) > 0.001;
+}
+
+function syncTimeUi({ dirty = false } = {}) {
+  const input = getTimeScaleInput();
+  const value = document.getElementById('time-scale-value');
+  if (!input) return;
+
+  if (dirty) {
+    timeSettingsCache.dirty = timeFormDiffersFromSaved();
+    timeSettingsCache.error = false;
+  }
+
+  if (value) value.textContent = t('timeScaleValue', { value: readTimeForm().scale.toFixed(2) });
+  updateTimeSaveStatus();
+}
+
+function applyTimeSettings(settings) {
+  const input = getTimeScaleInput();
+  if (input) input.value = String(clampTimeScale(settings?.scale ?? 0.5));
+  timeSettingsCache.dirty = false;
+  timeSettingsCache.error = false;
+  syncTimeUi();
+}
+
+function initTimeSettings() {
+  if (!getTimeScaleInput()) return;
+  getTimeScaleInput()?.addEventListener('input', () => syncTimeUi({ dirty: true }));
+  syncTimeUi();
 }
 
 // Render Ex-Rank entries: one planner entry per character, a switch each.
@@ -11072,6 +11168,46 @@ function setupEvents() {
       updateCameraSaveStatus();
     }
   });
+
+  // Time Scale settings save (the /api/time-mod counterpart of the camera card)
+  document.getElementById('btn-save-time')?.addEventListener('click', async () => {
+    const button = document.getElementById('btn-save-time');
+    const scaleInput = getTimeScaleInput();
+    if (!button || !scaleInput || timeSettingsCache.busy) return;
+
+    const scale = Number(scaleInput.value);
+    if (!Number.isFinite(scale) || scale < 0 || scale > 5) {
+      showToast(t('timeScaleError'), 'error');
+      return;
+    }
+    if (!state.isConnected || state.serverMode !== 'gac') {
+      showToast(t('timeSaveOfflineError'), 'error');
+      updateTimeSaveStatus();
+      return;
+    }
+
+    timeSettingsCache.busy = true;
+    updateTimeSaveStatus();
+    button.textContent = t('timeSaving');
+    try {
+      const saved = await apiCall('/api/time-mod', 'POST', { scale });
+      const payload = saved?.time_mod_settings || saved || {};
+      const settings = { scale: clampTimeScale(payload.scale ?? scale) };
+      state.persistentData = state.persistentData || {};
+      state.persistentData.time_mod_settings = settings;
+      savePersistentCache(state.persistentData);
+      applyTimeSettings(settings);
+      showToast(t('timeSaved'), 'success');
+    } catch (err) {
+      timeSettingsCache.dirty = true;
+      timeSettingsCache.error = true;
+      showToast(t('toastErrorMessage', { message: err.message }), 'error');
+    } finally {
+      timeSettingsCache.busy = false;
+      button.textContent = t('timeSave');
+      updateTimeSaveStatus();
+    }
+  });
   document.getElementById('btn-save-aha-help')?.addEventListener('click', async () => {
     const select = document.getElementById('aha-help-level');
     const button = document.getElementById('btn-save-aha-help');
@@ -12358,6 +12494,7 @@ async function init() {
   setupFireflyExtrasEvents();
   setupEnkaImportEvents();
   initCameraSettings();
+  initTimeSettings();
   setupInventoryEvents();
   setupDamageAnalystEvents();
   setupGMConsoleEvents();
