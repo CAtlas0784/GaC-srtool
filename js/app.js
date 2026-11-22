@@ -5,10 +5,10 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.53';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.54';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
-import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=4';
+import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=5';
 import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=8';
 import { buildMarch7thBody, inspectMarch7thReply, march7thUrl } from './march7th.js?v=1';
 import { maxAvatarSkills } from './skills.js?v=1';
@@ -1695,13 +1695,14 @@ function setupLanguageSelector() {
 }
 
 // The endgame room picker is shared by every push-only server that reads
-// battle_config. Its intro texts name the server, so RobinSR gets its own keys.
+// battle_config. Its intro texts name the server, so RobinSR and March7thHoney get their own keys.
 function usesEndgamePicker() {
   return modeSupports('fireflyEndgame', state.serverMode);
 }
 
 function endgameTextKey(name) {
-  return `${state.serverMode === 'robin' ? 'robinEndgame' : 'ffEndgame'}${name}`;
+  const prefix = { robin: 'robinEndgame', march7th: 'march7thEndgame' }[state.serverMode] || 'ffEndgame';
+  return `${prefix}${name}`;
 }
 
 // Server Mode Setup

@@ -70,14 +70,14 @@ export const MODE_CAPABILITIES = {
     jsonModes: ['freesr']
   },
   // March7thHoney: push-only over POST /sr-tools with an account login. It takes
-  // the FreeSR snapshot but no extra_data, and nothing documents an endgame room
-  // picker for it, so only characters, equipment and the JSON editor are offered.
+  // the FreeSR snapshot (battle_config included) but no extra_data, so it gets the
+  // endgame room picker and Custom Enemy like the other push-only servers.
   march7th: {
     saveManager: false,
     exranks: false,
     inventory: false,
     monsterSettings: false,
-    fireflyEndgame: false,
+    fireflyEndgame: true,
     damageAnalyst: false,
     sceneCard: false,
     gmConsole: false,

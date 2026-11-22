@@ -54,6 +54,8 @@ test('March7thHoney is push-only, needs a login and has no extra_data', async ()
   assert.equal(modeSupports('pushOnly', 'march7th'), true);
   assert.equal(modeSupports('needsLogin', 'march7th'), true);
   assert.equal(modeSupports('extraData', 'march7th'), false);
+  // battle_config travels in the snapshot, so the endgame room picker is offered.
+  assert.equal(modeSupports('fireflyEndgame', 'march7th'), true);
   assert.equal(modeSupports('needsLogin', 'robin'), false);
   assert.deepEqual(modeCapabilities('march7th').jsonModes, ['freesr']);
 });
@@ -73,6 +75,8 @@ test('mode UI strings exist in Thai and English', async () => {
   const keys = [
     'serverModeFirefly',
     'apiUrlHintGaC', 'apiUrlHintFirefly', 'apiUrlHintRobin',
+    'march7thEndgameTitle', 'march7thEndgameDescription', 'march7thEndgameRule',
+    'march7thEndgameSynced', 'march7thEndgameCustomDescription',
     'serverModeMarch7th', 'apiUrlHintMarch7th', 'badgePersistenceMarch7th', 'lblMarch7thUser',
     'lblMarch7thPass', 'march7thLoginHint', 'march7thNeedLogin', 'march7thProbeSuccess',
     'march7thSyncSuccess', 'march7thTimeout', 'march7thServerError', 'march7thNotServer',
