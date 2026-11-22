@@ -17,6 +17,7 @@
 - **GaCy GO：** 通过 REST API（`/api/...`）读写，可使用全部功能：角色、装备、物品、怪物、存档、Ex-Rank、Damage Analyst 和 GM 控制台。
 - **FireflyGo：** 仅推送，`POST /sync`。可用：角色、装备、终局关卡、FireflyGo 控制（extra_data）和 JSON 编辑器。
 - **RobinSR：** 仅推送，`POST /srtools`。可用：角色、装备、终局关卡和 JSON 编辑器。
+- **March7thHoney：** 仅推送，`POST /sr-tools`，附带在 **设置** 页填写的用户名和密码（密码只保存在当前标签页，关闭即消失）。可用：角色、装备、终局关卡和 JSON 编辑器，不发送 extra_data。
 
 所选服务器不支持的标签页会自动隐藏。
 
@@ -61,7 +62,7 @@
 ### 怪物设置
 - **GaCy GO：** 按服务器所用版本，从客户端资源查看混沌回忆、虚构叙事、末日幻影和异相仲裁的关卡与波次（只读）。Aha's Help 有独立标签页，与异相仲裁分开。
 - **自定义敌人：** 仅适用于 Golden / Crimson Calyx。可按名称或 ID 搜索怪物。“使用客户端关卡”会清除自定义波次。历战余响、凝滞虚影、侵蚀隧洞、终局关卡和模拟宇宙不使用本页的波次。
-- **FireflyGo / RobinSR：** 选择终局关卡和波次，写入 `battle_config`。
+- **FireflyGo / RobinSR / March7thHoney：** 选择终局关卡和波次，写入 `battle_config`。
 
 ### 存档管理（GaCy GO）
 - 开拓者的性别与属性，以及三月七的命途。

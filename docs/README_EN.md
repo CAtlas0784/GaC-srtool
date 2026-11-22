@@ -17,6 +17,7 @@ Use it at [gacy-srtool.vercel.app](https://gacy-srtool.vercel.app/), then open *
 - **GaCy GO:** reads and writes over the REST API (`/api/...`). Everything is available: characters, equipment, items, monsters, save files, Ex-Rank, Damage Analyst and the GM Console.
 - **FireflyGo:** push only, over `POST /sync`. Characters, equipment, Endgame rooms, FireflyGo controls (extra_data) and the JSON editor.
 - **RobinSR:** push only, over `POST /srtools`. Characters, equipment, Endgame rooms and the JSON editor.
+- **March7thHoney:** push only, over `POST /sr-tools` with the username and password you enter in **Settings** (the password stays in this tab and is gone when it closes). Characters, equipment, Endgame rooms and the JSON editor; no extra_data is sent.
 
 Tabs the selected server does not support are hidden automatically.
 
@@ -61,7 +62,7 @@ Every edit shows whether the server has received it:
 ### Monster Settings
 - **GaCy GO:** view the stages and waves of Memory of Chaos, Pure Fiction, Apocalyptic Shadow and Anomaly Arbitration from the client resources for the version the server runs (read only). Aha's Help has its own tab, separate from AA.
 - **Custom Enemy:** Golden / Crimson Calyx only. Search monsters by name or ID. "Use Client stages" clears your custom waves. Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame and Simulated Universe do not take waves from this page.
-- **FireflyGo / RobinSR:** pick an Endgame room and its waves, written into `battle_config`.
+- **FireflyGo / RobinSR / March7thHoney:** pick an Endgame room and its waves, written into `battle_config`.
 
 ### Save manager (GaCy GO)
 - Trailblazer gender and element, and March 7th's path.

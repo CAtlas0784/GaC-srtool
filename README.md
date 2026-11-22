@@ -17,6 +17,7 @@
 - **GaCy GO:** อ่านและเขียนผ่าน REST API (`/api/...`) ใช้ได้ทุกฟีเจอร์ ได้แก่ ตัวละคร อุปกรณ์ ไอเทม มอนสเตอร์ ไฟล์เซฟ Ex-Rank Damage Analyst และ GM Console
 - **FireflyGo:** ส่งอย่างเดียวผ่าน `POST /sync` ใช้ได้กับตัวละคร อุปกรณ์ ห้อง Endgame ตัวควบคุม FireflyGo (extra_data) และตัวแก้ JSON
 - **RobinSR:** ส่งอย่างเดียวผ่าน `POST /srtools` ใช้ได้กับตัวละคร อุปกรณ์ ห้อง Endgame และตัวแก้ JSON
+- **March7thHoney:** ส่งอย่างเดียวผ่าน `POST /sr-tools` พร้อมชื่อผู้ใช้และรหัสผ่านที่กรอกในหน้า **ตั้งค่า** (รหัสผ่านอยู่ในแท็บนี้เท่านั้น ปิดแท็บแล้วหาย) ใช้ได้กับตัวละคร อุปกรณ์ ห้อง Endgame และตัวแก้ JSON ไม่ส่ง extra_data
 
 แท็บที่เซิร์ฟเวอร์ไม่รองรับจะถูกซ่อนเองตามโหมดที่เลือก
 
@@ -61,7 +62,7 @@
 ### ตั้งค่ามอนสเตอร์
 - **GaCy GO:** ดูด่านและ wave ของ Memory of Chaos, Pure Fiction, Apocalyptic Shadow และ Anomaly Arbitration จาก resource ของ Client ตามเวอร์ชันที่เซิร์ฟเวอร์ใช้ (อ่านอย่างเดียว) แท็บ Aha's Help แยกจาก AA
 - **Custom Enemy:** ใช้ได้เฉพาะ Golden / Crimson Calyx ค้นมอนด้วยชื่อหรือ ID การกดใช้ stage จาก Client จะล้าง wave ที่ตั้งเอง Weekly Boss, Stagnant Shadow, Cavern of Corrosion, Endgame และ Simulated Universe ไม่รับ wave จากหน้านี้
-- **FireflyGo / RobinSR:** เลือกห้อง Endgame และ wave แล้วเขียนลง `battle_config`
+- **FireflyGo / RobinSR / March7thHoney:** เลือกห้อง Endgame และ wave แล้วเขียนลง `battle_config`
 
 ### จัดการเซฟ (GaCy GO)
 - เพศและธาตุของผู้บุกเบิก และสายของ March 7th
