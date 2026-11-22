@@ -47,6 +47,17 @@ test('FireflyGo hides every GaCy-only feature and exposes extra_data', async () 
   assert.equal(modeSupports('extraData', 'robin'), false);
 });
 
+test('March7thHoney is push-only, needs a login and has no extra_data', async () => {
+  const { SERVER_MODES, MODE_LABELS, modeSupports, modeCapabilities } = await load();
+  assert.ok(SERVER_MODES.includes('march7th'));
+  assert.equal(MODE_LABELS.march7th, 'March7thHoney');
+  assert.equal(modeSupports('pushOnly', 'march7th'), true);
+  assert.equal(modeSupports('needsLogin', 'march7th'), true);
+  assert.equal(modeSupports('extraData', 'march7th'), false);
+  assert.equal(modeSupports('needsLogin', 'robin'), false);
+  assert.deepEqual(modeCapabilities('march7th').jsonModes, ['freesr']);
+});
+
 test('unknown modes fall back to GaCy GO', async () => {
   const { normalizeMode, modeCapabilities, modeSupports, MODE_LABELS } = await load();
   assert.equal(normalizeMode('nope'), 'gac');
@@ -62,6 +73,9 @@ test('mode UI strings exist in Thai and English', async () => {
   const keys = [
     'serverModeFirefly',
     'apiUrlHintGaC', 'apiUrlHintFirefly', 'apiUrlHintRobin',
+    'serverModeMarch7th', 'apiUrlHintMarch7th', 'badgePersistenceMarch7th', 'lblMarch7thUser',
+    'lblMarch7thPass', 'march7thLoginHint', 'march7thNeedLogin', 'march7thProbeSuccess',
+    'march7thSyncSuccess', 'march7thTimeout', 'march7thServerError', 'march7thNotServer',
     'serverModeRobin', 'robinProbeSuccess', 'robinSyncSuccess', 'robinTimeout',
     'robinNotSrtoolsServer', 'robinServerError', 'syncPushFailed', 'fireflyAutoSynced',
     'robinEndgameTitle', 'robinEndgameDescription', 'robinEndgameRule',
@@ -134,6 +148,7 @@ test('mode-gated DOM hooks exist in index.html', () => {
     'ff-setting-hide-ui', 'ff-setting-invasion-percent',
     'ff-challenge-skip-node', 'ff-challenge-peak-group', 'ff-challenge-peak-list',
     'ff-theory-mode', 'ff-theory-cycle-count', 'ff-theory-stage-id', 'ff-theory-lineup',
+    'march7th-credentials', 'setting-m7-username', 'setting-m7-password',
     'ff-theory-hp', 'ff-lua', 'ff-lua-enabled', 'ff-setting-invasion-value', 'btn-firefly-probe', 'btn-firefly-save-extra',
     'btn-firefly-sync', 'firefly-extra-status',
     'monster-settings-gac', 'monster-settings-firefly', 'ff-endgame-tabs',

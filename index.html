@@ -32,6 +32,7 @@
           <option value="gac" selected>GaCy GO</option>
           <option value="firefly" data-i18n="serverModeFirefly">FireflyGo</option>
           <option value="robin" data-i18n="serverModeRobin">RobinSR</option>
+          <option value="march7th" data-i18n="serverModeMarch7th">March7thHoney</option>
         </select>
       </div>
 
@@ -1055,6 +1056,7 @@
                   <option value="gac">GaCy GO</option>
                   <option value="firefly" data-i18n="serverModeFirefly">FireflyGo</option>
                   <option value="robin" data-i18n="serverModeRobin">RobinSR</option>
+                  <option value="march7th" data-i18n="serverModeMarch7th">March7thHoney</option>
                 </select>
               </div>
 
@@ -1067,6 +1069,15 @@
                   <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://127.0.0.1:21000">127.0.0.1:21000</button>
                   <button type="button" class="btn btn-sm btn-secondary btn-quick-url" data-url="http://localhost:8080">localhost:8080</button>
                 </div>
+              </div>
+
+              <!-- March7thHoney only: its POST /sr-tools wants an account login -->
+              <div class="form-group" id="march7th-credentials" style="display: none;">
+                <label class="form-label" for="setting-m7-username" data-i18n="lblMarch7thUser">ชื่อผู้ใช้ / UID</label>
+                <input type="text" id="setting-m7-username" class="form-input" autocomplete="username" spellcheck="false">
+                <label class="form-label" for="setting-m7-password" data-i18n="lblMarch7thPass">รหัสผ่าน</label>
+                <input type="password" id="setting-m7-password" class="form-input" autocomplete="current-password">
+                <div class="form-hint" data-i18n="march7thLoginHint">รหัสผ่านเก็บไว้ในแท็บนี้เท่านั้น ปิดแท็บแล้วหาย และไม่ถูกบันทึกถาวร</div>
               </div>
 
               <div class="settings-actions">
@@ -2118,6 +2129,6 @@
   <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.78"></script>
+  <script type="module" src="js/app.js?v=3.79"></script>
 </body>
 </html>

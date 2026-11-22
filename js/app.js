@@ -5,11 +5,12 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.52';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.53';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
-import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=3';
+import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=4';
 import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=8';
+import { buildMarch7thBody, inspectMarch7thReply, march7thUrl } from './march7th.js?v=1';
 import { maxAvatarSkills } from './skills.js?v=1';
 import {
   ENDGAME_MODES,
@@ -57,13 +58,18 @@ window.KNOWN_GACHABASE_ASSETS = KNOWN_GACHABASE_ASSETS;
 
 // Application State
 const state = {
-  serverMode: normalizeMode(localStorage.getItem('gac_srtool_mode') || 'gac'), // 'gac' | 'firefly' | 'robin'
+  serverMode: normalizeMode(localStorage.getItem('gac_srtool_mode') || 'gac'), // 'gac' | 'firefly' | 'robin' | 'march7th'
   apiUrl: localStorage.getItem('gac_srtool_api_url') || 'http://localhost:21000',
   pingIntervalSec: 10,
   isConnected: false,
   fireflyConnected: false,
   // RobinSR is push-only too: tracks the last explicit POST /srtools result.
   robinConnected: false,
+  // March7thHoney: same push-only rule, plus an account login. The username is
+  // kept in localStorage; the password only lives for the browser session.
+  march7thConnected: false,
+  march7thUser: readStoredCredential('local', 'gac_srtool_m7_user'),
+  march7thPass: readStoredCredential('session', 'gac_srtool_m7_pass'),
   fireflyExtraData: readStoredFireflyExtra(),
   statusData: null,
   avatarsList: [],
@@ -103,6 +109,9 @@ const state = {
 const el = {
   serverModeSelect: document.getElementById('server-mode-select'),
   settingServerMode: document.getElementById('setting-server-mode'),
+  march7thCredentials: document.getElementById('march7th-credentials'),
+  settingM7User: document.getElementById('setting-m7-username'),
+  settingM7Pass: document.getElementById('setting-m7-password'),
   lblActiveMode: document.getElementById('lbl-active-mode'),
   langSelect: document.getElementById('lang-select'),
   statusDot: document.getElementById('status-dot'),
@@ -689,6 +698,103 @@ async function pushRobinSync({ silent = false } = {}) {
   }
 }
 
+// March7thHoney transport. POST /sr-tools takes { username, password, data? };
+// a body without `data` only checks the account. Failures can arrive inside an
+// HTTP 200, so the body is inspected as well (see inspectMarch7thReply).
+function readStoredCredential(kind, key) {
+  try {
+    return (kind === 'session' ? sessionStorage : localStorage).getItem(key) || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function storeMarch7thCredentials() {
+  try {
+    localStorage.setItem('gac_srtool_m7_user', state.march7thUser);
+    // Never written to localStorage: it is gone when the tab closes.
+    sessionStorage.setItem('gac_srtool_m7_pass', state.march7thPass);
+  } catch (e) {
+    console.warn('Could not store the March7thHoney login:', e);
+  }
+}
+
+function march7thReplyProblem(parsed, text) {
+  const verdict = inspectMarch7thReply(parsed, text);
+  if (verdict.kind === 'ok') return '';
+  if (verdict.kind === 'error') return t('march7thServerError', { message: verdict.message || t('fireflyRequestFailed') });
+  return t('march7thNotServer');
+}
+
+async function march7thRequest(buildBody, { timeoutMs = 8000 } = {}) {
+  if (!state.march7thUser.trim() || !state.march7thPass) throw new Error(t('march7thNeedLogin'));
+  const url = march7thUrl(state.apiUrl);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildBody({ username: state.march7thUser.trim(), password: state.march7thPass })),
+      signal: controller.signal
+    });
+    const text = await res.text();
+    let parsed = null;
+    if (text) {
+      try { parsed = JSON.parse(text); } catch (e) { parsed = null; }
+    }
+    if (!res.ok) {
+      const detail = (parsed && typeof parsed === 'object' && ((typeof parsed.error === 'string' && parsed.error) || (typeof parsed.message === 'string' && parsed.message)))
+        || text.trim().slice(0, 200);
+      throw new Error(detail && !detail.startsWith('<') ? t('march7thServerError', { message: detail }) : `HTTP ${res.status}: ${res.statusText}`);
+    }
+    const problem = march7thReplyProblem(parsed, text);
+    if (problem) throw new Error(problem);
+    return parsed || {};
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error(t('march7thTimeout'));
+    if (err instanceof TypeError) {
+      const mixed = typeof window !== 'undefined' && window.location?.protocol === 'https:' && /^http:\/\/(localhost|127\.0\.0\.1)/i.test(url);
+      throw new Error(`${err.message} (${url})${mixed ? ` (${t('fireflyMixedContentHint')})` : ''}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function setMarch7thConnected(connected) {
+  state.march7thConnected = connected;
+  setConnectionStatus(connected, connected ? '' : t('offline'));
+}
+
+// The connect probe: no `data`, so the server only checks the account.
+async function probeMarch7th({ silent = false, auto = false } = {}) {
+  try {
+    const result = await march7thRequest((login) => buildMarch7thBody(login), { timeoutMs: auto ? 2500 : 8000 });
+    setMarch7thConnected(true);
+    if (!silent) showToast(t('march7thProbeSuccess'), 'success');
+    return result;
+  } catch (err) {
+    setMarch7thConnected(false);
+    throw err;
+  }
+}
+
+// Push the local FreeSR snapshot to March7thHoney (POST /sr-tools).
+async function pushMarch7thSync({ silent = false } = {}) {
+  try {
+    const result = await march7thRequest((login) => buildMarch7thBody(login, state.fullFreesrData));
+    setMarch7thConnected(true);
+    if (!silent) showToast(t('march7thSyncSuccess'), 'success');
+    return result;
+  } catch (err) {
+    setMarch7thConnected(false);
+    throw err;
+  }
+}
+
 // Push-only servers have no read endpoint, so "connected" only means the last
 // probe or push worked. Probe (write-free) whenever we are not connected, so the
 // indicator corrects itself without pressing Test connection, for example when
@@ -699,6 +805,8 @@ function autoProbePushServer() {
   let probe = null;
   if (state.serverMode === 'firefly' && !state.fireflyConnected) probe = probeFirefly({ silent: true, auto: true });
   else if (state.serverMode === 'robin' && !state.robinConnected) probe = probeRobin({ silent: true, auto: true });
+  // Only probe with a login on file: an empty one would just be refused.
+  else if (state.serverMode === 'march7th' && !state.march7thConnected && state.march7thUser && state.march7thPass) probe = probeMarch7th({ silent: true, auto: true });
   if (!probe) return null;
   pushServerProbe = probe.catch(() => {}).finally(() => { pushServerProbe = null; });
   return pushServerProbe;
@@ -708,6 +816,7 @@ function autoProbePushServer() {
 function resetPushServerState() {
   state.fireflyConnected = false;
   state.robinConnected = false;
+  state.march7thConnected = false;
 }
 
 // API check: calls every endpoint this page reads in the current mode and
@@ -728,6 +837,9 @@ const API_CHECKS = {
   ],
   robin: [
     { path: '/srtools', method: 'POST', body: {}, robin: true }
+  ],
+  march7th: [
+    { path: '/sr-tools', method: 'POST', march7th: true }
   ]
 };
 
@@ -742,14 +854,16 @@ function apiCheckBodyError(parsed, text) {
 }
 
 async function runOneApiCheck(base, check) {
-  const url = check.firefly ? fireflySyncUrl(base) : check.robin ? robinSrtoolsUrl(base) : `${base}${check.path}`;
+  const url = check.firefly ? fireflySyncUrl(base) : check.robin ? robinSrtoolsUrl(base) : check.march7th ? march7thUrl(base) : `${base}${check.path}`;
   const t0 = performance.now();
   try {
     const res = await fetch(url, {
       method: check.method,
       cache: 'no-store',
-      headers: (check.firefly || check.robin) ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
-      body: check.body ? JSON.stringify(check.body) : undefined,
+      headers: (check.firefly || check.robin || check.march7th) ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
+      body: check.march7th
+        ? JSON.stringify(buildMarch7thBody({ username: state.march7thUser.trim(), password: state.march7thPass }))
+        : check.body ? JSON.stringify(check.body) : undefined,
       signal: AbortSignal.timeout(6000)
     });
     const ms = Math.round(performance.now() - t0);
@@ -763,6 +877,8 @@ async function runOneApiCheck(base, check) {
       problem = fireflyReplyProblem(parsed, text);
     } else if (check.robin) {
       problem = robinReplyProblem(parsed);
+    } else if (check.march7th) {
+      problem = march7thReplyProblem(parsed, text);
     } else {
       problem = apiCheckBodyError(parsed, text);
       if (problem) problem = t('apiCheckServerError', { message: problem });
@@ -1589,6 +1705,12 @@ function endgameTextKey(name) {
 }
 
 // Server Mode Setup
+// RobinSR and March7thHoney take pushes only: nothing can be read back, so
+// code that would fetch from the server falls through to the browser cache.
+function isRobinLikeMode() {
+  return state.serverMode === 'robin' || state.serverMode === 'march7th';
+}
+
 let serverModesBound = false;
 
 // Re-applies every mode-dependent piece of UI. Safe to call repeatedly (it is
@@ -1630,6 +1752,7 @@ function applyModeDisplay(mode) {
   setVisible(el.cardPersistentCamera, caps.saveManager);
   setVisible(el.cardPersistentTime, caps.saveManager);
   setVisible(el.cardFireflyExtras, caps.extraData);
+  setVisible(el.march7thCredentials, caps.needsLogin);
   setVisible(el.btnQuickSyncPersistent, caps.saveManager);
   setVisible(el.btnSelectPersistent, caps.saveManager);
   setVisible(el.btnSelectDatagame, caps.jsonModes.includes('datagame'));
@@ -1639,12 +1762,14 @@ function applyModeDisplay(mode) {
   }
   if (el.badgePersistenceMode) {
     el.badgePersistenceMode.textContent = t(caps.extraData ? 'badgePersistenceFirefly'
-      : caps.saveManager ? 'badgePersistenceGaC' : 'badgePersistenceRobin');
+      : caps.saveManager ? 'badgePersistenceGaC'
+      : mode === 'march7th' ? 'badgePersistenceMarch7th' : 'badgePersistenceRobin');
     el.badgePersistenceMode.className = caps.saveManager ? 'badge-creative' : 'badge-super-tag';
   }
   if (el.apiUrlModeHint) {
     el.apiUrlModeHint.textContent = t(caps.extraData ? 'apiUrlHintFirefly'
-      : mode === 'robin' ? 'apiUrlHintRobin' : 'apiUrlHintGaC');
+      : mode === 'robin' ? 'apiUrlHintRobin'
+      : mode === 'march7th' ? 'apiUrlHintMarch7th' : 'apiUrlHintGaC');
   }
 
   // Never leave a hidden tab selected.
@@ -1706,6 +1831,7 @@ function setupServerModes() {
     // FireflyGo is push-only, so its connection state must never carry over.
     state.fireflyConnected = false;
     state.robinConnected = false;
+    state.march7thConnected = false;
     showToast(t('toastServerSwitched', { mode: MODE_LABELS[next] }), 'info');
     refreshStatus();
   };
@@ -1814,7 +1940,8 @@ async function refreshStatus() {
 
     state.statusData = data;
     setConnectionStatus(state.serverMode === 'firefly' ? state.fireflyConnected
-      : state.serverMode === 'robin' ? state.robinConnected : true);
+      : state.serverMode === 'robin' ? state.robinConnected
+      : state.serverMode === 'march7th' ? state.march7thConnected : true);
 
     el.lblApiUrl.textContent = state.apiUrl;
     el.statAvatars.textContent = data.avatar_count ?? state.avatarsList.length;
@@ -1837,6 +1964,9 @@ async function refreshStatus() {
         el.badgePersistenceMode.className = 'badge-creative';
       } else if (state.serverMode === 'firefly') {
         el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
+        el.badgePersistenceMode.className = 'badge-super-tag';
+      } else if (state.serverMode === 'march7th') {
+        el.badgePersistenceMode.textContent = t('badgePersistenceMarch7th');
         el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
         el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
@@ -1865,6 +1995,8 @@ async function refreshStatus() {
       setConnectionStatus(state.fireflyConnected);
     } else if (state.serverMode === 'robin') {
       setConnectionStatus(state.robinConnected);
+    } else if (state.serverMode === 'march7th') {
+      setConnectionStatus(state.march7thConnected);
     } else {
       setConnectionStatus(false, t('offline'));
     }
@@ -1887,6 +2019,9 @@ async function refreshStatus() {
         el.badgePersistenceMode.className = 'badge-creative';
       } else if (state.serverMode === 'firefly') {
         el.badgePersistenceMode.textContent = t('badgePersistenceFirefly');
+        el.badgePersistenceMode.className = 'badge-super-tag';
+      } else if (state.serverMode === 'march7th') {
+        el.badgePersistenceMode.textContent = t('badgePersistenceMarch7th');
         el.badgePersistenceMode.className = 'badge-super-tag';
       } else {
         el.badgePersistenceMode.textContent = t('badgePersistenceRobin');
@@ -6724,7 +6859,7 @@ async function saveLineupToServer(lineupData) {
     state.dataGameData = state.dataGameData || { ...DEFAULT_DATA_GAME };
     state.dataGameData.lineups = { ...lineupData };
     await saveDataGameCache(state.dataGameData);
-    if (state.isConnected && state.serverMode !== 'robin') {
+    if (state.isConnected && !isRobinLikeMode()) {
       await apiCall('/api/data-in-game', 'POST', state.dataGameData).catch(() => {});
     }
   }
@@ -7173,6 +7308,18 @@ async function saveFreesrChangesToServer() {
     return;
   }
 
+  // March7thHoney: POST /sr-tools with the account login and the snapshot.
+  if (state.serverMode === 'march7th') {
+    try {
+      await trackedPush(() => pushMarch7thSync({ silent: true }), retry);
+      markBuildsReceived();
+    } catch (err) {
+      showToast(t('syncPushFailed', { server: MODE_LABELS.march7th, message: err.message }), 'error');
+      throw err;
+    }
+    return;
+  }
+
   // GaCy GO: try /api/freesr first, then the srtools-compatible endpoint.
   const payloadWrapped = { data: state.fullFreesrData };
   const payloadDirect = state.fullFreesrData;
@@ -7212,8 +7359,8 @@ async function loadEquipment() {
     if (state.fullFreesrData) {
       lcs = state.fullFreesrData.lightcones || [];
       relics = state.fullFreesrData.relics || [];
-    } else if (state.isConnected && state.serverMode !== 'robin') {
-      // RobinSR has no read endpoint; it falls through to the browser cache.
+    } else if (state.isConnected && !isRobinLikeMode()) {
+      // RobinSR and March7thHoney have no read endpoint; they fall through to the browser cache.
       const res = await apiCall('/api/freesr').catch(async () => {
         return await apiCall('/srtools');
       }).catch(() => null);
@@ -9585,7 +9732,7 @@ function setupFireflyEndgameEvents() {
 
 // Load Persistent / Character Path Settings (GaC persistent vs Firefly data-in-game)
 async function loadPersistentSettings() {
-  if (state.serverMode === 'robin') return;
+  if (isRobinLikeMode()) return;
 
   if (state.serverMode === 'firefly') {
     // Firefly uses data-in-game.json char_path { main, march_7 }
@@ -9979,10 +10126,10 @@ async function loadJsonData(mode) {
     if (el.btnSelectDatagame) el.btnSelectDatagame.className = 'btn btn-sm btn-secondary';
     el.jsonStatusInfo.textContent = t('jsonStatusLoading', { file: 'freesr-data.json' });
     try {
-      if (state.fullFreesrData && (!state.isConnected || state.serverMode === 'firefly' || state.serverMode === 'robin')) {
+      if (state.fullFreesrData && (!state.isConnected || state.serverMode === 'firefly' || state.serverMode === 'robin' || state.serverMode === 'march7th')) {
         el.jsonEditor.value = JSON.stringify(state.fullFreesrData, null, 2);
         el.jsonStatusInfo.textContent = t('jsonStatusMemory', { file: 'freesr-data.json' });
-      } else if (state.isConnected && state.serverMode !== 'robin') {
+      } else if (state.isConnected && state.serverMode !== 'robin' && state.serverMode !== 'march7th') {
         const res = await apiCall('/api/freesr');
         if (generation !== jsonLoadGeneration) return;
         if (!res.data || typeof res.data !== 'object' || Array.isArray(res.data)) throw new Error('invalid freesr response');
@@ -11596,12 +11743,25 @@ function setupEvents() {
 
   document.getElementById('btn-api-check')?.addEventListener('click', () => { runApiCheck(); });
 
+  // March7thHoney login. Typing changes the account, so the last result is stale.
+  if (el.settingM7User) el.settingM7User.value = state.march7thUser;
+  if (el.settingM7Pass) el.settingM7Pass.value = state.march7thPass;
+  const syncMarch7thLogin = () => {
+    state.march7thUser = el.settingM7User?.value ?? '';
+    state.march7thPass = el.settingM7Pass?.value ?? '';
+    state.march7thConnected = false;
+    storeMarch7thCredentials();
+  };
+  el.settingM7User?.addEventListener('input', syncMarch7thLogin);
+  el.settingM7Pass?.addEventListener('input', syncMarch7thLogin);
+
   // Ping Latency Test
   if (el.btnTestConnection) {
     el.btnTestConnection.addEventListener('click', async () => {
       const targetUrl = (el.settingApiUrl?.value || state.apiUrl).trim().replace(/\/+$/, '');
       const isFirefly = state.serverMode === 'firefly';
       const isRobin = state.serverMode === 'robin';
+      const isMarch7th = state.serverMode === 'march7th';
       if (el.pingLatencyBadge) {
         el.pingLatencyBadge.style.display = 'inline-block';
         el.pingLatencyBadge.textContent = '...';
@@ -11619,6 +11779,8 @@ function setupEvents() {
           await probeFirefly({ silent: true });
         } else if (isRobin) {
           await probeRobin({ silent: true });
+        } else if (isMarch7th) {
+          await probeMarch7th({ silent: true });
         } else {
           const res = await fetch(`${state.apiUrl}/api/status`, { signal: AbortSignal.timeout(3500) });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -11638,7 +11800,7 @@ function setupEvents() {
           el.pingLatencyBadge.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
           el.pingLatencyBadge.style.color = '#ef4444';
         }
-        showToast(isRobin ? t('toastErrorMessage', { message: err.message }) : t('toastPingFailed'), 'error');
+        showToast(isRobin || isMarch7th ? t('toastErrorMessage', { message: err.message }) : t('toastPingFailed'), 'error');
         if (isFirefly) {
           state.fireflyConnected = false;
           setFireflyExtraStatus('fireflyRequestFailedDetail', { message: err.message }, 'error');
@@ -11760,6 +11922,12 @@ function setupEvents() {
       state.apiUrl = 'http://localhost:21000';
       state.serverMode = 'gac';
       state.fireflyExtraData = null;
+      state.march7thUser = '';
+      state.march7thPass = '';
+      state.march7thConnected = false;
+      try { sessionStorage.removeItem('gac_srtool_m7_pass'); } catch (e) { /* storage blocked */ }
+      if (el.settingM7User) el.settingM7User.value = '';
+      if (el.settingM7Pass) el.settingM7Pass.value = '';
       state.defaultEnergy = 50;
       state.autoSync = true;
       state.showcaseRolls = true;

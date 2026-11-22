@@ -6,12 +6,13 @@
 // understands POST /sync, so every feature that needs a read endpoint has to
 // disappear from the UI instead of failing at runtime.
 
-export const SERVER_MODES = ['gac', 'firefly', 'robin'];
+export const SERVER_MODES = ['gac', 'firefly', 'robin', 'march7th'];
 
 export const MODE_LABELS = {
   gac: 'GaCy GO',
   firefly: 'FireflyGo',
-  robin: 'RobinSR'
+  robin: 'RobinSR',
+  march7th: 'March7thHoney'
 };
 
 export const MODE_CAPABILITIES = {
@@ -66,6 +67,26 @@ export const MODE_CAPABILITIES = {
     pushOnly: true,
     extraData: false,
     ownedAvatarsOnly: false,
+    jsonModes: ['freesr']
+  },
+  // March7thHoney: push-only over POST /sr-tools with an account login. It takes
+  // the FreeSR snapshot but no extra_data, and nothing documents an endgame room
+  // picker for it, so only characters, equipment and the JSON editor are offered.
+  march7th: {
+    saveManager: false,
+    exranks: false,
+    inventory: false,
+    monsterSettings: false,
+    fireflyEndgame: false,
+    damageAnalyst: false,
+    sceneCard: false,
+    gmConsole: false,
+    battleSummary: false,
+    toolSession: false,
+    pushOnly: true,
+    extraData: false,
+    ownedAvatarsOnly: false,
+    needsLogin: true,
     jsonModes: ['freesr']
   }
 };
