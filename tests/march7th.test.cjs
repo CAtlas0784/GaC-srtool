@@ -35,5 +35,9 @@ test('replies are judged by status, error field and HTML', async () => {
   assert.equal(inspectMarch7thReply({ status: 401, message: 'no' }).kind, 'error');
   assert.equal(inspectMarch7thReply({ error: '' , status: 200 }).kind, 'ok');
   assert.equal(inspectMarch7thReply(null, '<html>502</html>').kind, 'html');
+  // The server seen in the wild answers { retcode, message, data }.
+  assert.deepEqual(inspectMarch7thReply({ retcode: -1, message: 'Account not found.', data: null }), { kind: 'error', message: 'Account not found.' });
+  assert.equal(inspectMarch7thReply({ retcode: 0, message: 'OK', data: null }).kind, 'ok');
+  assert.equal(inspectMarch7thReply({ retcode: 0, message: 'OK', data: {} }).kind, 'ok');
   assert.equal(inspectMarch7thReply([1]).kind, 'unknown');
 });

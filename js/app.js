@@ -10,7 +10,7 @@ import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from 
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=5';
 import { buildRobinPayload, classifyRobinReply, robinSrtoolsUrl } from './robin.js?v=8';
-import { buildMarch7thBody, inspectMarch7thReply, march7thUrl } from './march7th.js?v=1';
+import { buildMarch7thBody, inspectMarch7thReply, march7thUrl } from './march7th.js?v=2';
 import { maxAvatarSkills } from './skills.js?v=1';
 import {
   ENDGAME_MODES,

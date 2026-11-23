@@ -41,7 +41,8 @@ export function buildMarch7thBody({ username = '', password = '' } = {}, freesr)
  *
  * Returns { kind, message } where kind is:
  *   'ok'      - accepted: HTTP 2xx, JSON or text, and no error field
- *   'error'   - the server reports a failure, even inside an HTTP 200
+ *   'error'   - the server reports a failure (error field, bad status or a
+ *               non-zero retcode), even inside an HTTP 200
  *   'html'    - an HTML page (wrong server, Nginx or Cloudflare error page)
  *   'unknown' - a JSON value that is not an object
  */
@@ -53,6 +54,11 @@ export function inspectMarch7thReply(parsed, text = '') {
 
   const message = typeof parsed.message === 'string' ? parsed.message : '';
   if (typeof parsed.error === 'string' && parsed.error) return { kind: 'error', message: parsed.error };
+  // The real server answers { retcode, message, data }: 0 is success, anything
+  // else (-1 for an unknown account) is a failure, whatever the HTTP status was.
+  if (typeof parsed.retcode === 'number' && parsed.retcode !== 0) {
+    return { kind: 'error', message: message || `retcode ${parsed.retcode}` };
+  }
   if (typeof parsed.status === 'number' && (parsed.status < 200 || parsed.status > 299)) {
     return { kind: 'error', message: message || `status ${parsed.status}` };
   }
