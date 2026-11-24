@@ -1,0 +1,10 @@
+{
+  "format_version": 1,
+  "about": "Verified endgame placements sent with PUT /api/endgame/catalog. Add an entry only when it comes from a capture or a reference you can name in its source field; never derive one from stage ids. Keys are the stage ids the server reports. Entries without all three ids and a source are not sent.",
+  "placements": {
+    "moc": {},
+    "pf": {},
+    "as": {},
+    "peak": {}
+  }
+}

@@ -5,7 +5,7 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.54';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.55';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=5';
@@ -26,6 +26,15 @@ import {
   summarizeEndgameSelection,
   listStagePresets
 } from './endgame.js?v=2';
+import {
+  ENDGAME_CATALOG_PATH,
+  ENDGAME_PLACEMENTS_URL,
+  buildEndgameCatalogPayload,
+  endgameCatalogErrors,
+  endgamePushReason,
+  parseEndgameStatus,
+  summarizeEndgameStatus
+} from './endgame-sync.js?v=1';
 import {
   getAvatarIconUrl,
   getLightconeArtUrl,
@@ -92,6 +101,9 @@ const state = {
   inventoryDraft: {},
   inventoryPage: 0,
   monsterSettings: { activeMode: 'moc', catalog: null, groupId: '', stageId: '', customStage: '', waves: [], savedFingerprint: '', ready: false, canEdit: false, aaRoundSelection: null, aaRoundSelectionLoaded: false, aaRoundSelectionBusy: false, aaRoundSelectionError: '', aaRoundSelectionErrorKey: '' },
+  // PUT/GET /api/endgame/catalog. phase: idle | checking | pushing | synced |
+  // unsupported | offline | rejected | error.
+  endgameSync: { phase: 'idle', status: null, errors: [], error: '', local: null, pushedAt: null, inFlight: null, openGroups: new Set() },
   fireflyEndgame: {
     activeMode: 'moc',
     catalog: null,
@@ -918,19 +930,26 @@ async function runApiCheck() {
 let toolSessionTimer = null;
 let toolSessionConnected = false;
 let toolSessionGeneration = 0;
-async function syncToolSession(connected) {
+// The endgame catalog is checked once per connection, not on every lease renewal.
+let endgameCheckedThisConnection = false;
+async function syncToolSession(connected, { renew = false } = {}) {
   // Only the GaCy GO gateway implements /api/tool-session.
   if (!modeSupports('toolSession', state.serverMode)) {
     toolSessionConnected = connected;
     return;
   }
+  if (!connected) endgameCheckedThisConnection = false;
   const generation = ++toolSessionGeneration;
   if (toolSessionTimer) { clearTimeout(toolSessionTimer); toolSessionTimer = null; }
   toolSessionConnected = connected;
   try {
     const result = await apiCall('/api/tool-session', 'POST', { connected, client: 'GaC-Srtool' });
     if (generation === toolSessionGeneration && connected && toolSessionConnected && Number(result.lease_seconds) > 0) {
-      toolSessionTimer = setTimeout(() => syncToolSession(true), Number(result.lease_seconds) * 1000 / 3);
+      toolSessionTimer = setTimeout(() => syncToolSession(true, { renew: true }), Number(result.lease_seconds) * 1000 / 3);
+    }
+    if (generation === toolSessionGeneration && connected && !renew && !endgameCheckedThisConnection) {
+      endgameCheckedThisConnection = true;
+      syncEndgameCatalog({ auto: true });
     }
   } catch (error) {
     if (generation === toolSessionGeneration) toolSessionConnected = false;
@@ -969,6 +988,10 @@ function setConnectionStatus(connected, extraText = '') {
   const connectionChanged = state.isConnected !== connected;
   if (connected !== toolSessionConnected) syncToolSession(connected);
   state.isConnected = connected;
+  if (connectionChanged && !connected) {
+    endgameCheckedThisConnection = false;
+    resetEndgameSync();
+  }
   // FireflyGo's endgame picker is local-only, so only GaCy needs a reload here.
   if (connectionChanged && state.serverMode === 'gac' && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
   updateCameraSaveStatus();
@@ -1622,7 +1645,7 @@ function applyTranslations() {
   if (state.activeTab === 'tab-monster-settings') {
     renderMonsterSettings();
     if (state.serverMode === 'gac' && state.monsterSettings.activeMode === 'aha') loadAhaHelpSettings();
-  }
+  } else renderEndgameSyncPanel();
   refreshOpenAvatarDetailModal();
 }
 
@@ -8751,6 +8774,7 @@ function renderMonsterSettings() {
   else if (mode === 'su') {
     root.replaceChildren(monsterElement('div', 'monster-settings-empty', t('monsterSettingsSuReadOnly')));
   } else renderMonsterChallengeMode(mode);
+  renderEndgameSyncPanel();
   if (state.monsterSettings.statusKey) setMonsterSettingsStatus(state.monsterSettings.statusKey, state.monsterSettings.statusState, state.monsterSettings.statusVars);
 }
 
@@ -8842,7 +8866,368 @@ async function loadMonsterSettings() {
   }
 }
 
+// ── Endgame catalog sync (GaCy GO) ─────────────────────────────────────────
+// The web owns the endgame data and pushes it with PUT /api/endgame/catalog;
+// the server answers which groups and stages it can actually play.
+const ENDGAME_GET_TIMEOUT_MS = 8000;
+const ENDGAME_PUT_TIMEOUT_MS = 30000;
+const ENDGAME_SYNC_MODE_FOR_TAB = { moc: 'moc', pf: 'pf', as: 'as', aa: 'peak' };
+const ENDGAME_SYNC_MODE_LABEL = { moc: 'monsterModeMoc', pf: 'monsterModePf', as: 'monsterModeAs', peak: 'monsterModeAa' };
+let endgameSyncGeneration = 0;
+
+function endgameApiBase() {
+  return String(state.apiUrl || '').replace(/\/+$/, '');
+}
+
+function resetEndgameSync() {
+  const es = state.endgameSync;
+  endgameSyncGeneration += 1;
+  es.inFlight = null;
+  es.phase = 'idle';
+  es.status = null;
+  es.errors = [];
+  es.error = '';
+  renderEndgameSyncPanel();
+}
+
+// Returns { network:false, status, ok, body, text } or { network:true, timeout, message }.
+async function endgameCatalogRequest(method, body, timeoutMs) {
+  try {
+    const res = await fetch(`${endgameApiBase()}${ENDGAME_CATALOG_PATH}`, {
+      method,
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch (_) { json = null; }
+    return { network: false, status: res.status, ok: res.ok, body: json, text };
+  } catch (error) {
+    const timeout = error?.name === 'TimeoutError' || error?.name === 'AbortError';
+    return { network: true, timeout, message: timeout ? t('endgameSyncTimeout') : String(error?.message || error) };
+  }
+}
+
+// A server that lacks the route can answer the CORS preflight with no CORS
+// headers, so the browser reports a network error instead of a 404. If a known
+// endpoint still answers, the server is up and simply lacks the catalog route.
+async function classifyEndgameNetworkFailure(reply) {
+  if (reply.timeout) return { phase: 'offline', error: reply.message };
+  try {
+    const res = await fetch(`${endgameApiBase()}/api/monster-settings/aa-round`, {
+      cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', 'X-GaC-Srtool': '1' },
+      signal: AbortSignal.timeout(4000)
+    });
+    if (res.ok) return { phase: 'unsupported', error: '' };
+  } catch (_) { /* Unreachable: offline. */ }
+  return { phase: 'offline', error: reply.message };
+}
+
+// Turns a reply into a status document, or records why there is none.
+async function readEndgameReply(reply, { put = false } = {}) {
+  const es = state.endgameSync;
+  if (reply.network) {
+    const failure = await classifyEndgameNetworkFailure(reply);
+    es.phase = failure.phase;
+    es.error = failure.error;
+    return null;
+  }
+  if (reply.status === 404 || reply.status === 405 || reply.status === 501) {
+    es.phase = 'unsupported';
+    return null;
+  }
+  if (put && reply.status === 400) {
+    es.phase = 'rejected';
+    es.errors = endgameCatalogErrors(reply.body);
+    if (!es.errors.length) es.errors = [String(reply.text || 'HTTP 400').slice(0, 300)];
+    return null;
+  }
+  if (!reply.ok) {
+    es.phase = 'error';
+    const detail = reply.body?.error || reply.body?.message || String(reply.text || '').slice(0, 160);
+    es.error = `HTTP ${reply.status}${detail ? `: ${detail}` : ''}`;
+    return null;
+  }
+  const status = parseEndgameStatus(reply.body);
+  // {"retcode":0} comes from an older server's catch-all route.
+  if (!status) es.phase = 'unsupported';
+  return status;
+}
+
+async function loadEndgameSyncLocal() {
+  const es = state.endgameSync;
+  if (es.local) return es.local;
+  const catalogPromise = state.fireflyEndgame.catalog
+    ? Promise.resolve(state.fireflyEndgame.catalog)
+    : fetch(`${FIREFLY_ENDGAME_CATALOG_URL}?v=${assetVersion('firefly-endgame.json')}`).then(res => {
+      if (!res.ok) throw new Error(`firefly-endgame.json: HTTP ${res.status}`);
+      return res.json();
+    });
+  const placementsPromise = fetch(ENDGAME_PLACEMENTS_URL, { cache: 'no-cache' }).then(res => {
+    if (!res.ok) throw new Error(`endgame-placements.json: HTTP ${res.status}`);
+    return res.json();
+  });
+  const [catalog, placements] = await Promise.all([catalogPromise, placementsPromise]);
+  const built = await buildEndgameCatalogPayload(catalog, placements);
+  if (built.droppedPlacements.length) console.warn('Endgame placements not sent:', built.droppedPlacements);
+  if (built.goEscaped.length) console.warn('Endgame catalog contains characters Go escapes differently:', built.goEscaped);
+  es.local = { ...built, catalog };
+  return es.local;
+}
+
+// Re-reads only the server's room catalog and AA round so new seasons show in
+// the pickers; unsaved Custom Enemy waves are left alone.
+async function refreshMonsterCatalogAfterSync() {
+  const editor = state.monsterSettings;
+  if (state.serverMode !== 'gac' || !state.isConnected || !(editor.catalog || editor.ready)) return;
+  try {
+    editor.catalog = await apiCall('/api/monster-settings/catalog');
+  } catch (error) {
+    console.warn('Monster settings catalog refresh failed:', error);
+    return;
+  }
+  try {
+    const result = await apiCall('/api/monster-settings/aa-round');
+    editor.aaRoundSelection = result?.selection || null;
+    editor.aaRoundSelectionLoaded = true;
+  } catch (_) { /* Keep the last known AA round. */ }
+  if (state.activeTab === 'tab-monster-settings' && !usesEndgamePicker()) renderMonsterSettings();
+}
+
+/**
+ * GET the server's catalog status and PUT ours when the server has none or a
+ * different sha256. `force` (the Sync button) always PUTs.
+ */
+function syncEndgameCatalog({ force = false, auto = false } = {}) {
+  const es = state.endgameSync;
+  if (es.inFlight) return es.inFlight;
+  if (state.serverMode !== 'gac' || !state.isConnected) {
+    renderEndgameSyncPanel();
+    return Promise.resolve();
+  }
+  const generation = endgameSyncGeneration;
+  const base = endgameApiBase();
+  const stale = () => generation !== endgameSyncGeneration || base !== endgameApiBase() || state.serverMode !== 'gac' || !state.isConnected;
+
+  const run = (async () => {
+    es.phase = 'checking';
+    es.errors = [];
+    es.error = '';
+    renderEndgameSyncPanel();
+    try {
+      let local;
+      try {
+        local = await loadEndgameSyncLocal();
+      } catch (error) {
+        es.phase = 'error';
+        es.error = t('endgameSyncLocalError', { error: error.message });
+        return;
+      }
+      if (stale()) return;
+
+      const status = await readEndgameReply(await endgameCatalogRequest('GET', null, ENDGAME_GET_TIMEOUT_MS));
+      if (stale() || !status) return;
+      es.status = status;
+      if (!force && !endgamePushReason(status, local.sha256)) {
+        es.phase = 'synced';
+        return;
+      }
+
+      es.phase = 'pushing';
+      renderEndgameSyncPanel();
+      const pushed = await readEndgameReply(await endgameCatalogRequest('PUT', local.payload, ENDGAME_PUT_TIMEOUT_MS), { put: true });
+      if (stale()) return;
+      if (!pushed) {
+        if (es.phase === 'rejected') showToast(escapeHtml(t('endgameSyncRejected', { count: es.errors.length })), 'error');
+        else if (!auto) showToast(escapeHtml(t('endgameSyncPushFailed')), 'error');
+        return;
+      }
+      es.status = pushed;
+      es.phase = 'synced';
+      es.pushedAt = Date.now();
+      showToast(escapeHtml(t('endgameSyncPushedToast', { version: local.version })), 'success');
+      await refreshMonsterCatalogAfterSync();
+    } catch (error) {
+      if (!stale()) {
+        es.phase = 'error';
+        es.error = String(error?.message || error);
+      }
+    } finally {
+      if (generation === endgameSyncGeneration) {
+        es.inFlight = null;
+        if (stale() && (es.phase === 'checking' || es.phase === 'pushing')) es.phase = 'idle';
+      }
+      renderEndgameSyncPanel();
+    }
+  })();
+  es.inFlight = run;
+  return run;
+}
+
+function endgameLocalText(names) {
+  if (!names || typeof names !== 'object') return '';
+  const lang = String(getCurrentLanguage() || 'en');
+  return String((lang.startsWith('th') ? names.th : '') || names.en || names.th || '').trim();
+}
+
+function endgameLocalGroup(mode, groupId) {
+  const groups = state.endgameSync.local?.catalog?.modes?.[mode]?.groups || [];
+  return groups.find(group => Number(group.id) === Number(groupId)) || null;
+}
+
+// The server reports a floor/level id or a battle stage id; name whichever matches.
+function endgameLocalStageName(group, stageId) {
+  const id = Number(stageId);
+  for (const level of group?.levels || []) {
+    if (Number(level.id) === id) return endgameLocalText(level.name);
+    const side = (level.sides || []).find(entry => Number(entry.stageId) === id);
+    if (side) return [endgameLocalText(level.name), endgameLocalText(side.name)].filter(Boolean).join(' · ');
+  }
+  const stage = (group?.stages || []).find(entry => Number(entry.id) === id || Number(entry.stageId) === id);
+  return stage ? endgameLocalText(stage.name) : '';
+}
+
+function endgameStatusBadge(status) {
+  const known = status === 'playable' || status === 'rejected';
+  return monsterElement('span', `endgame-sync-badge${known ? ` is-${status}` : ''}`,
+    status === 'playable' ? t('endgameSyncPlayable') : status === 'rejected' ? t('endgameSyncRejectedBadge') : (status || '—'));
+}
+
+function formatEndgameReceivedAt(value) {
+  if (value == null || value === '') return '';
+  const numeric = Number(value);
+  const date = Number.isFinite(numeric) ? new Date(numeric < 1e12 ? numeric * 1000 : numeric) : new Date(String(value));
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString(getCurrentLanguage() || undefined);
+}
+
+function renderEndgameSyncPanel() {
+  const panel = document.getElementById('endgame-sync-panel');
+  if (!panel) return;
+  const es = state.endgameSync;
+  const online = state.serverMode === 'gac' && state.isConnected;
+  panel.hidden = state.serverMode !== 'gac';
+  const summary = document.getElementById('endgame-sync-summary');
+  const button = document.getElementById('btn-endgame-sync');
+  const errorsNode = document.getElementById('endgame-sync-errors');
+  const meta = document.getElementById('endgame-sync-meta');
+  const list = document.getElementById('endgame-sync-status-list');
+  panel.dataset.state = es.phase;
+  if (list) list.hidden = state.serverMode !== 'gac';
+  if (button) {
+    button.disabled = !online || Boolean(es.inFlight);
+    button.setAttribute('aria-busy', String(Boolean(es.inFlight)));
+  }
+
+  const phaseKey = {
+    idle: online ? 'endgameSyncIdle' : 'endgameSyncConnect',
+    checking: 'endgameSyncChecking',
+    pushing: 'endgameSyncPushing',
+    synced: 'endgameSyncSynced',
+    unsupported: 'endgameSyncUnsupported',
+    offline: 'endgameSyncOffline',
+    rejected: 'endgameSyncRejected',
+    error: 'endgameSyncError'
+  }[es.phase] || 'endgameSyncIdle';
+  if (summary) {
+    summary.textContent = t(phaseKey, {
+      version: es.status?.source?.version || '—',
+      error: es.error || '—',
+      count: es.errors.length
+    });
+  }
+
+  if (errorsNode) {
+    errorsNode.replaceChildren(...(es.phase === 'rejected' ? es.errors : []).map(text => monsterElement('li', '', text)));
+    errorsNode.hidden = es.phase !== 'rejected' || !es.errors.length;
+  }
+
+  if (meta) {
+    meta.replaceChildren();
+    if (es.status) {
+      const source = es.status.source || {};
+      const facts = monsterElement('p', 'endgame-sync-facts');
+      const parts = [];
+      if (es.status.stored) {
+        parts.push(t('endgameSyncServerVersion', { version: source.version || '—', sha: String(source.sha256 || '').slice(0, 12) || '—' }));
+        const received = formatEndgameReceivedAt(es.status.received_at);
+        if (received) parts.push(t('endgameSyncReceivedAt', { time: received }));
+      } else {
+        parts.push(t('endgameSyncNotStored'));
+      }
+      if (es.local) {
+        parts.push(t(endgamePushReason(es.status, es.local.sha256) ? 'endgameSyncLocalDiffers' : 'endgameSyncLocalMatches', { version: es.local.version || '—' }));
+      }
+      facts.textContent = parts.join(' · ');
+      meta.append(facts);
+      const chips = monsterElement('div', 'endgame-sync-chips');
+      const counts = summarizeEndgameStatus(es.status);
+      for (const mode of ['moc', 'pf', 'as', 'peak']) {
+        const count = counts[mode];
+        if (!count) continue;
+        chips.append(monsterElement('span', `endgame-sync-chip${count.playableStages < count.stages ? ' has-rejected' : ''}`,
+          t('endgameSyncModeCount', { mode: t(ENDGAME_SYNC_MODE_LABEL[mode]), groups: count.playableGroups, groupTotal: count.groups, stages: count.playableStages, stageTotal: count.stages })));
+      }
+      if (chips.childElementCount) meta.append(chips);
+    }
+  }
+
+  if (!list) return;
+  list.replaceChildren();
+  const mode = ENDGAME_SYNC_MODE_FOR_TAB[state.monsterSettings.activeMode];
+  if (!es.status) return;
+  if (!mode) {
+    list.append(monsterElement('p', 'endgame-sync-hint', t('endgameSyncPickMode')));
+    return;
+  }
+  const groups = (es.status.modes?.[mode]?.groups || []).slice().sort((a, b) => b.id - a.id);
+  list.append(monsterElement('h4', 'endgame-sync-list-title', t('endgameSyncListTitle', { mode: t(ENDGAME_SYNC_MODE_LABEL[mode]), count: groups.length })));
+  if (!groups.length) {
+    list.append(monsterElement('p', 'endgame-sync-hint', t('endgameSyncNoGroups')));
+    return;
+  }
+  for (const group of groups) {
+    const key = `${mode}:${group.id}`;
+    const local = endgameLocalGroup(mode, group.id);
+    const details = monsterElement('details', `endgame-sync-group is-${group.status || 'unknown'}`);
+    details.dataset.endgameGroup = key;
+    details.open = es.openGroups.has(key);
+    const head = monsterElement('summary', 'endgame-sync-group-head');
+    const playable = group.stages.filter(stage => stage.status === 'playable').length;
+    const title = monsterElement('span', 'endgame-sync-group-title');
+    title.append(monsterElement('strong', '', endgameLocalText(local?.name) || t('endgameSyncGroupFallback', { id: group.id })));
+    title.append(monsterElement('span', 'endgame-sync-group-meta', t('endgameSyncGroupMeta', { id: group.id, playable, total: group.stages.length })));
+    head.append(title, endgameStatusBadge(group.status));
+    details.append(head);
+    if (group.reason) details.append(monsterElement('p', 'endgame-sync-reason', group.reason));
+    const stages = monsterElement('ul', 'endgame-sync-stages');
+    for (const stage of group.stages) {
+      const row = monsterElement('li', `endgame-sync-stage is-${stage.status || 'unknown'}`);
+      const copy = monsterElement('span', 'endgame-sync-stage-copy');
+      copy.append(monsterElement('code', '', String(stage.id)));
+      const name = endgameLocalStageName(local, stage.id);
+      if (name) copy.append(monsterElement('span', 'endgame-sync-stage-name', name));
+      row.append(copy, endgameStatusBadge(stage.status));
+      if (stage.reason || stage.status === 'rejected') {
+        row.append(monsterElement('p', 'endgame-sync-reason', stage.reason || t('endgameSyncNoReason')));
+      }
+      stages.append(row);
+    }
+    details.append(stages);
+    list.append(details);
+  }
+}
+
 function setupMonsterSettingsEvents() {
+  document.getElementById('btn-endgame-sync')?.addEventListener('click', () => syncEndgameCatalog({ force: true }));
+  document.getElementById('endgame-sync-status-list')?.addEventListener('toggle', event => {
+    const details = event.target.closest?.('[data-endgame-group]');
+    if (!details) return;
+    if (details.open) state.endgameSync.openGroups.add(details.dataset.endgameGroup);
+    else state.endgameSync.openGroups.delete(details.dataset.endgameGroup);
+  }, true);
   document.querySelectorAll('[data-monster-mode]').forEach(button => {
     button.addEventListener('click', () => {
       state.monsterSettings.activeMode = button.dataset.monsterMode;

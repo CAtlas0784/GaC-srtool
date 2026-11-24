@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=2.61">
+  <link rel="stylesheet" href="css/styles.css?v=2.62">
   <link rel="stylesheet" href="css/item-catalog.css?v=6">
   <link rel="icon" type="image/png" href="assets/logo.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -490,6 +490,18 @@
           </div>
         </div>
 
+        <section id="endgame-sync-panel" class="endgame-sync-panel" data-state="idle" aria-labelledby="endgame-sync-title" hidden>
+          <div class="endgame-sync-head">
+            <div class="endgame-sync-copy">
+              <h2 class="endgame-sync-title" id="endgame-sync-title" data-i18n="endgameSyncTitle">Endgame catalog</h2>
+              <p id="endgame-sync-summary" class="endgame-sync-summary" role="status" aria-live="polite" data-i18n="endgameSyncConnect">Connect to GaCy GO to sync the endgame catalog.</p>
+            </div>
+            <button type="button" class="btn btn-secondary" id="btn-endgame-sync" data-i18n="endgameSyncButton" disabled>Sync now</button>
+          </div>
+          <ul id="endgame-sync-errors" class="endgame-sync-errors" hidden></ul>
+          <div id="endgame-sync-meta" class="endgame-sync-meta"></div>
+        </section>
+
         <div class="monster-settings-tabs" role="tablist" aria-label="Monster settings modes">
           <button type="button" class="monster-settings-tab active" role="tab" aria-selected="true" data-monster-mode="moc" data-i18n="monsterModeMoc">Memory of Chaos</button>
           <button type="button" class="monster-settings-tab" role="tab" aria-selected="false" data-monster-mode="pf" data-i18n="monsterModePf">Pure Fiction</button>
@@ -501,6 +513,7 @@
         </div>
         <div id="monster-settings-status" class="monster-settings-status" role="status" aria-live="polite" data-i18n="monsterSettingsLoading">กำลังอ่าน stage จาก resource ของ Client...</div>
         <div id="monster-settings-view" class="monster-settings-view" role="tabpanel" aria-live="polite"></div>
+        <div id="endgame-sync-status-list" class="endgame-sync-status-list" hidden></div>
 
         <div id="monster-settings-aha-help" class="monster-settings-aha-help" role="tabpanel" aria-labelledby="monster-mode-aha" hidden>
           <div class="aha-help-card" id="aha-help-card">
@@ -2129,6 +2142,6 @@
   <div class="toast-container" id="toast-container" role="status" aria-live="polite"></div>
 
   <!-- Script Modules -->
-  <script type="module" src="js/app.js?v=3.81"></script>
+  <script type="module" src="js/app.js?v=3.82"></script>
 </body>
 </html>

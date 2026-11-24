@@ -7829,3 +7829,45 @@ input:checked + .slider:before { background-color: var(--paper); }
 @media (max-width: 640px) {
   .ffx-aha-preset { flex: 1 1 0; min-height: 40px; }
 }
+
+/* Endgame catalog sync (GaCy GO): a status band above the mode tabs and the
+   server's per-room verdicts below the picker. Colour marks outcome only. */
+.endgame-sync-panel { display: grid; gap: 0.6rem; margin: 0 0 1rem; padding: 0.85rem 1rem; border: 1px solid var(--rule); border-radius: var(--radius-md); background: transparent; }
+.endgame-sync-panel[hidden], .endgame-sync-status-list[hidden], .endgame-sync-errors[hidden] { display: none; }
+.endgame-sync-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.endgame-sync-copy { display: grid; gap: 0.25rem; min-width: 0; flex: 1 1 320px; }
+.endgame-sync-title { margin: 0; font-family: var(--font-label); font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+.endgame-sync-summary { margin: 0; color: var(--ink-2); font-size: 0.86rem; line-height: 1.5; overflow-wrap: anywhere; }
+.endgame-sync-panel[data-state="synced"] .endgame-sync-summary { color: var(--received); }
+.endgame-sync-panel[data-state="offline"] .endgame-sync-summary,
+.endgame-sync-panel[data-state="rejected"] .endgame-sync-summary,
+.endgame-sync-panel[data-state="error"] .endgame-sync-summary { color: var(--danger); }
+.endgame-sync-panel[data-state="unsupported"] .endgame-sync-summary { color: var(--accent-gold); }
+.endgame-sync-errors { margin: 0; padding: 0.6rem 0.9rem 0.6rem 1.8rem; border: 1px dashed var(--danger); border-radius: var(--radius-md); color: var(--ink); font-size: 0.82rem; line-height: 1.5; max-height: 220px; overflow: auto; overflow-wrap: anywhere; }
+.endgame-sync-facts { margin: 0; color: var(--ink-2); font-size: 0.8rem; line-height: 1.5; overflow-wrap: anywhere; }
+.endgame-sync-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.endgame-sync-chip { padding: 0.2rem 0.6rem; border: 1px solid var(--rule-strong); border-radius: 999px; color: var(--ink-2); font-size: 0.76rem; }
+.endgame-sync-chip.has-rejected { border-color: var(--accent-gold); color: var(--ink); }
+
+.endgame-sync-status-list { display: grid; gap: 0.5rem; margin-top: 1.25rem; }
+.endgame-sync-list-title { margin: 0; color: var(--ink-2); font-size: 0.86rem; font-weight: 700; }
+.endgame-sync-hint { margin: 0; color: var(--ink-2); font-size: 0.84rem; }
+.endgame-sync-group { border: 1px solid var(--rule); border-radius: var(--radius-md); }
+.endgame-sync-group.is-rejected { border-color: var(--rule-strong); }
+.endgame-sync-group-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 44px; padding: 0.5rem 0.85rem; cursor: pointer; list-style: none; }
+.endgame-sync-group-head::-webkit-details-marker { display: none; }
+.endgame-sync-group-head:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.endgame-sync-group-title { display: grid; gap: 0.15rem; min-width: 0; }
+.endgame-sync-group-title strong { color: var(--ink); font-size: 0.88rem; overflow-wrap: anywhere; }
+.endgame-sync-group-meta { color: var(--ink-3); font-size: 0.74rem; }
+.endgame-sync-badge { flex: 0 0 auto; padding: 0.1rem 0.55rem; border: 1px solid var(--rule-strong); border-radius: 999px; color: var(--ink-2); font-size: 0.72rem; font-weight: 600; }
+.endgame-sync-badge.is-playable { border-color: var(--received); color: var(--received); }
+.endgame-sync-badge.is-rejected { border-color: var(--danger); color: var(--danger); }
+.endgame-sync-reason { margin: 0; color: var(--ink-2); font-size: 0.8rem; line-height: 1.45; overflow-wrap: anywhere; }
+.endgame-sync-group > .endgame-sync-reason { padding: 0 0.85rem 0.5rem; }
+.endgame-sync-stages { display: grid; gap: 0; margin: 0; padding: 0 0.85rem 0.6rem; list-style: none; }
+.endgame-sync-stage { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.25rem 0.75rem; padding: 0.4rem 0; border-top: 1px solid var(--rule); }
+.endgame-sync-stage > .endgame-sync-reason { flex-basis: 100%; }
+.endgame-sync-stage-copy { display: flex; align-items: baseline; gap: 0.6rem; min-width: 0; flex-wrap: wrap; }
+.endgame-sync-stage-copy code { color: var(--ink-2); font-size: 0.78rem; }
+.endgame-sync-stage-name { color: var(--ink); font-size: 0.82rem; overflow-wrap: anywhere; }
