@@ -5,7 +5,7 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.55';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.57';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=5';
@@ -8278,18 +8278,48 @@ function monsterLocalizedText(names) {
     .trim();
 }
 
+// The server's catalog carries no names or icons when its Nanoka metadata
+// fails to load. The bundled endgame catalog has both for every monster that
+// appears in an endgame wave, so it fills the gaps.
+function bundledMonster(monsterId) {
+  return state.monsterSettings.bundledMonsters?.[String(monsterId)] || null;
+}
+
+function ensureBundledMonsters() {
+  const editor = state.monsterSettings;
+  if (editor.bundledMonsters) return Promise.resolve(editor.bundledMonsters);
+  const known = state.fireflyEndgame.catalog || state.endgameSync.local?.catalog;
+  if (known?.monsters) {
+    editor.bundledMonsters = known.monsters;
+    return Promise.resolve(editor.bundledMonsters);
+  }
+  editor.bundledMonstersPromise ||= fetch(`${FIREFLY_ENDGAME_CATALOG_URL}?v=${assetVersion('firefly-endgame.json')}`)
+    .then(res => (res.ok ? res.json() : null))
+    .then(catalog => { editor.bundledMonsters = catalog?.monsters || {}; return editor.bundledMonsters; })
+    .catch(error => {
+      console.warn('Bundled monster names unavailable:', error);
+      editor.bundledMonsters = {};
+      return editor.bundledMonsters;
+    })
+    .finally(() => { editor.bundledMonstersPromise = null; });
+  return editor.bundledMonstersPromise;
+}
+
 function monsterName(monsterId) {
   const metadata = state.monsterSettings.catalog?.monsters?.[String(monsterId)];
-  return monsterLocalizedText(metadata?.names) || `Monster ${monsterId}`;
+  return monsterLocalizedText(metadata?.names)
+    || endgameLocalText(bundledMonster(monsterId)?.name)
+    || `Monster ${monsterId}`;
 }
 
 function makeMonsterIdentity(monsterId, variant = '') {
   const metadata = state.monsterSettings.catalog?.monsters?.[String(monsterId)];
   const item = monsterElement('span', `monster-settings-monster${variant ? ` ${variant}` : ''}`);
   const portrait = monsterElement('span', 'monster-settings-monster-portrait', '');
-  if (metadata?.icon_url) {
+  const iconUrl = metadata?.icon_url || bundledMonster(monsterId)?.icon;
+  if (iconUrl) {
     const image = document.createElement('img');
-    image.src = metadata.icon_url;
+    image.src = iconUrl;
     image.alt = '';
     image.loading = 'lazy';
     image.referrerPolicy = 'no-referrer';
@@ -8796,6 +8826,7 @@ async function loadMonsterSettings() {
   editor.aaRoundSelectionError = '';
   editor.aaRoundSelectionErrorKey = '';
   setMonsterSettingsStatus('monsterSettingsLoading', 'loading');
+  const bundledMonstersReady = ensureBundledMonsters();
 
   let catalogError = null;
   if (state.isConnected && state.serverMode === 'gac') {
@@ -8855,13 +8886,14 @@ async function loadMonsterSettings() {
   editor.canEdit = loadedFromServer && state.serverMode === 'gac' && state.isConnected;
   editor.ready = Boolean(data);
 
+  await bundledMonstersReady;
   if (editor.activeMode === 'aha' && editor.ahaLoaded) loadAhaHelpSettings();
   renderMonsterSettings();
   if (catalogError) setMonsterSettingsStatus('monsterSettingsCatalogError', 'error', { error: catalogError.message });
   else if (!editor.canEdit) setMonsterSettingsStatus('monsterSettingsReadOnly', 'unavailable');
   else {
     let sources = (editor.catalog?.sources || []).join(', ') || t('monsterSettingsClientResources');
-    if (editor.catalog?.metadata_error) sources += ', Nanoka metadata unavailable';
+    if (editor.catalog?.metadata_error) sources += `, ${t('monsterSettingsMetadataFallback')}`;
     setMonsterSettingsStatus('monsterSettingsLoaded', 'saved', { source: sources });
   }
 }

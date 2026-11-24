@@ -7458,7 +7458,8 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     endgameSyncGroupMeta: 'กลุ่ม {id} · เล่นได้ {playable}/{total} ด่าน',
     endgameSyncPlayable: 'เล่นได้',
     endgameSyncRejectedBadge: 'เล่นไม่ได้',
-    endgameSyncNoReason: 'เซิร์ฟเวอร์ไม่ได้ระบุเหตุผล'
+    endgameSyncNoReason: 'เซิร์ฟเวอร์ไม่ได้ระบุเหตุผล',
+    monsterSettingsMetadataFallback: 'ใช้ชื่อและรูปมอนจากข้อมูล Endgame ของเว็บแทน'
   },
   en: {
     // Build guide: in-game recommendation
@@ -7871,7 +7872,8 @@ const MODAL_AND_TOOL_TRANSLATIONS = {
     endgameSyncGroupMeta: 'Group {id} · {playable}/{total} stages playable',
     endgameSyncPlayable: 'Playable',
     endgameSyncRejectedBadge: 'Not playable',
-    endgameSyncNoReason: 'The server gave no reason.'
+    endgameSyncNoReason: 'The server gave no reason.',
+    monsterSettingsMetadataFallback: 'monster names and icons come from the web endgame data instead'
   }
 };
 for (const [language, additions] of Object.entries(MODAL_AND_TOOL_TRANSLATIONS)) {
