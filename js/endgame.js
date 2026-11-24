@@ -337,3 +337,40 @@ export function summarizeEndgameSelection(catalog, selection) {
     side: stage.side || ''
   };
 }
+
+/**
+ * Looks up the server status (playable / rejected) for a stage in a group.
+ * Matches by stageId first, then falls back to level/stage id.
+ * Handles peak boss/hard sharing an id, so stageId takes precedence.
+ * Returns { status, reason } or null when not found.
+ */
+export function matchStageStatus(statusDoc, mode, groupId, stageRef) {
+  if (!statusDoc || typeof statusDoc !== 'object') return null;
+  const syncMode = mode === 'aa' ? 'peak' : mode;
+  const groups = statusDoc.modes?.[syncMode]?.groups;
+  if (!Array.isArray(groups)) return null;
+  const group = groups.find((g) => Number(g.id) === Number(groupId));
+  if (!group || !Array.isArray(group.stages)) return null;
+
+  const targetStageId = Number(stageRef?.stageId ?? stageRef);
+  const targetId = Number(stageRef?.id);
+
+  // 1. Match by stageId if valid
+  if (Number.isFinite(targetStageId) && targetStageId > 0) {
+    const match = group.stages.find((s) => Number(s.id) === targetStageId);
+    if (match && match.status) {
+      return { status: match.status, reason: match.reason || '' };
+    }
+  }
+
+  // 2. Fall back to level/stage id
+  if (Number.isFinite(targetId) && targetId > 0) {
+    const match = group.stages.find((s) => Number(s.id) === targetId);
+    if (match && match.status) {
+      return { status: match.status, reason: match.reason || '' };
+    }
+  }
+
+  return null;
+}
+

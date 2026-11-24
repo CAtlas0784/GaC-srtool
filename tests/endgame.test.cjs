@@ -248,3 +248,67 @@ test('listStagePresets offers every peak stage and the newest seasons, without r
   assert.equal(presets[0].group.id, 3);
   assert.deepEqual(listStagePresets(null), []);
 });
+
+test('matchStageStatus matches by stageId first, falls back to id, and distinguishes peak boss/hard', async () => {
+  const { matchStageStatus } = await load();
+  const statusDoc = {
+    stored: true,
+    modes: {
+      peak: {
+        groups: [
+          {
+            id: 12,
+            status: 'rejected',
+            stages: [
+              { id: 1201, status: 'playable', reason: '' },
+              { id: 30501021, status: 'playable', reason: '' },
+              { id: 30501022, status: 'rejected', reason: 'hard stage disabled' }
+            ]
+          }
+        ]
+      },
+      moc: {
+        groups: [
+          {
+            id: 1037,
+            status: 'playable',
+            stages: [
+              { id: 5612, status: 'rejected', reason: 'floor not available' },
+              { id: 30127112, status: 'playable', reason: '' }
+            ]
+          }
+        ]
+      }
+    }
+  };
+
+  // 1. Peak boss and hard share id 1204 in catalog, but have distinct stageIds 30501021 and 30501022
+  const boss = matchStageStatus(statusDoc, 'peak', 12, { id: 1204, stageId: 30501021 });
+  assert.deepEqual(boss, { status: 'playable', reason: '' });
+
+  const hard = matchStageStatus(statusDoc, 'peak', 12, { id: 1204, stageId: 30501022 });
+  assert.deepEqual(hard, { status: 'rejected', reason: 'hard stage disabled' });
+
+  // 2. Mode 'aa' normalizes to 'peak'
+  const aaMatch = matchStageStatus(statusDoc, 'aa', 12, { id: 1204, stageId: 30501022 });
+  assert.deepEqual(aaMatch, { status: 'rejected', reason: 'hard stage disabled' });
+
+  // 3. Fallback to id when stageId does not match server status
+  const fallbackMatch = matchStageStatus(statusDoc, 'peak', 12, { id: 1201, stageId: 99999999 });
+  assert.deepEqual(fallbackMatch, { status: 'playable', reason: '' });
+
+  // 4. MoC floor id fallback
+  const mocFloor = matchStageStatus(statusDoc, 'moc', 1037, { id: 5612, stageId: 30127111 });
+  assert.deepEqual(mocFloor, { status: 'rejected', reason: 'floor not available' });
+
+  // 5. MoC exact stageId match takes priority even if id is provided
+  const mocStage = matchStageStatus(statusDoc, 'moc', 1037, { id: 5612, stageId: 30127112 });
+  assert.deepEqual(mocStage, { status: 'playable', reason: '' });
+
+  // 6. Unknown stage or unknown group or null statusDoc
+  assert.equal(matchStageStatus(statusDoc, 'peak', 12, { id: 9999, stageId: 8888 }), null);
+  assert.equal(matchStageStatus(statusDoc, 'peak', 999, { id: 1201 }), null);
+  assert.equal(matchStageStatus(null, 'peak', 12, { id: 1201 }), null);
+  assert.equal(matchStageStatus(statusDoc, 'pf', 12, { id: 1201 }), null);
+});
+
