@@ -40,13 +40,15 @@ jobs:
         if: env.VERCEL_DEPLOY_HOOK != ''
         run: curl --fail --silent --show-error -X POST "$VERCEL_DEPLOY_HOOK" > /dev/null
 
-  deploy:
+  # Build and deploy are separate jobs. When the upload and the deploy ran as
+  # steps of one job, deploy-pages sometimes listed the run's artifacts a
+  # moment after the upload had finalized and found none ("No artifacts named
+  # github-pages"), so the run failed with a good artifact sitting there.
+  # A job boundary lets the artifact become visible first.
+  build:
     # GitHub only: the copy of this file on Gitea must not try to deploy
     # GitHub Pages.
     if: github.ref == 'refs/heads/main' && github.server_url == 'https://github.com'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -83,6 +85,15 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.server_url == 'https://github.com'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
