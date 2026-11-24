@@ -5,7 +5,7 @@ import { initializeItemCatalog } from './item-catalog.js?v=16';
 import { initializeUnstuck } from './unstuck.js?v=8';
 import { loadGameData, assetVersion } from './game-data.js?v=1';
 import { PRYDWEN_BUILD_GUIDES } from './build-guides-data.js';
-import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.56';
+import { SUPPORTED_LANGUAGES, TRANSLATIONS, getCurrentLanguage, setLanguage, t, translateElement, translatePath } from './i18n.js?v=2.55';
 import { enkaToFreeSR, mergeFreeSR, countFreeSRContent, normalizeEnkaUid } from './enka-import.js?v=1';
 import { buildSyncPayload, buildSyncExtraData, inspectFireflyReply, normalizeExtraData, fireflySyncUrl, FIREFLY_EXTRA_FALLBACK } from './firefly.js?v=4';
 import { MODE_LABELS, normalizeMode, modeCapabilities, modeSupports } from './modes.js?v=5';
@@ -24,9 +24,8 @@ import {
   monsterInfo,
   resolveEndgameSelection,
   summarizeEndgameSelection,
-  listStagePresets,
-  matchStageStatus
-} from './endgame.js?v=3';
+  listStagePresets
+} from './endgame.js?v=2';
 import {
   ENDGAME_CATALOG_PATH,
   ENDGAME_PLACEMENTS_URL,
@@ -997,7 +996,6 @@ function setConnectionStatus(connected, extraText = '') {
   if (connectionChanged && state.serverMode === 'gac' && state.activeTab === 'tab-monster-settings') loadMonsterSettings();
   updateCameraSaveStatus();
   updateTimeSaveStatus();
-  updateFireflyEndgameControls();
   if (connected) {
     el.statusDot.classList.add('connected');
     el.connectionStatusText.textContent = extraText || t('online');
@@ -1726,7 +1724,7 @@ function usesEndgamePicker() {
 }
 
 function endgameTextKey(name) {
-  const prefix = { robin: 'robinEndgame', march7th: 'march7thEndgame', gac: 'gacEndgame' }[state.serverMode] || 'ffEndgame';
+  const prefix = { robin: 'robinEndgame', march7th: 'march7thEndgame' }[state.serverMode] || 'ffEndgame';
   return `${prefix}${name}`;
 }
 
@@ -8748,32 +8746,6 @@ function renderMonsterCustomEditor() {
   renderMonsterCustomWaves();
 }
 
-function renderGacEndgamePicker(root, mode) {
-  const pickerMode = mode === 'aa' ? 'peak' : mode;
-  state.fireflyEndgame.activeMode = pickerMode;
-
-  root.replaceChildren();
-
-  if (!state.fireflyEndgame.catalog) {
-    root.append(monsterElement('div', 'monster-settings-empty',
-      state.fireflyEndgame.catalogState === 'error'
-        ? t('ffEndgameCatalogError', { error: state.fireflyEndgame.catalogError || '' })
-        : t('ffEndgameLoading')));
-    updateFireflyEndgameControls();
-    applyFireflyEndgameStatus();
-    return;
-  }
-
-  if (mode === 'aa') {
-    const aaGroups = state.monsterSettings.catalog?.modes?.aa || state.fireflyEndgame.catalog?.modes?.peak?.groups || [];
-    root.append(renderAARoundSelection(aaGroups));
-  }
-
-  renderFireflyRoomEditor(root, pickerMode);
-  updateFireflyEndgameControls();
-  applyFireflyEndgameStatus();
-}
-
 function renderMonsterSettings() {
   if (usesEndgamePicker()) {
     renderFireflyEndgame();
@@ -8798,22 +8770,12 @@ function renderMonsterSettings() {
       state.monsterSettings.ahaLoaded = true;
       loadAhaHelpSettings();
     }
-  } else if (mode === 'custom') {
-    renderMonsterCustomEditor();
-  } else if (mode === 'su') {
+  } else if (mode === 'custom') renderMonsterCustomEditor();
+  else if (mode === 'su') {
     root.replaceChildren(monsterElement('div', 'monster-settings-empty', t('monsterSettingsSuReadOnly')));
-  } else if (['moc', 'pf', 'as', 'aa'].includes(mode)) {
-    renderGacEndgamePicker(root, mode);
-  } else {
-    renderMonsterChallengeMode(mode);
-  }
-  updateFireflyEndgameControls();
+  } else renderMonsterChallengeMode(mode);
   renderEndgameSyncPanel();
-  if (['moc', 'pf', 'as', 'aa'].includes(mode)) {
-    applyFireflyEndgameStatus();
-  } else if (state.monsterSettings.statusKey) {
-    setMonsterSettingsStatus(state.monsterSettings.statusKey, state.monsterSettings.statusState, state.monsterSettings.statusVars);
-  }
+  if (state.monsterSettings.statusKey) setMonsterSettingsStatus(state.monsterSettings.statusKey, state.monsterSettings.statusState, state.monsterSettings.statusVars);
 }
 
 async function loadMonsterSettings() {
@@ -8834,8 +8796,6 @@ async function loadMonsterSettings() {
   editor.aaRoundSelectionError = '';
   editor.aaRoundSelectionErrorKey = '';
   setMonsterSettingsStatus('monsterSettingsLoading', 'loading');
-
-  const endgameCatalogPromise = ensureFireflyEndgameCatalog();
 
   let catalogError = null;
   if (state.isConnected && state.serverMode === 'gac') {
@@ -8895,9 +8855,6 @@ async function loadMonsterSettings() {
   editor.canEdit = loadedFromServer && state.serverMode === 'gac' && state.isConnected;
   editor.ready = Boolean(data);
 
-  await endgameCatalogPromise;
-  syncFireflyEndgameSelectionFromSave();
-
   if (editor.activeMode === 'aha' && editor.ahaLoaded) loadAhaHelpSettings();
   renderMonsterSettings();
   if (catalogError) setMonsterSettingsStatus('monsterSettingsCatalogError', 'error', { error: catalogError.message });
@@ -8906,9 +8863,6 @@ async function loadMonsterSettings() {
     let sources = (editor.catalog?.sources || []).join(', ') || t('monsterSettingsClientResources');
     if (editor.catalog?.metadata_error) sources += ', Nanoka metadata unavailable';
     setMonsterSettingsStatus('monsterSettingsLoaded', 'saved', { source: sources });
-  }
-  if (['moc', 'pf', 'as', 'aa'].includes(editor.activeMode)) {
-    applyFireflyEndgameStatus();
   }
 }
 
@@ -9277,101 +9231,51 @@ function setupMonsterSettingsEvents() {
   document.querySelectorAll('[data-monster-mode]').forEach(button => {
     button.addEventListener('click', () => {
       state.monsterSettings.activeMode = button.dataset.monsterMode;
-      if (['moc', 'pf', 'as', 'aa'].includes(button.dataset.monsterMode)) {
-        state.fireflyEndgame.activeMode = button.dataset.monsterMode === 'aa' ? 'peak' : button.dataset.monsterMode;
-      }
       renderMonsterSettings();
     });
-  });
-  const gacActions = document.getElementById('gac-endgame-actions');
-  gacActions?.addEventListener('click', event => {
-    if (event.target.closest('#gac-endgame-reset')) {
-      resetFireflyEndgame();
-      return;
-    }
-    if (event.target.closest('#gac-endgame-apply')) {
-      applyFireflyEndgame({ sync: false });
-      return;
-    }
-    if (event.target.closest('#gac-endgame-apply-sync')) {
-      applyFireflyEndgame({ sync: true });
-    }
   });
   const root = document.getElementById('monster-settings-view');
   root?.addEventListener('change', async event => {
     const picker = event.target.closest('[data-aa-round-picker]');
-    if (picker && !picker.disabled) {
-      const editor = state.monsterSettings;
-      if (editor.aaRoundSelectionBusy) return;
-      const peakGroupId = picker.value ? Number(picker.value) : 0;
-      if (peakGroupId) {
-        const selected = (editor.catalog?.modes?.aa || state.fireflyEndgame.catalog?.modes?.peak?.groups || [])
-          .find(group => Number(group.id) === peakGroupId);
-        if (selected) {
-          editor.groupId = String(selected.id);
-          fireflyEndgameSelection('peak').groupId = Number(selected.id);
-          fireflyEndgameSelection('peak').stageIndex = 0;
-        }
-      } else {
-        const defaultGroup = editor.catalog?.modes?.aa?.[0] || state.fireflyEndgame.catalog?.modes?.peak?.groups?.[0];
-        if (defaultGroup) {
-          editor.groupId = String(defaultGroup.id);
-          fireflyEndgameSelection('peak').groupId = Number(defaultGroup.id);
-          fireflyEndgameSelection('peak').stageIndex = 0;
-        }
+    if (!picker || picker.disabled) return;
+    const editor = state.monsterSettings;
+    if (editor.aaRoundSelectionBusy) return;
+    const peakGroupId = picker.value ? Number(picker.value) : 0;
+    if (peakGroupId) {
+      const selected = editor.catalog?.modes?.aa?.find(group => Number(group.id) === peakGroupId);
+      if (!selected) return;
+      editor.groupId = String(selected.id);
+      editor.stageId = String(selected.stages[0]?.id || '');
+    } else {
+      const defaultGroup = editor.catalog?.modes?.aa?.[0];
+      if (defaultGroup) {
+        editor.groupId = String(defaultGroup.id);
+        editor.stageId = String(defaultGroup.stages[0]?.id || '');
       }
-      const previousSelection = editor.aaRoundSelection;
-      editor.aaRoundSelectionBusy = true;
-      editor.aaRoundSelectionError = '';
-      editor.aaRoundSelectionErrorKey = '';
-      editor.aaRoundSelection = peakGroupId ? { peak_group_id: peakGroupId } : null;
+    }
+    const previousSelection = editor.aaRoundSelection;
+    editor.aaRoundSelectionBusy = true;
+    editor.aaRoundSelectionError = '';
+    editor.aaRoundSelectionErrorKey = '';
+    editor.aaRoundSelection = peakGroupId ? { peak_group_id: peakGroupId } : null;
+    renderMonsterSettings();
+    try {
+      const payload = peakGroupId ? { peak_group_id: peakGroupId } : { action: 'clear' };
+      const result = await apiCall('/api/monster-settings/aa-round', 'POST', payload);
+      editor.aaRoundSelection = result?.selection || null;
+      editor.aaRoundSelectionLoaded = true;
+      showToast(t(editor.aaRoundSelection ? 'monsterAaRoundSavedToast' : 'monsterAaRoundClearedToast'), 'success');
+    } catch (error) {
+      editor.aaRoundSelection = previousSelection;
+      editor.aaRoundSelectionError = error.message;
+      editor.aaRoundSelectionErrorKey = 'monsterAaRoundSaveError';
+      showToast(t('monsterAaRoundSaveError', { error: error.message }), 'error');
+    } finally {
+      editor.aaRoundSelectionBusy = false;
       renderMonsterSettings();
-      try {
-        const payload = peakGroupId ? { peak_group_id: peakGroupId } : { action: 'clear' };
-        const result = await apiCall('/api/monster-settings/aa-round', 'POST', payload);
-        editor.aaRoundSelection = result?.selection || null;
-        editor.aaRoundSelectionLoaded = true;
-        showToast(t(editor.aaRoundSelection ? 'monsterAaRoundSavedToast' : 'monsterAaRoundClearedToast'), 'success');
-      } catch (error) {
-        editor.aaRoundSelection = previousSelection;
-        editor.aaRoundSelectionError = error.message;
-        editor.aaRoundSelectionErrorKey = 'monsterAaRoundSaveError';
-        showToast(t('monsterAaRoundSaveError', { error: error.message }), 'error');
-      } finally {
-        editor.aaRoundSelectionBusy = false;
-        renderMonsterSettings();
-      }
-      return;
-    }
-
-    const groupSelect = event.target.closest('[data-ff-endgame-group]');
-    if (groupSelect) {
-      handleEndgameGroupChange(groupSelect);
-      return;
-    }
-
-    const levelSelect = event.target.closest('[data-ff-endgame-level]');
-    if (levelSelect) {
-      handleEndgameLevelChange(levelSelect);
-      return;
-    }
-
-    const toggle = event.target.closest('[data-ff-endgame-toggle]');
-    if (toggle) {
-      handleEndgameToggle(toggle);
     }
   });
   root?.addEventListener('click', event => {
-    const stageButton = event.target.closest('[data-ff-endgame-stage]');
-    if (stageButton) {
-      handleEndgameStageClick(stageButton);
-      return;
-    }
-    const sideButton = event.target.closest('[data-ff-endgame-side]');
-    if (sideButton) {
-      handleEndgameSideClick(sideButton);
-      return;
-    }
     const groupCard = event.target.closest('[data-monster-group]');
     if (groupCard) {
       state.monsterSettings.groupId = groupCard.dataset.monsterGroup;
@@ -9536,17 +9440,9 @@ function setFireflyEndgameStatus(key, statusState = 'info', vars = null) {
 function applyFireflyEndgameStatus() {
   const editor = state.fireflyEndgame;
   const node = document.getElementById('ff-endgame-status');
-  if (node) {
-    node.dataset.state = editor.statusState || 'info';
-    node.textContent = editor.statusKey ? t(editor.statusKey, editor.statusVars || undefined) : '';
-  }
-  if (state.serverMode === 'gac') {
-    const gacStatus = document.getElementById('monster-settings-status');
-    if (gacStatus && ['moc', 'pf', 'as', 'aa'].includes(state.monsterSettings.activeMode)) {
-      gacStatus.dataset.state = editor.statusState || 'info';
-      gacStatus.textContent = editor.statusKey ? t(editor.statusKey, editor.statusVars || undefined) : '';
-    }
-  }
+  if (!node) return;
+  node.dataset.state = editor.statusState || 'info';
+  node.textContent = editor.statusKey ? t(editor.statusKey, editor.statusVars || undefined) : '';
 }
 
 function fireflyEndgameGroupLabel(group) {
@@ -9591,11 +9487,7 @@ async function ensureFireflyEndgameCatalog({ force = false } = {}) {
   editor.catalogState = 'loading';
   editor.catalogError = '';
   setFireflyEndgameStatus('ffEndgameLoading', 'loading');
-  if (state.serverMode === 'gac') {
-    if (state.activeTab === 'tab-monster-settings') renderMonsterSettings();
-  } else {
-    renderFireflyEndgame();
-  }
+  renderFireflyEndgame();
 
   editor.catalogPromise = (async () => {
     try {
@@ -9628,11 +9520,7 @@ async function ensureFireflyEndgameCatalog({ force = false } = {}) {
   } else {
     setFireflyEndgameStatus('ffEndgameCatalogError', 'error', { error: editor.catalogError });
   }
-  if (state.serverMode === 'gac') {
-    if (state.activeTab === 'tab-monster-settings') renderMonsterSettings();
-  } else {
-    renderFireflyEndgame();
-  }
+  renderFireflyEndgame();
   return catalog;
 }
 
@@ -9667,12 +9555,10 @@ function syncFireflyEndgameSelectionFromSave() {
   }
 
   const peakGroupId = mode === 'peak'
-    ? (Number(state.fireflyExtraData?.challenge?.challenge_peak_group_id) || Number(state.monsterSettings?.aaRoundSelection?.peak_group_id) || 0)
+    ? Number(state.fireflyExtraData?.challenge?.challenge_peak_group_id) || 0
     : 0;
   const selection = findSelectionByStageId(catalog, mode, config.stage_id, peakGroupId);
   if (selection) editor.selections[mode] = selection;
-  // GaCy GO keeps the tab the user is on: the save only seeds the picker's
-  // selections, it never switches tabs (this runs on every tab open).
 }
 
 async function loadFireflyEndgame() {
@@ -9696,36 +9582,12 @@ function updateFireflyEndgameControls() {
   const editor = state.fireflyEndgame;
   const config = editor.catalog ? buildFireflyBattleConfig(editor.catalog, fireflyEndgameSelection()) : null;
   const canApply = Boolean(config && state.fullFreesrData);
-
-  // Push-only buttons in #monster-settings-firefly
   for (const id of ['ff-endgame-apply', 'ff-endgame-apply-sync']) {
     const button = document.getElementById(id);
     if (button) button.disabled = !canApply;
   }
   const reset = document.getElementById('ff-endgame-reset');
   if (reset) reset.disabled = !editor.catalog;
-
-  // GaCy buttons in #monster-settings-gac
-  const isGacEndgame = state.serverMode === 'gac' && ['moc', 'pf', 'as', 'aa'].includes(state.monsterSettings.activeMode);
-  const gacActions = document.getElementById('gac-endgame-actions');
-  if (gacActions) gacActions.hidden = !isGacEndgame;
-
-  const gacReset = document.getElementById('gac-endgame-reset');
-  if (gacReset) gacReset.disabled = !editor.catalog;
-
-  const gacApply = document.getElementById('gac-endgame-apply');
-  if (gacApply) gacApply.disabled = !canApply;
-
-  const gacApplySync = document.getElementById('gac-endgame-apply-sync');
-  if (gacApplySync) {
-    if (!state.isConnected) {
-      gacApplySync.disabled = true;
-      gacApplySync.title = t('gacEndgameSyncOfflineHint');
-    } else {
-      gacApplySync.disabled = !canApply;
-      gacApplySync.title = '';
-    }
-  }
 }
 
 function renderFireflyEndgame() {
@@ -9805,15 +9667,7 @@ function renderFireflyRoomEditor(root, mode) {
       card.setAttribute('aria-pressed', String(active));
       // Stage name first with the full width, the first monster under it.
       const copy = monsterElement('span', 'monster-settings-stage-copy');
-      const head = monsterElement('div', 'ff-endgame-stage-head');
-      head.append(monsterElement('strong', '', fireflyLocalizedText(stage.name) || t('ffEndgameStageValue', { id: stage.stageId })));
-      const verdict = matchStageStatus(state.endgameSync?.status, mode, group?.id, stage);
-      if (verdict) {
-        const badge = endgameStatusBadge(verdict.status);
-        if (verdict.reason) badge.title = verdict.reason;
-        head.append(badge);
-      }
-      copy.append(head);
+      copy.append(monsterElement('strong', '', fireflyLocalizedText(stage.name) || t('ffEndgameStageValue', { id: stage.stageId })));
       copy.append(monsterElement('span', 'monster-settings-stage-meta',
         `${t(FIREFLY_PEAK_KIND_KEYS[stage.kind] || 'ffEndgameStageKindPre')} · ${t('monsterSettingsWaveCount', { count: stage.waves?.length || 0 })}`));
       card.append(copy);
@@ -9862,12 +9716,6 @@ function renderFireflyRoomEditor(root, mode) {
         .map((id) => fireflyLocalizedText(monsterInfo(catalog, id)?.name))
         .filter(Boolean);
       if (names.length) button.append(monsterElement('span', 'ff-endgame-side-sub', names.slice(0, 2).join(' / ')));
-      const verdict = matchStageStatus(state.endgameSync?.status, mode, group?.id, { stageId: side.stageId, id: level?.id });
-      if (verdict) {
-        const badge = endgameStatusBadge(verdict.status);
-        if (verdict.reason) badge.title = verdict.reason;
-        button.append(badge);
-      }
       sideRow.append(button);
     }
     sideField.append(sideRow);
@@ -10127,33 +9975,8 @@ async function applyFireflyEndgame({ sync = false } = {}) {
 
   setFireflyEndgameStatus('ffEndgameSaving', 'loading');
   try {
-    if (sync) {
-      await saveFreesrChangesToServer();
-      // On AA tab in GaCy mode: send POST /api/monster-settings/aa-round after freesr succeeds
-      if (state.serverMode === 'gac' && selection.mode === 'peak' && state.isConnected) {
-        const peakGroupId = Number(selection.groupId) || 0;
-        if (peakGroupId > 0) {
-          try {
-            const result = await apiCall('/api/monster-settings/aa-round', 'POST', { peak_group_id: peakGroupId });
-            state.monsterSettings.aaRoundSelection = result?.selection || { peak_group_id: peakGroupId };
-            state.monsterSettings.aaRoundSelectionLoaded = true;
-            state.monsterSettings.aaRoundSelectionError = '';
-            state.monsterSettings.aaRoundSelectionErrorKey = '';
-          } catch (aaError) {
-            state.monsterSettings.aaRoundSelectionError = aaError.message;
-            state.monsterSettings.aaRoundSelectionErrorKey = 'monsterAaRoundSaveError';
-            const errorKey = 'gacEndgameAaRoundError';
-            setFireflyEndgameStatus(errorKey, 'error', { error: aaError.message });
-            showToast(t(errorKey, { error: aaError.message }), 'error');
-            if (state.serverMode === 'gac') renderMonsterSettings();
-            else renderFireflyEndgame();
-            return;
-          }
-        }
-      }
-    } else {
-      await saveFreesrCache(state.fullFreesrData);
-    }
+    if (sync) await saveFreesrChangesToServer();
+    else await saveFreesrCache(state.fullFreesrData);
     const doneKey = sync ? endgameTextKey('Synced') : 'ffEndgameSaved';
     setFireflyEndgameStatus(doneKey, 'saved');
     showToast(t(doneKey), 'success');
@@ -10161,8 +9984,7 @@ async function applyFireflyEndgame({ sync = false } = {}) {
     setFireflyEndgameStatus('ffEndgameSyncError', 'error', { error: error.message });
     showToast(t('ffEndgameSyncError', { error: error.message }), 'error');
   }
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
+  renderFireflyEndgame();
 }
 
 function resetFireflyEndgame() {
@@ -10172,64 +9994,7 @@ function resetFireflyEndgame() {
     ? defaultFireflyCustomSelection()
     : defaultEndgameSelection(editor.catalog, mode);
   setFireflyEndgameStatus('ffEndgameResetDone', 'info');
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
-}
-
-function handleEndgameStageClick(stageButton) {
-  fireflyEndgameSelection('peak').stageIndex = Number(stageButton.dataset.ffEndgameStage) || 0;
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
-}
-
-function handleEndgameSideClick(sideButton) {
-  fireflyEndgameSelection().side = sideButton.dataset.ffEndgameSide;
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
-}
-
-function handleEndgameGroupChange(groupSelect) {
-  const selection = fireflyEndgameSelection();
-  const groupId = Number(groupSelect.value) || null;
-  const group = groupList(state.fireflyEndgame.catalog, selection.mode)
-    .find((entry) => Number(entry.id) === Number(groupId));
-  selection.groupId = group ? Number(group.id) : groupId;
-  selection.stageIndex = 0;
-  if (selection.mode !== 'peak') {
-    const levels = (Array.isArray(group?.levels) ? group.levels : [])
-      .slice().sort((a, b) => Number(b.floor || b.id) - Number(a.floor || a.id));
-    const level = levels[0] || null;
-    selection.levelId = level ? Number(level.id) : null;
-    const sides = Array.isArray(level?.sides) ? level.sides : [];
-    selection.side = sides.find((side) => side.side === 'firstNode')?.side || sides[0]?.side || 'firstNode';
-  }
-  if (state.serverMode === 'gac') {
-    state.monsterSettings.groupId = String(selection.groupId);
-    renderMonsterSettings();
-  } else {
-    renderFireflyEndgame();
-  }
-}
-
-function handleEndgameLevelChange(levelSelect) {
-  const selection = fireflyEndgameSelection();
-  const levelId = Number(levelSelect.value) || null;
-  const group = groupList(state.fireflyEndgame.catalog, selection.mode)
-    .find((entry) => Number(entry.id) === Number(selection.groupId));
-  const level = (group?.levels || []).find((entry) => Number(entry.id) === Number(levelId)) || null;
-  selection.levelId = level ? Number(level.id) : null;
-  const sides = Array.isArray(level?.sides) ? level.sides : [];
-  selection.side = sides.find((side) => side.side === selection.side)?.side || sides[0]?.side || 'firstNode';
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
-}
-
-function handleEndgameToggle(toggle) {
-  const selection = fireflyEndgameSelection();
-  if (toggle.dataset.ffEndgameToggle === 'cycle') selection.useCycle = toggle.checked;
-  if (toggle.dataset.ffEndgameToggle === 'buff') selection.useBuff = toggle.checked;
-  if (state.serverMode === 'gac') renderMonsterSettings();
-  else renderFireflyEndgame();
+  renderFireflyEndgame();
 }
 
 function setupFireflyEndgameEvents() {
@@ -10246,13 +10011,15 @@ function setupFireflyEndgameEvents() {
 
     const stageButton = event.target.closest('[data-ff-endgame-stage]');
     if (stageButton) {
-      handleEndgameStageClick(stageButton);
+      fireflyEndgameSelection('peak').stageIndex = Number(stageButton.dataset.ffEndgameStage) || 0;
+      renderFireflyEndgame();
       return;
     }
 
     const sideButton = event.target.closest('[data-ff-endgame-side]');
     if (sideButton) {
-      handleEndgameSideClick(sideButton);
+      fireflyEndgameSelection().side = sideButton.dataset.ffEndgameSide;
+      renderFireflyEndgame();
       return;
     }
 
@@ -10278,19 +10045,44 @@ function setupFireflyEndgameEvents() {
   section.addEventListener('change', (event) => {
     const groupSelect = event.target.closest('[data-ff-endgame-group]');
     if (groupSelect) {
-      handleEndgameGroupChange(groupSelect);
+      const selection = fireflyEndgameSelection();
+      const groupId = Number(groupSelect.value) || null;
+      const group = groupList(state.fireflyEndgame.catalog, selection.mode)
+        .find((entry) => Number(entry.id) === Number(groupId));
+      selection.groupId = group ? Number(group.id) : groupId;
+      selection.stageIndex = 0;
+      if (selection.mode !== 'peak') {
+        const levels = (Array.isArray(group?.levels) ? group.levels : [])
+          .slice().sort((a, b) => Number(b.floor || b.id) - Number(a.floor || a.id));
+        const level = levels[0] || null;
+        selection.levelId = level ? Number(level.id) : null;
+        const sides = Array.isArray(level?.sides) ? level.sides : [];
+        selection.side = sides.find((side) => side.side === 'firstNode')?.side || sides[0]?.side || 'firstNode';
+      }
+      renderFireflyEndgame();
       return;
     }
 
     const levelSelect = event.target.closest('[data-ff-endgame-level]');
     if (levelSelect) {
-      handleEndgameLevelChange(levelSelect);
+      const selection = fireflyEndgameSelection();
+      const levelId = Number(levelSelect.value) || null;
+      const group = groupList(state.fireflyEndgame.catalog, selection.mode)
+        .find((entry) => Number(entry.id) === Number(selection.groupId));
+      const level = (group?.levels || []).find((entry) => Number(entry.id) === Number(levelId)) || null;
+      selection.levelId = level ? Number(level.id) : null;
+      const sides = Array.isArray(level?.sides) ? level.sides : [];
+      selection.side = sides.find((side) => side.side === selection.side)?.side || sides[0]?.side || 'firstNode';
+      renderFireflyEndgame();
       return;
     }
 
     const toggle = event.target.closest('[data-ff-endgame-toggle]');
     if (toggle) {
-      handleEndgameToggle(toggle);
+      const selection = fireflyEndgameSelection();
+      if (toggle.dataset.ffEndgameToggle === 'cycle') selection.useCycle = toggle.checked;
+      if (toggle.dataset.ffEndgameToggle === 'buff') selection.useBuff = toggle.checked;
+      renderFireflyEndgame();
     }
   });
 

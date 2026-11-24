@@ -1,4 +1,4 @@
-import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.56';
+import { getCurrentLanguage, t, translatePath } from './i18n.js?v=2.55';
 import { assetVersion } from './game-data.js?v=1';
 
 // Versioned by content hash (see scripts/sync-data.mjs), not by hand.

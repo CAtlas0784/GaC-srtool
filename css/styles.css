@@ -7757,13 +7757,6 @@ input:checked + .slider:before { background-color: var(--paper); }
 
 #tab-monster-settings .ff-endgame-stage-grid .monster-settings-stage-copy { flex: none; }
 
-#tab-monster-settings .ff-endgame-stage-grid .ff-endgame-stage-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
 #tab-monster-settings .ff-endgame-stage-grid .monster-settings-stage-copy strong {
   font-size: 0.98rem;
   line-height: 1.3;
